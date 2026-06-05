@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "DBHG Plugin Marketplace",
+  "name": "DBHG-Plugin-Marketplace",
   "owner": {
     "name": "dilberryhoundog",
     "email": "tech@grahams.coffee"
@@ -19,7 +19,7 @@
       "category": "deployment"
     },
     {
-      "name": "chat toolset",
+      "name": "chat-tools",
       "source": "./plugins/chat-tools",
       "category": "productivity"
     }
