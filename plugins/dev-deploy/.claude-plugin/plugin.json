@@ -1,0 +1,9 @@
+{
+  "name": "dev-deploy",
+  "version": "0.1.0",
+  "description": "A companion skill for dev-workspace. Efficient deployment using kamalc",
+  "author": {
+    "name": "dilberryhoundog",
+    "email": "tech@grahams.coffee"
+  }
+}
