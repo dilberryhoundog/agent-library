@@ -1,6 +1,6 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "DBHG-Plugin-Marketplace",
+  "name": "DBHD-Plugins",
   "owner": {
     "name": "dilberryhoundog",
     "email": "tech@grahams.coffee"
@@ -9,25 +9,29 @@
     {
       "name": "dev-workspace",
       "description": "A comprehensive skill set for managing agent context, efficient git commands, conversation management, context shaping. etc",
-      "source": "./plugins/dev-workspace",
-      "category": "development"
+      "category": "development",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/dilberryhoundog/dev-workspace.git",
+        "path": "./plugins/dev-workspace",
+        "ref": "main"
+      }
     },
     {
       "name": "dev-deploy",
       "description": "A companion skill for dev-workspace. Efficient deployment using kamal",
-      "source": "./plugins/dev-deploy",
-      "category": "deployment"
+      "category": "deployment",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/dilberryhoundog/dev-workspace.git",
+        "path": "./plugins/dev-deploy",
+        "ref": "main"
+      }
     },
     {
       "name": "chat-tools",
-      "version": "0.1.1",
-      "source": "./",
-      "category": "productivity",
-      "strict": false,
-      "skills": [
-        "./skills/conversation-capture",
-        "./skills/magic-reply"
-      ]
+      "source": "./plugins/chat-tools",
+      "category": "productivity"
     }
   ]
 }
