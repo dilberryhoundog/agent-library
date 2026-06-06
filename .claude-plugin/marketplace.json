@@ -14,7 +14,7 @@
         "source": "git-subdir",
         "url": "https://github.com/dilberryhoundog/dev-workspace.git",
         "path": "./plugins/dev-workspace",
-        "ref": "main"
+        "ref": "convert-to-plugin"
       }
     },
     {
@@ -25,7 +25,7 @@
         "source": "git-subdir",
         "url": "https://github.com/dilberryhoundog/dev-workspace.git",
         "path": "./plugins/dev-deploy",
-        "ref": "main"
+        "ref": "convert-to-plugin"
       }
     },
     {
