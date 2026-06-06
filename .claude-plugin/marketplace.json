@@ -21,10 +21,7 @@
     {
       "name": "chat-tools",
       "version": "0.1.1",
-      "source": {
-        "source": "github",
-        "repo": "dilberryhoundog/agent-library"
-      },
+      "source": "./library",
       "category": "productivity",
       "strict": false,
       "skills": [
