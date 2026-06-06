@@ -20,8 +20,14 @@
     },
     {
       "name": "chat-tools",
-      "source": "./plugins/chat-tools",
-      "category": "productivity"
+      "version": "0.1.1",
+      "source": "./",
+      "category": "productivity",
+      "strict": false,
+      "skills": [
+        "./skills/conversation-capture",
+        "./skills/magic-reply"
+      ]
     }
   ]
 }
