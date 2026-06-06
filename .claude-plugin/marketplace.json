@@ -26,6 +26,7 @@
         "repo": "dilberryhoundog/agent-library"
       },
       "category": "productivity",
+      "strict": false,
       "skills": [
         "./library/skills/conversation-capture",
         "./library/skills/magic-reply"
