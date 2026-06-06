@@ -1,9 +1,15 @@
 {
   "name": "chat-tools",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "A suite of chat tools; capture conversations, shape context",
   "author": {
     "name": "dilberryhoundog",
     "email": "tech@grahams.coffee"
-  }
+  },
+  "source": "./",
+  "category": "productivity",
+  "skills": [
+    "./skills/conversation-capture",
+    "./skills/magic-reply"
+  ]
 }
