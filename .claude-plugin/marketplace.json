@@ -20,8 +20,16 @@
     },
     {
       "name": "chat-tools",
-      "source": "./plugins/chat-tools",
-      "category": "productivity"
+      "version": "0.1.1",
+      "source": {
+        "source": "github",
+        "repo": "dilberryhoundog/agent-library"
+      },
+      "category": "productivity",
+      "skills": [
+        "./library/skills/conversation-capture",
+        "./library/skills/magic-reply"
+      ]
     }
   ]
 }
