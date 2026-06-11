@@ -8,7 +8,12 @@ allowed-tools: Bash(ruby *conversation-capture *), Bash(mv *), Read, Edit, Updat
 
 Parse the current Claude Code session JSONL into a formatted, readable transcript. Summarize and rename the output file.
 
+## Agent invariants
+
+- Do not `cd` into any directory, all commands can be run from `pwd`
+
 ## Session Id
+
 SESSION_ID = ${CLAUDE_SESSION_ID}
 
 ## Capture
@@ -26,6 +31,7 @@ The script outputs one line: the transcript file path.
 Using the full conversation context.
 
 **Summary:** Write a 3-5 line summary of the conversation. The summary must be:
+
 - **Global scope** — readable without access to the conversation
 - **Factual** — what was discussed, what was built/fixed, key decisions, what remains
 - **No session-specific language** — avoid "the user asked me to", "I was told to"
@@ -33,6 +39,7 @@ Using the full conversation context.
 Read the first 20 lines of the transcript file to locate the `[SUMMARY]` block. Insert the summary between the `>>>` and `<<<` markers using the Edit tool. If the block already has content, replace it.
 
 **Rename:** Check the transcript filename.
+
 - If it contains a raw UUID (e.g. `f5d11e2f_f5d11e2f-89c8-...txt`), rename it with a descriptive slug
 - If it already has a descriptive name, keep it if still accurate, rename if the conversation has shifted focus
 
