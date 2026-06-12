@@ -29,6 +29,11 @@ user, then continue with the release.
 
 Proceed through five gates in order. Never skip the confirmation gate.
 
+When invoked with a unit name, release that unit. When invoked bare (no argument), run
+gates 1–2 for every unit in the config and report each unit's state — commits pending
+since its last tag, or "nothing to release" — then ask which unit(s) to release before
+continuing to gate 3.
+
 ### 1. Preflight
 
 - No modified or staged files (`git status --porcelain --untracked-files=no` is empty).
