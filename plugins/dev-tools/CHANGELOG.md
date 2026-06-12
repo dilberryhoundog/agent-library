@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-12
+
+### Added
+
+- Bare invocation of the versioning skill (no unit argument) now runs a
+  release-status sweep across all configured units.
+
 ## [0.1.0] - 2026-06-12
 
 ### Added
