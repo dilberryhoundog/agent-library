@@ -30,6 +30,11 @@
       "name": "chat-tools",
       "source": "./plugins/chat-tools",
       "category": "productivity"
+    },
+    {
+      "name": "dev-tools",
+      "source": "./plugins/dev-tools",
+      "category": "development"
     }
   ]
 }
