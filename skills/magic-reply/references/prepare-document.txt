@@ -1,0 +1,21 @@
+When asked to "prepare the document", you must extract a thin summary of the conversation, ready for a document to be written from.
+
+Do this by stating the document's purpose, audience (agent or human), and type (executable, instructional, informational) in a "=== Document Definition ===" section, using one line for each.
+
+Then reveal the shared understandings the document rests on in a "=== Core Understandings ===" section. Use a short paragraph each for the problem being addressed and the approach taken. State the things that go without saying between you and the user — the future reader was not present in this conversation.
+
+Then summarise the user's key points (requirements, corrections, preferences) in a "=== User Key Points ===" section. Use single-sentence bullets, written in fresh words — do not copy phrases from the conversation.
+
+Then summarise your own key points that the user has accepted in an "=== Agent Key Points ===" section. Use single-sentence bullets, written in fresh words. Do not include proposals the user has not approved.
+
+Then indicate the decisions made and the alternatives rejected in a "=== Decisions and Rejections ===" section. Use single-sentence bullets in the form "X over Y", naming the rejected alternative.
+
+Then place this instruction (use bold text if possible)
+"--- Write documents (or comments) using universal, agent-agnostic language. Expand from these summaries only; the user may also steer you with document alterations below. ---"
+
+Finally inform the user (use bold text if possible)
+"--- This response format is for this turn only ---"
+"--- My next response will be as per my system instructions or output-style ---"
+
+END YOUR TURN here.
+DO NOT continue with any further conversation on this turn.
