@@ -42,6 +42,8 @@ continuing to gate 3.
 - On the remote's default branch (`git symbolic-ref refs/remotes/origin/HEAD`). When the
   current branch differs, stop and ask.
 - Project config exists and identifies the unit(s) being released.
+- When the unit's config enables GitHub releases, the `gh` CLI is available and
+  authenticated (`gh auth status`).
 
 ### 2. Determine range
 
@@ -57,6 +59,16 @@ continuing to gate 3.
 
 - Map each conventional commit to a bump level using the table in
   `references/release-process.md`.
+- Breaking-change scan: check the diff's shape (`git diff <range> --stat -- <paths>`).
+  When any changed file defines a user-facing surface (commands, skill definitions,
+  manifests, config schemas, documented formats) — or when uncertain — spawn the
+  `dev-tools:breaking-change-detector` agent, passing it the commit range, the unit's
+  paths, and the unit's current version. Skip only when every changed file is non-contract
+  by location (tests, CI, internal scripts, release housekeeping) or the commit-derived
+  bump is already major. If the agent cannot be spawned (not installed, or the spawn
+  errors), proceed on the commit-derived bump and flag the missing scan. Always state in
+  the proposal whether the scan ran, was skipped (with the reason), or failed. The agent's
+  bump floor overrides a lower commit-derived bump; report any discrepancy to the user.
 - Present: the commit list, what each commit maps to, the resulting bump
   (e.g. "2 feat, 1 fix → minor: 1.0.1 → 1.1.0"), and a draft changelog entry written
   user-facing — what a user of the unit notices, not a git log dump.
@@ -79,10 +91,10 @@ Follow the command sequences in `references/release-process.md`:
 
 ## Hard rules
 
-- Never use heredocs — sandboxing blocks them by design. Build multi-line content with a
-  file-write tool in a temp directory _outside the repository_ and pass it via `-F` /
-  `--notes-file`, or use repeated `-m` flags. Files written inside the repo would dirty the
-  tree and fail verification.
+- Never use heredocs — they are blocked in some sandboxed shells. Build multi-line content
+  with a file-write tool in a temp directory _outside the repository_ and pass it via
+  `-F` / `--notes-file`, or use repeated `-m` flags; these work everywhere. Files written
+  inside the repo would dirty the tree and fail verification.
 - Annotated tags only (`git tag -a`), never lightweight.
 - Never move or overwrite an existing tag. If the tag already exists, stop and ask.
 - One release commit per unit; stage only the files belonging to that release.

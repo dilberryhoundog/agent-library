@@ -34,7 +34,7 @@ Take the highest level that any commit in the range triggers.
 
 | Commit pattern | Bump | Changelog section |
 |---|---|---|
-| `feat!:` or `BREAKING CHANGE:` footer | major (minor if version < 1.0.0) | Changed / Removed |
+| any type with `!` (`feat!:`, `fix!:`, …) or `BREAKING CHANGE:` footer | major (minor if version < 1.0.0) | Changed / Removed |
 | `feat:` | minor | Added |
 | `fix:` | patch | Fixed |
 | `perf:` | patch | Changed |
@@ -56,7 +56,8 @@ humans deciding whether to upgrade — never paste the git log.
 - Each entry describes what a user of the unit notices, in plain language.
 - Maintain an `## [Unreleased]` section at the top; releasing moves its entries under the
   new version heading.
-- When creating a changelog for the first time, copy `assets/CHANGELOG-template.md`, then
+- When creating a changelog for the first time, copy the skill directory's
+  `assets/CHANGELOG-template.md`, then
   replace the placeholder version, date, and `Added` entry with the actual baseline version,
   today's date, and the first-release summary (see "First release" below).
 
@@ -90,7 +91,8 @@ When no tag matches the pattern:
 
 ## Execution sequence
 
-Substitute values from the project config. Never use heredocs (sandboxing blocks them);
+Substitute values from the project config. Never use heredocs (blocked in some sandboxed
+shells);
 write multi-line content to files with a file-write tool and pass them with `-F` /
 `--notes-file`, or use repeated `-m` flags.
 
@@ -103,6 +105,11 @@ dirty the tree and fail verification.
 
 When the unit's manifest is `none`, skip the manifest edit, stage only the changelog, and
 treat the tag as the version's source of truth.
+
+The "manifest" is wherever the literal version string lives, as recorded in the project
+config — some ecosystems delegate (e.g. a gemspec reading `lib/<gem>/version.rb`, a
+build file reading a `VERSION` constant); edit the file holding the literal, never a
+reference to it.
 
 ```bash
 # 1. Update the manifest version field (edit the file directly), then update the changelog.
@@ -123,6 +130,11 @@ gh release create <tag> --title "<unit> v<X.Y.Z>" --notes-file <notes-file>
 
 Note: tags do not push by default — `--follow-tags` (or an explicit `git push origin
 <tag>`) is required.
+
+If the GitHub release step fails after the tag is pushed (e.g. `gh` missing or
+unauthenticated), the release is still durable — the commit and tag are the record.
+Report the failure and instruct the user to publish the release manually for the
+existing tag; do not retry by re-tagging.
 
 ## Verification checklist
 

@@ -13,9 +13,12 @@ everything repo-specific so the versioning skill stays universal.
 
 Interview the repository, then confirm with the user:
 
-- **Single project** (one deliverable): one unit. Find its manifest — `package.json`,
-  `*.gemspec`, `pyproject.toml`, `Cargo.toml`, `.claude-plugin/plugin.json`, or a `VERSION`
-  file. Tag pattern is plain `v{version}`.
+- **Single project** (one deliverable): one unit. Find its manifest — the file holding the
+  **literal version string**. Candidates: `package.json`, `pyproject.toml`, `Cargo.toml`,
+  `.claude-plugin/plugin.json`, a `VERSION` file. Beware delegation: some ecosystems
+  reference the version from elsewhere (a gemspec reading `lib/<gem>/version.rb`, a build
+  file reading a constant) — record the file and field that contain the literal, not the
+  reference. Tag pattern is plain `v{version}`.
 - **Multi-unit repository** (plugin marketplace, monorepo): one unit per independently
   versioned deliverable, plus optionally a unit for the repository itself covering root and
   shared files. Tag patterns are namespaced: `{unit}/v{version}`.
