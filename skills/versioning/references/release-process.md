@@ -133,4 +133,5 @@ After executing, confirm all version locations agree and report the result:
 - [ ] `git tag -l '<tag>'` shows the tag, and `git ls-remote --tags origin` shows it on the
       remote.
 - [ ] `gh release view <tag>` succeeds (when releases are enabled).
-- [ ] Working tree is clean.
+- [ ] No modified or staged files remain (`git status --porcelain --untracked-files=no` is
+      empty).

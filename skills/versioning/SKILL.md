@@ -31,7 +31,9 @@ Proceed through five gates in order. Never skip the confirmation gate.
 
 ### 1. Preflight
 
-- Working tree is clean (`git status --porcelain` is empty). If dirty, stop and report.
+- No modified or staged files (`git status --porcelain --untracked-files=no` is empty).
+  If dirty, stop and report. Untracked files are tolerated but must not be staged into the
+  release commit.
 - On the remote's default branch (`git symbolic-ref refs/remotes/origin/HEAD`). When the
   current branch differs, stop and ask.
 - Project config exists and identifies the unit(s) being released.
