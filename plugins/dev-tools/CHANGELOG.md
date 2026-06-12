@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-13
+
+### Added
+
+- Breaking-change detector: the propose gate now spawns a `breaking-change-detector`
+  agent that judges the release diff against the unit's public contract. Its bump floor
+  overrides a lower commit-derived bump, preventing accidental under-versioning.
+
 ## [0.2.0] - 2026-06-12
 
 ### Added
