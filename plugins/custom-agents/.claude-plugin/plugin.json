@@ -1,0 +1,10 @@
+{
+  "name": "custom-agents",
+  "version": "0.1.0",
+  "description": "A suite of custom agents",
+  "author": {
+    "name": "dilberryhoundog",
+    "email": "tech@grahams.coffee"
+  },
+  "category": "productivity"
+}
