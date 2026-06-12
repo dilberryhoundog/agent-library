@@ -1,0 +1,10 @@
+{
+  "name": "dev-tools",
+  "version": "0.1.0",
+  "description": "Developer workflow tools; semantic versioning and releases",
+  "author": {
+    "name": "dilberryhoundog",
+    "email": "tech@grahams.coffee"
+  },
+  "category": "development"
+}
