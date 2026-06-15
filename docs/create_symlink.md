@@ -1,13 +1,15 @@
 # Creating Symlinks
 
+Asset sources live under `extensions/` (e.g. `extensions/agents/`, `extensions/skills/`), so a symlink from inside a plugin climbs three levels to the repo root, then descends into `extensions/`.
+
 **File Symlink**
 
 ```bash
-ln -s ../../../agents/File.md ./plugins/plugin_name/agents/file.md
+ln -s ../../../extensions/agents/File.md ./plugins/plugin_name/agents/file.md
 ```
 
 **Folder Symlink**
 
 ```bash
-ln -s ../../../skills/folder ./plugins/plugin_name/skills/folder
+ln -s ../../../extensions/skills/folder ./plugins/plugin_name/skills/folder
 ```

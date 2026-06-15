@@ -8,28 +8,18 @@ A custom Claude Code plugin and skill library — a personal marketplace for dis
 
 ## Repository Structure
 
-- `plugins/` — versioned, installable packages. Each plugin is an independent release unit with its own `plugin.json`, `CHANGELOG.md`, and `skills/` or `agents/` directories.
-- `skills/` — library-level skill guides (SKILL.md files). Plugins expose skills via symlinks into this directory.
-- `agents/` — custom Claude Code subagents (markdown agent definitions).
-- `rules/` — organizational standards applied across the library.
-- `docs/` — guides for maintaining the marketplace and authoring plugins/skills.
+- `plugins/` — versioned, installable packages. Each plugin is an independent release unit with its own `plugin.json`, `CHANGELOG.md`, and `skills/` or `agents/` directories (populated by symlinks).
+- `extensions/` — the shared asset library (`skills/`, `agents/`, `commands/`, `output-styles/`, `rules/`) that plugins symlink from. Single source of truth; one asset can feed multiple plugins.
+- `docs/` — A mix of official and local guides for maintaining the marketplace and authoring plugins/skills.
 - `.claude-plugin/marketplace.json` — the plugin registry (owner: dilberryhoundog).
-- `.claude/rules/versioning.md` — versioning unit definitions (read by the versioning skill).
 
 ## Plugins
 
-Four local plugins, each versioned independently:
-
-- `chat-tools` — conversation capture, document shaping, context management skills
-- `dev-tools` — semantic versioning and release automation (the versioning skill)
-- `custom-agents` — suite of custom Claude Code agents
-- `agent-library` (repository-level unit) — umbrella unit covering everything outside `plugins/`
-
-External plugins (`dev-workspace`, `dev-deploy`) are sourced from separate repos and listed in the marketplace only.
+Local plugins live in `plugins/`, each an independently versioned package composed from symlinked `extensions/` assets. Additional plugins are hosted in their own repositories. `.claude-plugin/marketplace.json` is the authoritative list of what the marketplace serves and where each remote plugin's source lives.
 
 ## Skills Architecture
 
-Skills are markdown guides (SKILL.md) that Claude reads to acquire specialized workflows. They live in `skills/<name>/SKILL.md`. Plugins expose skills by symlinking: e.g., `plugins/dev-tools/skills/versioning -> ../../../skills/versioning`.
+Skills are markdown guides (SKILL.md) that Claude reads to acquire specialized workflows. They live in `extensions/skills/<name>/SKILL.md`. Plugins expose skills by symlinking: e.g., `plugins/dev-tools/skills/versioning -> ../../../extensions/skills/versioning`.
 
 The same skill can be linked into multiple plugins. Adding a new skill to a plugin means creating a symlink — not copying files.
 
@@ -38,14 +28,10 @@ The same skill can be linked into multiple plugins. Adding a new skill to a plug
 Versioning is managed by the `versioning` skill (in `dev-tools` plugin). Units are defined in `.claude/rules/versioning.md`. To cut a release, invoke `/versioning` and follow the skill's workflow — it handles changelog, manifest bump, tag, and GitHub release.
 
 Key rules:
+
 - Plugin versions live in `plugins/<name>/.claude-plugin/plugin.json` (field: `version`).
-- The `agent-library` unit uses tags as source of truth (no manifest).
-- Each unit gets its own git tag: `chat-tools/v{version}`, `dev-tools/v{version}`, `v{version}` for the root unit.
+- Each unit gets its own git tag: `chat-tools/v{version}`, `dev-tools/v{version}`
 
 ## Documentation Standards
 
-All documents in this repo (SKILL.md, agents, rules, CLAUDE.md) must be **agent-agnostic**: resolvable by any agent in any future session with no session context. See `rules/agent-agnostic.md` for the full standard. The `doc-reviewer` agent (`agents/doc-reviewer.md`) audits documents for compliance.
-
-Key rules from `rules/code-comments.md`:
-- Comments must encode durable facts (hidden constraints, invariants, workarounds).
-- No narration of what code does, no task references, no caller references.
+All documents in this repo (SKILL.md, agents, rules, CLAUDE.md) must be **agent-agnostic**: resolvable by any agent in any future session with no session context.

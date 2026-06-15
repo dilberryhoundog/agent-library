@@ -1,1 +1,1 @@
-../../../agents/breaking-change-detector.md
+../../../extensions/agents/breaking-change-detector.md

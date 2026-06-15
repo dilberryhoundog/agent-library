@@ -7,7 +7,8 @@ no release consumers; their history lives in git alone.
 
 ## Path resolution rule
 
-Plugins symlink their skills and agents from root directories (`skills/`, `agents/`). Git
+Plugins symlink their skills and agents from the asset library (`extensions/skills/`,
+`extensions/agents/`). Git
 records content changes against the symlink targets, so compute each unit's paths at
 runtime: the plugin directory plus the repo-relative target of every symlink inside it
 (`find plugins/<name> -type l`, resolve each with `readlink`). Never filter history by the

@@ -1,1 +1,1 @@
-../../../agents/doc-reviewer.md
+../../../extensions/agents/doc-reviewer.md
