@@ -6,30 +6,16 @@ A self-contained toolchain for Claude assets — authored, packaged, and deliver
 
 Claude assets — skills, agents, commands, and more — tend to scatter across every working directory you run Claude in. Spread out like that, they're impossible to maintain and impossible to deliver. This repository solves that: it stores, packages, and delivers those assets through Claude's official plugin framework, so a single source of truth feeds every Claude installation you work with.
 
-## Marketplace Compatibility
-
-This marketplace is compatible with both **Claude Code** and **Co-work**.
-Some plugins are more suited to one of the two platforms. If you come across any compatibility issues, please report them with an issue.
-
 ## Quickstart
 
-Installing is the same idea on both platforms — register this marketplace, then install whatever you want from it. Only the navigation differs.
-
-**In Claude Code**
+Register this marketplace in Claude Code, then install whatever you want from it.
 
 1. Run `/plugins`.
 2. Open the **Marketplaces** tab and choose **Add marketplace**.
 3. Use the green **Code** button above to copy the URL.
 4. Paste this repository's URL into the marketplace dialog.
 
-**In Co-work** (Mac or Windows app)
-
-1. Open the **Cowork** tab, then **Customise**.
-2. Add a **Personal plugin** → **Create plugin** → **Add marketplace**.
-3. Use the green **Code** button above to copy the URL.
-4. Paste this repository's URL into the marketplace dialog.
-
-**Then, on either platform:** open the **Plugins** tab and install any — or all — of the plugins on offer. Plugins update themselves as new versions ship.
+Then open the **Plugins** tab and install any — or all — of the plugins on offer. Plugins update themselves as new versions ship.
 
 ## The three core components
 
@@ -37,7 +23,7 @@ Plugins are bundled and delivered using an integrated toolchain: assets are auth
 
 ### Custom plugin marketplace
 
-Plugins are delivered and updated through Claude's official marketplace mechanism — a single install serves both Claude Code and Co-work, and keeps installed plugins current automatically as their versions change. The marketplace serves general use plugins from this repository alongside premium plugins maintained in their own repositories — covering categories such as workspace management, git, context management, and deployment — all reachable under the one install.
+Plugins are delivered and updated through Claude Code's official marketplace mechanism — a single install keeps installed plugins current automatically as their versions change. The marketplace serves general use plugins from this repository alongside premium plugins maintained in their own repositories — covering categories such as workspace management, git, context management, and deployment — all reachable under the one install.
 
 ### Plugin packaging
 
@@ -54,5 +40,4 @@ An integrated toolchain — assets → packaging → delivery — yields:
 - **A single source of truth** for Claude assets.
 - **Easy versioning and updating** of everything installed.
 - **Clean working directories**, since each project's `.claude/` stays minimal.
-- **Cross-platform reach**, working across Claude platforms.
 - **Conceptually packaged assets** — pull them in where they're needed, leave them out where they're not.
