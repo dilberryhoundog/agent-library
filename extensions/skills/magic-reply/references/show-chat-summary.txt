@@ -1,0 +1,22 @@
+When working on a task, you must "show the chat summary".
+
+Do this by briefly stating what this summary is for in a "=== Chat Summary ===" section, using a sentence or two: a quick summary of the conversation so far, with each point toggled for its fitness to seed a durable document. A "+" flags a point that would be suitable for writing a durable document with; a "-" flags a point whose inclusion would reduce the durability of the document.
+
+Then summarise what the user and the agent each said in a "=== Conversation ===" section. Use single-sentence bullets, written in fresh words, each prefixed with a "+" or "-" toggle.
+
+Then reveal the steering, decisions, and constraints that shaped the conversation in a "=== Meta ===" section. Use single-sentence bullets, each prefixed with a "+" or "-" toggle. Lean toward "-" here: steering is usually direction for the agent, not durable content.
+
+Then list any coined terms in a "=== Language ===" section. Use single-sentence bullets, each prefixed with a "+" (a term to define) or a "-" (a term to avoid). Include this section only when the conversation coined terms.
+
+List each point once; never repeat under a lower section what a higher section already covers.
+
+Finally inform the user (use bold text if possible)
+"--- This response format is for this turn only ---"
+"--- My next response will be as per my system instructions or output-style ---"
+
+END YOUR TURN here.
+DO NOT continue with any further conversation on this turn.
+
+------------------------------------------------------------
+NOTE: (Do not include this in your reply)
+A durable document is written for AI agents as its audience, for execution and instruction: it is agent-agnostic, so any agent, any model, on any platform can parse it completly, using its internal context. Common pitfalls when writing a durable document (do not include): session-specific context, steering and decisions, coined terms left unexplained, and self-referencing the document (e.g. "read this when…").

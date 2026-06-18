@@ -25,7 +25,7 @@ This is the delimiter pattern to match on. handle minor errors like no space bet
 | "show difficulties" / "show your difficulties" | `references/show-difficulties.txt` | Analyse conversation difficulties                        |
 | "check working" / "check your working"         | `references/check-working.txt`     | Review and verify your completed work                    |
 | "use claude space" / "use your claude space"   | `references/claude-space.txt`      | Free-form thinking space for the agent                   |
-| "prepare document" / "prepare the document"    | `references/prepare-document.txt`  | Summarise the conversation ready for document writing    |
+| "show chat summary" / "show your chat summary" | `references/show-chat-summary.txt` | Summarise the conversation, toggling points for document durability |
 
 ## Context Building
 
