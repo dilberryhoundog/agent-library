@@ -3,7 +3,7 @@ name: versioning
 description: Propose and execute semantic version releases - version bump, changelog entry, annotated git tag, GitHub release.
 disable-model-invocation: true
 argument-hint: [unit-name]
-model: sonnet
+model: haiku
 ---
 
 # Versioning
