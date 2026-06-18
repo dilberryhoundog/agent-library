@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-06-18
+
+### Added
+
+- `markdown` skill: builds a durable, agent-agnostic document through a single
+  scaffold that moves chat summary → headings → prose → strip.
+
+### Changed
+
+- `magic-reply`: the `-- prepare document --` trigger is replaced by
+  `-- show chat summary --`, which renders an in-chat conversation summary that
+  toggles each point for its fitness in a durable document.
+- `doc-reviewer` agent now runs on Opus instead of Sonnet.
+
+### Removed
+
+- `conversation-capture` skill — moved to the dev-workspace plugin.
+- `create-documents` skill — superseded by the `markdown` skill.
+
 ## [1.2.0] - 2026-06-13
 
 ### Added
