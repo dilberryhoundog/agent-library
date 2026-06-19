@@ -7,26 +7,6 @@
   },
   "plugins": [
     {
-      "name": "dev-workspace",
-      "description": "A comprehensive skill set for managing agent context, efficient git commands, conversation management, context shaping. etc",
-      "category": "development",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/dilberryhoundog/dev-workspace.git",
-        "path": "./plugins/dev-workspace"
-      }
-    },
-    {
-      "name": "dev-deploy",
-      "description": "A companion skill for dev-workspace. Efficient deployment using kamal",
-      "category": "deployment",
-      "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/dilberryhoundog/dev-workspace.git",
-        "path": "./plugins/dev-deploy"
-      }
-    },
-    {
       "name": "chat-tools",
       "source": "./plugins/chat-tools",
       "category": "productivity"
