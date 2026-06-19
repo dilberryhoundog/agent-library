@@ -1,0 +1,1920 @@
+ ▐▛███▜▌   Claude Code v2.1.181
+▝▜█████▛▘  Opus 4.8 · Claude Max
+  ▘▘ ▝▝    ~/Projects/agent-library
+
+  ✔ Using flicker-free rendering · if you want to go back, use /tui default
+    · Click to move your cursor in the text input
+    · Click to expand collapsed tool results
+    · By default, text auto-copies when you select it (/config to change)
+    · Hold Shift while selecting to use your terminal's native copy instead
+
+
+❯ Lets explore the issues in this repo. #1 i think will be redundant once the   
+  other issues are addressed                                                    
+
+⏺ I'll look at the GitHub issues for this repo.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Three open issues. Let me explore the relevant code for each before
+  discussing.
+
+  Read 5 files, ran 1 shell command (ctrl+o to expand)
+
+⏺ Let me check the "co-work" / dev-workspace references and any agent-agnostic
+  mentions tied to the issues.
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+⏺ I've explored all three issues and the relevant code. Here's the picture.
+
+  The three issues and how they relate
+
+  #7 — Split the marketplace (CC-only here, co-work elsewhere)
+  Right now this repo presents itself as dual-platform. The coupling shows up in
+  three places:
+  - README.md:11-12 "Marketplace Compatibility" + the whole In Co-work
+  quickstart block (:25-30) + :40 "a single install serves both Claude Code and
+  Co-work".
+  - .claude-plugin/marketplace.json lists dev-workspace and dev-deploy, both
+  sourced from the remote dilberryhoundog/dev-workspace.git — these are the
+  co-work-oriented plugins. The locally-versioned plugins (chat-tools,
+  dev-tools, and custom-agents per the versioning rule) are the CC ones.
+  - The work: strip co-work from this repo's README + marketplace listing, leave
+  only the CC plugins, and stand up a separate co-work marketplace + plugins
+  repo for the moved pieces.
+
+  #6 — Rework magic-reply's "prepare document" trigger
+  - extensions/skills/magic-reply/references/prepare-document.txt currently
+  emits a bespoke format (Document Definition / Core Understandings / User Key
+  Points / …). The issue wants it realigned to the markdown skill's Phase 1 
+  "Chat summary" (markdown/SKILL.md:33-43) — the five-section, +/- toggle
+  catalogue (conversation / agent context / meta / language / audience).
+  - Remove the "agent-agnostic language" references in that file (:14).
+  - Rename trigger prepare document → show chat summary
+  (magic-reply/SKILL.md:28), which also makes it consistent with the other show 
+  … triggers.
+
+  #1 — conversation-capture output_dir config
+  - config.yml:1 hardcodes output_dir: dev/workspace/history — a dev-workspace 
+  (co-work) path. The issue asks to make it user-configurable via plugin
+  user-config and survive plugin updates by living in plugin data.
+
+  Why #1 likely becomes redundant
+
+  Your hypothesis holds up. conversation-capture lives in chat-tools, but its
+  only configurable concern — output_dir — points at dev/workspace/history,
+  which is a dev-workspace convention, not a Claude Code one. The whole reason
+  output_dir needs to be customizable/portable is that it's serving the co-work
+  workspace layout.
+
+  Once #7 separates the two ecosystems, one of two things removes the need for
+  #1:
+  - If conversation-capture moves to the co-work repo, dev/workspace/history is
+  a fixed local convention there and needs no user-config.
+  - If it stays here as CC-only, the markdown skill's "chat summary" (surfaced
+  in-chat via the renamed show chat summary trigger from #6) already covers
+  conversation summarization without writing to a workspace dir — making the
+  capture-to-history-file path, and its output_dir, moot.
+
+  Either way the configurable-output-dir problem dissolves rather than needing
+  to be solved.
+
+  So I'd sequence: #7 first (it determines where things live), then #6, then
+  close #1 as redundant — confirming which of the two redundancy paths actually
+  applies.
+
+  One thing I need from you to firm up the plan:
+
+⏺ User declined to answer questions
+  ⎿  · Under the #7 split, what happens to the conversation-capture skill 
+     (currently in chat-tools)? (Moves to co-work repo / Stays, superseded by 
+     chat summary / Stays, keep as-is)
+     · Which issue should I start implementing now (vs. keep exploring)? (Just 
+     exploring for now / Start #7 (marketplace split) / Start #6 (magic-reply))
+
+❯ Not quite right. Chat tools are strongly coupled with dev workspace, dev      
+  workspace is decidedly Claude Code only. CLI heavy skill. conversation        
+  capture relies on dev workspace conventions.The config output_dir, is         
+  templated directly to dev workspace. so our cowork plugins will likely not    
+  even run conversation capture with its ruby script and json lines parser.     
+  A quick look identified a problem based on it now being a plugin. The         
+  output_dir config line sat in the skill folder, when the skill was "dropped"  
+  into a project the script could be individually configured. now the skill is  
+  universal and only project or user scoped through settings.json               
+  The script also has a guard wherby the dir is defined or hardcoded. This      
+  probabluy needs rethinking now that it is a plugin. There is some advanced    
+  vars that can be set upon setup that persist values upon plugin install,      
+  these might be able to be used as a guided setup function.                    
+                                                                                
+  #6 work has already been completed, it just needs checking.                   
+  #7 dilberryhoundog/cowork-library is the intended repo. We will also have to  
+  look at all of this repo's reference to "dual platform" etc.                  
+
+⏺ Thanks — that reframes it. Let me correct my model and check the actual state.
+
+  Corrected understanding:
+  - The split in #7 is the opposite of what I guessed: chat-tools +
+  dev-workspace are Claude Code only (CLI-heavy, Ruby/JSONL). The co-work
+  plugins are what move out, to dilberryhoundog/cowork-library.
+  - conversation-capture depends on dev-workspace conventions; co-work plugins
+  won't even run it.
+  - #1 is not redundant — it's a real plugin-config problem: output_dir used to
+  be per-project-tunable because the skill was dropped into a project; now that
+  it's a universal plugin, that config only has project/user settings.json
+  scope, and the script's "defined-or-hardcoded" dir guard needs rethinking
+  (possibly the install-time persisted vars as a guided setup).
+  - #6 is supposedly done — needs verifying.
+
+  Let me check the actual current state of #6 and read the capture script.
+
+  Read 1 file, ran 3 shell commands (ctrl+o to expand)
+
+⏺ Done exploring. Here's the grounded picture, corrected to your framing.
+
+  #7 — Make this repo Claude-Code-only; co-work moves to 
+  dilberryhoundog/cowork-library
+
+  "References to co-work / dual-platform" to update are concentrated in two
+  files:
+
+  - README.md — line 11-12 (Marketplace Compatibility), lines 16 & 32 ("both
+  platforms" / "either platform"), the entire In Co-work quickstart block
+  (25-30), line 40 ("a single install serves both Claude Code and Co-work"), and
+  line 57 ("Cross-platform reach"). All of this reframes to CC-only.
+  - .claude-plugin/marketplace.json — the dev-workspace and dev-deploy entries
+  point at the remote dilberryhoundog/dev-workspace.git. Note these are not the
+  co-work plugins by your description — dev-workspace is CC-only, CLI-heavy. So
+  the question for #7 is which plugins actually relocate to cowork-library vs.
+  stay. The marketplace listing currently has nothing co-work-specific except 
+  the README marketing; the co-work plugins presumably don't exist here yet and
+  get authored in the new repo.
+
+  The docs/ "both" hits are all unrelated (semver examples, settings docs) —
+  leave them.
+
+  #6 — Status check: does not look done in the working tree
+
+  Last commit touching magic-reply was the consolidation commit (32e5266);
+  nothing since, and the working tree only has breaking-change-detector.md
+  modified. The current files still show the old state:
+  - prepare-document.txt still emits the bespoke "Document Definition / Core
+  Understandings / …" format and still says "agent-agnostic language" (line 14).
+  - magic-reply/SKILL.md:28 still has the trigger as "prepare document" / 
+  "prepare the document", not show chat summary.
+
+  So either #6 was done on a branch/repo that isn't here, or it's not actually
+  committed. Worth confirming where that work lives — from this checkout it
+  reads as not started.
+
+  #1 — Real issue, and the mechanism is exactly what you described
+
+  You're right that it's a genuine plugin-config problem, not redundant. The
+  root cause:
+  - config.yml:1 (output_dir: dev/workspace/history) and the script's guard
+  config.fetch('output_dir', 'dev/workspace/history')
+  (scripts/conversation-capture:84) read a config.yml bundled inside the skill 
+  folder. Under ${CLAUDE_PLUGIN_ROOT} that folder is ephemeral and overwritten 
+  on every update — so the old "edit config.yml per project" path is dead now
+  that it's a universal plugin.
+
+  The "advanced vars set at install that persist" you remembered is the
+  userConfig field in plugin.json (docs/plugin_reference.md:526-563):
+  - Prompts the user at enable time; supports type: "directory" with a default.
+  - Persists in settings.json under pluginConfigs[<plugin-id>].options —
+  survives updates and reinstalls.
+  - Exported to the Ruby subprocess as CLAUDE_PLUGIN_OPTION_OUTPUT_DIR, and
+  substitutable as ${user_config.output_dir} in skill content.
+
+  So the clean fix for #1: declare output_dir (and optionally include_thinking /
+  include_subagents) as userConfig in chat-tools/plugin.json, change the script
+  to read ENV['CLAUDE_PLUGIN_OPTION_OUTPUT_DIR'] (falling back to the
+  dev/workspace/history default), and drop the bundled config.yml's role as the
+  config source. That's the "guided setup" — the enable-time prompt.
+  ${CLAUDE_PLUGIN_DATA} is the other persistent option but it's for plugin
+  state, not a user-chosen output location, so userConfig is the right tool
+  here.
+
+  One open point on #1: sanitize is a list of find/replace pairs — userConfig
+  handles strings/dirs/bools/numbers cleanly but a list-of-pairs doesn't map
+  well, so that part likely stays as a bundled default (or string + multiple).
+
+  Where do you want to start — confirm #6's whereabouts first, or should I draft
+  the #1 userConfig + script change?
+
+✻ Churned for 1m 23s
+
+❯ My mistake. #6 The create document skill has been updated to use the new      
+  method (single scaffold doc progressing through 4 phases) but this issue is   
+  about converting that trigger to do a similar thing, whereby the user can see 
+  a chat summary in the chat itself. A conversation can then be had about what  
+  is meta and what points are relevant.                                         
+  #7 no cowork plugins exist yet, the skills i want to convert are in my agents 
+  repo (classroom). this "skill conversion to plugins" work was so that I       
+  could use skills in cowork.                                                   
+
+⏺ Got it — that clears both up.
+
+  #6 is still to be done, and now I understand the shape: convert the prepare 
+  document trigger so it renders the markdown skill's Phase 1 chat summary
+  inline in the chat — the five-section catalogue (conversation / agent context
+  / meta / language / audience) with +/- toggles — so the user can see it and
+  then talk through what's meta vs. what's relevant, flipping toggles
+  conversationally, before any document is written. Rename the trigger to show 
+  chat summary, drop the bespoke "Document Definition" format and the
+  "agent-agnostic" language. It becomes the in-chat front door to the
+  create-documents pipeline rather than a one-shot summary dump.
+
+  #7 is now clear too: nothing relocates out of this repo. This repo just sheds
+  its co-work/dual-platform framing (README lines 11-12, 16, 25-30, 32, 40, 57)
+  to become CC-only. The new dilberryhoundog/cowork-library is a separate build,
+  populated by converting skills from your classroom agents repo into plugins —
+  that conversion work is what makes them usable in co-work. So #7-in-this-repo
+  = README/marketplace cleanup; #7-elsewhere = new repo + classroom→plugin
+  conversions.
+
+  So all three are independent, and all live (for this repo) as concrete edits:
+  - #6 — rewrite prepare-document.txt → chat-summary-in-chat, rename trigger in
+  magic-reply/SKILL.md.
+  - #1 — userConfig.output_dir in chat-tools/plugin.json + script reads
+  CLAUDE_PLUGIN_OPTION_OUTPUT_DIR.
+  - #7 (here) — strip dual-platform framing from README.md.
+
+  Where do you want to start? My suggestion is #6 — it's self-contained, the
+  dependency (the create-documents 4-phase method) is already in place, and
+  getting the chat-summary trigger right is the most design-sensitive of the
+  three.
+
+✻ Brewed for 19s
+
+❯ lets work down from 7 to 6. then well have to dive deeper with #1             
+
+⏺ Starting with #7 — stripping the dual-platform framing from the README so this
+  repo reads as Claude-Code-only.
+
+⏺ Update(README.md)
+  ⎿  Added 2 lines, removed 16 lines
+       6  
+       7  Claude assets — skills, agents, commands, and more — tend to sc
+          atter across every working directory you run Claude in. Spread 
+          out like that, they're impossible to maintain and impossible to
+           deliver. This repository solves that: it stores, packages, and
+           delivers those assets through Claude's official plugin framewo
+          rk, so a single source of truth feeds every Claude installation
+           you work with.
+       8  
+       9 -## Marketplace Compatibility                                   
+      10 -                                                               
+      11 -This marketplace is compatible with both **Claude Code** and **
+         -Co-work**.                                                     
+      12 -Some plugins are more suited to one of the two platforms. If yo
+         -u come across any compatibility issues, please report them with
+         - an issue.                                                     
+      13 -                                                               
+       9  ## Quickstart
+      10  
+      16 -Installing is the same idea on both platforms — register this m
+         -arketplace, then install whatever you want from it. Only the na
+         -vigation differs.                                              
+      11 +Register this marketplace in Claude Code, then install whatever
+         + you want from it.                                             
+      12  
+      18 -**In Claude Code**                                             
+      19 -                                                               
+      13  1. Run `/plugins`.
+      14  2. Open the **Marketplaces** tab and choose **Add marketplace**
+          .
+      15  3. Use the green **Code** button above to copy the URL.
+      16  4. Paste this repository's URL into the marketplace dialog.
+      17  
+      25 -**In Co-work** (Mac or Windows app)                            
+      18 +Then open the **Plugins** tab and install any — or all — of the
+         + plugins on offer. Plugins update themselves as new versions sh
+         +ip.                                                            
+      19  
+      27 -1. Open the **Cowork** tab, then **Customise**.                
+      28 -2. Add a **Personal plugin** → **Create plugin** → **Add market
+         -place**.                                                       
+      29 -3. Use the green **Code** button above to copy the URL.        
+      30 -4. Paste this repository's URL into the marketplace dialog.    
+      31 -                                                               
+      32 -**Then, on either platform:** open the **Plugins** tab and inst
+         -all any — or all — of the plugins on offer. Plugins update them
+         -selves as new versions ship.                                   
+      33 -                                                               
+      20  ## The three core components
+      21  
+      22  Plugins are bundled and delivered using an integrated toolchain
+          : assets are authored, packaged into plugins, and delivered thr
+          ough a marketplace. Three components carry that flow.
+
+⏺ Update(README.md)  ⎿  Added 1 line, removed 1 line
+      23  
+      24  ### Custom plugin marketplace
+      25  
+      26 -Plugins are delivered and updated through Claude's official mar
+         -ketplace mechanism — a single install serves both Claude Code a
+         -nd Co-work, and keeps installed plugins current automatically a
+         -s their versions change. The marketplace serves general use plu
+         -gins from this repository alongside premium plugins maintained 
+         -in their own repositories — covering categories such as workspa
+         -ce management, git, context management, and deployment — all re
+         -achable under the one install.                                 
+      26 +Plugins are delivered and updated through Claude Code's officia
+         +l marketplace mechanism — a single install keeps installed plug
+         +ins current automatically as their versions change. The marketp
+         +lace serves general use plugins from this repository alongside 
+         +premium plugins maintained in their own repositories — covering
+         + categories such as workspace management, git, context manageme
+         +nt, and deployment — all reachable under the one install.      
+      27  
+      28  ### Plugin packaging
+      29  
+
+⏺ Update(README.md)
+  ⎿  Removed 1 line
+      40  - **A single source of truth** for Claude assets.
+      41  - **Easy versioning and updating** of everything installed.
+      42  - **Clean working directories**, since each project's `.claude/
+          ` stays minimal.
+      43 -- **Cross-platform reach**, working across Claude platforms.   
+      43  - **Conceptually packaged assets** — pull them in where they're
+           needed, leave them out where they're not.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ #7 (this repo) done. README is now Claude-Code-only — removed the "Marketplace
+  Compatibility" dual-platform section, the In Co-work quickstart block,
+  "both/either platform" phrasing, the "serves both Claude Code and Co-work"
+  line, and the "Cross-platform reach" advantage. The only co-work references in
+  the repo were in README; marketplace.json and docs/ had none. (The new
+  cowork-library repo + classroom→plugin conversions remain separate,
+  out-of-repo work.)
+
+  Now #6 — converting the magic-reply trigger. The plan:
+  1. Rename trigger prepare document → show chat summary in
+  magic-reply/SKILL.md:28.
+  2. Rewrite references/prepare-document.txt (→ rename file to
+  show-chat-summary.txt) to render the markdown skill's Phase 1 chat summary
+  inline — the five sections with +/- toggles — then invite the user to disc
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ just quickly you removed some install instructions and scope we could recycle 
+  into the cowork readme, this is stuff we spent time creating so could we      
+  maybe extract a cowork readme from this that I could transfer when ready.     
+  just name readme-cowork or something like that.                               
+
+⏺ Good call. I'll preserve the co-work material in a transferable draft.
+
+⏺ Write(readme-cowork.md)
+  ⎿  Wrote 48 lines to readme-cowork.md
+       1 <!-- DRAFT — staging file for the future `dilberryhoundog/cowork
+       2      Holds the Co-work-oriented README material extracted when t
+         his repo was
+         work-library
+       4      when ready, then delete this file. -->
+       6 # Cowork Library
+       7 
+         ed from the
+       9 authoring repos into installable, versioned plugins so they can 
+      10 Co-work.
+     … +52 lines (ctrl+o to expand)
+
+⏺ Saved the extracted co-work material to readme-cowork.md at the repo root — a
+  staging draft for dilberryhoundog/cowork-library. It preserves what we
+  removed: the Marketplace Compatibility note, the In Co-work install steps (now
+  leading, with Claude Code as the secondary path), the "serves both" delivery
+  line, and the "Cross-platform reach" advantage. A header comment marks it as a
+  transfer-then-delete staging file so it doesn't get mistaken for this repo's
+  own README.
+
+  Now back to #6. The plan again:
+  1. In magic-reply/SKILL.md, rename the trigger row prepare document → show 
+  chat summary and repoint it.
+  2. Rewrite the reference file (rename prepare-document.txt →
+  show-chat-summary.txt) so it renders the markdown skill's Phase 1 chat summary
+  inline — the five sections (conversation / agent context / meta / language /
+  audience) with +/- toggles — then invites the user to discuss what's meta vs.
+  relevant and flip toggles, rather than dumping the old "Document Definition"
+  format. Drop the "agent-agnostic" wording.
+
+  Want me to proceed with #6?
+
+✻ Churned for 18s
+
+❯ proceed with #6 --show your working --                                        
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ === My Task ===
+
+  Convert magic-reply's prepare document trigger into a show chat summary
+  trigger. Instead of emitting the old bespoke "Document Definition / Core
+  Understandings / …" one-shot format, the trigger should render the
+  create-documents (markdown) skill's Phase 1 chat summary inline in the chat:
+  the five-section catalogue — conversation / agent context / meta / language /
+  audience — with each line prefixed by a +/- toggle. The point is to make the
+  summary visible and discussable: the user sees it, then we talk through what's
+  meta vs. relevant and flip toggles conversationally, as the front door into
+  the document pipeline. The "agent-agnostic" language gets dropped from this
+  reference.
+
+  === My Thinking ===
+
+  - Rename the trigger row in magic-reply/SKILL.md from "prepare document" / 
+  "prepare the document" to "show chat summary" / "show the chat summary",
+  update its purpose text, and repoint the reference path.
+  - Rename the reference file references/prepare-document.txt →
+  references/show-chat-summary.txt (via git mv to keep history).
+  - Rewrite the reference body to instruct: build the five-section catalogue,
+  one point per line, each with a +/- toggle, following the same toggle
+  semantics as markdown skill Phase 1 (incl. language +=define / -=avoid, and
+  lean - on meta/steering).
+  - Render it directly in chat (not as an HTML comment — that's only for the
+  scaffold file), then invite the user to flip toggles and discuss
+  meta-vs-relevant before any document is written.
+  - Keep the "one turn only" closing notices consistent with the other reference
+  files.
+  - Point the reader at the create-documents/markdown skill as the next step
+  once the summary is settled.
+
+  === Issues ===
+
+  - Naming consistency: other triggers use "show X" / "show your X"; "chat
+  summary" reads better as "show the chat summary" than "show your chat summary"
+  — minor wording call to confirm.
+  - The markdown skill's Phase 1 chat summary is normally written into the 
+  scaffold file as an HTML comment; here it's rendered live in chat. I'll reuse
+  its section/toggle definitions but present them as plain visible text, and
+  must avoid implying a file is being created this turn.
+  - Source-of-truth duplication: the section/toggle rules live in
+  markdown/SKILL.md. I'll reference that skill rather than fully re-specifying,
+  to avoid drift — but the reference file still needs enough standalone detail
+  to act on.
+
+  === Placement and Pattern ===
+
+  Two files in extensions/skills/magic-reply/: edit SKILL.md (the Trigger Map
+  table row) and replace references/prepare-document.txt with
+  references/show-chat-summary.txt. The pattern mirrors the existing reference
+  files (show-working.txt, show-strategy.txt): a short imperative spec of the
+  output format, sections delimited by === … ===, closing with the standard
+  "this turn only" notices and a hard "END YOUR TURN" stop. The new body adopts
+  the markdown skill's five-section + +/- toggle vocabulary verbatim for
+  alignment, adds the conversational "flip toggles / discuss meta" step that's
+  unique to the in-chat rendering, and hands off to the create-documents skill
+  as the continuation.
+
+  --- This response format is for this turn only ---
+  --- My next response will be as per my system instructions or output-style ---
+
+✻ Sautéed for 40s
+
+❯ lets make some adjustments.                                                   
+  magic triggers are all pure context not "interactive" very imperative. So we  
+  do not "invite the the user" or "point the reader".                           
+  please ensure we lean heavily on current conventions. each trigger is very    
+  similar in its style and format. this should join the line up of triggers.    
+  read them all, go with the flow.                                              
+                                                                                
+  the goal is the agent turn containing a very simple summary with the ===      
+  Title === convention differentiating the top level sections. conversation,    
+  meta, language (coined terms only) are the only appropriate headings for a    
+  mid chat summary. This means removal of agent context and audience sections   
+  in the trigger text.                                                          
+  We should probably include a === Chat Summary === heading explaining what we  
+  are doing...                                                                  
+  A quick summary of the chat. with + flagging points that would be suitable    
+  for writing a durable document with. - Flags that including this piece would  
+  reduce the durability of the document.                                        
+                                                                                
+  Im happy keeping the naming convention, of "show" &  "show your"              
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Conventions are clear now — pure-context, imperative, === Section ===
+  headings, standard closing notices, hard stop. Let me rename the reference
+  file (preserving history) and write the new body, then update the trigger map.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Write(extensions/skills/magic-reply/references/show-chat-summary.txt)
+  ⎿  Error writing file
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Write(extensions/skills/magic-reply/references/show-chat-summary.txt)
+  ⎿  Added 6 lines, removed 9 lines
+       1 -When asked to "prepare the document", you must extract a thin s
+         -ummary of the conversation, ready for a document to be written 
+         -from.                                                          
+       1 +When working on a task, you must "show the chat summary".      
+       2  
+       3 -Do this by stating the document's purpose, audience (agent or h
+         -uman), and type (executable, instructional, informational) in a
+         - "=== Document Definition ===" section, using one line for each
+         -.                                                              
+       3 +Do this by briefly stating what this summary is for in a "=== C
+         +hat Summary ===" section, using a sentence or two: a quick summ
+         +ary of the conversation so far, with each point toggled for its
+         + fitness to seed a durable document. A "+" flags a point that w
+         +ould be suitable for writing a durable document with; a "-" fla
+         +gs a point whose inclusion would reduce the durability of the d
+         +ocument.                                                       
+       4  
+       5 -Then reveal the shared understandings the document rests on in 
+         -a "=== Core Understandings ===" section. Use a short paragraph 
+         -each for: the problem being addressed, the approach taken, and 
+         -the assumptions that go without saying between you and the user
+         -. The future reader was not present in this conversation.      
+       5 +Then summarise what the user and the agent each said in a "=== 
+         +Conversation ===" section. Use single-sentence bullets, written
+         + in fresh words, each prefixed with a "+" or "-" toggle.       
+       6  
+       7 -Then summarise the user's key points (requirements, corrections
+         -, preferences) in a "=== User Key Points ===" section. Use sing
+         -le-sentence bullets, written in fresh words — do not copy phras
+         -es from the conversation.                                      
+       7 +Then reveal the steering, decisions, and constraints that shape
+         +d the conversation in a "=== Meta ===" section. Use single-sent
+         +ence bullets, each prefixed with a "+" or "-" toggle. Lean towa
+         +rd "-" here: steering is usually direction for the agent, not d
+         +urable content.                                                
+       8  
+       9 -Then summarise your own key points that the user has accepted i
+         -n an "=== Agent Key Points ===" section. Use single-sentence bu
+         -llets, written in fresh words. Do not include proposals the use
+         -r has not approved.                                            
+       9 +Then list any coined terms in a "=== Language ===" section. Use
+         + single-sentence bullets, each prefixed with a "+" (a term to d
+         +efine) or a "-" (a term to avoid). Include this section only wh
+         +en the conversation coined terms.                              
+      10  
+      11 -Then indicate the decisions made and the alternatives rejected 
+         -in a "=== Decisions and Rejections ===" section. Use single-sen
+         -tence bullets in the form "X over Y", naming the rejected alter
+         -native.                                                        
+      11 +List each point once; never repeat under a lower section what a
+         + higher section already covers.                                
+      12  
+      13 -Then place this instruction (use bold text if possible)        
+      14 -"--- Write documents (or comments) using universal, agent-agnos
+         -tic language. Expand from these summaries only; the user may al
+         -so steer you with document alterations in their following messa
+         -ges. ---"                                                      
+      15 -                                                               
+      13  Finally inform the user (use bold text if possible)
+      14  "--- This response format is for this turn only ---"
+      15  "--- My next response will be as per my system instructions or 
+          output-style ---"
+
+⏺ Now the trigger map row in SKILL.md:
+
+⏺ Update(extensions/skills/magic-reply/SKILL.md)
+  ⎿  Added 1 line, removed 1 line
+      25  | "show difficulties" / "show your difficulties" | `references/
+          show-difficulties.txt` | Analyse conversation difficulties     
+                             |
+      26  | "check working" / "check your working"         | `references/
+          check-working.txt`     | Review and verify your completed work 
+                             |
+      27  | "use claude space" / "use your claude space"   | `references/
+          claude-space.txt`      | Free-form thinking space for the agent
+                             |
+      28 -| "prepare document" / "prepare the document"    | `references/
+         -prepare-document.txt`  | Summarise the conversation ready for d
+         -ocument writing    |                                           
+      28 +| "show chat summary" / "show your chat summary" | `references/
+         +show-chat-summary.txt` | Summarise the conversation, toggling p
+         +oints for document durability |                                
+      29  
+      30  ## Context Building
+      31  
+
+⏺ #6 done. Summary of changes:
+
+  - Renamed references/prepare-document.txt → references/show-chat-summary.txt
+  (via git mv, history preserved).
+  - Rewrote the reference to match the trigger conventions exactly —
+  pure-context/imperative, === Section === headings, standard closing notices,
+  hard END YOUR TURN stop. It now produces a === Chat Summary === lead
+  (explaining the +/- durability toggle), then === Conversation ===, === Meta 
+  === (lean -), and === Language === (coined terms only, shown only when terms
+  exist). Dropped the old "Document Definition / Core Understandings / Agent Key
+  Points" format, the agent-context/audience sections, the "agent-agnostic"
+  instruction, and all interactivity.
+  - Updated the Trigger Map row in magic-reply/SKILL.md to "show chat summary" /
+  "show your chat summary" → the new reference, with a matching purpose line.
+
+  The +/- semantics align with the markdown skill's Phase 1, so the in-chat
+  summary slots straight into the create-documents pipeline.
+
+  That's #7 (this-repo cleanup + readme-cowork.md staged) and #6 complete. Ready
+  to dive deep on #1 whenever you are — the userConfig.output_dir +
+  script-rewrite work we scoped earlier.
+
+✻ Baked for 1m 3s
+
+❯ great ive got a good idea. lets provide a short blurb what a durable document 
+  is, inside the skill text.                                                    
+                                                                                
+  Note: (Guide for agents, do not include in your reply)                        
+  A durable document is one that has Ai agents as its audince for execution and 
+  instruction purposes. durable documents are agent agnostic, any agent, any    
+  model, any platform can efficiently parse the document in completion.         
+  pitfalls to avoid... Session specific context, steering and decisions, coined 
+  terms without explanation, self referencing the document ("read when ...")    
+
+⏺ Update(extensions/skills/magic-reply/SKILL.md)  ⎿  User rejected update to extensions/skills/magic-reply/SKILL.md
+
+❯ in the show chat summary text file, so the agent sees it when the trigger     
+  loads and is ignored when other triggers are called                           
+
+⏺ Right — into the reference file so it loads only with this trigger. Let me add
+  the blurb there.
+
+⏺ Update(extensions/skills/magic-reply/references/show-chat-summary.txt)
+  ⎿  Added 2 lines
+      1  When working on a task, you must "show the chat summary".
+      2  
+      3 +A durable document is written for AI agents as its audience, for
+        + execution and instruction: it is agent-agnostic, so any agent, 
+        +any model, on any platform can parse it to completion without ou
+        +tside context. Pitfalls that erode durability: session-specific 
+        +context, steering and decisions, coined terms left unexplained, 
+        +and self-referencing the document (e.g. "read this when…"). Togg
+        +le each point below by its fitness for such a document.         
+      4 +                                                                
+      5  Do this by briefly stating what this summary is for in a "=== Ch
+         at Summary ===" section, using a sentence or two: a quick summar
+         y of the conversation so far, with each point toggled for its fi
+         tness to seed a durable document. A "+" flags a point that would
+          be suitable for writing a durable document with; a "-" flags a 
+         point whose inclusion would reduce the durability of the documen
+         t.
+      6  
+      7  Then summarise what the user and the agent each said in a "=== C
+         onversation ===" section. Use single-sentence bullets, written i
+         n fresh words, each prefixed with a "+" or "-" toggle.
+
+⏺ Added the durable-document blurb to the top of show-chat-summary.txt — it
+  loads only when this trigger fires and stays out of the way for every other
+  trigger. It defines the durable document (agent audience, agent-agnostic,
+  parseable to completion without outside context) and lists the durability
+  pitfalls (session-specific context, steering/decisions, unexplained coined
+  terms, self-referencing), then ties straight into the +/- toggle instruction
+  that follows.
+
+  #6 is complete. Ready for #1 when you are.
+
+✻ Baked for 10s
+
+※ recap: Working through three repo issues. #7 (README to Claude-Code-only, co-work material staged in readme-cowork.md) and #6 (magic-reply "show chat summary" trigger) are done. Next: dive into #1, the conversation-capture output_dir plugin-config work. (disable recaps in /config)
+
+❯ changed it slightly.                                                          
+
+⏺ Got it — blurb moved to a trailing NOTE that won't surface in the reply. #6 is
+  complete.
+
+  Now let's dive into #1. Let me read the full capture script first so the
+  design discussion is grounded in exactly how it resolves paths and config
+  today.
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Read the full path-resolution logic. Here's the deep-dive on #1.
+
+  What's actually broken
+
+  resolve_output_file (scripts/conversation-capture:84):
+  output_dir = File.join(Dir.pwd, config.fetch('output_dir',
+  'dev/workspace/history'))
+  Two coupled problems now that this is a plugin, not a dropped-in skill:
+
+  1. Config source is ephemeral. config comes from config.yml bundled in
+  ${CLAUDE_PLUGIN_ROOT} (:19-21), which is overwritten on every plugin update
+  and was never meant for user edits. The old "edit config.yml per project"
+  workflow is dead.
+  2. Stale invocation path. SKILL.md:24 calls ruby 
+  skills/conversation_capture/scripts/conversation-capture — underscored dir
+  name and a project-relative path. Neither is right under the plugin model; it
+  needs ${CLAUDE_PLUGIN_ROOT} and the real hyphenated dir. This is a latent bug
+  #1 should fix regardless.
+
+  The mechanism (confirmed against the docs)
+
+  userConfig in plugin.json is exactly your "advanced vars set at install that
+  persist": prompted at enable time, stored in settings.json under
+  pluginConfigs[chat-tools].options, survives updates and reinstalls. The
+  reliable way to get the value into the Ruby script is
+  ${user_config.output_dir} substitution in the SKILL.md command (the docs
+  explicitly allow ${user_config.KEY} in skill content) — passed as an argument
+  — rather than relying on the CLAUDE_PLUGIN_OPTION_* env var reaching the Bash
+  tool's subprocess, which the docs only promise for hook/MCP/LSP subprocesses.
+
+  So the shape is:
+  - plugin.json → userConfig.output_dir with a default.
+  - SKILL.md → ruby "${CLAUDE_PLUGIN_ROOT}/scripts/conversation-capture" 
+  <SESSION_ID> "${user_config.output_dir}".
+  - Script → take optional ARGV[1] as output_dir, precedence arg → config.yml → 
+  hardcoded default.
+  - config.yml → drop output_dir (now redundant), keep include_thinking /
+  include_subagents / sanitize as bundled defaults.
+
+  Two design decisions I want your call on
+
+  1. Path semantics — relative or absolute? dev/workspace/history is inherently
+  project-relative: each project keeps its own history, and the script joins it
+  onto the project root. If I make output_dir a userConfig type: "directory",
+  the picker returns one absolute path — meaning every project's transcripts
+  pile into a single shared folder, and the File.join(Dir.pwd, …) logic breaks
+  on an absolute second arg. If I make it type: "string" with default
+  dev/workspace/history, it stays project-relative and the join still works. My
+  recommendation: string, project-relative — it preserves today's behaviour and
+  the per-project history model. Choose directory/absolute only if you actually
+  want one global transcript bucket.
+
+  2. Scope — just output_dir, or lift the booleans too? include_thinking and
+  include_subagents have the same "stuck in ephemeral config.yml" problem, just
+  less visibly. I could promote them to userConfig booleans in the same pass so
+  all user-facing settings persist. sanitize is a list-of-pairs and doesn't map
+  to userConfig, so it stays bundled regardless. My lean: keep #1 tight to 
+  output_dir (the issue's actual subject) and leave the booleans in config.yml
+  unless you want the full sweep now.
+
+  Which way on each?
+
+✻ Baked for 1m 4s
+
+※ recap: Working through three repo issues; #7 (CC-only README) and #6 (chat-summary trigger) are done. Now on #1: making conversation-capture's output_dir a persistent plugin userConfig. Next, your call on two design questions: relative vs absolute path, and whether to also move the boolean settings. (disable recaps in /config)
+
+❯ lets do relative string. It shouldn't be too hard to do the same for the      
+  other settings. eg sanitize_find, sanitize_find                               
+                                                                                
+  we have options to set defaults ( and possibly required) also as outlined     
+  here...                                                                       
+  https://code.claude.com/docs/en/plugins-reference#user-configuration          
+
+⏺ Let me pull the authoritative user-configuration section to confirm the
+  multiple/default/required semantics and how array values surface to the
+  script.
+
+⏺ Fetch(https://code.claude.com/docs/en/plugins-reference#user-configuration)
+  ⎿  Received 77.3KB (200 OK)
+
+  Searched memories (ctrl+o to expand)
+
+⏺ Fetched the official reference. One important gap surfaced that shapes the
+  sanitize design.
+
+  What the docs confirm
+
+  - userConfig option fields: type (string/number/boolean/directory/file),
+  title, description, plus optional default, required, sensitive, multiple
+  (string-only → array), min/max.
+  - Values substitute as ${user_config.KEY} in skill content (non-sensitive) and
+  export as CLAUDE_PLUGIN_OPTION_<KEY> env vars to plugin subprocesses.
+
+  The gap
+
+  The docs specify multiple: true gives "an array of strings" but never define 
+  how an array serializes into a ${user_config.KEY} substitution or into the
+  CLAUDE_PLUGIN_OPTION_<KEY> env var — space-joined? comma? JSON? It's
+  undocumented, so building the sanitize feature on parallel sanitize_find /
+  sanitize_replace arrays means relying on unspecified behaviour, and the
+  find/replace pairing across two independent arrays is fragile besides.
+
+  My recommendation: keep every field a scalar
+
+  This sidesteps the array ambiguity entirely and keeps substitution
+  predictable:
+
+  - output_dir → string, default "dev/workspace/history" (relative, as decided).
+  - include_thinking → boolean, default false.
+  - include_subagents → boolean, default false.
+  - sanitize → a single string using a small delimiter convention rather than
+  two arrays — e.g. default "$HOME=>~", multiple pairs separated by ;: "$HOME=>~
+  ; MyName=>the user". The script splits on ; then =>. One scalar field,
+  predictable substitution, and find/replace stay paired by construction.
+
+  Each value reaches the Ruby script as an explicit CLI argument via
+  ${user_config.*} substitution in the SKILL.md command (the documented,
+  guaranteed channel — I won't depend on env-var export reaching the Bash
+  subprocess, which the docs only promise for hook/MCP/LSP processes). The
+  script keeps config.yml as its fallback defaults for standalone runs, so
+  precedence is CLI arg → config.yml → hardcoded.
+
+  The one trade-off: a ;/=> delimited sanitize string is slightly less obvious
+  than a YAML list. If you'd rather keep sanitize as a true list, we keep that 
+  one field in the bundled config.yml (not user-configurable) and only lift
+  output_dir + the two booleans into userConfig.
+
+  So the call is just on sanitize: delimited-scalar userConfig field (my pick),
+  or leave sanitize in config.yml and userConfig only the other three? Once you
+  pick, I'll implement.
+
+✻ Cooked for 1m 19s
+
+❯ Ok lets do a single sanitize_find and sanitize_replace value. this will       
+  restrict our sanitize function to a single value but that is all I ever       
+  really use, to strip the users profile path from the convo.                   
+                                                                                
+  is there increased difficulty supporting both the config.yml file and the     
+  userConfig. should we just migrate to userConfig?                             
+
+⏺ Good call on the single sanitize pair. And yes — to your question: migrate 
+  fully to userConfig and delete config.yml. Supporting both means two sources
+  of truth, precedence logic, and a config.yml that's now
+  ephemeral-in-plugin-root anyway. Once every field is a scalar (which they now
+  all are), there's nothing left that needs YAML — the script just reads CLI
+  args with hardcoded fallback defaults for standalone runs. Cleaner and removes
+  the require 'yaml' path entirely.
+
+  Let me read how the config values are consumed in the rest of the script
+  before I rewrite.
+
+  Read 1 file, ran 1 shell command (ctrl+o to expand)
+
+⏺ Confirmed two things: include_subagents is dead config (never referenced —
+  agent-result templates always render), and the SKILL invocation path is wrong
+  (skills/conversation_capture/...). I'll wire include_subagents so the toggle
+  actually works (default false, matching the long-stated config default — note
+  this means subagent results stop being included by default, a behavior change
+  I'm flagging), and fix the path.
+
+  Let me make the edits.
+
+⏺ Update(extensions/skills/conversation-capture/scripts/conversation-capture)
+  ⎿  Removed 1 line
+       6  require 'pathname'
+       7  require 'date'
+       8  require 'fileutils'
+       9 -require 'yaml'                                                 
+       9  
+      10  class ConversationCapture
+      11    CLAUDE_DIR = File.join(Dir.home, '.claude')
+
+⏺ Update(extensions/skills/conversation-capture/scripts/conversation-capture)
+  ⎿  User rejected updatextensions/skills/conversation-capture/scripts/conversat
+     to                 ion-capture
+⏺ Understood — no baked-in defaults. The default values live in plugin.json's
+  userConfig; if a setting doesn't reach the script, it fails with a clear
+  message rather than silently substituting a hardcoded value. The toggles
+  simply stay off when absent (that's feature-off, not a magic default).
+
+⏺ Update(extensions/skills/conversation-capture/scripts/conversation-capture)
+  ⎿  User rejected updatextensions/skills/conversation-capture/scripts/conversat
+     to                 ion-capture
+
+❯ Um don't they get written to either user or project scope settings.json in    
+  ./.claude? this makes them configurable once initialised, and callable from   
+  there?                                                                        
+
+⏺ Yes — exactly right, and that's the backbone of this design. Here's the
+  precise data flow:
+
+  1. plugin.json declares each setting under userConfig (with a default).
+  2. On enable, Claude Code prompts and writes the values to settings.json under
+  pluginConfigs["chat-tools"].options — at whichever scope applies
+  (~/.claude/settings.json for user, ./.claude/settings.json for project).
+  Project overrides user.
+  3. They stay editable there afterward — that's your "configurable once
+  initialised." No re-enable needed; edit the file (or re-run the config
+  prompt).
+  4. They're callable via ${user_config.KEY} substitution. Claude Code resolves
+  the scope (project > user > plugin.json default) and substitutes the value
+  into skill content before the Bash command runs.
+
+  So the script never parses settings.json itself — it shouldn't, because it'd
+  have to re-implement scope/merge resolution. Instead the SKILL.md command
+  carries ${user_config.output_dir} etc., Claude Code substitutes the resolved
+  value, and the script receives it as a CLI flag. The script stays dumb.
+
+  Where "fail gracefully" comes in: it's only the safety net for the edge case
+  where nothing resolves — plugin not yet configured and the substitution comes
+  through empty. In that case the script says "output_dir not configured"
+  instead of writing to a guessed path. With the default in plugin.json, that
+  should rarely fire, but it beats a silent hardcoded fallback (your earlier
+  point).
+
+  So nothing changes in the plan — it's consistent with what you described. The
+  script edit I was about to make just (a) drops the YAML/config.yml reading and
+  (b) takes the values as flags. Shall I continue with that and the matching
+  plugin.json userConfig + SKILL.md command?
+
+✻ Baked for 26s
+
+❯ ok with you on plugin.json userConfig , but unsure what you mean by SKILL.md  
+  command. this skill is dependent on a ruby script reading those values,       
+  doesn't it also need those values?                                            
+
+⏺ By "the SKILL.md command" I mean the fenced bash block in SKILL.md that the
+  agent actually runs — that is how the values get to the ruby script. It's the
+  bridge you're asking about.
+
+  Right now that block is (SKILL.md:23-25):
+  ruby skills/conversation_capture/scripts/conversation-capture <SESSION_ID>
+
+  The flow is: settings.json → Claude Code substitutes ${user_config.*} into 
+  this block's text (substitution is allowed in skill content for non-sensitive
+  values) → the agent runs the resulting command → the ruby script receives the
+  values as CLI flags. So the new block becomes:
+  ruby "${CLAUDE_PLUGIN_ROOT}/scripts/conversation-capture" \
+    --session-id "${CLAUDE_SESSION_ID}" \
+    --output-dir "${user_config.output_dir}" \
+    --include-thinking "${user_config.include_thinking}" \
+    --include-subagents "${user_config.include_subagents}" \
+    --sanitize-find "${user_config.sanitize_find}" \
+    --sanitize-replace "${user_config.sanitize_replace}"
+
+  So the script does get the values — that's what the --output-dir 
+  "${user_config.output_dir}" etc. are doing. The chain is:
+
+  plugin.json (declares + default) → settings.json (stores, editable) →
+  ${user_config.*} substituted into the SKILL.md command → ruby script reads
+  them as ARGV flags.
+
+  That's why all three pieces change together:
+  1. plugin.json — declare the five userConfig fields.
+  2. SKILL.md — rewrite the command block to pass them as flags (and fix the
+  broken ${CLAUDE_PLUGIN_ROOT} path).
+  3. the ruby script — parse those flags instead of reading config.yml.
+
+  Does that clear it up? If so I'll proceed with all three (plus git rm 
+  config.yml).
+
+✻ Brewed for 17s
+
+※ recap: Working through issue #1: making conversation-capture's settings user-configurable via plugin userConfig. #7 and #6 are already done. Next action is to implement the three changes: add the five userConfig fields to plugin.json, rewrite the SKILL.md command to pass them as flags, and update the ruby script to read those flags instead of config.yml. (disable recaps in /config)
+
+❯ output_dir = File.join(Dir.pwd, config.fetch('output_dir',                    
+  'dev/workspace/history'))                                                     
+                                                                                
+  what is this line doing? it looks like it reads the path from config to know  
+  where to put the file.bypassing SKILL.md                                      
+
+⏺ Exactly — you've spotted the current mechanism. That line is doing two things
+  today:
+
+  1. config.fetch('output_dir', ...) — reads output_dir from config, which right
+  now is the parsed config.yml (loaded in initialize). So the script
+  self-sources the path from the bundled YAML; SKILL.md passes nothing. That's
+  the "bypass" you're seeing — the command line and the config file are two
+  independent channels today.
+  2. File.join(Dir.pwd, ...) — joins it onto the project root (the relative-path
+  behaviour).
+  3. 'dev/workspace/history' — the hardcoded fallback if the key is missing.
+
+  After the migration, all three of those shift:
+  - config is no longer the YAML — it's the CLI options hash parsed from the
+  flags. So config['output_dir'] is the value that came from --output-dir 
+  "${user_config.output_dir}" in SKILL.md. No more bypass — SKILL.md becomes the
+  single channel.
+  - The File.join(Dir.pwd, ...) stays (still relative to project root, as we
+  decided).
+  - The hardcoded 'dev/workspace/history' fallback goes away — if output_dir
+  arrives empty, the script fails gracefully ("output_dir not configured")
+  instead of guessing.
+
+  So that exact line becomes roughly:
+  output_dir = config['output_dir'].to_s.strip
+  if output_dir.empty?
+    $stderr.puts "conversation-capture: output_dir not configured (set the 
+  plugin's user config)."
+    exit 1
+  end
+  output_path = File.join(Dir.pwd, output_dir)
+
+  That's the heart of #1: the path stops coming from a bundled file the script
+  reads on its own, and starts coming from the user config through SKILL.md.
+  Want me to proceed with the three changes now?
+
+✻ Worked for 17s
+
+❯ so when you say "through SKILL.md" the script needs the agent to input flags  
+  derived from skill.md itself?                                                 
+  if so thats waay to complicated. read this...                                 
+  /Users/dylangraham/Projects/agent-library/docs/userConfig.md                  
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ That's the key fact — thank you, that's much simpler. The
+  CLAUDE_PLUGIN_OPTION_<KEY> env vars are exported directly to scripts in the
+  plugin's script dir, so the script reads them straight from ENV — no flags, no
+  agent-supplied input, no ${user_config.*} substitution through SKILL.md.
+  SKILL.md just runs the script (with the path fixed); Claude Code has already
+  put the values in the environment.
+
+  So the revised, simpler design:
+  - plugin.json — declare the five userConfig fields with defaults.
+  - script — read ENV['CLAUDE_PLUGIN_OPTION_OUTPUT_DIR'], ..._INCLUDE_THINKING,
+  ..._INCLUDE_SUBAGENTS, ..._SANITIZE_FIND, ..._SANITIZE_REPLACE; drop
+  YAML/config.yml; fail gracefully if output_dir is empty.
+  - SKILL.md — just fix the path to
+  ${CLAUDE_PLUGIN_ROOT}/scripts/conversation-capture; no flags.
+
+  Let me implement.
+
+⏺ Update(extensions/skills/conversation-capture/scripts/conversation-capture)
+  ⎿  User rejected updatextensions/skills/conversation-capture/scripts/conversat
+     to                 ion-capture
+
+❯ ok so lets not waste tokens trying to build before we are ready. The help     
+  agent isn't sure if these vars reach to the script directory in skills/ it    
+  might be a plugin feature rather than a skills one?                           
+  what are options here?                                                        
+  - have a var deliverer script, in plugin/scripts folder that the skill script 
+  reads. if not present it reads yaml instead?                                  
+  this would allow usage as a standalone skill or as a plugin.                  
+
+⏺ Good call — let's settle the architecture before touching code. The whole
+  decision hinges on one unknown: does CLAUDE_PLUGIN_OPTION_<KEY> actually reach
+  a script that a skill launches via the Bash tool? The docs guarantee it for
+  hook / MCP / LSP subprocesses; "skill-launched Bash subprocess" is the grey
+  area the help agent flagged. Everything below forks on that answer.
+
+  Options
+
+  1. Env var, with config.yml fallback (best case, if env reaches skill scripts)
+  Script reads ENV['CLAUDE_PLUGIN_OPTION_*']; if unset (standalone, no plugin),
+  falls back to a local config.yml; if neither, fails gracefully. This is your
+  "deliverer-or-yaml" idea, where the "deliverer" is just the environment — zero
+  extra moving parts. Clean, supports standalone + plugin. Entirely contingent
+  on the unknown.
+
+  2. Hook-delivered file, with config.yml fallback (robust regardless of the 
+  unknown)
+  The refinement of your var-deliverer idea: the deliverer is a hook, not a
+  plain script — because a hook is guaranteed the CLAUDE_PLUGIN_OPTION_* env. A
+  SessionStart hook reads them and writes the resolved values to
+  ${CLAUDE_PLUGIN_DATA}/config.yml (persistent, survives updates). The skill
+  script reads precedence: plugin-data file → skill-dir config.yml → fail.
+  Downside: adds a hook + hooks.json. The reason a plain script can't be the
+  deliverer is it has no source for the values unless something already handed
+  it env or substitution — a hook does.
+
+  3. SKILL.md flag substitution, with config.yml fallback
+  ${user_config.*} substitution into skill content is documented, so passing
+  --output-dir "${user_config.output_dir}" is spec-supported for the plugin
+  case. But standalone, the ${...} doesn't substitute and gets passed literally
+  — the script would have to detect the unsubstituted ${ and fall back. Hacky.
+
+  My recommendation
+
+  Verify Option 1 before committing to anything. It's the cheapest test and it
+  collapses the whole decision: enable the local chat-tools plugin, drop a
+  one-line echo "$CLAUDE_PLUGIN_OPTION_OUTPUT_DIR" into the script (or a
+  throwaway), invoke the skill, see if the value appears.
+  - If it shows → Option 1, done. Simplest, supports both modes, matches your
+  instinct.
+  - If it's empty → Option 2 (hook deliverer), which is robust and still gives
+  you standalone + plugin.
+
+  Both target the same end state you want (configurable via settings.json,
+  persists across updates, still works standalone via config.yml). The only
+  question is whether we need the hook as a courier.
+
+  Want me to run that verification test? It's a small, reversible probe — and it
+  tells us which option is even on the table before we build.
+
+✻ Churned for 54s
+
+❯ options I see...                                                              
+  1. transfer script from skill/scripts to plugin/scripts, ENV's should work    
+  here. Skill invokes the script from the CLAUDE_PLUGIN_ROOT variable. this     
+  also allows for installation at user and project scope.                       
+  2. The hook would need an identifier for the project as every project reads   
+  the same config yaml file. it may work but would be messy. maybe the project  
+  path could be appended.                                                       
+  option 1 looks way better than option 2 but stops the skill being a plugin.   
+  maybe we could support both. a plugin with var injection, a dropin skill with 
+  config yaml.                                                                  
+
+⏺ A couple of things to untangle before we pick — one of your premises is worth
+  checking:
+
+  File location probably isn't the deciding factor. Whether
+  CLAUDE_PLUGIN_OPTION_* is present depends on how the process is launched, not
+  where the script file sits. In both cases it's the agent's Bash tool running
+  ruby <path> — moving the file from skills/conversation-capture/scripts/ to a
+  top-level plugins/chat-tools/scripts/ doesn't change the Bash tool's
+  environment. Either Claude Code injects those vars into Bash-tool calls when a
+  plugin is active (then the current location already works) or it only injects
+  into hook/MCP/LSP subprocesses it spawns itself (then relocating won't help
+  either). So I'd not relocate on the assumption it fixes env — it may just
+  churn the symlinks for nothing.
+
+  The "support both" design is actually clean and needs no relocation. One
+  script, precedence:
+  ENV['CLAUDE_PLUGIN_OPTION_OUTPUT_DIR']  (plugin mode)
+    → config.yml in the skill folder      (drop-in mode)
+    → fail gracefully
+  The script stays in the skill folder (so the drop-in skill keeps its
+  config.yml and travels intact); the plugin symlinks the whole skill as it does
+  today. Same one file serves both modes. This is exactly your "plugin with var
+  injection / drop-in with yaml" — without splitting the script into two homes.
+  We only fall back to the hook-courier (Option 2) if the test proves
+  skill-launched Bash gets no env.
+
+  And on your Option 2 instinct: you're right it's messy — a shared config.yml
+  would collide across projects. But note that's only a problem for a single 
+  global file; ${CLAUDE_PLUGIN_DATA} is per-plugin not per-project, so it'd
+  still need the project-path keying you described. Another reason to prefer the
+  env path if the test passes.
+
+  So the gate is still that one test, and running it needs a minimal build — 
+  which is what makes us "ready":
+  1. Declare the five userConfig fields in plugin.json (needed for any value to
+  exist).
+  2. Add the ENV → config.yml → fail read to the script, plus a temporary
+  $stderr.puts echo of the env var.
+  3. Enable the local chat-tools plugin, set a value, invoke the skill, read the
+  echo.
+
+  That's the smallest amount of building that resolves the unknown, and almost
+  all of it is the real implementation (only the echo is throwaway). If the echo
+  shows the value → we're done. If empty → we add the hook courier and nothing
+  else changes.
+
+  Want me to do that minimal build and run the probe? Or would you rather
+  confirm the env behaviour first with the claude-code-guide agent
+  (authoritative-ish) before we build anything?
+
+✻ Brewed for 53s
+
+❯ confirm the env behaviour with the claude-code-guide agent first, then do the 
+  minimal build testing if this reveals nothing. this is important bacause      
+  this behaviour could drive major changes to most of my advanced skills.       
+
+⏺ I'll consult the claude-code-guide agent on the precise env-propagation
+  behaviour.
+
+⏺ claude-code-guide(Confirm plugin env var propagation)
+  ⎿  Done (10 tool uses · 56.8k tokens · 1m 35s)
+  (ctrl+o to expand)
+
+⏺ The guide agent gave an authoritative answer, and it flips our working
+  assumption. Summary:
+
+  - CLAUDE_PLUGIN_OPTION_* env vars → Bash-tool subprocesses: docs are silent, 
+  almost certainly NO. "Plugin subprocesses" means processes Claude Code spawns
+  directly (hooks, MCP, LSP, monitors). A script the agent runs via the Bash
+  tool is not in that set. So building on env vars is the risky path.
+  - Script location is irrelevant (confirmed) — so relocating to
+  plugins/chat-tools/scripts/ buys nothing. Your instinct to question that was
+  right.
+  - The documented, reliable path is ${user_config.KEY} substitution in the 
+  SKILL.md command itself. And critically — this isn't the "agent derives flags"
+  complexity I wrongly described earlier. Claude Code substitutes the value 
+  into the command text before the agent ever sees it. The agent just runs a
+  command that already has the real value baked in. It's automatic and
+  transparent, not agent-driven.
+
+  So the architecture inverts from where we were heading:
+
+  Plugin mode — SKILL.md command carries the placeholders; Claude Code bakes
+  them in; the script reads them as flags:
+  ruby "${CLAUDE_PLUGIN_ROOT}/scripts/conversation-capture" \
+    --session-id "${CLAUDE_SESSION_ID}" \
+    --output-dir "${user_config.output_dir}" \
+    --include-thinking "${user_config.include_thinking}" \
+    --include-subagents "${user_config.include_subagents}" \
+    --sanitize-find "${user_config.sanitize_find}" \
+    --sanitize-replace "${user_config.sanitize_replace}"
+  Standalone drop-in mode — no plugin, so ${user_config.*} stays literal. The
+  script detects an unsubstituted/empty value (e.g. starts with ${) and falls
+  back to config.yml; if neither, fails gracefully.
+
+  One script, flag-based, with a config.yml fallback. No env-var dependence, no
+  hook courier needed. This is the inverse of what you called "way too
+  complicated" earlier — but the reason it's actually fine is that the
+  substitution is done by the harness, for free, before execution.
+
+  This is the broadly-applicable finding for your advanced skills: to feed 
+  plugin user-config into a skill-launched script, put ${user_config.*} in the 
+  SKILL.md command and read it as args — don't rely on CLAUDE_PLUGIN_OPTION_* 
+  env vars in Bash-tool scripts. Given you said this drives changes across your
+  library, I'll save it to memory.
+
+  Recalled 1 memory, wrote 2 memories (ctrl+o to expand)
+
+⏺ Memory saved (and indexed).
+
+  On your instruction — you said run the build-test only "if this reveals
+  nothing." It revealed something concrete: env vars are out,
+  substitution-in-SKILL.md is the documented path. So we have our architecture
+  without needing the probe.
+
+  That said, the one residual inference is whether ${user_config.*} substitution
+  reliably fires inside a fenced bash block specifically (the guide rates this
+  "works reliably" but it's the one spot still partly inferred). Given you said
+  this drives changes across your whole skill library, I'd treat that as worth a
+  single real confirmation before you standardize on it everywhere — but it's
+  optional for this issue, since the config.yml fallback covers us even if
+  substitution somehow no-ops.
+
+  So, how do you want to proceed:
+
+  - Build it now — implement the substitution + flags + config.yml-fallback
+  design for conversation-capture (the real #1 work), and verify substitution as
+  a natural side-effect when you next enable the plugin.
+  - Verify substitution first — minimal build (declare userConfig, add the
+  flags, temporary echo), enable the local plugin, confirm the baked-in value
+  appears, then finish — highest confidence before you replicate the pattern
+  across other skills.
+
+  Given the library-wide stakes you flagged, my lean is verify first — one clean
+  confirmation now de-risks every skill you convert later. Which way?
+
+✻ Crunched for 3m 4s
+※ recap: Goal: address the three repo issues. #7 (README CC-only) and #6 (magic-reply chat-summary trigger) are done. Now on #1: we confirmed plugin config reaches skill scripts via SKILL.md substitution, not env vars. Next: decide build-now vs verify-substitution-first, then implement.
+
+❯ https://code.claude.com/docs/en/hooks#hooks-in-skills-and-agents              
+  sais hooks can be directly defined in skills, when convo capture runs in a    
+  chat we should know enough to run this hook directly. we can also pass args   
+  as per:                                                                       
+  https://code.claude.com/docs/en/hooks#command-hook-fields                     
+
+⏺ Fetch(https://code.claude.com/docs/en/hooks)
+  ⎿  Received 207.5KB (200 OK)
+
+⏺ Read both sections. Here's what they establish, and how it lands for this
+  skill specifically.
+
+  Confirmed facts:
+  - Hooks can be defined in SKILL.md frontmatter (hooks: block, same format as
+  settings hooks), scoped to the skill's lifetime, all events supported.
+  - Command hooks support args (exec form — each arg passed verbatim, no shell),
+  and plugin hooks reliably substitute ${user_config.*} plus export
+  CLAUDE_PLUGIN_ROOT / CLAUDE_PLUGIN_DATA / CLAUDE_PROJECT_DIR as env on the
+  spawned process.
+
+  So a hook is a guaranteed courier for the config values. But here's the catch
+  for this skill, and it's a timing problem, not a delivery problem:
+
+  There's no "skill invoked" event. Skill-scoped hooks fire on the normal events
+  (PreToolUse, PostToolUse, Stop, SessionEnd, …) while the skill is active —
+  none of which means "the moment the skill runs." conversation-capture's flow
+  is same-turn and sequential: the script must produce the transcript file, then
+  the same agent turn reads it back to summarize and rename. A Stop/SessionEnd
+  hook fires after the turn — too late for the agent to read and summarize. A
+  PreToolUse hook fires before every tool call, not the capture specifically. So
+  a hook fights this skill's run-then-summarize sequence.
+
+  The key realization that makes the hook unnecessary: the guide already
+  confirmed ${user_config.*} substitution is performed by the harness in skill 
+  content — including the fenced bash command — before the agent sees it. That's
+  the same substitution engine the hook would use. So the plain agent-run
+  command gets the values just as reliably as a hook would. The only thing that
+  was ever unreliable is CLAUDE_PLUGIN_OPTION_* env in a Bash-tool subprocess —
+  and we're dropping that regardless.
+
+  So both reliable paths converge; the choice is purely structural:
+
+  - A — agent runs the command with ${user_config.*} flags (+ config.yml
+  fallback for standalone). Reliable per the guide, and it fits the same-turn
+  run→summarize flow with zero restructuring.
+  - B — skill-defined hook runs the script. Equally reliable on values, but the
+  hook can't fire at "skill invoked," so you'd have to restructure
+  conversation-capture away from its interactive summarize flow.
+
+  My recommendation: A. The hook mechanism is genuinely valuable — but for
+  event-driven auto-capture (e.g. a SessionEnd hook that snapshots every session
+  automatically), which is a different, additive feature you could build later.
+  For the on-demand summarize-flow this skill has today, A is the reliable and
+  structurally clean fit.
+
+  Shall I build Option A — userConfig in plugin.json, ${user_config.*} flags in
+  the SKILL.md command (path fixed), script reads flags with config.yml fallback
+  and graceful fail, include_subagents wired, config.yml reduced to the
+  standalone-fallback defaults?
+
+✻ Sautéed for 1m 51s
+
+※ recap: Goal: address repo issues #7, #6, #1. #7 and #6 are done; #1 (making conversation-capture's output_dir user-configurable) is designed but unbuilt. Next: build Option A on your go-ahead — userConfig in plugin.json, ${user_config.*} flags in SKILL.md, script reads flags with config.yml fallback.
+
+❯ im still not convinced as the script needs a write location before the agent  
+  touches it, it also reads files in the config location to update the file.    
+  options for me.                                                               
+  - consult settings.json directly shortcircuiting path processes (almost the   
+  same as defining them in config.yml)                                          
+  - convert to dev workspace only. path can be hardcoded, or defined in         
+  workspace-config.yml                                                          
+  - save conversation to central location. agent reads it there and then mv's   
+  to the var location using skill.md this needs hard coded defaults, script     
+  will still struggle to update the conversation.                               
+
+⏺ Your core concern is the real test, so let me check each option against it:
+  the script must know the output dir as its first action — it writes the
+  transcript there and globs that dir for an existing transcript to overwrite
+  (the resume logic at :88). Whatever we pick has to give the script the path up
+  front, and keep read+write+resume pointing at the same place.
+
+  Option (c) — central + mv — fails on exactly this. You're right: the script's
+  resume detection globs output_dir for <prefix>_*. If files get mv'd out to the
+  var location, a re-run finds nothing in central → writes a duplicate instead
+  of overwriting. Resume breaks. Reject.
+
+  Option (b) — dev-workspace-only. Honest to reality: we established early that
+  conversation-capture is coupled to dev-workspace conventions and co-work won't
+  run it. So hardcode dev/workspace/history, or read a project-local
+  dev/workspace/config.yml. Dead simple, deterministic, script knows the path
+  instantly, resume works. Cost: drops the plugin-UI configurability — but that
+  may be fine, since the skill only makes sense inside the workspace layout
+  anyway. This is essentially your very first instinct (that #1 might be moot
+  once the dev-workspace coupling is owned).
+
+  Option (a) — script reads settings.json directly. This is my pick, and it
+  directly fulfills #1 as written ("implement the user config feature… survive
+  updates"):
+  - userConfig is still declared in plugin.json → user gets the enable-time
+  prompt, value persists in settings.json and survives updates, editable there
+  anytime.
+  - But the script doesn't depend on substitution or env to receive it — as its
+  first action it reads settings.json itself: project .claude/settings.json (+
+  .local) then user ~/.claude/settings.json, pulling
+  pluginConfigs["chat-tools"].options.output_dir, project overriding user. Falls
+  back to config.yml for standalone, then graceful fail.
+  - The script knows the path before it touches anything; read/write/resume all
+  stay coherent. No reliance on the grey-area delivery mechanisms at all.
+
+  You noted (a) is "almost the same as config.yml" — correct, but with the one
+  difference that matters for #1: config.yml sits in the ephemeral plugin root
+  and dies on update, whereas settings.json is the persistent, editable, scoped
+  store. Same simplicity, but it actually satisfies the "survive updates"
+  requirement.
+
+  Recommendation: (a) if you want conversation-capture to stay a configurable
+  general plugin; (b) if you'd rather embrace the dev-workspace coupling and
+  stop treating it as universal. (a) honors the issue literally; (b) is the
+  simpler path your earlier redundancy hunch pointed at.
+
+  One wrinkle either way for (a): the exact pluginConfigs key may be namespaced
+  (e.g. chat-tools vs chat-tools (DBHD-Plugins)). That needs one real look at a
+  settings.json after enabling the plugin — a tiny, non-throwaway check before
+  finalizing the read logic.
+
+  Which direction — (a) script-reads-settings, or (b) dev-workspace-only?
+
+✻ Cogitated for 1m 11s
+
+❯ a couple of updates. the mv from central location can always make a new file. 
+  The agent can do a mv that overwrites the exiting file.                       
+  also can the script hunt for the key directly in the settings.json bypassing  
+  the namespacing as this may change over time?                                 
+
+⏺ Both updates land — let me fold them in.
+
+  On the mv-overwrite (your update to c): agreed, the agent can mv -f over an
+  existing file (globbing the var dir for <prefix>_* and overwriting), so the
+  resume objection to (c) dissolves. But (c) only solves the output location.
+  The other settings — include_thinking, include_subagents,
+  sanitize_find/replace — change what the script writes and how it sanitizes, so
+  they must reach the script at write time; a post-hoc mv can't deliver them.
+  So (c) still leaves four of the five settings needing a script-side channel.
+  That's why I'd not split the mechanism — whatever delivers the toggles to the
+  script may as well deliver output_dir too, uniformly.
+
+  On hunting the key directly (your settings.json question): yes — and this
+  actually makes (a) clean and future-proof. Instead of looking up a brittle
+  namespaced key like pluginConfigs["chat-tools (DBHD-Plugins)"].options, the
+  script walks every entry under pluginConfigs.*.options and picks up our known
+  keys (output_dir, include_thinking, …) wherever they appear. The plugin id can
+  be renamed or re-namespaced over time and the script doesn't care — it
+  matches on the option names, not the plugin key. Since only this plugin
+  defines those names, there's no collision risk.
+
+  So (a) becomes fully self-contained and delivery-independent:
+
+  - plugin.json — declare the five userConfig fields (gives the enable-time
+  prompt, persistence, and an editable home in settings.json).
+  - script (first action) — read settings.json in precedence order (project
+  .claude/settings.json + .local, then user ~/.claude/settings.json), deep-scan
+  pluginConfigs.*.options for the five keys by name, merge with project winning.
+  Fallback to config.yml (standalone drop-in), then graceful fail if output_dir
+  is still empty. The script knows write/read/resume location before touching
+  anything — your core requirement, satisfied.
+  - SKILL.md — just fix the script path; no flags, no mv, no substitution
+  dependency.
+  - config.yml — kept solely as the standalone-mode fallback defaults.
+
+  This relies on zero grey-area mechanisms (no ${user_config.*} substitution, no
+  CLAUDE_PLUGIN_OPTION_* env) — the script reads the persisted store itself.
+
+  The one thing I'd verify during the build (not throwaway): enable the local
+  plugin, set output_dir, and look at the real settings.json to confirm the
+  exact pluginConfigs.*.options shape my scan walks.
+
+  Shall I build (a) on this basis?
+
+✻ Sautéed for 1m 2s
+
+❯ to be honest, as im thinking about this. claude code has an `/export` command 
+  that extracts the convo to the cwd dir anyway. So i should probably convert   
+  this to a dev workspace only skill anyway. this means hard coding the path.   
+  we could then save to plugin data location a default global settings, we      
+  could then create flag overides like `--thinking`. to 'true' these settings.  
+  this means it just runs with default global settings, even down to multiple   
+  sanitizers.                                                                   
+  if im in a non dev workspace project i just export the convo. and have it     
+  land in the cwd.                                                              
+
+⏺ Honestly, that's the cleanest framing yet — and it's exactly what issue #1's
+  second line ("explore keeping config in plugin data to survive updates") was
+  pointing at. You've reasoned your way to the answer the issue asked you to
+  explore. Let me reflect the consolidated design back:
+
+  conversation-capture becomes a dev-workspace skill:
+  - Output path hardcoded to dev/workspace/history (relative to project root).
+  The script knows it instantly — your "needs the path first" concern
+  evaporates, and read/write/resume stay trivially coherent. No userConfig, no
+  settings.json parsing.
+  - Global defaults in ${CLAUDE_PLUGIN_DATA} — a config.yml there holding
+  include_thinking, include_subagents, and a multi-entry sanitize list (back to
+  a real list, since it's a file not a scalar userConfig). Persists across
+  updates. User edits it once, applies everywhere.
+  - Per-run flag overrides — --thinking, --subagents, --sanitize … flip a
+  setting for a single run on top of the defaults.
+  - Non-workspace projects → /export lands the convo in cwd;
+  conversation-capture simply isn't the tool there.
+
+  A couple of mechanism notes to get it right:
+
+  1. How the script learns ${CLAUDE_PLUGIN_DATA}: pass it via substitution in 
+  the SKILL.md command — ${CLAUDE_PLUGIN_DATA} is a path placeholder that
+  substitutes reliably in skill content (confirmed, same class as
+  ${CLAUDE_PLUGIN_ROOT}). Not the env var. So the command is roughly:
+  ruby "${CLAUDE_PLUGIN_ROOT}/scripts/conversation-capture"
+  "${CLAUDE_SESSION_ID}" \
+    --data-dir "${CLAUDE_PLUGIN_DATA}" $ARGUMENTS
+  1. $ARGUMENTS forwards any --thinking-style overrides the user typed.
+  2. Seeding: on first run, if <data-dir>/config.yml doesn't exist, the script
+  writes it from built-in defaults — so there's always a file for the user to
+  edit. Built-in defaults (the only hardcoded values) = include_thinking: false,
+  include_subagents: false, sanitize: [$HOME→~].
+  3. Optional guard: if dev/workspace/ doesn't exist in the project, the script
+  exits with "not a dev-workspace project — use /export instead," matching your
+  mental model.
+
+  This drops userConfig entirely and relies on only confirmed-reliable
+  mechanisms (path-placeholder substitution + $ARGUMENTS).
+
+  Two things to confirm before I build:
+  - Does conversation-capture stay in chat-tools, or move to the dev-workspace 
+  plugin (its real home now that it's workspace-only)? That's a relocation tied
+  to #7 — I'd flag it as a follow-on rather than do it in this pass, but tell me
+  if you want it moved now.
+  - Good to build on this design? (Hardcoded path, ${CLAUDE_PLUGIN_DATA}
+  defaults file + seeding, $ARGUMENTS flag overrides, /export guard.)
+
+✻ Brewed for 1m 2s
+
+※ recap: We're resolving repo issues #7 and #6 (done) and now #1: reworking conversation-capture as a dev-workspace skill with a hardcoded path, a `${CLAUDE_PLUGIN_DATA}` defaults file, and flag overrides. Next: you confirm whether to build this and whether the skill moves to the dev-workspace plugin.
+
+❯ dev workspace has a workspace-config.yaml file in every workspace. the config 
+  could shift here, built with defaults. including output_dir. not much would   
+  need to be refactored in the original script. no flags etc, user just changes 
+  what they need even in real time. or variable per workspace.                  
+  We should extract it from chat tools and embed it into dev workspace first    
+  yeah? then transfer the config file location and non dev workspace guard?     
+  Can you check the difficulty?                                                 
+
+⏺ Let me investigate the actual moving parts so the difficulty assessment is
+  grounded, not guessed.
+
+  Ran 1 shell command (ctrl+o to expand)
+  ⎿  Interrupted · What should Claude do instead?
+
+❯ not difficulty shifting, how much does the script change?                     
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Barely at all — this is by far the smallest script change of everything we've
+  discussed. Here's the precise delta against the current script:
+
+  1. Restore require 'yaml' (1 line). I removed it earlier anticipating the
+  env/flag approach; the workspace-config route needs YAML again. (Worth noting:
+  right now the script is actually broken — initialize still calls
+  YAML.load_file at :20 with no require, so this restore is needed regardless.)
+
+  2. Change one line — where the config loads from. Line 19 today:
+  config_file = config_path || File.expand_path('../config.yml', __dir__)
+  becomes the workspace file:
+  config_file = File.join(Dir.pwd, 'dev/workspace/workspace-config.yaml')
+  If conversation-capture's settings sit under a section in that shared file
+  (likely, since it configures the whole workspace), one extra line to scope in:
+  @config = (YAML.load_file(config_file) || {})['conversation_capture'] || {}
+
+  That's the entire config change. Everything downstream is untouched because
+  the YAML shape is identical to today's config.yml:
+  - resolve_output_file:84 — config.fetch('output_dir', 'dev/workspace/history')
+  works as-is (still relative to project root, default intact).
+  - include_thinking:181 — config.fetch('include_thinking', false) unchanged.
+  - sanitize:198-212 — already iterates a YAML array of find/replace pairs, so
+  multiple sanitizers work with zero change.
+
+  3. Optional, additive (not required):
+  - A non-workspace guard: if dev/workspace/ (or the config file) is absent →
+  $stderr.puts "not a dev-workspace project — use /export"; exit. ~3 lines.
+  - Wiring include_subagents (still dead config) — independent of this change;
+  ~2 lines if you want the toggle live.
+
+  So: ~1 line restored + 1–2 lines changed for the core shift, plus a handful of
+  optional lines. No flags, no userConfig, no env/substitution, no plugin-data
+  plumbing, no $ARGUMENTS. The whole config-consumption engine stays put. This
+  is the least-invasive option, and it gives you the live-editable,
+  per-workspace config you described essentially for free.
+
+  The only thing that genuinely moves (separately, as you said) is the file:
+  deleting the bundled config.yml and documenting the keys in
+  workspace-config.yaml — but that lives in the dev-workspace repo, so it's part
+  of the extract-then-rewire step, not the script edit.
+
+✻ Churned for 37s
+
+❯ can you write an issue on dilberyhoundog/dev-workspace for this work. I have  
+  returned the require yaml thorugh the diff.                                   
+
+  Ran 1 shell command (ctrl+o to expand)
+
+❯ its moved already.                                                            
+
+⏺ Understood — I'll just create the issue. Writing the body to a temp file, then
+  filing it.
+
+⏺ Write(/tmp/cc-issue-body.md)  ⎿  Wrote 45 lines to ../../../../tmp/cc-issue-body.md
+      1 ## Summary
+      3 `conversation-capture` now lives in the dev-workspace plugin. Com
+        plete its conversion into a dev-workspace-native skill by moving 
+        and adding a non-workspace guard. The skill is intended for use o
+        lt-in `/export` covers the need.
+      4 
+      6 
+      7 The skill parses the current session JSONL into a formatted trans
+        renames it. Its settings previously lived in a `config.yml` bundl
+         in the (ephemeral) plugin install directory
+     … +68 lines (ctrl+o to expand)
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Filed: dilberryhoundog/dev-workspace#10 — "Convert conversation-capture to
+  workspace-config.yaml + add non-workspace guard".
+
+  The issue captures the agreed design self-contained (no chat context needed to
+  act on it): config moves into the per-workspace workspace-config.yaml under a
+  conversation_capture: section with defaults, the bundled config.yml is
+  removed, a non-workspace guard points to /export, include_subagents gets
+  wired, and the SKILL path/Config section get fixed. It also records why
+  userConfig was rejected, so the decision doesn't get re-litigated later.
+
+  Since the skill has already moved out of this repo, the original #1 here is
+  now resolved by relocation — its remaining work is tracked on the
+  dev-workspace side. Where does that leave agent-library #1? You can close it
+  as moved (referencing dev-workspace#10), or I can leave it. Want me to close
+  it with a pointer comment?
+
+✻ Baked for 31s
+
+❯ close it with a pointer comment                                               
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Closed agent-library#1 with a pointer to dev-workspace#10.
+
+  That wraps all three issues from this session:
+
+  - #7 — README de-coupled to Claude-Code-only; co-work material preserved in
+  readme-cowork.md for the future cowork-library repo. (working-tree changes, 
+  uncommitted)
+  - #6 — magic-reply prepare document → show chat summary, reference rewritten
+  to the in-chat five-section catalogue with +/- durability toggles.
+  (working-tree changes, uncommitted)
+  - #1 — closed as moved; the real work now lives in dev-workspace#10 (config →
+  workspace-config.yaml).
+
+  Note the #6 and #7 edits are still unstaged in the working tree (plus the
+  pre-existing breaking-change-detector.md modification from before this
+  session). Want me to commit #6 and #7 — separately, given they're unrelated
+  units — or leave them for you?
+
+✻ Cooked for 16s
+
+❯ commit #6 and #7 separately, then the (two now) agent changes to fix an       
+  "extra usage" tokens issue with the model: sonnet frontmatter.                
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Conversation-capture deletions and docs/userConfig.md aren't part of these
+  three commits, so I'll leave them unstaged. Let me check the agent diffs to
+  write an accurate message.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ The agent changes are: breaking-change-detector sonnet→haiku and doc-reviewer
+  sonnet→opus (plus a trivial emphasis style tweak). Committing the three units
+  separately now.
+
+  Committed 4bceaa1 (ctrl+o to expand)
+
+⏺ Commit 1 (#6) done. Now #7:
+
+  Committed 66d3af4 (ctrl+o to expand)
+
+⏺ Now the agent model changes:
+
+  Committed 219046f (ctrl+o to expand)
+
+⏺ All three commits landed, separately:
+
+  1. 4bceaa1 — #6 magic-reply trigger → "show chat summary"
+  2. 66d3af4 — #7 README scoped to Claude Code only + readme-cowork.md staged
+  3. 219046f — agent models off sonnet (breaking-change-detector → haiku,
+  doc-reviewer → opus)
+
+  Left uncommitted intentionally (not part of these units):
+  - The conversation-capture/ deletions (the skill's move out of this repo —
+  commit when you're ready to finalize that relocation).
+  - docs/userConfig.md (untracked — the captured reference doc).
+
+  Nothing pushed. Want me to leave those two for you, or handle the
+  conversation-capture removal as its own commit?
+
+✻ Sautéed for 1m 7s
+
+❯ commit the conversation-capture removal too                                   
+
+  Committed df073fa (ctrl+o to expand)
+
+⏺ Committed df073fa.
+
+  One loose end to flag (not auto-fixing, since it touches the plugin and likely
+  wants a version bump): removing the skill from extensions/ leaves a dangling 
+  symlink in the plugin —
+
+  - plugins/chat-tools/skills/conversation-capture → now points at the deleted
+  target.
+  - plugins/chat-tools/plugin.json description still says "capture
+  conversations…", and CHANGELOG.md references the skill.
+
+  So chat-tools still advertises a skill that no longer resolves. Cleaning that
+  up (remove the symlink, update the description/changelog) is a chat-tools
+  change that should go through the versioning skill for a proper bump. Want me
+  to do that next, or leave it for a dedicated release pass?
+
+  Current branch state: five commits ahead of origin/main (the four from this
+  session plus nothing pushed), with docs/userConfig.md still untracked. Nothing
+  pushed yet.
+
+✻ Cogitated for 14s
+
+※ recap: Worked through three repo issues: committed #6 (magic-reply trigger), #7 (README scoped to Claude Code), the agent model changes, and the conversation-capture removal. Next: clean up the dangling conversation-capture symlink and description in the chat-tools plugin via a versioned release.
+
+❯ ok made a few changes to the chat-tools plugin. cleanup and add a skill.      
+  commit that first.                                                            
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ Clear: dropped conversation-capture (moved) and create-documents symlinks,
+  added the markdown skill, and trimmed "capture conversations" from the
+  description. Target resolves. Committing.
+
+  Committed 25959c7 (ctrl+o to expand)
+
+⏺ Committed 25959c7.
+
+  chat-tools is now consistent — the dangling symlink is gone, markdown is wired
+  in, and the description matches. Note the plugin is still at version: 1.2.0 —
+  this cleanup (removed + added skills, changed description) is a
+  release-worthy change, so it'll want a bump via the versioning skill when
+  you're ready to cut chat-tools.
+
+  Session commit stack on main, ahead of origin/main by 5, nothing pushed:
+  - 25959c7 chat-tools cleanup (markdown in, conversation-capture out)
+  - df073fa remove conversation-capture skill
+  - 219046f agent models off sonnet
+  - 66d3af4 README → Claude Code only
+  - 4bceaa1 magic-reply → "show chat summary"
+
+  Still untracked: docs/userConfig.md. Want me to run /versioning for the
+  chat-tools bump, or push as-is first?
+
+✻ Crunched for 32s
+
+❯ run /versioning for the chat-tools bump                                       
+⏺ Skill(dev-tools:versioning)
+  ⎿  Successfully loaded skill · claude-haiku-4-5-20251001
+
+⏺ I'll release the chat-tools unit. Starting with the gates.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Preflight passes (clean tree; untracked docs/userConfig.md tolerated, on main,
+  gh authed). Last tag is chat-tools/v1.2.0 = manifest. Now the range, filtered
+  to chat-tools' paths (plugin dir + resolved symlink targets).
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ The path filter came back empty, which is wrong given the diff clearly touches
+  those paths — likely my path-resolution loop mangled the args. Let me re-run
+  cleanly. Also noting: v1.2.0 predates the big extensions/ consolidation, so
+  the range is noisy with renames.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Real range is 5 commits (the earlier empty result was a bad-args loop).
+  Mapping them:
+
+  - 32e5266 refactor (asset consolidation) → patch
+  - f655c9e feat (markdown skill added) → minor
+  - 4bceaa1 feat (magic-reply trigger reworked) → minor
+  - 219046f fix (doc-reviewer model) → patch
+  - 25959c7 refactor — but it removes conversation-capture and create-documents
+  from the plugin and adds markdown
+
+  That last one removes user-facing skills/commands from the plugin — a likely
+  breaking change for existing chat-tools users. This is exactly the case the
+  skill says to verify, so I'll spawn the breaking-change-detector before
+  proposing.
+
+⏺ dev-tools:breaking-change-detector(Breaking-change scan chat-tools)
+  ⎿  Done (8 tool uses · 13.8k tokens · 51s)
+  (ctrl+o to expand)
+
+⏺ Breaking-change scan ran and returned breaking → major floor. Since chat-tools
+  is post-1.0 (1.2.0), breaking changes require a major bump: 1.2.0 → 2.0.0.
+
+  Let me check the changelog format before drafting the entry.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ Release proposal — chat-tools
+
+  Scan: breaking-change-detector ran → verdict breaking, floor major.
+
+  Commits since chat-tools/v1.2.0:
+  - 32e5266 refactor: consolidate assets under extensions/ → patch
+  - f655c9e feat: add markdown skill → minor
+  - 4bceaa1 feat: rework magic-reply trigger → minor (breaking: removed prepare 
+  document phrase)
+  - 219046f fix: doc-reviewer model sonnet→opus → patch (behavioral/cost change)
+  - 25959c7 refactor: chat-tools cleanup → breaking (removed
+  conversation-capture + create-documents skills)
+
+  Bump: 1.2.0 → 2.0.0 (major). Two skills removed from the plugin and a trigger
+  phrase renamed — existing users must change how they invoke things.
+
+  Draft changelog entry:
+
+  ## [2.0.0] - 2026-06-18
+
+  ### Added
+
+  - `markdown` skill: builds a durable, agent-agnostic document through a single
+    scaffold that moves chat summary → headings → prose → strip.
+
+  ### Changed
+
+  - `magic-reply`: the `-- prepare document --` trigger is replaced by
+    `-- show chat summary --`, which renders an in-chat conversation summary
+  that
+    toggles each point for its fitness in a durable document.
+  - `doc-reviewer` agent now runs on Opus instead of Sonnet.
+
+  ### Removed
+
+  - `conversation-capture` skill — moved to the dev-workspace plugin.
+  - `create-documents` skill — superseded by the `markdown` skill.
+
+  Note: the Removed items and the trigger rename are the breaking changes; users
+  invoking /chat-tools:conversation-capture, /chat-tools:create-documents, or
+  -- prepare document -- must switch.
+
+  Approve 2.0.0 with this changelog, or adjust the bump/entry? On approval I'll
+  update the manifest + changelog, commit, tag chat-tools/v2.0.0, push with
+  tags, and create the GitHub release.
+
+✻ Churned for 2m 43s
+
+❯ approve 2.0.0, go ahead                                                       
+
+⏺ Approved. Executing the release.
+
+⏺ Update(plugins/chat-tools/.claude-plugin/plugin.json)
+  ⎿  File must be read first
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Update(plugins/chat-tools/.claude-plugin/plugin.json)
+  ⎿  Added 1 line, removed 1 line
+      1  {
+      2    "name": "chat-tools",
+      3 -  "version": "1.2.0",                                           
+      3 +  "version": "2.0.0",                                           
+      4    "description": "A suite of chat tools; shape context, create d
+         ocuments",
+      5    "author": {
+      6      "name": "dilberryhoundog",
+
+⏺ Update(plugins/chat-tools/CHANGELOG.md)
+  ⎿  File must be read first
+
+  Read 1 file (ctrl+o to expand)
+
+⏺ Update(plugins/chat-tools/CHANGELOG.md)
+  ⎿  Added 19 lines
+       7  
+       8  ## [Unreleased]
+       9  
+      10 +## [2.0.0] - 2026-06-18                                        
+      11 +                                                               
+      12 +### Added                                                      
+      13 +                                                               
+      14 +- `markdown` skill: builds a durable, agent-agnostic document t
+         +hrough a single                                                
+      15 +  scaffold that moves chat summary → headings → prose → strip. 
+      16 +                                                               
+      17 +### Changed                                                    
+      18 +                                                               
+      19 +- `magic-reply`: the `-- prepare document --` trigger is replac
+         +ed by                                                          
+      20 +  `-- show chat summary --`, which renders an in-chat conversat
+         +ion summary that                                               
+      21 +  toggles each point for its fitness in a durable document.    
+      22 +- `doc-reviewer` agent now runs on Opus instead of Sonnet.     
+      23 +                                                               
+      24 +### Removed                                                    
+      25 +                                                               
+      26 +- `conversation-capture` skill — moved to the dev-workspace plu
+         +gin.                                                           
+      27 +- `create-documents` skill — superseded by the `markdown` skill
+         +.                                                              
+      28 +                                                               
+      29  ## [1.2.0] - 2026-06-13
+      30  
+      31  ### Added
+
+⏺ Now stage only the release files, commit, tag, push, and create the GitHub
+  release. Writing the release notes to a temp file outside the repo (per the
+  skill's no-heredoc rule).
+
+⏺ Write(/tmp/chat-tools-v2-notes.md)
+  ⎿  Wrote 17 lines to ../../../../tmp/chat-tools-v2-notes.md
+       1 ### Added
+       3 - `markdown` skill: builds a durable, agent-agnostic document th
+         rough a single scaffold that moves chat summary → headings → pro
+       4 
+       5 ### Changed
+       7 - `magic-reply`: the `-- prepare document --` trigger is replace
+         d by `-- show chat summary --`, which renders an in-chat convers
+         le document.
+       8 - `doc-reviewer` agent now runs on Opus instead of Sonnet.
+      10 ### Removed
+     … +14 lines (ctrl+o to expand)
+
+  Committed 90910d9, pushed to main, ran 1 shell command (ctrl+o to expand)
+
+⏺ Now verifying every version location agrees:
+  Ran 1 shell command (ctrl+o to expand)
+
+⏺ chat-tools v2.0.0 released. All locations agree:
+
+  - Manifest: 2.0.0
+  - Changelog: ## [2.0.0] - 2026-06-18
+  - Tag: chat-tools/v2.0.0 (annotated, pushed)
+  - GitHub release: https://github.com/dilberryhoundog/agent-library/releases/ta
+  g/chat-tools/v2.0.0
+  - Working tree clean (only docs/userConfig.md remains untracked, as before)
+
+  main is pushed and up to date with the release. The major bump was driven by
+  the breaking-change scan: removed conversation-capture + create-documents
+  skills and the prepare document → show chat summary trigger rename.
+
+  That closes out the full arc of this session — issues #6, #7, and #1
+  (relocated to dev-workspace#10), the chat-tools cleanup, and the release.
+
+✻ Baked for 1m 7s
+
+❯ wana close out the issues                                                     
+
+⏺ I'll close both, with comments recording what landed. #6 is fully done; #7's
+  in-repo work is done but the new cowork-library repo is separate future work —
+  I'll note that in its closing comment.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+⏺ All three agent-library issues are now closed:
+
+  - #1 — closed earlier (conversation-capture relocated → dev-workspace#10).
+  - #6 — closed; trigger reworked, shipped in chat-tools v2.0.0.
+  - #7 — closed; in-repo de-coupling done, cowork-library creation noted as
+  separate future work.
+
+  gh issue list confirms no open issues remain on the repo.
+
+  Net outcome for the session: README scoped to Claude Code, magic-reply trigger
+  reworked, conversation-capture removed and its follow-on work filed on
+  dev-workspace (#10), chat-tools cleaned up and released as v2.0.0 (pushed +
+  GitHub release), and all three issues closed. The only loose thread is the
+  untracked docs/userConfig.md, left as-is.
+
+✻ Brewed for 35s
