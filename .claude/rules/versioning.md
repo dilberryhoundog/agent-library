@@ -23,6 +23,13 @@ plugin directory alone.
 - tag: chat-tools/v{version}
 - github-release: yes
 
+### classroom
+- paths: plugins/classroom plus resolved symlink targets
+- manifest: plugins/classroom/.claude-plugin/plugin.json (field: version)
+- changelog: plugins/classroom/CHANGELOG.md
+- tag: classroom/v{version}
+- github-release: yes
+
 ### custom-agents
 - paths: plugins/custom-agents plus resolved symlink targets
 - manifest: plugins/custom-agents/.claude-plugin/plugin.json (field: version)
