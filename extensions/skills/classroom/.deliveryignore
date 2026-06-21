@@ -1,0 +1,13 @@
+# Files to strip when sanitising this skill for delivery to other platforms.
+# Per skills_scope.md: scrub personal data before sharing. These hold real
+# family/learner config and stay in this private repo only — they must NOT ship.
+# One path per line, relative to this skill's root. Lines starting with # are comments.
+#
+# What ships instead: references/students/_template.md and
+# references/students/example-learner.md (a fictional sample), plus a sanitised
+# global-requirements.md if one is prepared for sharing.
+
+references/global-requirements.md
+references/students/amahni.md
+references/students/jearvis.md
+references/students/theran.md

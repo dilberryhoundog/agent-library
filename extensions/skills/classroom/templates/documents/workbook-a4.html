@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<!--
+  TEMPLATE: Student Workbook (A4, print / Apple-Pencil ready)
+  ----------------------------------------------------------------------------
+  HOUSE STYLE for every printable in this skill. Copy this file, then:
+    1) Set the program title, unit name, and unit accent colour (--accent).
+    2) Build a cover page (provided).
+    3) Repeat the .lesson block once per lesson, following the chosen lesson
+       structure (default: Watch / Concept / Notes / Practice / Reflect).
+    4) End the unit with the reflection page (provided).
+  INVARIANTS: A4 only; Australian English; answers live in the SEPARATE
+  answer-key template, never here; confidence stars + reflection included.
+  The block styles below mirror templates/blocks/*.html so this file is
+  self-contained.
+-->
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Workbook — A4</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap');
+
+  /* ---- A4 print setup ---- */
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --accent: #2d6a4f;        /* set per unit; colour-codes cover + margin */
+    --accent-soft: #e8f3ee;
+    --ink: #1a1a1a;
+    --margin-tint: #fffdf2;   /* annotation-margin wash */
+  }
+  body { font-family: 'Lexend', Arial, sans-serif; color: var(--ink); background: #e8e8e8; font-size: 12pt; line-height: 1.5; }
+
+  /* ---- A4 page ---- */
+  .page {
+    position: relative;
+    width: 210mm; min-height: 297mm;
+    margin: 10mm auto; background: #fff;
+    padding: 18mm 20mm 16mm 18mm;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  }
+  /* Wide right-hand annotation margin (Apple Pencil) */
+  .page::after {
+    content: ''; position: absolute; top: 0; right: 0;
+    width: 34mm; height: 100%;
+    background: var(--margin-tint); border-left: 1.5px solid var(--accent);
+    z-index: 0;
+  }
+  .content { position: relative; z-index: 1; width: calc(100% - 38mm); }
+
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; page-break-after: always; }
+  }
+
+  /* ---- Cover ---- */
+  .cover { width: 210mm; height: 297mm; margin: 10mm auto; padding: 26mm;
+    background: linear-gradient(160deg, var(--accent) 0%, #14342a 100%);
+    color: #fff; display: flex; flex-direction: column; justify-content: center;
+    align-items: center; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+  .cover .badge { font-size: 10pt; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.85; }
+  .cover h1 { font-size: 34pt; font-weight: 800; margin: 10px 0; }
+  .cover .sub { font-size: 14pt; opacity: 0.9; }
+  .cover .namebox { margin-top: 40px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.4);
+    border-radius: 12px; padding: 16px 24px; font-size: 12pt; }
+
+  /* ---- Headings & lesson scaffold ---- */
+  .unit-header { border-bottom: 2.5px solid var(--accent); padding-bottom: 8px; margin-bottom: 14px; }
+  .unit-header .week { font-size: 9pt; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
+  .unit-header h2 { font-size: 20pt; font-weight: 800; }
+  .step { margin: 14px 0; }
+  .step-label { display: inline-block; font-size: 9pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #fff; background: var(--accent); padding: 3px 10px; border-radius: 8px; margin-bottom: 8px; }
+  .concept-box { background: var(--accent-soft); border-radius: 12px; padding: 14px 16px; }
+  ol.steps { margin: 6px 0 6px 20px; } ol.steps li { margin: 5px 0; }
+
+  /* ---- Write/draw affordances ---- */
+  .write-line { border-bottom: 1.5px dotted #9aa59a; height: 30px; margin: 0 0 6px; }
+  .draw-box { border: 1.5px dashed #b7c2b7; border-radius: 10px; min-height: 45mm; margin: 8px 0;
+    display: flex; align-items: flex-start; justify-content: flex-end; padding: 6px 10px; color: #b7c2b7; font-size: 9pt; }
+  .working-space { border: 1.5px solid #cfd8cf; border-radius: 10px; min-height: 40mm; padding: 10px; margin: 8px 0; }
+  .working-space .ws-label { font-size: 9pt; font-weight: 700; color: #777; }
+  .q { margin: 10px 0; } .q .qnum { font-weight: 800; color: var(--accent); }
+  .mc label { display: block; margin: 4px 0 4px 6px; }
+
+  /* ---- Inlined block styles (mirror templates/blocks/) ---- */
+  .confidence-block { border: 2px dashed var(--accent); border-radius: 12px; padding: 14px 18px; margin: 16px 0; background: var(--accent-soft); }
+  .confidence-prompt { font-weight: 700; margin: 0 0 8px; } .confidence-prompt .hint { font-weight: 400; font-style: italic; color: #555; }
+  .stars { font-size: 34px; letter-spacing: 10px; color: #d9a400; line-height: 1; }
+  .confidence-scale { font-size: 11px; color: #555; margin: 8px 0 0; }
+  .challenge { border: 2px solid var(--accent); border-radius: 12px; padding: 14px 16px; margin: 14px 0; background: #fff; }
+  .challenge .ch-title { font-weight: 800; color: var(--accent); margin-bottom: 6px; }
+  .reflection-page h2 { font-size: 20pt; margin: 0 0 4px; }
+  .reflect-box { border: 1.5px solid #cfd8cf; border-radius: 10px; padding: 12px 16px; margin: 0 0 14px; }
+  .reflect-box h4 { margin: 0 0 10px; font-size: 12pt; }
+  footer { text-align: center; margin-top: 20px; font-size: 8.5pt; color: #aaa; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div class="badge">[Program Name]</div>
+  <h1>[Unit Title]</h1>
+  <div class="sub">[Subject &middot; Age/Year &middot; Number of weeks]</div>
+  <div class="namebox">Name: ____________________&nbsp;&nbsp;&nbsp; Start date: ____________</div>
+</div>
+
+<!-- ============ ONE LESSON (repeat this whole .page per lesson) ============ -->
+<div class="page"><div class="content">
+  <div class="unit-header">
+    <div class="week">Unit X &middot; Week / Lesson N</div>
+    <h2>[Lesson Title]</h2>
+  </div>
+
+  <!-- STEP 1: WATCH -->
+  <div class="step">
+    <span class="step-label">&#128250; Watch</span>
+    <p>Watch the video, then jot one thing you noticed. (Follow link rules: channel/search link + a backup.)</p>
+    <div class="write-line"></div>
+  </div>
+
+  <!-- STEP 2: KEY CONCEPT — visual example BEFORE reading -->
+  <div class="step">
+    <span class="step-label">&#11088; Key Concept</span>
+    <div class="concept-box">
+      <strong>[Concept name]</strong>
+      <p>[Worked visual example — show it, minimal words.]</p>
+    </div>
+  </div>
+
+  <!-- STEP 3: GUIDED NOTES — skeleton, not blank void -->
+  <div class="step">
+    <span class="step-label">&#9999;&#65039; My Notes</span>
+    <ol class="steps">
+      <li>The main idea is ________________________________</li>
+      <li>An example is ____________________________________</li>
+    </ol>
+  </div>
+
+  <!-- STEP 4: PRACTICE — varied formats + working space -->
+  <div class="step">
+    <span class="step-label">&#10003; Practice</span>
+    <div class="q"><span class="qnum">1.</span> [Multiple choice question]
+      <div class="mc">
+        <label>&#9711; A) ____</label><label>&#9711; B) ____</label><label>&#9711; C) ____</label>
+      </div>
+    </div>
+    <div class="q"><span class="qnum">2.</span> [Write-the-answer question]
+      <div class="write-line"></div>
+    </div>
+    <div class="working-space"><span class="ws-label">Working Space</span></div>
+  </div>
+
+  <!-- Optional: Real-World Caravan Challenge -->
+  <div class="challenge">
+    <div class="ch-title">&#128666; Real-World Caravan Challenge</div>
+    <p>[One concrete task applying today's concept to life on the road.]</p>
+    <div class="write-line"></div>
+  </div>
+
+  <!-- Optional: drawing / make-it -->
+  <div class="step">
+    <span class="step-label">&#9986;&#65039; Make / Draw</span>
+    <div class="draw-box">draw here</div>
+  </div>
+
+  <!-- STEP 5: REFLECT — confidence stars -->
+  <div class="confidence-block">
+    <p class="confidence-prompt">How do I feel about this lesson? <span class="hint">(colour the stars)</span></p>
+    <div class="stars">&#9734; &#9734; &#9734; &#9734; &#9734;</div>
+    <p class="confidence-scale">1 = still tricky &middot; 3 = getting there &middot; 5 = I&rsquo;ve got it!</p>
+  </div>
+
+  <footer>[Program Name] &middot; Unit X &middot; A4 &middot; print with wide margin for Apple Pencil annotation</footer>
+</div></div>
+
+<!-- ============ END-OF-UNIT REFLECTION (one per unit) ============ -->
+<div class="page"><div class="content reflection-page">
+  <h2>My Reflection &mdash; End of Unit</h2>
+  <p style="font-style:italic;color:#555;margin-bottom:14px;">There are no wrong answers here. This page is just for you.</p>
+  <div class="reflect-box"><h4>&#128172; One thing I understand better now:</h4>
+    <div class="write-line"></div><div class="write-line"></div></div>
+  <div class="reflect-box"><h4>&#129300; One thing I still find tricky:</h4>
+    <div class="write-line"></div><div class="write-line"></div></div>
+  <div class="reflect-box"><h4>&#10067; A question I still have:</h4>
+    <div class="write-line"></div></div>
+</div></div>
+
+</body>
+</html>
