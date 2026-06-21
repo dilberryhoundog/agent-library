@@ -1,0 +1,9 @@
+{
+  "name": "classroom-pdf-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimal MCP server bundled with the classroom plugin: renders HTML to a faithful A4 PDF via headless Chromium.",
+  "dependencies": {
+    "puppeteer": "^24.0.0"
+  }
+}
