@@ -1,0 +1,5 @@
+# Chat transcripts exported to the repo root (e.g. via /export).
+# Kept locally as a work record; not published. Matches the
+# YYYY-MM-DD-HHMMSS-<slug>.txt export filename, anchored to the root only,
+# so skill reference .txt files in subdirectories stay tracked.
+/20??-??-??-*.txt
