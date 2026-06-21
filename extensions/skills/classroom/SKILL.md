@@ -15,9 +15,7 @@ A build draws on a classroom project's configuration — `global-requirements.md
 `students/` files at the project storage root. Before starting any build, confirm that
 configuration is present:
 
-- **If classroom context is loaded** (a `.claude/rules/classroom.md` rule and/or a classroom
-  section in the project `CLAUDE.md` are in context, and `global-requirements.md` exists at
-  the root), proceed.
+- **If classroom signal is loaded** (A `**CLASSROOM SKILL COMPATIBLE**` signal appears in your loaded context), proceed.
 - **If no classroom context is visible**, do not assume the current folder is the classroom
   and do not scatter files. Stop and ask the user: is the working directory the intended
   classroom project root (they may need to relaunch there), or would they like to set up a
@@ -58,9 +56,9 @@ This is the usual shape of the work, not a fixed pipeline. Skip, repeat, or reor
 
 `references/setup.md` — first-run bootstrap for a classroom project (copy the init payload to the project root, fill the config). Read only when setting up or repairing a project, not on every build.
 
-`global-requirements.md` *(project storage root)* — the family's standing constants. Read at the start of every build. Lives in the project, not in this skill; it is created during setup.
+`global-requirements.md` _(project storage root)_ — the family's standing constants. Read at the start of every build. Lives in the project, not in this skill; it is created during setup.
 
-`students/` *(project storage root)* — one file per learner; the configuration layer. Read the file(s) for the learner this build serves. The field definitions live in this skill's `references/students/_template.md`; use them to add a learner file under the project's `students/`.
+`students/` _(project storage root)_ — one file per learner; the configuration layer. Read the file(s) for the learner this build serves. The field definitions live in this skill's `references/students/_template.md`; use them to add a learner file under the project's `students/`.
 
 `references/pedagogy/` — teaching approaches. Read the file matching the learner's profile and apply it to every lesson.
 
