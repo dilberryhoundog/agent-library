@@ -23,7 +23,9 @@ section in the project's CLAUDE.md. The config defines the repository's **versio
 units** — each with paths, manifest, changelog, tag pattern, and `github-release` flag.
 
 If no config exists, follow `references/setup-instructions.md` to create one with the
-user, then continue with the release.
+user, then continue with the release. Use the same reference to **add or update a unit**
+when the config exists but the requested unit is missing — define the unit with the user, then
+continue.
 
 ## Workflow
 

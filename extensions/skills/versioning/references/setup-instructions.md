@@ -1,7 +1,19 @@
 # Project Config Setup
 
-How to create a repository's versioning config when none exists. The config externalises
-everything repo-specific so the versioning skill stays universal.
+How to create a repository's versioning config when none exists, and how to add or update a
+unit in an existing one. The config externalises everything repo-specific so the versioning
+skill stays universal.
+
+## Adding or updating a unit (config already exists)
+
+When the config exists but the requested unit is not defined — or a defined unit's details
+have changed — edit `.claude/rules/versioning.md` (or the CLAUDE.md `## Versioning` section)
+rather than recreating it. Add or amend one `### <unit-name>` block using the field shape in
+"Config template" below, following the existing units' conventions for paths, manifest, tag
+pattern, and `github-release`. Resolve a unit's paths the way the existing config documents
+(e.g. a plugin's directory plus the resolved targets of its symlinks). Confirm the block with
+the user before the first release uses it. The rest of this file covers creating a config
+from scratch.
 
 ## Placement
 
