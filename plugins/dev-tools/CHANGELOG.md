@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-21
+
+### Added
+
+- The versioning skill can now add or update a unit in an existing config — not just
+  create one from scratch. A new plugin can be registered for releases without rewriting
+  the whole config.
+
 ## [0.3.0] - 2026-06-13
 
 ### Added
