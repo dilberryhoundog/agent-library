@@ -1,0 +1,56 @@
+---
+name: git-box
+description: This skill should be used whenever basic git procedures are required — committing, pushing, stashing, or switching branches. Trigger on phrases like "commit my changes", "commit and push", "save my work", "push this", "stash and switch to feat/x", "make 3 commits", or "commit the housekeeping, leave the rest". Use it for any commit / push / switch request even when the user doesn't say "git" explicitly — it routes the work to a guarded background agent instead of running git inline.
+disable-model-invocation: true
+allowed-tools: Bash(git status:*), Agent(git-commander)
+---
+
+# git-awesome
+
+Route a git request to the **git-commander** background agent, which runs the work through
+guarded verb commands and returns a structured report. The request may come from the user or
+originate here. Read the status, turn the intent into an informative brief, hand it off, relay
+the result. Message wording, emoji, and the git verbs themselves all happen downstream.
+
+## Why a background agent
+
+Running git inline burns the main context on mechanical work and exposes write operations to
+the main agent. Delegating to git-commander keeps this session lean and confines git-write
+authority to one agent that can only ever touch git (never files).
+
+## Current state (auto-loaded)
+
+!`git status -s -b -u`
+
+That short status is enough to frame the brief. Avoid pulling fuller diffs here — the verb
+commands load their own detail when they run.
+
+## How to dispatch
+
+1. **Read the status and the request together.** Status shows the branch, ahead/behind, and
+   which files changed; the request says what to do with them.
+
+2. **Write an informative brief.** For each action the request implies, state the _how and
+   what_ so git-commander isn't left guessing:
+   - commit — what to commit and how to group it
+   - push — whether to push, and where (set upstream if there's none)
+   - switch — which branch, and what to do with uncommitted work (e.g. dirty tree → stash,
+     switch, pop)
+
+   Fill any deficit from status. If the request omits the commit grouping, supply it from the
+   changed files; if it asks for a switch but ignores a dirty tree, spell out the stash/pop.
+   Don't decide message wording or stage anything — but leave nothing critical to chance.
+
+3. **Launch git-commander** via the Agent tool, passing the brief. Let it dispatch the right
+   verb commands and chain them as needed.
+
+4. **Relay its report.** git-commander returns a structured summary (what it committed, push
+   result, branch moves, anything blocked). Surface that to the user; if it flagged something
+   needing judgment — an ambiguous split, a possible breaking change — bring that decision
+   back to the user rather than answering on its behalf.
+
+## Scope
+
+git-commander agent covers **commit**, **push**, and **switch** work (switch / stash /
+pop). Advanced git — merges, rebases, resets, history rewriting — is deliberately out of
+scope; handle that directly in a guided session, not through this skill.
