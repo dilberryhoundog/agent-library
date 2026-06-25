@@ -20,6 +20,15 @@
       "name": "classroom",
       "source": "./plugins/classroom",
       "category": "learning"
+    },
+    {
+      "name": "pocock-skills",
+      "description": "Matt Pocock's skills",
+      "category": "dev",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/mattpocock/skills.git"
+      }
     }
   ]
 }
