@@ -20,19 +20,6 @@
       "name": "classroom",
       "source": "./plugins/classroom",
       "category": "learning"
-    },
-    {
-      "name": "pocock-skills",
-      "description": "Matt Pocock's skills",
-      "category": "dev",
-      "strict": false,
-      "source": {
-        "source": "url",
-        "url": "https://github.com/mattpocock/skills.git"
-      },
-      "skills": [
-        "../skills/productivity/writing-great-skills"
-      ]
     }
   ]
 }
