@@ -1,0 +1,1 @@
+../../../extensions/agents/git-robot.md
