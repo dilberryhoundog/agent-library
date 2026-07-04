@@ -6,7 +6,7 @@ disable-model-invocation: true
 allowed-tools: Bash(git status *), Agent(git-robot), Skill(agent *)
 ---
 
-The main agent loop is important, it needs careful management to ensure longevity and quality of the context. Therefore, use this Git Box to route basic git procedures to a background agent. So that important work can continue in the foreground of the main chat, without reducing quality or buring tokens.
+The main agent loop is important, it needs careful management to ensure longevity and quality of the context. Therefore, use this Git Box to route basic git procedures to a background agent. So that important work can continue in the foreground of the main chat, without reducing quality or burning tokens.
 
 # Agent Invariants
 
@@ -71,11 +71,11 @@ Workflows listed here are available to use as your brief. Replace any generic `<
 
 Check the `Workflow Map` for workflows
 
-**IF**: The users request is similar to a workflow listed, or the request could benefit from the workflow, or the user specifically requests a workflow.
+**IF**: The user’s request is similar to a workflow listed, or the request could benefit from the workflow, or the user specifically requests a workflow.
 **THEN**: Reference the Workflow, check that it is indeed suitable for the request, by viewing the complete template.
 
 **IF**: The workflow is suitable for the request.
-**THEN**: Silently fill in your brief using the workflow template, filling the request specific data as you go.
+**THEN**: Silently fill in your brief using the workflow template, filling the request-specific data as you go.
 
 #### Workflow Map
 
@@ -97,7 +97,7 @@ Use the `gh MCP` to create the issue. Also check open issues for previously repo
 
 ## +GATHER CONTEXT
 
-Receive and collate all the context available to you. this is your source of truth.
+Receive and collate all the context available to you. This is your source of truth.
 
 === User Request ===  
 $ARGUMENTS
@@ -156,7 +156,7 @@ Using available context, formulate a brief for the git-robot agent.
 `git-robot` has inbuilt logic to split commits into logical groupings.
 The agent can also do this by sending through each logical commit as a single procedure.
 The choice is made from your confidence in the gathered context. If unsure, send down the responsibility to the subagent.
-Whichever choice is made, ensure the task overview of each is adequte for the agent to execute.
+Whichever choice is made, ensure the task overview of each is adequate for the agent to execute.
 
 #### Proceed
 
@@ -182,7 +182,7 @@ Use the `Brief` as your only message to the agent.
 **Message**: - Inform the user of the agent invocation problem, suggest a fix and an alternative method.
 
 **IF**: The agent invoked successfully.  
-**Message**: - Inform the user of the successful invocation and that the agent is working on their request in the background. The user and you can proceed with the conversation, but connot mutate any files.
+**Message**: - Inform the user of the successful invocation and that the agent is working on their request in the background. The user and you can proceed with the conversation, but cannot mutate any files.
 
 #### Proceed
 
@@ -193,7 +193,7 @@ Use the `Brief` as your only message to the agent.
 
 The `git-robot` agent will present a summary of their tasks completed.
 
-#### Present findings
+#### Present Findings
 
 The `git-robot` report already arrives split into `Successful Procedures`, `Failures and Errors`, and `Additional Notes`. Present those sections to the user verbatim — do not re-sort or re-bucket the directive lines. Carry the `Additional Notes` content through unchanged; it is where git-robot surfaces difficulties, so never drop it.
 
