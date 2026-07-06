@@ -32,14 +32,14 @@ testers before being promoted to a final version.
 
 Take the highest level that any commit in the range triggers.
 
-| Commit pattern | Bump | Changelog section |
-|---|---|---|
-| any type with `!` (`feat!:`, `fix!:`, …) or `BREAKING CHANGE:` footer | major (minor if version < 1.0.0) | Changed / Removed |
-| `feat:` | minor | Added |
-| `fix:` | patch | Fixed |
-| `perf:` | patch | Changed |
-| `docs:`, `style:`, `refactor:`, `test:`, `chore:`, `ci:`, `build:` | patch (or no release if nothing user-visible) | Changed, or omit |
-| `security`-related fixes | patch minimum | Security |
+| Commit pattern                                                        | Bump                                          | Changelog section |
+|-----------------------------------------------------------------------|-----------------------------------------------|-------------------|
+| any type with `!` (`feat!:`, `fix!:`, …) or `BREAKING CHANGE:` footer | major (minor if version < 1.0.0)              | Changed / Removed |
+| `feat:`                                                               | minor                                         | Added             |
+| `fix:`                                                                | patch                                         | Fixed             |
+| `perf:`                                                               | patch                                         | Changed           |
+| `docs:`, `style:`, `refactor:`, `test:`, `chore:`, `ci:`, `build:`    | patch (or no release if nothing user-visible) | Changed, or omit  |
+| `security`-related fixes                                              | patch minimum                                 | Security          |
 
 Commits that change nothing user-visible (CI tweaks, internal refactors) may be omitted
 from the changelog even though they sit in the range. When the range contains only such
@@ -143,7 +143,7 @@ After executing, confirm all version locations agree and report the result:
 - [ ] Manifest version field reads `X.Y.Z` (skip when the unit's manifest is `none`).
 - [ ] Changelog's top released heading reads `X.Y.Z` with today's date.
 - [ ] `git tag -l '<tag>'` shows the tag, and `git ls-remote --tags origin` shows it on the
-      remote.
+  remote.
 - [ ] `gh release view <tag>` succeeds (when releases are enabled).
 - [ ] No modified or staged files remain (`git status --porcelain --untracked-files=no` is
-      empty).
+  empty).

@@ -2,101 +2,211 @@
 name: versioning
 description: Propose and execute semantic version releases - version bump, changelog entry, annotated git tag, GitHub release.
 disable-model-invocation: true
-argument-hint: [unit-name]
+argument-hint: [ unit-name ]
 model: haiku
 ---
 
 # Versioning
 
-A release turns committed work into a named, documented snapshot. This skill derives the
-version bump from conventional commits, proposes it with visible reasoning, and on
-confirmation updates every version location in sync.
+A release turns committed work into a named, documented snapshot. This skill derives the version bump from conventional commits, proposes it with visible reasoning, and on confirmation updates every version location in sync.
 
-The skill is universal: it carries the _how_ (semver rules, commit mapping, command
-sequences). The _where_ (which files hold versions, tag patterns, changelog paths) lives in
-each repository's project config, never in this skill.
+The skill is universal: it carries the _how_ (semver rules, commit mapping, command sequences). The _where_ (which files hold versions, tag patterns, changelog paths) lives in each repository's project config, never in this skill.
 
-## Project config (required)
+# --- Agent Invariants (Global) ---
 
-Read `.claude/rules/versioning.md` in the repository root. Fallback: a `## Versioning`
-section in the project's CLAUDE.md. The config defines the repository's **versioned
-units** — each with paths, manifest, changelog, tag pattern, and `github-release` flag.
+**NEVER** move or overwrite an existing tag. If the tag already exists, stop and ask.
 
-If no config exists, follow `references/setup-instructions.md` to create one with the
-user, then continue with the release. Use the same reference to **add or update a unit**
-when the config exists but the requested unit is missing — define the unit with the user, then
-continue.
+# --- REFERENCES ---
 
-## Workflow
+## Preflight
 
-Proceed through five gates in order. Never skip the confirmation gate.
+=== Git Status ===
+!`git status --porcelain --untracked-files=no`
+=== Branch ===
+Remote:
+!`git symbolic-ref --short refs/remotes/origin/HEAD | sed 's@^origin/@@'`
+Local:
+!`git branch --show-current`
+=== GitHub Authenticated ===
+!`gh auth status`
 
-When invoked with a unit name, release that unit. When invoked bare (no argument), run
-gates 1–2 for every unit in the config and report each unit's state — commits pending
-since its last tag, or "nothing to release" — then ask which unit(s) to release before
-continuing to gate 3.
+## Request
 
-### 1. Preflight
+=== User Request ===  
+$ARGUMENTS
 
-- No modified or staged files (`git status --porcelain --untracked-files=no` is empty).
-  If dirty, stop and report. Untracked files are tolerated but must not be staged into the
-  release commit.
-- On the remote's default branch (`git symbolic-ref refs/remotes/origin/HEAD`). When the
-  current branch differs, stop and ask.
-- Project config exists and identifies the unit(s) being released.
-- When the unit's config enables GitHub releases, the `gh` CLI is available and
-  authenticated (`gh auth status`).
+# --- STEPS ---
 
-### 2. Determine range
+## +DISPATCH
 
-- Find the unit's latest tag matching its tag pattern: `git tag -l '<pattern>'`, sorted by
-  version.
-- The range is `<last-tag>..HEAD`, filtered to the unit's paths:
-  `git log <last-tag>..HEAD -- <paths>`.
-- **First release** (no tag exists): the baseline is the manifest's current version, and
-  the changelog entry summarises the unit's history to date.
-- No commits in range: report "nothing to release" and stop.
+Read `.claude/rules/versioning.md` in the repository root. **OR** a `## Versioning` section in the project's CLAUDE.md
 
-### 3. Propose
+These define the repository's **versioned units** — each with paths, manifest, changelog, tag pattern, and `github-release` flag.
 
-- Map each conventional commit to a bump level using the table in
-  `references/release-process.md`.
-- Breaking-change scan: check the diff's shape (`git diff <range> --stat -- <paths>`).
-  When any changed file defines a user-facing surface (commands, skill definitions,
-  manifests, config schemas, documented formats) — or when uncertain — spawn the
-  `dev-tools:breaking-change-detector` agent, passing it the commit range, the unit's
-  paths, and the unit's current version. Skip only when every changed file is non-contract
-  by location (tests, CI, internal scripts, release housekeeping) or the commit-derived
-  bump is already major. If the agent cannot be spawned (not installed, or the spawn
-  errors), proceed on the commit-derived bump and flag the missing scan. Always state in
-  the proposal whether the scan ran, was skipped (with the reason), or failed. The agent's
-  bump floor overrides a lower commit-derived bump; report any discrepancy to the user.
-- Present: the commit list, what each commit maps to, the resulting bump
-  (e.g. "2 feat, 1 fix → minor: 1.0.1 → 1.1.0"), and a draft changelog entry written
-  user-facing — what a user of the unit notices, not a git log dump.
-- Always show the reasoning, so the user can audit (and learn) the mapping.
+#### Step invariants
 
-### 4. Confirm
+**DO NOT** run extra commands or read from the filesystem.
 
-- Wait for explicit approval. The user may override the bump level or edit the changelog
-  draft; their choice wins.
+#### Proceed
 
-### 5. Execute and verify
+**IF**: The versioned units config exists **AND** the requested unit is in the config **OR** no unit was requested (bare invocation)
+**THEN**: `--> +PREFLIGHT`
 
-Follow the command sequences in `references/release-process.md`:
+**IF**: NO versioned units config exists **OR** the requested unit is missing from the config
+**THEN**: `--> +USER CONFIRMATION` referencing `references/setup-instructions.md`
 
-- Update the manifest version and the changelog.
-- Create the release commit, annotated tag, push with tags, GitHub release (when
-  configured).
-- Verify every version location agrees (manifest, changelog heading, tag, release) and
-  report the result.
+## +USER CONFIRMATION
 
-## Hard rules
+Confirm with the user the actions they would like to take.
 
-- Never use heredocs — they are blocked in some sandboxed shells. Build multi-line content
-  with a file-write tool in a temp directory _outside the repository_ and pass it via
-  `-F` / `--notes-file`, or use repeated `-m` flags; these work everywhere. Files written
-  inside the repo would dirty the tree and fail verification.
-- Annotated tags only (`git tag -a`), never lightweight.
-- Never move or overwrite an existing tag. If the tag already exists, stop and ask.
-- One release commit per unit; stage only the files belonging to that release.
+#### Step Invariants
+
+**DO NOT** update files, commit, tag, or push before the user explicitly approves the proposal.
+
+#### Decision
+
+Upon return with the users' confirmation. Decide between these options:
+
+**IF**: You created with the user: a new config file **OR** new/updated versioned unit
+**THEN**: `--> +PREFLIGHT`
+
+**IF**: You repaired a `+PREFLIGHT` failure
+**THEN**: `--> +PREFLIGHT`
+
+**IF**: The user guided you on which units to release after a bare invocation
+**THEN**: For each chosen unit, `--> +BREAKING CHANGES`.
+
+**IF**: The user is confirming a version update that you proposed **OR** have requested a change to the bump level or change log entry
+**THEN**: `--> +EXECUTE`
+
+## +PREFLIGHT
+
+Verify the release preconditions. The `Preflight` reference already holds the live state — read it, do not re-run the commands.
+
+#### Step Invariants
+
+**DO NOT** stage, modify, or write any file during preflight.
+
+#### Return
+
+**IF**: Any of the following cases fail:
+
+- The working tree has modified or staged files (`=== Git Status ===` is non-empty)
+- The local branch differs from the remote default (`=== Branch ===`)
+- A targeted unit enables `github-release` **AND** `gh` is not authenticated (`=== GitHub Authenticated ===`)
+
+- **THEN**: `--> +USER CONFIRMATION` Reporting the failing precondition to the user. Offer to fix the problems and return.
+
+#### Proceed
+
+**WHEN**: The tree is clean **AND** the branch is the remote default **AND** `gh` is authenticated
+**THEN**: `--> +RANGE`
+
+## +RANGE
+
+Determine the commit range for the unit(s) under release.
+
+Resolve the unit's paths per the config's path-resolution rule — the unit directory plus the repo-relative target of every symlink inside it.
+
+Find the unit's latest tag matching its tag pattern (`git tag -l '<pattern>'`, sorted by version).
+
+The range is `<last-tag>..HEAD` filtered to those paths (`git log <last-tag>..HEAD -- <paths>`).
+
+**First release** (no tag exists): the baseline is the manifest's current version, and the changelog entry summarises the unit's history to date.
+
+#### Decision
+
+Choose by how the skill was invoked:
+
+**IF**: Invoked bare (no unit named)
+**THEN**: `--> +USER CONFIRMATION` Compute the range state for every unit in the config, report each unit's pending commits or "nothing to release", and ask which unit(s) to release.
+
+**IF**: A named unit has no commits in range
+**THEN**: Report "nothing to release" and **END**.
+
+#### Proceed
+
+**WHEN**: A targeted unit has commits in range
+**THEN**: `--> +BREAKING CHANGES`
+
+## +BREAKING CHANGES
+
+Set the bump floor before the proposal by scanning for changes that break an existing user of the unit.
+
+Inspect the diff's shape (`git diff <range> --stat -- <paths>`). When any changed file defines a user-facing surface (commands, skill definitions, manifests, config schemas, documented formats) — or when uncertain — spawn the `dev-tools:breaking-change-detector` agent, passing the commit range, the unit's paths, and the unit's current version. A confirmed breaking change sets the bump floor to major, overriding a lower commit-derived bump.
+
+#### Decision
+
+Choose whether to scan:
+
+**IF**: Every changed file is non-contract by location (tests, CI, internal scripts, release housekeeping) **OR** the commit-derived bump is already major
+**THEN**: Skip the scan, recording the skip reason. `--> +PROPOSE`
+
+**IF**: The agent cannot be spawned (not installed, or the spawn errors)
+**THEN**: Record the scan as failed and continue on the commit-derived bump. `--> +PROPOSE`
+
+**IF**: A user-facing surface changed **OR** the outcome is uncertain
+**THEN**: Run the scan and record its result and any bump floor.
+
+#### Proceed
+
+**WHEN**: The scan has run, been skipped, or failed, and any bump floor is recorded
+**THEN**: `--> +PROPOSE`
+
+## +PROPOSE
+
+Derive and present the proposed bump for the unit.
+
+Map each conventional commit in range to a bump level using the table in `references/release-process.md`. Apply the bump floor from `+BREAKING CHANGES`, which overrides a lower commit-derived bump; report any discrepancy.
+
+Present the commit list, what each commit maps to, the resulting bump (e.g. "2 feat, 1 fix → minor: 1.0.1 → 1.1.0"), and a draft changelog entry written user-facing — what a user of the unit notices, not a git log dump. Always show the reasoning, so the user can audit and learn the mapping.
+
+#### Step Invariants
+
+**ALWAYS** state whether the breaking-change scan ran, was skipped (with the reason), or failed.
+
+#### Proceed
+
+**WHEN**: The proposal — bump, reasoning, and draft changelog — is presented
+**THEN**: `--> +USER CONFIRMATION`
+
+## +EXECUTE
+
+Apply the release, following the command sequences in `references/release-process.md`. Use the user's final bump and changelog text — their edits win.
+
+Update the manifest version and the changelog. Create the release commit, the annotated tag, push with tags, and the GitHub release when the unit enables it.
+
+#### Step Invariants
+
+**NEVER** use heredocs — they are blocked in some sandboxed shells. Build multi-line content with a file-write tool in a temp directory _outside the repository_ and pass it via `-F` / `--notes-file`, or use repeated `-m` flags. Files written inside the repo would dirty the tree and fail verification.
+**ALWAYS** create annotated tags (`git tag -a`), never lightweight.
+**ALWAYS** release one commit per unit; stage only the files belonging to that release.
+**NEVER** stage untracked files that are not the manifest or changelog; untracked files may exist but do not enter the release commit.
+
+#### Proceed
+
+**WHEN**: The manifest, changelog, commit, tag, push, and any GitHub release are complete
+**THEN**: `--> +VERIFY`
+
+## +VERIFY
+
+Confirm every version location agrees.
+
+Check that the manifest version, the changelog heading, the tag, and the GitHub release (when configured) all name the same version.
+
+#### Return
+
+**IF**: Any version location disagrees
+**END**: Report the mismatch to the user for resolution.
+
+#### End
+
+**WHEN**: Every version location agrees
+**END**: Report the released version and where it now lives, to the user.
+
+# --- TERMS ---
+
+Terms used in this skill:
+: **Versioned Unit**: An independently released package defined in the project config, with its own paths, manifest, changelog, tag pattern, and `github-release` flag.
+: **Range**: The commit span released for a unit — `<last-tag>..HEAD` filtered to the unit's paths.
+: **Bump**: The semver increment (major, minor, patch) derived from the conventional commits in range.
