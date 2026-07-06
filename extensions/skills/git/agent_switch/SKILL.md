@@ -58,8 +58,6 @@ From the `Brief` read the `SWITCH` procedure and its actions. Review them agains
 
 Pick the first/next uncompleted action.
 
-#### Agent Invariants
-
 #### Decision
 
 **IF**: The procedure contains a `switch` action on a dirty tree **AND** no `stash` action precedes it in the procedure (or in an earlier still-open `SWITCH(stash)`)  
