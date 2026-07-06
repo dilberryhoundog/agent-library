@@ -8,7 +8,7 @@ allowed-tools: Bash(git status *), Agent(git-robot), Skill(agent *)
 
 The main agent loop is important, it needs careful management to ensure longevity and quality of the context. Therefore, use this Git Box to route basic git procedures to a background agent. So that important work can continue in the foreground of the main chat, without reducing quality or burning tokens.
 
-# Agent Invariants
+# Agent Invariants (Global)
 
 **NEVER** call the git-robot agent directly. Wait for user to enter the skill command themselves.
 
@@ -115,14 +115,14 @@ Use your knowledge of current chat context.
 #### Return
 
 **IF**: The request is unclear or ambiguous.  
-**Message**: - inform the user that the request is unclear and ask for clarification
+**THEN**: Inform the user that the request is unclear and ask for clarification
 
 **IF**: The request involves git commands outside of the agents scope.  
-**Message**: - inform the user that the request involves git commands outside the agent’s scope and ask to help manage the current git state
+**THEN**: Inform the user that the request involves git commands outside the agent’s scope and ask to help manage the current git state
 
 #### Proceed
 
-**IF**: Agent has enough context to formulate the brief
+**IF**: Agent has enough context to formulate the brief (directly or from user clarifications)
 **THEN**: Proceed to `+FORMULATE BRIEF` step.
 
 ## +FORMULATE BRIEF
@@ -179,10 +179,10 @@ Use the `Brief` as your only message to the agent.
 #### Return
 
 **IF**: The agent was unable to invoke the agent.  
-**Message**: - Inform the user of the agent invocation problem, suggest a fix and an alternative method.
+**THEN**: Inform the user of the agent invocation problem, suggest a fix and an alternative method.
 
 **IF**: The agent invoked successfully.  
-**Message**: - Inform the user of the successful invocation and that the agent is working on their request in the background. The user and you can proceed with the conversation, but cannot mutate any files.
+**THEN**: Inform the user of the successful invocation and that the agent is working on their request in the background. The user and you can proceed with the conversation, but cannot mutate any files.
 
 #### Proceed
 
@@ -214,17 +214,18 @@ Additional Notes:
 <git-robot's notes, or "none">
 ```
 
-#### Return
-
-**IF**: The report is enough to satisfy the user's request and the skill process succeeded without problems.
-
 #### Proceed
 
 **IF**: The request succeeded and represents a repeatable workflow.
-**THEN**: Proceed to `+WORKFLOW` step.
+**THEN**: `Present Findings` and Proceed to `+WORKFLOW` step.
 
 **IF**: The request succeeded but the skill process had problems **OR** The request succeeded but the results included errors or failures.
-**THEN**: Proceed to `+HELP` step.
+**THEN**: `Present Findings` and Proceed to `+HELP` step.
+
+#### End
+
+**IF**: No further steps (+WORKFLOW or +HELP) are required.
+**END**: `Present Findings` to the user and end the skill.
 
 ## +HELP
 
@@ -232,10 +233,9 @@ The main agent is available to help the user handle some issues that may arise d
 
 #### Help the user
 
-**Skill Process Failures**: Talk with the user about the issues after the request and offer to create an issue. Refer to `Issue Creation` below.
+**Skill Process Failures**: Talk with the user about the issues after the request and offer to create an issue. Refer to `Issue Creation`.
 **Git Errors**: Talk with the user about the git errors and offer to fix or handle them in the main chat. Use care when proceeding with these fixes, making sure the user understands your actions and approves them first.
-Also if the git error reveals a way the skill can be improved or fixed, offer to create an issue.
-Refer to `Issue Creation` below.
+Also if the git error reveals a way the skill can be improved or fixed, offer to create an issue. Refer to `Issue Creation`.
 
 #### Return
 
@@ -245,13 +245,13 @@ Refer to `Issue Creation` below.
 
 Save commonly repeated, successful requests as a workflow, refer to them to ensure consistency and efficiency.
 
-#### Agent Invariants
+#### Step Invariants
 
 **ENSURE** The uploaded brief is sanitised by using `****` to mask sensitive words. Or use a `<placeholder>` to provide a general idea of the requested procedure.
 
 #### Upload a Workflow
 
-Upload the brief you successfully used, to create a new workflow. Refer to `Issue Creation` below.
+Upload the brief you successfully used, to create a new workflow. Refer to `Issue Creation`.
 
 #### Return
 

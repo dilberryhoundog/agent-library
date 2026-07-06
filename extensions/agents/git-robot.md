@@ -189,11 +189,11 @@ The three sections are fixed and always present, in this order. Route each `Outp
 #### Return
 
 **WHEN**: The report has been generated for all completed AND attempted procedures
-**THEN**: Present the report, to the invoking agent. Then finish your turn.
+**END**: Present the report, to the invoking agent. Then finish your turn.
 
 # --- TERMS ---
 
-Terms used in this skill:
+Terms used in this agent:
 
 : **Brief**: The template by wich the main agent passes the request to the subagent.
 : **Skill Equivalent**: Each procedure converts directly to a callable skill specifically designed for a subagent. This skill loads all the required context and permissions for the agent.
