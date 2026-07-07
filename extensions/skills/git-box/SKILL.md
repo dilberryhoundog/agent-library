@@ -3,14 +3,16 @@ name: git-box
 display-name: Git Box
 description: Use Git Box to route basic git procedures to a background agent. So that important work can continue in the foreground of the main chat.
 disable-model-invocation: true
-allowed-tools: Bash(git status *), Agent(git-robot), Skill(agent *)
+allowed-tools: Bash(git status *), Agent(git-robot), Skill(agent-commit), Skill(agent-push), Skill(agent-switch)
 ---
+
+# Git Box
 
 The main agent loop is important, it needs careful management to ensure longevity and quality of the context. Therefore, use this Git Box to route basic git procedures to a background agent. So that important work can continue in the foreground of the main chat, without reducing quality or burning tokens.
 
 # Agent Invariants (Global)
 
-**NEVER** call the git-robot agent directly. Wait for user to enter the skill command themselves.
+**NEVER** call the git-robot agent directly from the main chat. This skill sits in the session context after its first invocation — even so, git-robot is only ever invoked from the `+Call Agent` step of a run the user started by entering the skill command.
 
 # --- REFERENCES ---
 
@@ -29,7 +31,7 @@ Agent's internal procedures mapping to a skill to perform basic git procedures.
 Git context:
 
 - State: (what does the agent do with staged or unstaged changes)
-- Task overview: (A launch point for git-robot to write / perform effectivly )
+- Task overview: (A launch point for git-robot to write / perform effectively)
 
 **=== Procedure actions ===**
 
@@ -63,21 +65,9 @@ SWITCH:
 - `PUSH`
 - `SWITCH(stash, switch)`
 
-## Workflow Templates
+## Workflow Map
 
-Workflows listed here are available to use as your brief. Replace any generic `<placeholder>` with the actual information you need.
-
-#### Use a Workflow
-
-Check the `Workflow Map` for workflows
-
-**IF**: The user’s request is similar to a workflow listed, or the request could benefit from the workflow, or the user specifically requests a workflow.
-**THEN**: Reference the Workflow, check that it is indeed suitable for the request, by viewing the complete template.
-
-**IF**: The workflow is suitable for the request.
-**THEN**: Silently fill in your brief using the workflow template, filling the request-specific data as you go.
-
-#### Workflow Map
+Proven briefs saved as reusable workflows. Replace any generic `<placeholder>` with the request-specific information.
 
 <!-- Currently under construction, awaiting workflow uploads -->
 
@@ -95,9 +85,26 @@ Use the `gh MCP` to create the issue. Also check open issues for previously repo
 
 # --- STEPS ---
 
-## +GATHER CONTEXT
+> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+>
+>- Fully meet a step's *step finished when* conditions before considering it done.
+>- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
+>- If a step cannot be completed, move to the step that handles the condition/error.
+>- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
 
-Receive and collate all the context available to you. This is your source of truth.
+## +Gather Context
+
+Collate the request, the git state, and the chat context into a single source of truth.
+
+#### Start this step when:
+
+The skill has been invoked.
+
+#### Invariants:
+
+**DO NOT** run extra commands or read from the filesystem — the context below is the whole source of truth.
+
+#### Collate:
 
 === User Request ===  
 $ARGUMENTS
@@ -108,32 +115,41 @@ $ARGUMENTS
 === Chat context ===  
 Use your knowledge of current chat context.
 
-#### Agent Invariants
+When the request is unclear or ambiguous, ask the user for clarification. When it involves git commands outside the agent's scope (anything beyond commit / push / switch, stash, pop), tell the user and offer to help manage the current git state in the main chat instead.
 
-**DO NOT** run extra commands or read from the filesystem.
+#### Step finished when:
 
-#### Return
+The request is unambiguous, within scope, and carries enough context to write the brief — directly or from the user's clarifications.
 
-**IF**: The request is unclear or ambiguous.  
-**THEN**: Inform the user that the request is unclear and ask for clarification
+## +Check Workflows
 
-**IF**: The request involves git commands outside of the agents scope.  
-**THEN**: Inform the user that the request involves git commands outside the agent’s scope and ask to help manage the current git state
+Reuse a proven workflow as the brief when one fits the request.
 
-#### Proceed
+#### Start this step when:
 
-**IF**: Agent has enough context to formulate the brief (directly or from user clarifications)
-**THEN**: Proceed to `+FORMULATE BRIEF` step.
+Context is gathered and the brief has not been drafted yet.
 
-## +FORMULATE BRIEF
+#### Match the Request:
 
-Using available context, formulate a brief for the git-robot agent.
+Check the `Workflow Map` reference. When the user's request is similar to a listed workflow, could benefit from one, or names one specifically — view the complete template and confirm it actually suits the request, then silently adopt it as the brief draft, filling the request-specific data as you go.
 
-#### Agent Invariants
+#### Step finished when:
 
-**DO NOT** Add any extra prose or context outside the pre-formated brief.
+A suitable workflow is adopted as the brief draft, or none matched (including an empty map) and the brief will be written fresh.
 
-#### Format
+## +Formulate Brief
+
+Turn the gathered context into a brief for the git-robot agent.
+
+#### Start this step when:
+
+Context is gathered and the brief is not yet complete — whether starting fresh or finishing an adopted workflow template.
+
+#### Invariants:
+
+**DO NOT** add any extra prose or context outside the pre-formatted brief.
+
+#### Format:
 
 - Place each procedure on a new line with an `-->` prefix.
 - Nest state and task overview under the procedure in a list format.
@@ -151,51 +167,47 @@ Using available context, formulate a brief for the git-robot agent.
 - task overview
 ```
 
-#### Decision
+#### Decision:
 
-`git-robot` has inbuilt logic to split commits into logical groupings.
-The agent can also do this by sending through each logical commit as a single procedure.
-The choice is made from your confidence in the gathered context. If unsure, send down the responsibility to the subagent.
-Whichever choice is made, ensure the task overview of each is adequate for the agent to execute.
+`git-robot` has inbuilt logic to split commits into logical groupings, and the brief can also do the splitting by sending each logical commit as its own procedure. Choose by your confidence in the gathered context — if unsure, send the responsibility down to the subagent. Whichever way, ensure each procedure's task overview is adequate for the agent to execute.
 
-#### Proceed
+#### Step finished when:
 
-**WHEN**: The brief has been formulated, to cover the user's request.
-**THEN**: Proceed to `+CALL AGENT` step.
+The brief is formatted per the template and covers the user's whole request.
 
-## +CALL AGENT
+## +Call Agent
 
-Invoke the `git-robot` agent to execute the planned procedures.
+Invoke the git-robot agent to execute the brief in the background.
 
-`agent("git-robot")`
+#### Start this step when:
 
-Use the `Brief` as your only message to the agent.
+A complete brief exists and git-robot has not been invoked with it.
 
-#### Agent Invariants
+#### Invariants:
 
-**DO NOT** Mutate any files, while the agent is executing the request in the background.
-**ENSURE** You return to this step after the Agent finishes executing the request.
+**DO NOT** mutate any files while the agent is executing the request in the background.
 
-#### Return
+#### Invoke:
 
-**IF**: The agent was unable to invoke the agent.  
-**THEN**: Inform the user of the agent invocation problem, suggest a fix and an alternative method.
+`agent("git-robot")` — use the `Brief` as your only message to the agent.
 
-**IF**: The agent invoked successfully.  
-**THEN**: Inform the user of the successful invocation and that the agent is working on their request in the background. The user and you can proceed with the conversation, but cannot mutate any files.
+Inform the user the agent is working on their request in the background: the conversation can continue, but no files can be mutated until it reports back.
 
-#### Proceed
+#### Step finished when:
 
-**WHEN**: The `git-robot` agent has finished executing the request and the agent has a valid conversation turn.
-**THEN**: Proceed to `+PRESENT REPORT` step.
+The agent is invoked and the user is informed. An invocation failure is a problem for the `+Help` step.
 
-## +PRESENT REPORT
+## +Present Report
 
-The `git-robot` agent will present a summary of their tasks completed.
+Relay the git-robot report to the user verbatim.
 
-#### Present Findings
+#### Start this step when:
 
-The `git-robot` report already arrives split into `Successful Procedures`, `Failures and Errors`, and `Additional Notes`. Present those sections to the user verbatim — do not re-sort or re-bucket the directive lines. Carry the `Additional Notes` content through unchanged; it is where git-robot surfaces difficulties, so never drop it.
+The git-robot report has arrived.
+
+#### Present Findings:
+
+The report already arrives split into `Successful Procedures`, `Failures and Errors`, and `Additional Notes`. Present those sections to the user verbatim — do not re-sort or re-bucket the directive lines. Carry the `Additional Notes` content through unchanged; it is where git-robot surfaces difficulties, so never drop it.
 
 === Report ===
 
@@ -214,48 +226,46 @@ Additional Notes:
 <git-robot's notes, or "none">
 ```
 
-#### Proceed
+#### Step finished when:
 
-**IF**: The request succeeded and represents a repeatable workflow.
-**THEN**: `Present Findings` and Proceed to `+WORKFLOW` step.
+The report is presented unaltered. When it fully satisfies the request with no failures, errors, or process problems, the skill is complete — unless the run is worth saving, in which case `+Save a Workflow` applies. Failures, errors, or process problems belong to the `+Help` step.
 
-**IF**: The request succeeded but the skill process had problems **OR** The request succeeded but the results included errors or failures.
-**THEN**: `Present Findings` and Proceed to `+HELP` step.
+## +Save a Workflow
 
-#### End
+Save a commonly repeated, successful request as a workflow for consistency and efficiency.
 
-**IF**: No further steps (+WORKFLOW or +HELP) are required.
-**END**: `Present Findings` to the user and end the skill.
+#### Start this step when:
 
-## +HELP
+The request succeeded and represents a repeatable workflow.
 
-The main agent is available to help the user handle some issues that may arise during the skill process.
+#### Invariants:
 
-#### Help the user
+**ENSURE** the uploaded brief is sanitised by using `****` to mask sensitive words, or a `<placeholder>` to provide a general idea of the requested procedure.
 
-**Skill Process Failures**: Talk with the user about the issues after the request and offer to create an issue. Refer to `Issue Creation`.
-**Git Errors**: Talk with the user about the git errors and offer to fix or handle them in the main chat. Use care when proceeding with these fixes, making sure the user understands your actions and approves them first.
-Also if the git error reveals a way the skill can be improved or fixed, offer to create an issue. Refer to `Issue Creation`.
+#### Upload the Workflow:
 
-#### Return
+Upload the brief you successfully used, to create a new workflow. Refer to the `Issue Creation` reference.
 
-**END**: Return to the main chat loop, to help the user.
+#### Step finished when:
 
-## +WORKFLOW
+The workflow issue is created. The skill is complete.
 
-Save commonly repeated, successful requests as a workflow, refer to them to ensure consistency and efficiency.
+## +Help
 
-#### Step Invariants
+Handle problems from the run with the user — the step for anything the others don't cover.
 
-**ENSURE** The uploaded brief is sanitised by using `****` to mask sensitive words. Or use a `<placeholder>` to provide a general idea of the requested procedure.
+#### Start this step when:
 
-#### Upload a Workflow
+The report contains failures or errors, the skill process itself misbehaved (including a failed agent invocation), or a situation has arisen that no other step covers.
 
-Upload the brief you successfully used, to create a new workflow. Refer to `Issue Creation`.
+#### Help the User:
 
-#### Return
+**Skill Process Failures**: Talk with the user about the issues and offer to create an issue — refer to the `Issue Creation` reference.
+**Git Errors**: Talk with the user about the git errors and offer to fix or handle them in the main chat. Use care when proceeding with these fixes, making sure the user understands your actions and approves them first. If a git error reveals a way the skill can be improved, offer to create an issue for that too.
 
-**END**: Return to the main chat loop, to upload the workflow.
+#### Step finished when:
+
+The user has been informed and has decided how to continue — fixing together in the main chat, filing an issue, or ending here. The skill is complete.
 
 # --- TERMS ---
 
@@ -266,4 +276,4 @@ Terms used in this skill:
 : **Skill Process**: The agent harness components working in harmony, Includes the skill, the agent, other sub skills called by the agent.
 : **Action**: A fine-tuning event on a procedure. Corresponds with similar git commands. They are represented with <action> in templates, and formatted in lowercase.
 : **Result**: The outcome of a procedure mostly mirrors the output or error messages directly from the git command.
-: **Brief**: The template by wich the main agent passes the request to the subagent.
+: **Brief**: The template by which the main agent passes the request to the subagent.
