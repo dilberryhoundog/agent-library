@@ -25,8 +25,8 @@ The skill is universal: it carries the _how_ (semver rules, commit mapping, comm
 === Git Status ===
 !`git status --porcelain --untracked-files=no`
 === Branch ===
-Remote:
-!`git symbolic-ref --short refs/remotes/origin/HEAD | sed 's@^origin/@@'`
+Remote (as `origin/<branch>`):
+!`git symbolic-ref --short refs/remotes/origin/HEAD`
 Local:
 !`git branch --show-current`
 === GitHub Authenticated ===
