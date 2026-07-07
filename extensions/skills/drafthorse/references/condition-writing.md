@@ -27,6 +27,7 @@ State what is true when this step's own work is genuinely done — and nothing e
 Optional prose guidance onward — the one sanctioned cross-step reference. Omit it when the next step's start condition picks up the completion state unaided.
 
 - **Point, don't restate** — name the destination or the move; never repeat the destination's conditions, which stay authoritative in its own start condition.
+- **Never contradict a start condition** — when the finished condition has failure outcomes, the do-next either covers them ("a recorded failure moves to reporting the result; otherwise…") or stays silent about them; a happy-path-only pointer that sends an ended run onward overrides the destination's own refusal.
 - **Its uses** — highlighting the happy path; a loop instruction ("return to the first step for the next item"); the exit of a finishing step ("end the skill and return to the user"); a bail that keeps a step from hanging on unmeetable completion conditions ("if errors are present, report them in the problem step; otherwise move on").
 
 ## Worked examples

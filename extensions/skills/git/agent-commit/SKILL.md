@@ -192,7 +192,7 @@ The amend is complete and recorded, or refused and the refusal recorded.
 
 #### Do this next:
 
-When further `COMMIT` procedures remain in the `Brief`, return to reading the next one; otherwise move to reporting the result.
+A completed amend with further `COMMIT` procedures remaining returns to reading the next one; a refusal, or no procedures remaining, moves to reporting the result.
 
 ### Check for Push:
 

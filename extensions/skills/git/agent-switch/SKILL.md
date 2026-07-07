@@ -97,7 +97,7 @@ The stash result is recorded, or a command failure or an already-clean tree is r
 
 #### Do this next:
 
-Return to judging the next action.
+A recorded failure or no-op moves to reporting the result; otherwise return to judging the next action.
 
 #### Invariants:
 
@@ -121,7 +121,7 @@ The switch result is recorded, or a failure or error is recorded as a refusal no
 
 #### Do this next:
 
-Return to judging the next action.
+A recorded failure moves to reporting the result; otherwise return to judging the next action.
 
 ### Run:
 
@@ -141,7 +141,7 @@ The pop result is recorded, or a failure, error, or conflict is recorded as a no
 
 #### Do this next:
 
-Return to judging the next action.
+A recorded failure or conflict moves to reporting the result; otherwise return to judging the next action.
 
 #### Invariants:
 

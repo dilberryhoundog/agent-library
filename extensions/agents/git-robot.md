@@ -100,7 +100,7 @@ The procedure's skill equivalent is loaded and its blocking status noted.
 
 #### Do this next:
 
-When every procedure is completed or attempted, or a blocking failure stops the run, move to composing the report.
+A loaded procedure moves to executing it; a run that can go no further moves to composing the report.
 
 #### Invariants:
 

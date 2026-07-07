@@ -87,7 +87,9 @@ The push has completed or failed, and the outcome is recorded.
 
 Move to reporting the result.
 
-### Decision:
+### Push the Branch:
+
+#### Decision:
 
 The upstream decides the command. No upstream (`Upstream` was empty): push with `git push -u origin <branch>`, establishing tracking. An existing upstream: push with `git push`.
 

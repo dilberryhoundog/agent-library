@@ -209,6 +209,10 @@ The git-robot report has arrived and has not yet been presented.
 
 The report is presented unaltered, and the run's outcome is recorded — full success, success worth saving as a workflow, or a run with failures, errors, or process problems.
 
+#### Do this next:
+
+A full success ends the skill — return to the user. A run worth saving moves to saving the workflow; failures, errors, or process problems move to help.
+
 ### Present Findings:
 
 The report already arrives split into `Successful Procedures`, `Failures and Errors`, and `Additional Notes`. Present those sections to the user verbatim — do not re-sort or re-bucket the directive lines. Carry the `Additional Notes` content through unchanged; it is where git-robot surfaces difficulties, so never drop it.
