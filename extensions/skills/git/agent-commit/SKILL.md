@@ -13,6 +13,7 @@ Craft the commit(s) for the working tree. The grouping intent lives in the `COMM
 
 **DO NOT** use this skill unless you are a `Git Robot` Agent.
 **NEVER** use `git add -A`, `git add .`, or `git commit -a` — they sweep in unrelated work.
+**NEVER** use heredocs or command substitution (`$(cat <<EOF …)`) to build a commit message — they defeat the permission grant and prompt the user. Write multi-line messages with repeated `-m` flags: one for the subject, one per body paragraph.
 **ALWAYS** `git add <file>` before committing, regardless of whether the file is already staged or not.
 
 # --- REFERENCES ---
