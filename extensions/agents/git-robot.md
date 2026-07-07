@@ -94,11 +94,19 @@ Route the first (or next) uncompleted procedure to its verb skill.
 
 A brief has arrived, and an uncompleted procedure remains — and no blocking failure has stopped the run.
 
+#### Step finished when:
+
+The procedure's skill equivalent is loaded and its blocking status noted.
+
+#### Do this next:
+
+When every procedure is completed or attempted, or a blocking failure stops the run, move to composing the report.
+
 #### Invariants:
 
 **DO NOT** invoke any other skill or tool, except for the procedure's skill equivalent.
 
-#### Load the Skill Equivalent:
+### Load the Skill Equivalent:
 
 Load the /<skill> equivalent of the first (or next) uncompleted procedure, per the `Procedure Translations` reference.
 
@@ -108,24 +116,31 @@ Load the /<skill> equivalent of the first (or next) uncompleted procedure, per t
 - SWITCH(stash) blocks SWITCH(switch)
 - The final procedure doesn't block.
 
-A skill that fails to load is recorded as a `🚫` Output Directive: when its procedure blocks later ones, the run ends at `+Report`; when it does not, this step applies again for the next uncompleted procedure.
+A skill that fails to load is recorded as a `🚫` Output Directive. When its procedure blocks later ones, no further procedure can run; when it does not, this step applies again for the next uncompleted procedure.
 
 #### Combining Procedures:
 
-When subsequent procedures share the same type, they can be combined under one skill invocation — work through each of them during `+Execute` using the original skill equivalent. Example brief:
+When subsequent procedures share the same type, they can be combined under one skill invocation — work through each of them while executing, using the original skill equivalent. Example brief:
 
-```
-COMMIT(action) <state><task overview>
-COMMIT(action) <state><task overview>
-COMMIT(action) <state><task overview>
-PUSH(action) <state><task overview>
+```txt
+--> COMMIT(action)
+- <state management>
+- task overview
+
+--> COMMIT(action)
+- <state management>
+- task overview
+
+--> COMMIT(action)
+- <state management>
+- task overview
+
+--> PUSH(action)
+- <state management>
+- task overview
 ```
 
 Each `COMMIT` procedure can be completed under the original skill equivalent invocation.
-
-#### Step finished when:
-
-The procedure's skill equivalent is loaded and its blocking status noted.
 
 ## +Execute
 
@@ -135,11 +150,19 @@ Complete the loaded procedure through its verb skill.
 
 A procedure's skill equivalent is loaded and the procedure's actions are not yet completed.
 
+#### Step finished when:
+
+The procedure has executed and its `Output Directive` is recorded — success, or a failure noted with its blocking status.
+
+#### Do this next:
+
+When uncompleted procedures remain and no blocking failure occurred, return to dispatching the next procedure; a blocking failure moves to composing the report.
+
 #### Invariants:
 
 **DO NOT** invoke any other git commands or file reads, Use only inbuilt context the procedure provides.
 
-#### Execute the Procedure:
+### Execute the Procedure:
 
 The called skill equivalent will autoload context and instructions. For the procedure, execute:
 
@@ -147,10 +170,6 @@ The called skill equivalent will autoload context and instructions. For the proc
 - Process all the actions that arrive with the procedure.
 - Integrate the git state requirements as per loaded procedure instructions.
 - Integrate the task overview requirements as per loaded procedure instructions.
-
-#### Step finished when:
-
-The procedure has executed and its `Output Directive` is recorded — success, or a failure noted with its blocking status. When uncompleted procedures remain and no blocking failure occurred, `+Dispatch` applies again for the next one; a blocking failure ends the run at `+Report`.
 
 ## +Report
 
@@ -160,11 +179,19 @@ Present the run's outcome to the invoking agent — the exit for successes, fail
 
 Every procedure has been completed or attempted, or a blocking failure or unprocessable brief means no further procedure can run.
 
+#### Step finished when:
+
+The report covers every completed and attempted procedure and is presented to the invoking agent.
+
+#### Do this next:
+
+Finish your turn.
+
 #### Invariants:
 
 **DO NOT** Include any additional prose or reporting except for what is granted here.
 
-#### Compose the Report:
+### Compose the Report:
 
 Review all procedures conducted. Present the `Output Directive` for each procedure using this format:
 
@@ -188,10 +215,6 @@ The three sections are fixed and always present, in this order. Route each `Outp
 #### Difficulties:
 
 `Additional Notes` is the only place difficulties surface. If you encountered any problem during your invocation (a malformed brief, an unprocessable instruction, a no-op worth explaining), write a short paragraph here. If there were none, write `none` — never omit the section.
-
-#### Step finished when:
-
-The report covers every completed and attempted procedure and is presented to the invoking agent. Then finish your turn.
 
 # --- TERMS ---
 

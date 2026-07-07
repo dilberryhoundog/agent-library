@@ -55,17 +55,21 @@ Decide the push shape from the live branch state.
 
 A `PUSH` procedure from the `Brief` awaits processing.
 
+#### Step finished when:
+
+The push shape is decided — unpushed commits with a fast-forwardable remote (or no upstream yet), an up-to-date no-op (empty `Unpushed commits` with an existing upstream), or a rejection (a branch behind or diverged from its upstream).
+
+#### Do this next:
+
+Unpushed commits with a fast-forwardable remote (or no upstream) move to pushing; a no-op or rejection moves to reporting the result — do not push a rejected branch.
+
 #### Invariants:
 
 **ENSURE** `Current Git State` is used to decide the push shape. Do not guess the branch or remote from the procedure text alone.
 
-#### Review the State:
+### Review the State:
 
 From the `Brief` read the `PUSH` procedure. Review it against the `Current Git State`: whether an upstream exists, whether unpushed commits exist, and whether the branch can fast-forward its remote.
-
-#### Step finished when:
-
-The push shape is decided. Unpushed commits with a fast-forwardable remote (or no upstream yet) mean `+Push` applies. An empty `Unpushed commits` with an existing upstream is an up-to-date no-op for `+Result`; a branch behind or diverged from its upstream is a rejection for `+Result` — do not push it.
 
 ## +Push
 
@@ -75,17 +79,21 @@ Deliver the current branch to its remote.
 
 The push shape is decided and there are unpushed commits the remote can fast-forward (or the branch has no upstream yet), and no push has been attempted.
 
-#### Decision:
+#### Step finished when:
+
+The push has completed or failed, and the outcome is recorded.
+
+#### Do this next:
+
+Move to reporting the result.
+
+### Decision:
 
 The upstream decides the command. No upstream (`Upstream` was empty): push with `git push -u origin <branch>`, establishing tracking. An existing upstream: push with `git push`.
 
 #### Run:
 
 Push, and record the branch, the remote it pushed to, and the resulting state for the `Result`.
-
-#### Step finished when:
-
-The push has completed or failed, and the outcome is recorded for `+Result`.
 
 ## +Result
 
@@ -95,11 +103,19 @@ Emit the outcome back to git-robot so it can render the `PUSH` Output Directive 
 
 The push outcome is recorded, or the procedure resolved without pushing (up to date, rejection, or error).
 
+#### Step finished when:
+
+The result line is emitted.
+
+#### Do this next:
+
+The skill is over, hand control back to git-robot.
+
 #### Invariants:
 
 **DO NOT** add prose beyond the result line and any no-op or rejection note.
 
-#### Result:
+### Result:
 
 Return a single line — the branch, remote, and resulting state:
 
@@ -112,10 +128,6 @@ Include rejections, errors, and no-ops:
 ```txt
 <rejection, error, or up-to-date note>
 ```
-
-#### Step finished when:
-
-The result line is emitted. The skill is over, hand control back to git-robot.
 
 # --- TERMS ---
 

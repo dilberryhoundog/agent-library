@@ -121,11 +121,19 @@ Load the current COMMIT procedure and the real diffs it covers.
 
 A `COMMIT` procedure from the `Brief` awaits processing, and no earlier no-op or refusal has ended the run.
 
+#### Step finished when:
+
+The procedure's directive and its expanded diffs are read, and the action to run is decided — a `new` action, an `amend` action, or a no-op (nothing in the procedure's scope to commit — clean tree, or every changed file outside the directive's scope; or an `amend` that follows a `new`, or a second `amend`, in the same brief). Never invent or force an empty commit.
+
+#### Do this next:
+
+A decided `new` action moves to creating new commits; a decided `amend` action moves to amending; a no-op moves to reporting the result.
+
 #### Invariants:
 
 **ALWAYS** use the `Expanded Diffs` to write the commit message. Do not guess from filenames or procedure details.
 
-#### Review Against the Tree:
+### Review Against the Tree:
 
 From the `Brief` read the current `COMMIT` procedure. Review it against the `Current Git State`.
 
@@ -141,10 +149,6 @@ git diff <paths>
 git diff --cached <paths>
 ```
 
-#### Step finished when:
-
-The procedure's directive and its expanded diffs are read, and the action is routed: `COMMIT(new)` means `+Commit New` applies; `COMMIT(amend)` means `+Commit Amend` applies. Nothing in the procedure's scope to commit (clean tree, or every changed file outside the directive's scope) is a no-op for `+Result` — never invent or force an empty commit. An `amend` that follows a `new`, or a second `amend`, in the same brief is likewise a no-op for `+Result`.
-
 ## +Commit New
 
 Create one or more new commits from the working tree, grouped per the procedure's directive.
@@ -153,7 +157,15 @@ Create one or more new commits from the working tree, grouped per the procedure'
 
 The current procedure is `COMMIT(new)` and its commits have not been made.
 
-#### Commit Splitting:
+#### Step finished when:
+
+Every commit for the current procedure is made and recorded.
+
+#### Do this next:
+
+When further `COMMIT` procedures remain in the `Brief`, return to reading the next one; otherwise move to reporting the result.
+
+### Commit Splitting:
 
 Map the procedure's directive onto the real changes from the `Expanded Diffs`. A directive may name a count ("3 commits"), a scope filter ("housekeeping, leave the rest"), or a free description. When unclear on how to manage the diff, fall back to the `Splitting heuristics`. Prefer fewer, cohesive commits — 1–4 per logical unit — and commit dependencies first so history stays bisectable. Your goal is a logical grouping of changes across every file in the procedure.
 
@@ -166,10 +178,6 @@ Map the procedure's directive onto the real changes from the `Expanded Diffs`. A
 
 Move to the next grouping, following the same procedure, until all the required files are committed. Remember each commit's short hash and subject as a `Result` to fold into the final report.
 
-#### Step finished when:
-
-Every commit for the current procedure is made and recorded. When further `COMMIT` procedures remain in the `Brief`, `+Read Procedure` applies again for the next one; otherwise `+Result` applies.
-
 ## +Commit Amend
 
 Fold the in-scope changes into the previous commit, or reword its message, per the procedure's task overview.
@@ -178,7 +186,15 @@ Fold the in-scope changes into the previous commit, or reword its message, per t
 
 The current procedure is `COMMIT(amend)` and the amend has not been made.
 
-#### Check for Push:
+#### Step finished when:
+
+The amend is complete and recorded, or refused and the refusal recorded.
+
+#### Do this next:
+
+When further `COMMIT` procedures remain in the `Brief`, return to reading the next one; otherwise move to reporting the result.
+
+### Check for Push:
 
 Determine whether `HEAD` has already reached the remote — amending a pushed commit rewrites shared history.
 
@@ -191,7 +207,7 @@ Treat any non-empty result (or an explicit upstream match) as **pushed = true**.
 
 #### Decision:
 
-Two conditions refuse the amend: the directive suggests changes to more than one previous commit (amend is a single-commit action; splitting is not supported), or the `Check for Push` reveals the commit has been pushed. Either way, amend nothing and record the refusal for `+Result`.
+Two conditions refuse the amend: the directive suggests changes to more than one previous commit (amend is a single-commit action; splitting is not supported), or the `Check for Push` reveals the commit has been pushed. Either way, amend nothing and record the refusal for the result.
 
 #### Commit:
 
@@ -199,10 +215,6 @@ Two conditions refuse the amend: the directive suggests changes to more than one
 - Confirm with `git status --short` that the intended files are staged with a clean working tree.
 - Amend with `git commit --amend`, rewriting the message to stay within `Commit message format`
 - Run the `Breaking changes` check, against the combined change.
-
-#### Step finished when:
-
-The amend is complete and recorded, or refused and the refusal recorded. When further `COMMIT` procedures remain in the `Brief`, `+Read Procedure` applies again for the next one; otherwise `+Result` applies.
 
 ## +Result
 
@@ -212,11 +224,19 @@ Emit the outcome back to git-robot so it can render the `COMMIT` Output Directiv
 
 Every `COMMIT` procedure in the `Brief` has been processed, or a no-op or refusal has ended the run.
 
+#### Step finished when:
+
+The result lines are emitted.
+
+#### Do this next:
+
+The skill is over, hand control back to git-robot.
+
 #### Invariants:
 
 **DO NOT** add prose beyond the commit lines and any no-op or skip note.
 
-#### Result:
+### Result:
 
 Return one line per commit completed — short hash and subject only, no body:
 
@@ -229,10 +249,6 @@ Include errors and failures:
 ```txt
 <error or failure message>
 ```
-
-#### Step finished when:
-
-The result lines are emitted. The skill is over, hand control back to git-robot.
 
 # --- TERMS ---
 
