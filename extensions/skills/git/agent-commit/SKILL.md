@@ -19,7 +19,7 @@ Craft the commit(s) for the working tree. The grouping intent lives in the `COMM
 
 ## Current Git state
 
-These overviews show _what_ changed and how much — enough to plan the grouping. Pull the actual diff content per group in the `+READ PROCEDURE` step; do not rely on the file names alone.
+These overviews show _what_ changed and how much — enough to plan the grouping. Pull the actual diff content per group in the `+Read Procedure` step; do not rely on the file names alone.
 
 === Branch + status ===  
 !`git status --short --branch`
@@ -106,12 +106,30 @@ Keep changes together when they form one cohesive feature, depend on each other 
 
 # --- STEPS ---
 
-## +READ PROCEDURE
+> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+>
+>- Fully meet a step's *step finished when* conditions before considering it done.
+>- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
+>- If a step cannot be completed, move to the step that handles the condition/error.
+>- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
 
-From the `Brief` read the current `COMMIT` procedure.
-Review against the `Current Git State`.
+## +Read Procedure
 
-#### Expanded Diffs
+Load the current COMMIT procedure and the real diffs it covers.
+
+#### Start this step when:
+
+A `COMMIT` procedure from the `Brief` awaits processing, and no earlier no-op or refusal has ended the run.
+
+#### Invariants:
+
+**ALWAYS** use the `Expanded Diffs` to write the commit message. Do not guess from filenames or procedure details.
+
+#### Review Against the Tree:
+
+From the `Brief` read the current `COMMIT` procedure. Review it against the `Current Git State`.
+
+#### Expanded Diffs:
 
 Read the full diff for the files in the current group only — not the whole tree. This is the content you write the message from.
 
@@ -123,75 +141,44 @@ git diff <paths>
 git diff --cached <paths>
 ```
 
-#### Agent Invariants
+#### Step finished when:
 
-**USE** the `Expanded Diffs` to write the commit message. Do not guess from filenames or procedure details.
+The procedure's directive and its expanded diffs are read, and the action is routed: `COMMIT(new)` means `+Commit New` applies; `COMMIT(amend)` means `+Commit Amend` applies. Nothing in the procedure's scope to commit (clean tree, or every changed file outside the directive's scope) is a no-op for `+Result` — never invent or force an empty commit. An `amend` that follows a `new`, or a second `amend`, in the same brief is likewise a no-op for `+Result`.
 
-#### Return
+## +Commit New
 
-**IF**: There is nothing in the procedure's scope to commit (clean tree, or every changed file falls outside the directive's scope)
-**THEN**: Commit nothing and proceed to `+RESULT`, recording the no-op. Never invent or force an empty commit.
+Create one or more new commits from the working tree, grouped per the procedure's directive.
 
-**IF**: an `amend` action comes after `new` or multiple `amend` actions in the same `brief`.
-**THEN**: Commit nothing and proceed to `+RESULT`, recording the no-op.
+#### Start this step when:
 
-#### Proceed
+The current procedure is `COMMIT(new)` and its commits have not been made.
 
-**IF**: The procedure action is `COMMIT(new)`
-**THEN**: Proceed to `+COMMIT new`
+#### Commit Splitting:
 
-**IF**: The procedure action is `COMMIT(amend)`
-**THEN**: Proceed to `+COMMIT amend`
+Map the procedure's directive onto the real changes from the `Expanded Diffs`. A directive may name a count ("3 commits"), a scope filter ("housekeeping, leave the rest"), or a free description. When unclear on how to manage the diff, fall back to the `Splitting heuristics`. Prefer fewer, cohesive commits — 1–4 per logical unit — and commit dependencies first so history stays bisectable. Your goal is a logical grouping of changes across every file in the procedure.
 
-## +COMMIT new
-
-Create one or more new commits from the working tree, grouped per the procedure's directive (git state, task overview).
-
-#### Commit Splitting
-
-Map each procedure's directive onto the real changes from the `Expanded Diffs`.
-A directive may...
-
-- Name a count ("3 commits")
-- A scope filter ("housekeeping, leave the rest")
-- A free description.
-
-When unclear on how to manage the diff:
-Fall back to the `Splitting heuristics`.
-
-Prefer fewer, cohesive commits — 1–4 per logical unit.
-Commit dependencies first so history stays bisectable.
-
-Your goal is to have a logical grouping of changes across every file in the procedure.
-
-#### Commit
+#### Commit:
 
 - Stage each file in the group with `git add <file>` (re-stage if already staged)
 - Confirm with `git status --short` that the intended files are staged with a clean working tree.
-- run the `Breaking changes` check
+- Run the `Breaking changes` check
 - Commit the changes with `git commit -m <message>` (write the message per `Commit message format`)
 
-Move to the next grouping, following the same procedure, until all the required files are committed.
+Move to the next grouping, following the same procedure, until all the required files are committed. Remember each commit's short hash and subject as a `Result` to fold into the final report.
 
-#### Results
+#### Step finished when:
 
-Remember each commit's short hash and subject as a `Result` to fold into the final report.
+Every commit for the current procedure is made and recorded. When further `COMMIT` procedures remain in the `Brief`, `+Read Procedure` applies again for the next one; otherwise `+Result` applies.
 
-#### Return
-
-**IF**: There are further `COMMIT` procedures in the `Brief`
-**THEN**: Return to `+READ PROCEDURE` for the next procedure.
-
-#### Proceed
-
-**WHEN**: Every commit for the current procedure is made **AND** no `COMMIT` procedures remain after this one
-**THEN**: Proceed to `+RESULT`.
-
-## +COMMIT amend
+## +Commit Amend
 
 Fold the in-scope changes into the previous commit, or reword its message, per the procedure's task overview.
 
-#### Check for Push
+#### Start this step when:
+
+The current procedure is `COMMIT(amend)` and the amend has not been made.
+
+#### Check for Push:
 
 Determine whether `HEAD` has already reached the remote — amending a pushed commit rewrites shared history.
 
@@ -202,35 +189,34 @@ git branch -r --contains HEAD
 
 Treat any non-empty result (or an explicit upstream match) as **pushed = true**. If the branch has no upstream and no remote contains `HEAD`, treat as **pushed = false**.
 
-#### Decision
+#### Decision:
 
-**IF**: The directive suggests changes to more than one previous commit. **OR** The `Check for Push` reveals the commit has been pushed to the remote branch.
-**THEN**: End all procedures **AND** Report to the main agent the details of your no-op.
+Two conditions refuse the amend: the directive suggests changes to more than one previous commit (amend is a single-commit action; splitting is not supported), or the `Check for Push` reveals the commit has been pushed. Either way, amend nothing and record the refusal for `+Result`.
 
-#### Commit
-
-> Amend is a single commit only, splitting etc is not supported.
+#### Commit:
 
 - Stage each file in the group with `git add <file>` (re-stage if already staged)
 - Confirm with `git status --short` that the intended files are staged with a clean working tree.
 - Amend with `git commit --amend`, rewriting the message to stay within `Commit message format`
-- run the `Breaking changes` check, against the combined change.
+- Run the `Breaking changes` check, against the combined change.
 
-#### Return
+#### Step finished when:
 
-**IF**: There are further `COMMIT(new)` procedures in the `Brief`
-**THEN**: Return to `+READ PROCEDURE` for the next procedure.
+The amend is complete and recorded, or refused and the refusal recorded. When further `COMMIT` procedures remain in the `Brief`, `+Read Procedure` applies again for the next one; otherwise `+Result` applies.
 
-#### Proceed
-
-**IF**: The ammend is complete **AND** no `COMMIT(new)` procedures remain
-**THEN**: Proceed to `+RESULT`.
-
-## +RESULT
+## +Result
 
 Emit the outcome back to git-robot so it can render the `COMMIT` Output Directive in its report.
 
-#### Result
+#### Start this step when:
+
+Every `COMMIT` procedure in the `Brief` has been processed, or a no-op or refusal has ended the run.
+
+#### Invariants:
+
+**DO NOT** add prose beyond the commit lines and any no-op or skip note.
+
+#### Result:
 
 Return one line per commit completed — short hash and subject only, no body:
 
@@ -244,14 +230,9 @@ Include errors and failures:
 <error or failure message>
 ```
 
-#### Agent Invariants
+#### Step finished when:
 
-**DO NOT** add prose beyond the commit lines and any no-op or skip note.
-
-#### Return
-
-**WHEN**: The result lines are emitted
-**END**: The skill is over, hand control back to git-robot.
+The result lines are emitted. The skill is over, hand control back to git-robot.
 
 # --- TERMS ---
 

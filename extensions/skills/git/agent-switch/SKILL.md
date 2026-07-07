@@ -52,100 +52,102 @@ The `Result` you return mirrors git's own report. Capture the meaningful state f
 
 # --- STEPS ---
 
-## +READ PROCEDURE
+> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+>
+>- Fully meet a step's *step finished when* conditions before considering it done.
+>- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
+>- If a step cannot be completed, move to the step that handles the condition/error.
+>- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
 
-From the `Brief` read the `SWITCH` procedure and its actions. Review them against the `Current Git State`, to judge tree cleanliness and branch existence.
+## +Read Procedure
 
-Pick the first/next uncompleted action.
+Judge the next action against the live tree before running anything.
 
-#### Decision
+#### Start this step when:
 
-**IF**: The procedure contains a `switch` action on a dirty tree **AND** no `stash` action precedes it in the procedure (or in an earlier still-open `SWITCH(stash)`)  
-**THEN**: Run no actions. End with `+RESULT` recording the refusal, so git-robot can surface it.
+The `SWITCH` procedure holds an action not yet run, and no refusal or failure has ended the run.
 
-**IF**: A `switch` action names a target branch that does not exist.  
-**THEN**: Run no actions. End with `+RESULT` recording the missing-branch refusal.
+#### Review the Action:
 
-#### Proceed
+From the `Brief` read the `SWITCH` procedure and its actions. Review them against the `Current Git State`, to judge tree cleanliness and branch existence. Pick the first/next uncompleted action.
 
-**IF**: The action is safe to run (clean tree, or stash precedes switch, and the target exists)  
-**THEN**: Proceed to the relevant section based upon the following map:
+#### Decision:
 
-- `stash` --> `+STASH`
-- `switch` -> `+SWITCH`
-- `pop` -> `+POP`
+Safety decides whether the action runs at all. A `switch` action on a dirty tree with no `stash` action preceding it (in the procedure, or in an earlier still-open `SWITCH(stash)`) is a refusal — run no actions and record it for `+Result`. A `switch` action naming a target branch that does not exist is likewise a missing-branch refusal.
 
-**IF**: No more actions need to be processed
-**THEN**: Proceed to `+RESULT`
+#### Step finished when:
 
-## +STASH
+The next action is judged safe to run (clean tree, or stash precedes switch, and the target exists) — the matching action step (`+Stash`, `+Switch`, `+Pop`) now applies. A refusal, or no actions remaining, belongs to `+Result`.
+
+## +Stash
 
 Set the dirty working tree aside before moving.
 
-Run `git stash push -u`.
+#### Start this step when:
 
-Record the stash result.
+The next safe action is `stash`.
 
-#### Agent Invariants
+#### Invariants:
 
-**DO NOT** create an empty stash. report the no-op instead
+**DO NOT** create an empty stash. Report the no-op instead.
 
-#### Return
+#### Run:
 
-**IF**: The action succeeds.
-**THEN**: Return back to `+READ PROCEDURE` to continue processing the actions.
+Run `git stash push -u`. Record the stash result.
 
-#### Proceed
+#### Step finished when:
 
-**IF**: An error arises, or the command fails **OR** The working tree is already clean.
-**THEN**: Proceed to `+RESULT` with the refusal/no-op note:
+The stash result is recorded — `+Read Procedure` applies again for the next action. A command failure, or an already-clean tree, is a no-op or refusal for `+Result`.
 
-## +SWITCH
+## +Switch
 
 Change to the target branch named in the task overview.
 
-Run `git switch <branch>`.
-Record the branch moved to.
+#### Start this step when:
 
-#### Return
+The next safe action is `switch`.
 
-**IF**: The action succeeds.
-**THEN**: Return back to `+READ PROCEDURE` to continue processing the actions.
+#### Run:
 
-#### Proceed
+Run `git switch <branch>`. Record the branch moved to.
 
-**IF**: Any failure or error arises.
-**THEN**: Continue to `+RESULT` and emit the refusal note.
+#### Step finished when:
 
-## +POP
+The switch result is recorded — `+Read Procedure` applies again for the next action. Any failure or error is a refusal note for `+Result`.
+
+## +Pop
 
 Restore the most recent stash entry onto the current branch.
 
-Run `git stash pop`.
+#### Start this step when:
 
-#### Agent Invariants
+The next safe action is `pop`.
+
+#### Invariants:
 
 **DO NOT** resolve conflicts from the Pop action. Report the conflict instead.
 
-#### Return
+#### Run:
 
-**IF**: The action succeeds.
-**THEN**: Return back to `+READ PROCEDURE` to continue processing the actions.
+Run `git stash pop`. Record the restore, and any conflict git reports.
 
-#### Proceed
+#### Step finished when:
 
-**IF**: Any failure or error arises.
-**THEN**: Continue to `+RESULT` and emit the refusal note.
+The pop result is recorded — `+Read Procedure` applies again for the next action. Any failure, error, or conflict is a note for `+Result`.
 
-## +RESULT
+## +Result
 
 Emit the outcome/s back to git-robot so it can render the `SWITCH` Output Directive in its report.
 
-#### Agent Invariants
+#### Start this step when:
+
+Every action in the procedure has run, or a refusal, failure, or conflict has ended the run early.
+
+#### Invariants:
 
 **DO NOT** add prose beyond the action lines and any refusal or conflict note.
 
-#### Result
+#### Result:
 
 Return one line per action run — the action and its resulting state:
 
@@ -159,10 +161,9 @@ Include refusals, conflicts, and no-ops:
 <refusal, conflict, or no-op note>
 ```
 
-#### Return
+#### Step finished when:
 
-**WHEN**: The result lines are emitted
-**END**: The skill is over, hand control back to git-robot.
+The result lines are emitted. The skill is over, hand control back to git-robot.
 
 # --- TERMS ---
 
