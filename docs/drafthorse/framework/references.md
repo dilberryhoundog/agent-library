@@ -1,8 +1,6 @@
 # References
 
-References are the data segment — context a step delivers to the agent. They are inert: a reference holds no logic, only the constants, maps, formats, and facts the steps act on. The steps do the timing — a step's job is to put the right context in front of the agent at the right time and place.
-
-A reference can be cited from *any* slot — engagement, decision, breakout, proceed. No single primitive routes references; the citing step decides when its context is needed.
+References are the data segment — context a step delivers to the agent. A reference holds the constants, maps, formats, and facts the steps act on (data by preference, not hard law — see the *references carry data* convention). The steps do the timing — a step's job is to put the right context in front of the agent at the right time and place, citing the reference inline at the moment of use (see the *cite references at the moment of use* convention).
 
 References fall on one axis: **static** (context that sits in or next to the document) versus **dynamic** (Claude-native functionality that produces context at runtime).
 

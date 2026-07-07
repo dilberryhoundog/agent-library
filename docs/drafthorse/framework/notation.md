@@ -1,25 +1,19 @@
 # Notation
 
-Notation is the language DraftHorse layers on top of plain markdown — the small set of tokens a builder learns once to read or write any DraftHorse document. This file teaches *form* only: how each token is written. What the operators *do* is defined in [steps.md](steps.md).
+Notation is the small set of markings DraftHorse layers on top of plain markdown. A DraftHorse document is written to be read cold — an agent that has never seen the framework should follow it from the document alone — so the notation carries no control flow; it only marks *what kind of thing* a piece of text is. The steps preamble (see [steps.md](steps.md)) teaches the one reading rule inside every document itself.
 
-## The principle: bold + CAPS = execution
+## The principle: bold + CAPS = a rule the agent must obey
 
-A token written in **bold capitals** is a machine instruction the agent must obey or act on — a jump, an operator, or an invariant keyword. Everything not in bold capitals is context the agent reads, not executes.
+A token written in **bold capitals** is an invariant keyword — a hard rule the agent must hold. Everything else is content the agent reads and acts on with its own judgment. This is the only executable marking in the notation.
 
-This single rule is what makes a DraftHorse document read as runnable rather than as an essay. The agent scans for the bold-caps tokens to find the control flow and the hard rules, and treats the surrounding prose as the context those instructions act on. Every executable token below is an instance of this principle.
+- `**DO NOT** / **ALWAYS** / **NEVER** …` → rule — the invariant form: a bolded imperative keyword followed by the rule it enforces. The keyword family is open (`**ENSURE**`, `**USE**`, and kin are valid); `DO NOT` / `ALWAYS` / `NEVER` are the core set.
 
-## Tokens
+## Structural markings (not executable — these organise and name)
 
-**Executable** (bold + CAPS — the agent acts on these):
-
-- `**-> +STEP**` — a jump to another node; the GOTO that wires the step graph.
-- `**IF** / **WHEN** / **THEN** / **END** / **OR** / **AND**` — the operator vocabulary (`OR` and `AND` used inline). Form here; behaviour in [steps.md](steps.md).
-- `**DO NOT** / **ALWAYS** / **NEVER** …` → explanation — the invariant form: a bolded action keyword followed by the rule it enforces.
-
-**Structural / label** (not executable — these organise and name):
-
-- `##` / `####` — heading levels: `##` declares a step node; `####` declares an in-step component heading.
-- `## +STEP NAME` — a step node declaration: CAPS, `+` prefix, H2.
+- `## +Step Name` — a step node: `+` prefix, Title Case, H2. The `+` distinguishes steps from reference and term headings.
+- `#### Start this step when:` / `#### Step finished when:` / `#### Do this next:` / `#### Invariants:` — the machinery headings, always H4, in this order (the last two optional): the step's contract, read without engaging (see [steps.md](steps.md)).
+- `###` — the engagement heading: one H3 named for the work opens the step's body; the work may structure itself with H4 sub-headings of its own.
+- `# --- REFERENCES --- / # --- STEPS --- / # --- TERMS ---` — the segment dividers of the scaffold (see [scaffold.md](scaffold.md)).
 - `=== Mini Heading ===` — a lightweight in-block label, lighter than a `####`.
 - `:` prefix — a term definition in the Terms section.
-- Title Case — References and Terms entries are named in Title Case, distinguishing them from the CAPS of step nodes.
+- Title Case — References and Terms entries are named in Title Case.

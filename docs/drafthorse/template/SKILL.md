@@ -6,14 +6,16 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 # disable-model-invocation: true   # user-invoked: strips description from agent context
 # user-invocable: false            # executor-only: cannot be called by the user directly
 # --- permissions (grants transfer to a sub-agent that invokes this skill) ---
-allowed-tools: <!-- e.g. Bash(git status *), Skill(...), Agent(...) -->
+# allowed-tools: e.g. Bash(git status *), Skill(...), Agent(...)
 ---
+
+# <Skill Title>
 
 <!-- One- or two-line statement of what this skill is for and why it exists. The leading concept the agent should carry while running it. -->
 
 # Agent Invariants
 
-<!-- GLOBAL invariants — hold across every step, no exceptions. Bold + CAPS keyword + the rule. Single source of truth: state once here, never restate per step. -->
+<!-- GLOBAL invariants — hold across every step, no exceptions. Bold + CAPS keyword + the rule (open family; DO NOT / ALWAYS / NEVER are the core set). Single source of truth: state once here, never restate per step. -->
 
 **DO NOT** <!-- ... -->
 **ALWAYS** <!-- ... -->
@@ -21,7 +23,7 @@ allowed-tools: <!-- e.g. Bash(git status *), Skill(...), Agent(...) -->
 
 # --- REFERENCES ---
 
-<!-- The data segment. Context only, never logic. Cite from any step/slot. Title Case names. -->
+<!-- The data segment. Constants, maps, formats, facts — data by preference, no work. Steps cite these inline at the moment of use. Title Case names. -->
 
 ## <Reference Name>
 
@@ -32,70 +34,86 @@ allowed-tools: <!-- e.g. Bash(git status *), Skill(...), Agent(...) -->
 
 ## <Reference Name>
 
-<!-- DYNAMIC reference — runtime-produced context (data load / external call / agent / hook). -->
-<!-- e.g. live state pulled in as source of truth, or a route out to another skill/tool. -->
+<!-- DYNAMIC reference — runtime-produced context (data load / external call / agent / hook), e.g. live state pulled in with a !`command` block. -->
 
 <!-- EXTERNAL static reference — if expansive and only sometimes relevant, push it to a sibling file and point at it here instead of inlining. -->
 
 # --- STEPS ---
 
-<!-- The executable body — the only place logic lives. Each step is an atomic, bounded, ordered unit ending on a checkable, exhaustive completion criterion (the exit edge). Fill only the slots a step needs; delete the rest. -->
+> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+>
+>- Fully meet a step's *step finished when* conditions before considering it done.
+>- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
+>- If a step cannot be completed, move to the step that handles the condition/error.
+>- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
 
-## +<FIRST STEP NAME>
+<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). H4 headings are the step's contract; the H3 opens the work. A step names another step only in its "Do this next:" slot; conditions are written in state terms, never step terms. -->
 
-<!-- Engagement — the core charge / work to complete. -->
+## +<Step Name>
 
-#### Agent Invariants
+<!-- One-line statement of what this step does. -->
 
-<!-- STEP-SCOPED rules that bind only inside this step. Delete if none. -->
+#### Start this step when:
 
-#### Decision
+<!-- The state that makes this the right work, in state terms. Exclude half-applied states — a condition that still holds after the step failed partway invites a destructive re-run. -->
 
-<!-- Dynamic, multi-way edge. Mini-instruction stating WHAT is decided and BETWEEN WHAT, then the bounded options. Delete if the step has no branch. -->
+#### Step finished when:
 
-**IF**: <condition>
-**THEN**: <!-- ... -->
+<!-- This step's own completion criteria only — checkable and exhaustive. Could the agent claim this is met while work remains? If yes, sharpen it. No other steps, no routing, no instructions. -->
 
-**IF**: <condition>
-**THEN**: <!-- ... -->
+#### Do this next:
 
-#### Return
+<!-- Optional prose: happy-path pointer, loop back, bail on failure, or skill exit. Points only — never restate the destination's conditions. Delete when the dovetail is obvious. -->
 
-<!-- Single edge looping back to an earlier node. Delete if unused. -->
+#### Invariants:
 
-**IF**: <condition>
-**THEN**: **-> +<STEP>**
+<!-- Rules in force while the step is in play. Delete the section if none. -->
 
-#### Proceed
+### <Heading Named for the Work>:
 
-<!-- Single edge advancing to the next node. Carries the completion criterion. -->
+<!-- The engagement — the work, as prose. Cite references inline at the moment they matter. Structure with H4 sub-headings when the work has distinct parts. -->
 
-**WHEN**: <completion criterion — checkable and exhaustive>
-**THEN**: **-> +<NEXT STEP NAME>**
+## +<Success Exit Step Name>
 
-## +<NEXT STEP NAME>
+<!-- Reports the outcome and ends the skill. -->
 
-<!-- Engagement. -->
+#### Start this step when:
 
-#### Breakout
+<!-- All the work is finished — stated exhaustively ("every item processed, declined, or reported empty"). -->
 
-<!-- Optional: hand the agent a creative / situationally-dependent stretch. This step launches the agent; a later step catches it. State the charge, the context delivered, and the catch condition. Delete if unused. -->
+#### Step finished when:
 
-#### Proceed
+<!-- The summary is presented. The skill is complete. -->
 
-**WHEN**: <completion criterion>
-**THEN**: **-> +<STEP>**
+#### Do this next:
 
-## +<FINAL STEP NAME>
+End the skill and return to the user.
 
-<!-- Engagement. -->
+### <Report>:
 
-#### End
+<!-- Summarise the run's outcome for the user. -->
 
-<!-- Terminate the step process and return control to the caller. -->
+## +Handle a Problem
 
-**WHEN**: <completion criterion>
-**END**
+<!-- The error step — the drain that makes coverage subtractive. Keep the start condition generic. -->
+
+Surface anything the other steps don't cover, and decide with the user how to continue.
+
+#### Start this step when:
+
+Something has gone wrong, or a situation has arisen that no other step covers.
+
+#### Step finished when:
+
+The user has been informed and has decided how to continue.
+
+#### Do this next:
+
+Resume the step the user chose, or end the skill.
+
+### Surface the Problem:
+
+Tell the user plainly what happened, where it arose, what state things are now in (especially anything half-applied), and what the options are.
 
 # --- TERMS ---
 
