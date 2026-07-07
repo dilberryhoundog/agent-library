@@ -83,7 +83,7 @@ The units are now identified in the config — proceed to preflight.
 
 ### Create or Amend the Config:
 
-Follow `references/setup-instructions.md` to discover the repository's units with the user and draft the config (or add/amend the one missing unit in the existing config). Show the drafted config to the user before it is used.
+Interview the repository to discover its units — how many deliverables, where each manifest's literal version string lives, the tag pattern, where each changelog lives, and which units publish GitHub releases — using the discovery heuristics and field rules in `references/config-template.md`, and confirm the findings with the user. Draft the config from the template at its preferred placement; when a config already exists, add or amend only the missing unit's block, following the existing units' conventions rather than recreating the file. Show the drafted config or amended block to the user before it is used.
 
 ## +Preflight
 
@@ -119,9 +119,9 @@ Every targeted unit has a computed range. A named unit with no commits in range 
 
 ### Compute the Range:
 
-Resolve the unit's paths per the config's path-resolution rule — the unit directory plus the repo-relative target of every symlink inside it. Find the unit's latest tag matching its tag pattern (`git tag -l '<pattern>'`, sorted by version). The range is `<last-tag>..HEAD` filtered to those paths (`git log <last-tag>..HEAD -- <paths>`).
+Resolve the unit's paths per the config's path-resolution rule — the unit directory plus the repo-relative target of every symlink inside it. Compute the range with the command block in `references/release-process.md` ("Determining the commit range"): the unit's latest tag matching its tag pattern, then `<last-tag>..HEAD` filtered to the unit's paths.
 
-**First release** (no tag matches): the baseline is the manifest's current version, and the changelog entry summarises the unit's history to date.
+**First release** (no tag matches): the baseline is the manifest's current version (`0.1.0` when no manifest exists — confirm with the user). Skip the bump derivation and release the baseline version itself unless the user prefers otherwise; the changelog entry summarises the unit's history to date rather than itemising every commit.
 
 #### Decision:
 
@@ -159,7 +159,7 @@ The user has seen the bump, the reasoning, and the draft changelog, and has resp
 
 ### Derive and Present:
 
-Map each conventional commit in range to a bump level using the table in `references/release-process.md`. Apply the bump floor from the breaking-change scan — it overrides a lower commit-derived bump; report any discrepancy. Present the commit list, what each commit maps to, the resulting bump (e.g. "2 feat, 1 fix → minor: 1.0.1 → 1.1.0"), and a draft changelog entry written user-facing — what a user of the unit notices, not a git log dump. Always show the reasoning so the user can audit and learn the mapping, and state whether the breaking-change scan ran, was skipped (with the reason), or failed.
+Map each conventional commit in range to a bump level using the table in `references/release-process.md`. Apply the bump floor from the breaking-change scan — it overrides a lower commit-derived bump; report any discrepancy. Present the commit list, what each commit maps to, the resulting bump (e.g. "2 feat, 1 fix → minor: 1.0.1 → 1.1.0"), and a draft changelog entry written user-facing — what a user of the unit notices, not a git log dump. Always show the reasoning so the user can audit and learn the mapping, and state whether the breaking-change scan ran, was skipped (with the reason), or failed. When the range contains only commits that change nothing user-visible, ask the user whether a release is warranted at all before proposing a bump.
 
 ## +Execute
 
@@ -182,7 +182,7 @@ The manifest, changelog, commit, tag, push, and any GitHub release are complete 
 
 ### Apply the Release:
 
-Follow the command sequences in `references/release-process.md`, using the user's final bump and changelog text. Update the manifest version and the changelog. Create the release commit, the annotated tag, push with tags, and the GitHub release when the unit enables it. When any command fails partway, stop — do not retry commands that already succeeded.
+Follow the command sequences in `references/release-process.md`, using the user's final bump and changelog text. Update the manifest version and the changelog; when the unit's manifest is `none`, skip the manifest edit, stage only the changelog, and treat the tag as the version's source of truth. When the unit has no changelog yet, create it from the skill directory's `assets/CHANGELOG-template.md`, replacing the placeholder version, date, and entry with the actual baseline. Create the release commit, the annotated tag, push with tags, and the GitHub release when the unit enables it. When any command fails partway, stop — do not retry commands that already succeeded.
 
 ## +Verify
 
@@ -198,7 +198,7 @@ Every version location agrees and the unit is reported released, or a mismatch i
 
 ### Confirm the Versions Agree:
 
-Check that the manifest version, the changelog heading, the tag (local and remote), and the GitHub release (when configured) all name the same version.
+Work through the verification checklist in `references/release-process.md`: the manifest version, the changelog heading, the tag (local and remote), the GitHub release (when configured), and a clean tree must all agree on the released version.
 
 ## +Finish
 
@@ -239,6 +239,10 @@ Resume the step the user chose, or end the skill.
 ### Surface the Problem:
 
 Tell the user plainly what happened, where in the release it arose, what state the repository is now in (especially anything half-applied: a commit without its tag, a tag not pushed, a release note missing), and what the options are. A pushed commit and tag are durable even when a later step failed — never retry by re-tagging.
+
+#### Github release failure
+
+when only the GitHub release step failed (e.g. `gh` missing or unauthenticated), instruct the user to publish the release manually for the existing tag.
 
 # --- TERMS ---
 
