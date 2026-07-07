@@ -34,6 +34,11 @@ Contract surfaces commonly include:
 Internal implementation — private helpers, refactors, comments, tests, formatting, docs
 that only describe (not promise) — is not contract.
 
+Command hygiene: keep every shell command a simple read-only invocation that permission
+rules can auto-allow. Never use `find -exec` (it executes arbitrary commands and always
+prompts) — list first (`find <dir> -type l`), then run a separate `readlink <link>` or
+`ls -l <path>` per result.
+
 ### Phase 2 — Diff the contract
 
 Examine the actual changes, not the commit messages:
