@@ -2,7 +2,7 @@
 name: agent-commit
 description: Execute the commit procedure using this skill. Specialised skill for `Git Robot`, not for general agent usage.
 user-invocable: false
-allowed-tools: Bash(git add *), Bash(git status *), Bash(git diff *), Bash(git commit *), Bash(git branch *)
+allowed-tools: Bash(git add *), Bash(git status *), Bash(git diff *), Bash(git commit *), Bash(git branch *), Bash(git restore --staged *)
 ---
 
 # Commit
@@ -171,6 +171,7 @@ Map the procedure's directive onto the real changes from the `Expanded Diffs`. A
 
 #### Commit:
 
+- Check `git diff --cached --name-only` for pre-staged files outside the current group; unstage each with `git restore --staged <file>` — the change itself is preserved for a later group or procedure. Note every unstaged path for the `Result`.
 - Stage each file in the group with `git add <file>` (re-stage if already staged)
 - Confirm with `git status --short` that the intended files are staged with a clean working tree.
 - Run the `Breaking changes` check
@@ -211,6 +212,7 @@ Two conditions refuse the amend: the directive suggests changes to more than one
 
 #### Commit:
 
+- Check `git diff --cached --name-only` for pre-staged files outside the current group; unstage each with `git restore --staged <file>` — the change itself is preserved for a later group or procedure. Note every unstaged path for the `Result`.
 - Stage each file in the group with `git add <file>` (re-stage if already staged)
 - Confirm with `git status --short` that the intended files are staged with a clean working tree.
 - Amend with `git commit --amend`, rewriting the message to stay within `Commit message format`
@@ -234,7 +236,7 @@ The skill is over, hand control back to git-robot.
 
 #### Invariants:
 
-**DO NOT** add prose beyond the commit lines and any no-op or skip note.
+**DO NOT** add prose beyond the commit lines, any no-op or skip note, and any unstaged out-of-scope paths.
 
 ### Result:
 
@@ -248,6 +250,12 @@ Include errors and failures:
 
 ```txt
 <error or failure message>
+```
+
+Include any pre-staged files that were unstaged as out-of-scope, one line each:
+
+```txt
+unstaged (out of scope): <path>
 ```
 
 # --- TERMS ---
