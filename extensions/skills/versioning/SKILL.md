@@ -4,6 +4,7 @@ description: Cut a semantic-version release for a configured unit — bump, chan
 disable-model-invocation: true
 argument-hint: [ unit-name ]
 model: sonnet
+allowed-tools: Bash(git status *), Bash(git symbolic-ref *), Bash(git branch *), Bash(gh auth status)
 ---
 
 # Versioning
