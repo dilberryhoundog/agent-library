@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-07-08
+
+### Fixed
+
+- The versioning skill loads again: its preflight commands (`git status`, `git
+  symbolic-ref`, `git branch`, `gh auth status`) are now granted via `allowed-tools`,
+  so the harness permission check no longer blocks the skill at invocation.
+- git-box's Skill grants now name the installed skills (`dev-tools:agent-commit`,
+  `dev-tools:agent-push`, `dev-tools:agent-switch`), removing the approval prompts on
+  every verb-skill invocation.
+- agent-push loads again: its upstream refs are quoted (`'@{upstream}'`) so the
+  brace-expansion permission check passes and PUSH procedures run.
+
 ## [0.6.0] - 2026-07-07
 
 ### Changed
