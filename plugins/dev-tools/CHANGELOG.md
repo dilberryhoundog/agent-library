@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-07-08
+
+### Fixed
+
+- The versioning skill's preflight branch command no longer pipes through `sed` —
+  pipelines fail the load-time permission check, blocking the skill from loading.
+- The breaking-change-detector agent is barred from `find -exec` (which always
+  prompts); it now lists symlinks first and resolves each with a separate command.
+
 ## [0.6.1] - 2026-07-08
 
 ### Fixed
