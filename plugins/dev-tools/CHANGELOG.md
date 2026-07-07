@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-07-08
+
+### Fixed
+
+- agent-commit no longer sweeps pre-staged out-of-scope files into its first commit:
+  it checks the index against the current group, unstages strays (changes preserved),
+  and reports each unstaged path in its result.
+- git-robot commits no longer trigger permission prompts: commit messages must be
+  built with repeated message flags (heredocs and command substitution are banned)
+  and must not contain literal shell syntax as text.
+- The versioning skill runs prompt-free end to end: its full release command surface
+  (tag, log, diff, add, commit, push, ls-remote, gh release, symlink resolution) now
+  rides the skill's own permission grants.
+
 ## [0.6.2] - 2026-07-08
 
 ### Fixed
