@@ -24,10 +24,10 @@ These overviews show where the local branch sits relative to its remote — enou
 !`git status --short --branch`
 
 === Upstream ===  
-!`git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null`
+!`git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null`
 
 === Unpushed commits ===  
-!`git log @{upstream}..HEAD --oneline 2>/dev/null`
+!`git log '@{upstream}..HEAD' --oneline 2>/dev/null`
 
 ## Push outcomes
 
