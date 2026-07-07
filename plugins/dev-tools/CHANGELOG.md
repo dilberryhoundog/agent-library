@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-07
+
+### Changed
+
+- **Breaking:** the git verb skills are renamed to hyphenated names (`agent-commit`,
+  `agent-push`, `agent-switch`); anything invoking the old names must update.
+- All dev-tools skills — versioning, git-box, and the git-robot agent — are rebuilt on the
+  DraftHorse standalone-step anatomy: each step declares plain-English start/finished
+  conditions, so any agent can execute a run cold.
+- The versioning skill's reference files are now pure data: `setup-instructions.md` is
+  renamed to `config-template.md`, and all procedural instructions moved into the skill's
+  steps.
+
+### Fixed
+
+- Step routing can no longer contradict a step's start condition (do-next guidance is
+  advisory; the start condition is what admits a step).
+- Typos and grammar in the git-box skill documentation.
+
 ## [0.5.0] - 2026-06-26
 
 ### Added
