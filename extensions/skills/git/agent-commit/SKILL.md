@@ -88,6 +88,7 @@ Use `<emoji> <type>: <description>`:
 - Conventional type (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `revert`), paired with the matching emoji from the `Emoji map` above.
 - Imperative mood, present tense — "add feature", not "added feature".
 - First line under 72 characters. Add a body only when the change needs explaining beyond its subject.
+- No literal shell syntax anywhere in the message — dollar-parenthesis substitution, backticks, or glob/parenthesis patterns (e.g. a permission pattern like "Bash(git commit ...)"). The permission checker reads the whole command line and treats such text as live shell syntax, forcing a prompt. Describe the syntax in words instead ("the git commit permission grant").
 
 #### Breaking changes
 
