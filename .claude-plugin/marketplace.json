@@ -7,6 +7,11 @@
   },
   "plugins": [
     {
+      "name": "agent-tools",
+      "source": "./plugins/agent-tools",
+      "category": "development"
+    },
+    {
       "name": "chat-tools",
       "source": "./plugins/chat-tools",
       "category": "productivity"

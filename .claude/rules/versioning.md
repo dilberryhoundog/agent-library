@@ -16,6 +16,14 @@ plugin directory alone.
 
 ## Units
 
+### agent-tools
+
+- paths: plugins/agent-tools plus resolved symlink targets
+- manifest: plugins/agent-tools/.claude-plugin/plugin.json (field: version)
+- changelog: plugins/agent-tools/CHANGELOG.md
+- tag: agent-tools/v{version}
+- github-release: yes
+
 ### chat-tools
 
 - paths: plugins/chat-tools plus resolved symlink targets

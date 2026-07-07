@@ -30,7 +30,7 @@ Versioning is managed by the `versioning` skill (in `dev-tools` plugin). Units a
 Key rules:
 
 - Plugin versions live in `plugins/<name>/.claude-plugin/plugin.json` (field: `version`).
-- Each unit gets its own git tag: `chat-tools/v{version}`, `dev-tools/v{version}`
+- Each unit gets its own git tag: `agent-tools/v{version}`, `chat-tools/v{version}`, `dev-tools/v{version}`
 
 ## Documentation Standards
 
