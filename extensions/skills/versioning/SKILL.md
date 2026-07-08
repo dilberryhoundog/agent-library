@@ -4,7 +4,7 @@ description: Cut a semantic-version release for a configured unit — bump, chan
 disable-model-invocation: true
 argument-hint: [ unit-name ]
 model: sonnet
-allowed-tools: Bash(git status *), Bash(git symbolic-ref *), Bash(git branch *), Bash(gh auth status), Bash(git tag *), Bash(git log *), Bash(git diff *), Bash(git add *), Bash(git commit *), Bash(git push *), Bash(git ls-remote *), Bash(gh release *), Bash(find * -type l), Bash(readlink *)
+allowed-tools: Read, Write, Edit, Agent(dev-tools:breaking-change-detector), Bash(git status *), Bash(git symbolic-ref *), Bash(git branch *), Bash(gh auth status), Bash(git tag *), Bash(git log *), Bash(git diff *), Bash(git add *), Bash(git commit *), Bash(git push *), Bash(git ls-remote *), Bash(gh release *), Bash(find * -type l), Bash(readlink *)
 ---
 
 # Versioning
@@ -112,7 +112,7 @@ Determine the commit range for the unit(s) under release.
 
 #### Start this step when:
 
-Preflight has passed and a targeted unit does not yet have a computed commit range.
+The release preconditions have been verified this run, and a targeted unit does not yet have a computed commit range.
 
 #### Step finished when:
 
@@ -176,7 +176,7 @@ The manifest, changelog, commit, tag, push, and any GitHub release are complete 
 
 #### Invariants:
 
-**NEVER** use heredocs — they are blocked in some sandboxed shells. Build multi-line content with a file-write tool in a temp directory _outside the repository_ and pass it via `-F` / `--notes-file`, or use repeated `-m` flags. Files written inside the repo would dirty the tree and fail verification.
+**NEVER** use heredocs — they are blocked in some sandboxed shells. Build multi-line content with `Write` in a temp directory _outside the repository_ and pass it via `-F` / `--notes-file`, or use repeated `-m` flags. Files written inside the repo would dirty the tree and fail verification.
 **ALWAYS** create annotated tags (`git tag -a`), never lightweight.
 **ALWAYS** release one commit per unit; stage only the files belonging to that release.
 **NEVER** stage untracked files that are not the manifest or changelog; untracked files may exist but do not enter the release commit.
