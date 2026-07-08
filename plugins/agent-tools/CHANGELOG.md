@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-08
+
+### Added
+
+- drafthorse-saddler agent for auditing DraftHorse specs, invocable as an optional independent-review pass from the drafthorse skill's Review step.
+
+### Fixed
+
+- Trimmed the drafthorse skill's tool grants to only what its steps actually use (dropped unused Grep/Glob).
+
 ## [0.1.0] - 2026-07-08
 
 ### Added
