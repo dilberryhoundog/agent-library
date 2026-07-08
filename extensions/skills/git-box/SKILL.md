@@ -69,11 +69,9 @@ SWITCH:
 
 Proven briefs saved as reusable workflows. Replace any generic `<placeholder>` with the request-specific information.
 
-<!-- Currently under construction, awaiting workflow uploads -->
-
-| Workflow Name | Type | Reference | Procedure Map |
-|---------------|------|-----------|---------------|
-|               |      |           |               |
+| Workflow Name   | Type            | Reference                    | Procedure Map     |
+|-----------------|-----------------|------------------------------|-------------------|
+| commit-and-push | commit and push | workflows/commit-and-push.md | COMMIT(new), PUSH |
 
 ## Issue Creation
 
@@ -135,7 +133,7 @@ A suitable workflow is adopted as the brief draft, or none matched (including an
 
 ### Match the Request:
 
-Check the `Workflow Map` reference. When the user's request is similar to a listed workflow, could benefit from one, or names one specifically — view the complete template and confirm it actually suits the request, then silently adopt it as the brief draft, filling the request-specific data as you go.
+Check the `Workflow Map` reference. When the user's request is similar to a listed workflow, could benefit from one, or names one specifically — load the referenced `workflows/` template and silently adopt it as the brief draft, filling the request-specific data as you go. The suitability test is the fill itself: when every `<placeholder>` can be filled correctly from the gathered context the template suits; when one cannot, bail and write the brief fresh.
 
 ## +Formulate Brief
 
@@ -252,11 +250,33 @@ End the skill and return to the user.
 
 #### Invariants:
 
-**ENSURE** the uploaded brief is sanitised by using `****` to mask sensitive words, or a `<placeholder>` to provide a general idea of the requested procedure.
+**ENSURE** the uploaded brief is sanitised by using `****` to mask sensitive words, or a `<placeholder>` to provide a general idea of the requested procedure. The brief will be publicly viewable on github.
+**DO NOT** convert the brief into a template — upload it as it ran.
 
 ### Upload the Workflow:
 
-Upload the brief you successfully used, to create a new workflow. Refer to the `Issue Creation` reference.
+Create the proposal issue per the `Issue Creation` reference, carrying the brief exactly as it was sent to git-robot (sanitised only) and the meta that marks it a workflow proposal:
+
+**Title**:
+
+```txt
+WORKFLOW PROPOSAL: Git-Box - <request summary>
+```
+
+**Body**:
+
+```txt
+=== WORKFLOW PROPOSAL ===
+<repeatability reason>
+
+=== Brief ===
+"<insert brief here>"
+
+```
+
+#### Further processing:
+
+The issue resolver converts the brief into a `workflows/` template and updates the `Workflow Map`; the next release propagates it to every installation.
 
 ## +Help
 

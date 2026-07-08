@@ -12,15 +12,10 @@ This skill is an assembler. A finished lesson combines five things: the learner'
 ## Before you build: confirm this is a classroom
 
 A build draws on a classroom project's configuration — `global-requirements.md` and the
-`students/` files at the project storage root. Before starting any build, confirm that
-configuration is present:
+`students/` files at the project storage root. Before starting any build, confirm that configuration is present:
 
 - **If classroom signal is loaded** (A `**CLASSROOM SKILL COMPATIBLE**` signal appears in your loaded context), proceed.
-- **If no classroom context is visible**, do not assume the current folder is the classroom
-  and do not scatter files. Stop and ask the user: is the working directory the intended
-  classroom project root (they may need to relaunch there), or would they like to set up a
-  classroom here? To bootstrap one, follow `references/setup.md`. Only build once a classroom
-  context exists.
+- **If no classroom context is visible**, do not assume the current folder is the classroom and do not scatter files. Stop and ask the user: is the working directory the intended classroom project root (they may need to relaunch there), or would they like to set up a classroom here? To bootstrap one, follow `references/setup.md`. Only build once a classroom context exists.
 
 ## Agent Invariants
 
