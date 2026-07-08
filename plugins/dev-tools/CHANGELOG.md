@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-07-08
+
+### Changed
+
+- git-robot's tool access is now explicitly scoped to `agent-commit`, `agent-push`, and `agent-switch` skills plus Bash, replacing unrestricted Skill access. This only affects direct/out-of-contract use of git-robot outside git-box.
+
+### Added
+
+- git-box workflows directory with a resolution process (README) and its first template, commit-and-push.
+
+### Removed
+
+- Archived unused skill-framework docs and deprecated assets not part of the dev-tools plugin.
+
 ## [0.6.3] - 2026-07-08
 
 ### Fixed
