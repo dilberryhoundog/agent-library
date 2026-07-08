@@ -1,7 +1,7 @@
 {
   "name": "classroom",
   "displayName": "Classroom",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Build tailored home-education lessons, courses, workbooks and teacher materials, with a bundled HTML-to-PDF engine. Runs in a project folder in Claude Code or cowork.",
   "author": {
     "name": "dilberryhoundog",

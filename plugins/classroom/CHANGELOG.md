@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-09
+
+### Changed
+
+- Classroom-project detection now keys on a single `CLASSROOM SKILL COMPATIBLE` marker emitted by a dedicated signal rule, replacing the previous heuristic (checking for a classroom rule/CLAUDE.md section plus `global-requirements.md`). **Migration:** existing classroom projects bootstrapped under 0.1.0 won't carry this marker and will stop being recognized until you re-run the setup bootstrap or add `.claude/rules/classroom-signal.md` from the updated template.
+
+### Added
+
+- Builds now retain the editable HTML source alongside each delivered PDF, in a matching `source/` folder (e.g. `unit-04/source/workbook.html` beside `unit-04/workbook.pdf`).
+
 ## [0.1.0] - 2026-06-21
 
 ### Added
