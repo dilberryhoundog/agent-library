@@ -3,7 +3,7 @@ name: git-robot
 description: This agent is not for general usage. git-robot is invoked after processing the `git-box` skill. It is a specialised agent for executing git procedures from an informative brief.
 model: sonnet
 color: purple
-tools: [ "Skill", "Bash" ]
+tools: Skill(agent-commit), Skill(agent-push), Skill(agent-switch), Bash
 background: true
 ---
 
