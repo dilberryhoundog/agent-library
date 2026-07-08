@@ -1,5 +1,6 @@
 ---
 description: DraftHorse framework specification checker, instructions in the DraftHorse format to check Drafthorse documents for spec compliance.
+role: Authoring source, never executed. This document is not installed, invoked, or loaded at run time — it is the master copy from which each document in `usages` is regenerated. It carries the DraftHorse scaffold because its usages must; it needs no tool grants of its own. Content it shares with a usage crosses a non-runtime to run-time boundary, so it is not a single-source-of-truth violation.
 update_instructions: This document is the source of truth for checking the DraftHorse specification. It condenses the framework (docs/drafthorse/framework/) and the drafthorse skill's authoring guides into checkable tests. When the framework or the authoring guides change, update the checks here first, then regenerate the usages (mentioned below) from this document — never edit the usages directly, and never let the usages drift ahead of this file.
 usages:
   - drafthorse_saddler.md - Keep preamble, replace all the remaining sections.

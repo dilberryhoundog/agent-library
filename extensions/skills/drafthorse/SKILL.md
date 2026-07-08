@@ -4,7 +4,7 @@ display-name: DraftHorse
 description: Build a new skill — or convert an existing document — using the DraftHorse framework, through gated phases of references, step map, invariants, and draft.
 disable-model-invocation: true
 argument-hint: [ skill purpose, or path to a document to convert ]
-allowed-tools: Read, Write, Edit, Grep, Glob, Agent(drafthorse-saddler)
+allowed-tools: Read, Write, Edit, Agent(drafthorse-saddler)
 ---
 
 # DraftHorse
