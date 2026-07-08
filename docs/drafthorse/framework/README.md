@@ -12,6 +12,10 @@ This folder is the **framework**: the normative reference for writing DraftHorse
 4. **[References](references.md)** — how steps reach data: internal, external, data-load, external-call.
 5. **[Conventions](conventions.md)** — the bucket of laws and idioms that make a valid document a good one.
 
+## Downstream consumers
+
+`../drafthorse-spec-check.md` condenses this framework into the checkable tests that its `usages:` documents audit with. When any layer here changes, update that document first, then regenerate each of its usages from it.
+
 ## After the framework
 
 Two more parts follow once this framework is fine-tuned, each in its own sibling folder under `docs/drafthorse/`:

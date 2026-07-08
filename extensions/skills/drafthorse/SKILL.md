@@ -4,6 +4,7 @@ display-name: DraftHorse
 description: Build a new skill — or convert an existing document — using the DraftHorse framework, through gated phases of references, step map, invariants, and draft.
 disable-model-invocation: true
 argument-hint: [ skill purpose, or path to a document to convert ]
+allowed-tools: Read, Write, Edit, Grep, Glob, Agent(drafthorse-saddler)
 ---
 
 # DraftHorse
@@ -187,6 +188,10 @@ Every scenario routes cleanly, every digest test passes, and the fixes are folde
 ### Scenario-Walk:
 
 Walk every realistic run of the drafted skill — the happy path, each decision branch, each loop iteration, each failure entry. At every point, check that the set of in-play steps is exactly the intended one — every state claimed by a step (or the error drain), no unintended overlap. Then sweep the `Conventions Digest` tests over the whole document. Fix what the walk finds and walk again.
+
+#### Independent Review:
+
+Once the walk converges — nothing left to fix — offer the user an independent spec review by the `drafthorse-saddler` agent, which audits the draft against the full framework specification from a cold session. The offer is the user's to take or decline; this walk has already caught what it can, and saddler exists to catch what a builder saturated with its own intent reads past. On approval, hand it the path to the draft; its findings fold into the draft the same way the walk's do — fix, then walk again whatever the fixes touched. When the agent is not installed, say so plainly and continue on this walk alone.
 
 ## +Deliver
 
