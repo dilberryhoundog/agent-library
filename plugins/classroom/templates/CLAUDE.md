@@ -2,8 +2,7 @@
 
 The all-in-one signal and configuration file for this classroom project. It loads on every session. This file is **maintained by the agent**: update it as the classroom changes — new learners, a finished course, a shift in where working files are kept.
 
-<!-- On first setup, fill the bracketed fields below and delete this comment and any
-   bracket prompts you have resolved. Keep the section structure. -->
+<!-- On first setup, fill the bracketed fields below and delete this comment and any bracket prompts you have resolved. Keep the section structure. -->
 
 ## This project
 
@@ -12,6 +11,7 @@ The all-in-one signal and configuration file for this classroom project. It load
 - **Standing requirements:** `global-requirements.md`
 - **Learners:** one file per learner in `students/` (see roster below)
 - **Working outputs:** <where finished builds are saved, e.g. `builds/<subject>/`>
+- **Document sources:** the HTML each PDF was rendered from, in a `source/` folder beside it
 
 ## Learner roster
 
@@ -22,17 +22,14 @@ the skill's references/students/\_template.md and writing students/<name>.md. --
 
 ## PDF delivery
 
-Convert finished HTML to A4 PDF with the `html_to_pdf` tool (classroom-pdf MCP server).
-Fallback when unavailable: deliver HTML, user prints to PDF (A4, margins off).
+Write each document's HTML to a `source/` folder beside its PDF, then convert it by passing that file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server). The saved HTML is the editable copy — corrections and later units reopen it. Fallback when the tool is unavailable: still save the HTML, then the user prints to PDF (A4, margins off).
 
 ## Status / resume notes
 
-<!-- Short running log so the next session can pick up: what's built, what's approved,
-what's next. The agent keeps this current. -->
+<!-- Short running log so the next session can pick up: what's built, what's approved, what's next. The agent keeps this current. -->
 
 - <e.g. "Fractions unit: scope & sequence approved; units 1–3 built; unit 4 next.">
 
 ## Setup
 
-To (re)bootstrap this project or understand the file layout, read the skill's
-`references/setup.md`.
+To (re)bootstrap this project or understand the file layout, read the skill's `references/setup.md`.

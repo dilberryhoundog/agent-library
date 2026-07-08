@@ -28,6 +28,7 @@ These hold on every build. If a request conflicts with one, raise the conflict w
 5. **Match the approved format once set.** After approval, every later unit uses the same lesson steps, blocks, and layout. Drift is a defect.
 6. **Confirm worldview and content settings per build.** A study may be requested from a specific worldview (e.g. a biblical framing) or may exclude certain framing (e.g. climate-change messaging). Read the student and global-requirements files and follow them; add no framing the user has not asked for, in either direction.
 7. **State scope honestly.** A full year cannot be produced in one response. Say so, then build unit by unit. Do not imply completeness that is not there.
+8. **Keep the HTML source; the PDF is derived.** Write every document's HTML to a `source/` folder beside the delivered PDF before converting, and convert from that file rather than from an inline string. A PDF cannot be edited, and later units, corrections, and marking all reopen the source.
 
 ## How a build comes together
 
@@ -43,7 +44,11 @@ This is the usual shape of the work, not a fixed pipeline. Skip, repeat, or reor
 
 **Assemble the documents.** Copy the relevant shell from `templates/documents/` and fill it. Insert reusable components from `templates/blocks/` where the lesson shape calls for them. Apply the relevant `references/pedagogy/` file and the learner's specifics throughout.
 
-**Verify and present.** Check the build against the Agent Invariants. Save finished files to a suitable project working location, present them, and end with a short list of what is done and what remains, so the next session can resume (keep the `CLAUDE.md` status notes current). Documents are authored as HTML; deliver each as an A4 PDF by converting with the `html_to_pdf` tool from the **classroom-pdf** MCP server. If that tool is unavailable on this host, deliver paste-ready HTML and tell the user to convert in the browser (Print → Save as PDF, A4, margins off).
+**Verify and present.** Check the build against the Agent Invariants. Save finished files to the project's working-outputs location (recorded in `CLAUDE.md`), present them, and end with a short list of what is done and what remains, so the next session can resume (keep the `CLAUDE.md` status notes current).
+
+Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder alongside where its PDF is delivered — `unit-04/source/workbook.html` beside `unit-04/workbook.pdf`, matching filenames — then convert by passing that file's path as `htmlPath` to the `html_to_pdf` tool from the **classroom-pdf** MCP server. Do not pass the document inline; the saved file is the copy every later session edits. If the tool is unavailable on this host, still write the HTML to `source/`, then deliver paste-ready HTML and tell the user to convert in the browser (Print → Save as PDF, A4, margins off).
+
+When updating or correcting an existing document, edit its file in `source/` and re-convert, rather than rebuilding the HTML from the template shell.
 
 **Mark and review completed work (optional).** If the user requests, review the learner's completed or annotated work. produce a review from `templates/documents/review-document.html` — per-strand gradings, evidence, strengths, and specific next-step recommendations — and save it to a suitable project working location.
 
