@@ -6,16 +6,12 @@ Read this when the user wants to follow, supplement, or avoid gaps against an ex
 
 ## The spine-plus-companion approach
 
-1. Identify what the spine already does well — do not recreate it.
-2. Confirm the spine is free to obtain (a global requirement).
-3. Build the companion to fill the specific gaps for the learner.
-4. Keep the companion mapped to the spine's sequence so there are no gaps.
-
-The matching course structure is `templates/course-structures/spine-plus-companion.md`.
+Interpretive guidance for shaping a spine-based build: lean on what the spine already does well rather than recreating it, keep the spine one the family can obtain free (a global requirement), aim the companion at the specific gaps for this learner, and keep it mapped to the spine's sequence so nothing falls between them. The matching course structure is `templates/course-structures/spine-plus-companion.md`.
 
 ## Known spines
 
 **The Good & The Beautiful (TGTB)**
+
 - Language Arts and Maths are available as free PDFs by level, fitting the no-subscription constraint.
 - Open-and-go, ~120 lessons per level, video + mini-lesson + review format.
 - Pace can feel fast for dyslexic learners, so the companion's job is to slow and scaffold key concepts, not add more speed.
