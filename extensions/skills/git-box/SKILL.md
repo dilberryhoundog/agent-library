@@ -115,7 +115,7 @@ $ARGUMENTS
 !`git status -s -b -u`
 
 === Chat context ===  
-Use your knowledge of current chat context.
+Use your knowledge of the current chat context.
 
 When the request is unclear or ambiguous, ask the user for clarification. When it involves git commands outside the agent's scope (anything beyond commit / push / switch, stash, pop), tell the user and offer to help manage the current git state in the main chat instead.
 
