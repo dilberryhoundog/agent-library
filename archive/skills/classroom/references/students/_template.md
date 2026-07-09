@@ -1,6 +1,6 @@
 # Student Profile Template
 
-Copy this file to the project storage root's `students/<name>.md` to add a learner. Fill every field you can; mark anything uncertain with `⚠ confirm` so it gets checked rather than silently assumed. The build reads this file to tailor everything, so the more accurate it is, the less re-asking is needed.
+Copy this file to `references/students/<name>.md` to add a learner. Fill every field you can; mark anything uncertain with `⚠ confirm` so it gets checked rather than silently assumed. The build reads this file to tailor everything, so the more accurate it is, the less re-asking is needed.
 
 Keep entries to what actually shapes a lesson. Omit detail that doesn't change how you'd teach.
 

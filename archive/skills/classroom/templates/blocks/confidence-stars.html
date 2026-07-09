@@ -1,0 +1,22 @@
+<!-- BLOCK: Confidence stars. Drop in at the end of a lesson (the "Reflect" step).
+     Learner circles/colours how confident they feel. Print- and Apple-Pencil-friendly. -->
+<div class="confidence-block">
+  <p class="confidence-prompt">How do I feel about this lesson? <span class="hint">(colour the stars)</span></p>
+  <div class="stars" aria-label="confidence rating one to five">
+    <span class="star">&#9734;</span>
+    <span class="star">&#9734;</span>
+    <span class="star">&#9734;</span>
+    <span class="star">&#9734;</span>
+    <span class="star">&#9734;</span>
+  </div>
+  <p class="confidence-scale">1 = still tricky &nbsp;·&nbsp; 3 = getting there &nbsp;·&nbsp; 5 = I&rsquo;ve got it!</p>
+</div>
+
+<style>
+/* Scoped styles — safe to inline once in the workbook <style> block. */
+.confidence-block { border: 2px dashed #6a8f6a; border-radius: 12px; padding: 14px 18px; margin: 16px 0; background: #f5faf5; }
+.confidence-prompt { font-weight: 700; margin: 0 0 8px; }
+.confidence-prompt .hint { font-weight: 400; font-style: italic; color: #555; }
+.stars { font-size: 34px; letter-spacing: 10px; color: #d9a400; line-height: 1; }
+.confidence-scale { font-size: 11px; color: #555; margin: 8px 0 0; }
+</style>

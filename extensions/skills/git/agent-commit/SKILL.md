@@ -134,6 +134,7 @@ A decided `new` action moves to creating new commits; a decided `amend` action m
 #### Invariants:
 
 **ALWAYS** use the `Expanded Diffs` to write the commit message. Do not guess from filenames or procedure details.
+**NEVER** use extra flags or commands (like `git -C` or `cd`) . trust the working directory is the right place.
 
 ### Review Against the Tree:
 

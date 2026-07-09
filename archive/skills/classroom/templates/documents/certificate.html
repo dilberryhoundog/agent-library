@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!--
+  TEMPLATE: Completion Certificate (A4 landscape). Awarded at the end of a
+  course/unit. Set student name, course title, date, and accent colour.
+-->
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate of Completion</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800&family=Playfair+Display:wght@700&display=swap');
+  @page { size:A4 landscape; margin:0; } * { margin:0; padding:0; box-sizing:border-box; }
+  :root { --accent:#2d6a4f; }
+  body { font-family:'Lexend',Arial,sans-serif; background:#e8e8e8; }
+  .cert { width:297mm; height:210mm; margin:10mm auto; background:#fff; padding:18mm;
+    box-shadow:0 4px 20px rgba(0,0,0,0.15); border:3px double var(--accent);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  @media print { body{background:#fff;} .cert{margin:0;box-shadow:none;} }
+  .ribbon { font-size:11pt; letter-spacing:0.25em; text-transform:uppercase; color:var(--accent); }
+  .cert h1 { font-family:'Playfair Display',serif; font-size:40pt; color:var(--accent); margin:6px 0 18px; }
+  .awarded { font-size:13pt; color:#444; }
+  .name { font-family:'Playfair Display',serif; font-size:30pt; margin:10px 0; border-bottom:2px solid var(--accent); padding:0 30px 6px; }
+  .course { font-size:15pt; margin:14px 0; }
+  .sigrow { display:flex; gap:80px; margin-top:40px; }
+  .sig { border-top:1.5px solid #888; padding-top:6px; font-size:10pt; min-width:160px; }
+</style>
+</head>
+<body>
+<div class="cert">
+  <div class="ribbon">Certificate of Completion</div>
+  <h1>Well Done!</h1>
+  <div class="awarded">This certificate is proudly awarded to</div>
+  <div class="name">[Student Name]</div>
+  <div class="course">for successfully completing<br><strong>[Course / Unit Title]</strong></div>
+  <div class="sigrow">
+    <div class="sig">Date: ______________</div>
+    <div class="sig">Teacher: ______________</div>
+  </div>
+</div>
+</body>
+</html>
