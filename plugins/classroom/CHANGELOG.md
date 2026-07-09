@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-10
+
+### Added
+
+- Optional grounding research now runs through a dedicated `course-researcher` subagent. When a build needs source material you don't have in hand, it sweeps the web for unit candidates — free resources plus purchased options worth the spend — and returns a structured candidate set; the skill then recommends a fitting selection and saves your choices to the course's `matter/`. The token-heavy searching stays quarantined out of the main session.
+
+### Changed
+
+- The classroom skill and its setup guide are rebuilt on DraftHorse step-based anatomy. Same workflow, invocation, outputs, and file layout — no action needed to upgrade. Marking/review and media-link verification are now factored into standalone handover documents.
+
 ## [0.2.0] - 2026-07-09
 
 ### Changed
