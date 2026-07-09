@@ -1,7 +1,7 @@
 ---
 name: classroom
 description: Build tailored homeschooling lessons, unit studies, workbooks, courses and the accompanying teacher/parent materials. Use this skill whenever the user wants to create, extend, or rebuild any home-education resource. Also useful when continuing or adding to a course already built, or helping review/mark completed materials.
-allowed-tools: Read, Write, Edit, Glob, WebSearch, WebFetch, Bash(cp:*), Bash(bash:*), mcp__plugin_classroom_classroom-pdf__html_to_pdf
+allowed-tools: Task, Read, Write, Edit, Glob, WebSearch, WebFetch, Bash(cp:*), Bash(bash:*), mcp__plugin_classroom_classroom-pdf__html_to_pdf
 ---
 
 # Classroom
@@ -122,11 +122,11 @@ The run is a build and its subject matter has not been gathered.
 
 #### Step finished when:
 
-Material the user has supplied is saved to the course's `matter/` folder, and optional grounding research has been offered and — if taken — produced and saved there too.
+Material the user has supplied is saved to the course's `matter/` folder, and optional grounding research has been offered and — if taken — the chosen candidates it returned have been saved there too.
 
 ### Gather and Save the Matter:
 
-Take in whatever subject material the user brings and save it to the course's `matter/` folder as a permanent record the later steps read. For a deep or technical subject, offer light grounding research — or suggest it yourself when the request warrants it; if the user agrees, do focused web research (field scope, key concepts, sensible sequencing, candidate resources verified against a real search), save the foundation to `matter/`, and read it through the rest of the build so the research is done once and reused across that subject's units.
+Take in whatever subject material the user brings and save it to the course's `matter/` folder as a permanent record the later steps read. For a deep or technical subject, or when the user has little material in hand, offer grounding research — or suggest it yourself when the request warrants it. If the user agrees, invoke the `course-researcher` subagent with the subject, the learner's constraints from the student file, the family's sourcing constants from `global-requirements.md` (locale, cost rule), and any matter already supplied; it quarantines the token-heavy searching and returns a structured candidate set (unit candidates, free and purchased material). Present its candidates to the user and, against the learner's profile and the family's requirements, recommend which units and materials to include and why. Leave the final choice to the user, then save what they choose to `matter/`.
 
 ## +Align the Build
 
@@ -158,7 +158,9 @@ The governing shape(s) are chosen with the user — which shape governs which pa
 
 ### Enumerate and Choose:
 
-List `templates/course-structures/` and `templates/lesson-structures/`, read each file's summary line, and present the ones that fit. Do not work from a memorised list — enumerate every time, so shapes added later are offered automatically. Shapes are not mutually exclusive: more than one can apply to a single build (a different lesson shape for different strands — say one for literacy, another for science), and a wrapper shape (such as a timed-session template) can layer on top of a content shape rather than replacing it. Confirm with the user which shape governs which part and how any wrapper applies.
+List `templates/course-structures/` and `templates/lesson-structures/`, read each file's summary line, and present the ones that fit. Do not work from a memorised list — enumerate every time, so shapes added later are offered automatically.
+Shapes are not mutually exclusive: more than one can apply to a single build (a different lesson shape for different strands — say one for literacy, another for science), and a wrapper shape (such as a timed-session template) can layer on top of a content shape rather than replacing it.
+Confirm with the user which shape governs which part and how any wrapper applies.
 
 ## +Assemble a Unit's Documents
 
@@ -178,7 +180,9 @@ The unit's documents are built from the chosen shapes, any media verified, each 
 
 ### Assemble the Documents:
 
-List `templates/documents/` and copy the shells the deliverable calls for, filling them and inserting components from `templates/blocks/` where the lesson shape calls for them. Apply the `references/pedagogy/` file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow `references/media-processing.md` as a handover doc and place its handback into the documents — **media links verified** (the per-concept links plus the standing note) or **links not verified** (surface the reason and decide with the user whether to defer or continue without it). Write each document's HTML into a `source/` folder beside where its PDF is delivered with matching filenames, then convert from that saved file per the `Document Pipeline` — never from an inline string. When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before it moves on.
+List `templates/documents/` and copy the shells the deliverable calls for, filling them and inserting components from `templates/blocks/` where the lesson shape calls for them. Apply the `references/pedagogy/` file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow `references/media-processing.md` as a handover doc and place its handback into the documents — **media links verified** (the per-concept links plus the standing note) or **links not verified** (surface the reason and decide with the user whether to defer or continue without it).
+Write each document's HTML into a `source/` folder beside where its PDF is delivered with matching filenames, then convert from that saved file per the `Document Pipeline` — never from an inline string. When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before
+it moves on.
 
 ## +Build and Approve the Sample
 
