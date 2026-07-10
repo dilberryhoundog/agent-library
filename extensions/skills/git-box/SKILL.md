@@ -69,9 +69,10 @@ SWITCH:
 
 Proven briefs saved as reusable workflows. Replace any generic `<placeholder>` with the request-specific information.
 
-| Workflow Name   | Type            | Reference                    | Procedure Map     |
-|-----------------|-----------------|------------------------------|-------------------|
-| commit-and-push | commit and push | workflows/commit-and-push.md | COMMIT(new), PUSH |
+| Workflow Name         | Type                      | Reference                          | Procedure Map        |
+|-----------------------|---------------------------|------------------------------------|----------------------|
+| commit-and-push       | commit and push           | workflows/commit-and-push.md       | COMMIT(new), PUSH    |
+| multi-commit-and-push | multiple commits and push | workflows/multi-commit-and-push.md | COMMIT(new)…, PUSH   |
 
 ## Issue Creation
 
