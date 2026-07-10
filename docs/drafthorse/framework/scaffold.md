@@ -21,6 +21,8 @@ Frontmatter wires the document before any of its prose runs. Four concerns live 
 - **Invocation surface** — `disable-model-invocation` and `user-invocable` decide who may reach the document: the agent autonomously, the user by name, or only a calling agent. This is what enforces an orchestrator/executor split — a front-door document the user enters, executor documents that cannot be called sideways.
 - **Config wiring** — user configuration is fed into the document's commands directly, so a step receives a resolved value rather than reaching for it.
 
+One variant empties this segment: a **handover** document (see [handover.md](handover.md)) carries `type: handover` as its whole frontmatter — no identity, permissions, or invocation surface — because it is reached only by a step that folds it in, and its identity moves into an identity paragraph in the body.
+
 ## Agent Invariants (global)
 
 Rules that bind the entire document. They hold in every step, and they are the document-wide counterpart to the step-scoped `#### Invariants:` section catalogued in [steps.md](steps.md). Global invariants carry the rules that must never lapse — safety floors, hard prohibitions — so they are stated once, at the top, and never restated per step (single source of truth).

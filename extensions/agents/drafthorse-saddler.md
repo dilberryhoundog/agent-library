@@ -44,6 +44,7 @@ Mechanical form checks — each is pass/fail by inspection:
 >- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
 >- If a step cannot be completed, move to the step that handles the condition/error.
 >- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
+>- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
 
 - **In-block labels** — `=== Mini Heading ===` only as a lightweight label inside a block, lighter than an H4.
 - **Terms form** — term entries use the `:` definition prefix and Title Case names; references entries are also Title Case.
@@ -56,6 +57,20 @@ Four concerns live in frontmatter; check each against the document's role:
 - **Invocation surface** — `disable-model-invocation` / `user-invocable` match the role. An executor document reachable sideways (model-invocable) is a defect; a front-door document the user must enter is user-invocable.
 - **Permissions** — `allowed-tools` (or agent `tools`) match what the steps actually do; grants transfer to a sub-agent that invokes the document, so permissions may be delivered at the step that needs them rather than held globally. A grant no step uses is a finding.
 - **Config wiring** — user configuration is resolved into the document's commands directly, so a step receives a value rather than reaching for it.
+- **Handover variant** — a document whose frontmatter is the single line `type: handover` is a handover; skip the identity, invocation, and permission checks above for it and audit it under `Handover Checks` instead.
+
+## Handover Checks
+
+A **handover** is a `type: handover` drafthorse document folded into the run by a **master step** in a master document — its steps run as sub-steps of the master step, and its references and invariants come into play for the run as if written into that step. Apply these whenever the reviewed document is a handover, or a reviewed skill cites one; they replace the skill-shaped checks for that file.
+
+- **Bare frontmatter and identity paragraph** — a handover's frontmatter is exactly `type: handover`, nothing else. With no `name`/`description`, its identity lives in the body: a `# Title (Handover)` heading and an identity paragraph naming what it does, when a master step folds it in, and that it routes no success or failure of its own. A missing identity paragraph, or any skill frontmatter field, is a finding.
+- **Never names its master** — a handover is written to be folded into any step that needs it, so it names no specific master. It may lean on the master's references by role or name, but pointing at the master document is a finding. The direction is one-way: a master document citing a handover's internal references is also a finding — they are not in context until the handover is folded in.
+- **Globals compatible across the set** — a handover's `Agent Invariants` join the master document's globals for the run. Sweep the whole set (master plus every folded handover): no global invariant repeats another and none conflicts. A handover-specific global is legitimate; a duplicated or conflicting one is the finding.
+- **Grants come from the master** — a handover carries no `allowed-tools`; sweep its tool use into the master document's permission check. A handover whose steps need a tool the master does not grant is a finding on the master document. Auditing a handover standalone, this cannot be verified — note it.
+- **No required exit steps** — a handover needs neither a success exit nor an error drain: its steps mix in as sub-steps of the master step, so exit control and failures belong to the master document's exit and problem steps. A handover routing its own success exit, or handing back a named outcome for the master to act on, is a finding; a local problem step that only surfaces something to the user mid-work is allowed.
+- **Master step owns the logic** — at each handover citation, the master step reads success from the resulting state (its own finished condition observes what the handover left behind) and lets failure fall to the master document's problem step; it must not look for an output the handover does not produce. A master step acting on an outcome token a handover never returns is a finding.
+- **One level only** — a handover must not fold in another handover; work that deep belongs in its own skill, reached as an external call. A nested fold-in is a finding.
+- **Audit mode by entry** — when the reviewed document is a skill citing handovers, audit each cited handover as part of the set under these checks (not as a reference), and run the cross-set globals and master-permission sweeps. When the reviewed document is a handover itself, audit it standalone: apply the checks it allows and note that master binding (permissions, globals compatibility) is unverifiable without the master. Label every finding by the file it lands on.
 
 ## Condition Checks
 
@@ -90,18 +105,21 @@ The conditions carry all the routing a wired graph would; a weak condition is a 
 - **Purpose line** — every step opens with a one-line statement of what it does.
 - **Sized to the pass** — a step encompasses all the work the agent can manage at once. Over-splitting smell: consecutive steps whose start conditions are just "the previous step finished". Premature-closing smell: a step that finishes only so the next can start while its concern still applies — the fix is a spanning step left in play, not a merge.
 - **Edges at real boundaries** — a boundary is a user-interaction wait, a loop body, a distinct completion state, a permission or context shift, a judgment shift, or a spanning concern. An edge at none of these is over-splitting.
-- **Spanning steps** — a concern persisting across several pieces of work is its own step, in play while inner steps start and finish; its invariants bind for its whole open duration and are not duplicated into the inner steps.
+- **Spanning steps** — a concern persisting across several pieces of work is its own step, in play while other steps start and finish; its invariants bind for its whole open duration and are not duplicated into other steps also in play.
 - **Decisions** — a Decision section appears only for a genuine bounded fork that is the step's own business, in plain prose. Routing between steps written as a Decision is a defect.
 - **Exit steps present** — a success exit whose start condition is the exhaustive all-done state, and an error step whose start condition is "something has gone wrong, or a situation no other step covers" and whose finish is "the user (or caller) informed and the continuation decided". The error step's engagement surfaces what happened, where, the current state (especially anything half-applied), and the options.
 - **Executor exception** — an executor document may fold the error drain into its reporting step; the reporting step's start condition must then claim the remainder explicitly ("…or a failure has ended the run"). Folding without the explicit claim is a finding.
+- **Handover exception** — where a step folds in a handover, the flow must start at the master step, run the handover's steps as its sub-steps, and end back at the master step — the master step's own start and finished conditions route the agent in and out. A handover whose flow exits anywhere other than back to its master step is a finding.
 
 ## Reference Checks
 
-- **Data, not work** — references hold constants, maps, formats, facts; work lives in steps. Small self-contained logic is tolerable (the interpreter is an agent), but a reference with ordered actions or branching is work asking to be a step.
-- **Embedded-work tells** — sweep every reference (inline and external) for: ordered actions ("first…, then…", numbered procedures, command sequences); conditionals ("if…, otherwise…", "when X, do Y"); interaction ("ask the user", "confirm before"); judgment charges ("decide whether", "verify that"). Every hit is weighed; unextracted work is the most common conversion defect. A reference that is all work has no business being a reference.
-- **Inline vs external** — compact and always-relevant context inline in the References section; expansive and sometimes-relevant context in an external file loaded when a step's logic calls for it. Misplacement either way is a finding.
+- **Data, not work** — references hold constants, maps, formats, facts; work lives in steps. Small self-contained logic is tolerable (the interpreter is an agent), but a reference with ordered actions or branching is work asking to be extracted to a step.
+- **Embedded-work tells** — a reference should be data an agent *reads*, not work an agent *does*. Scan each for the tells of hidden work: ordered actions ("first…, then…"), conditionals ("if…, otherwise…"), interaction ("ask the user"), or judgment calls ("decide whether", "verify that"). Such work in a `references/` file is a finding — it belongs in a step — unless the file declares `type: handover`, which is audited as a handover, not a reference.
+- **Inline vs external** — compact and always-relevant context inline in the References section; expansive and sometimes-relevant context in an external file loaded when a step calls it. Misplacement either way is a finding.
+- **Handover references** — a cited `type: handover` file is audited under `Handover Checks`, not as a reference (its steps and logic are not embedded-work findings). Check only the pairing here: the handover's work is compatible with the starting and finishing criteria of the invoking master step — the start condition admits the fold-in, and the finished condition can read the state the handover leaves behind. An incompatible pairing is a finding on the master step.
 - **Moment-of-use citation** — a step cites a reference inside the sentence that needs it, or inside a finished condition to make it binding — never as a list at the top of a step. Each external file's citation moment must actually match what the file holds.
-- **No dead weight** — a reference no step cites is dead weight; a step citing no reference may be missing its data. Flag both.
+- **No dead weight** — a reference unused in a step is dead weight; a step citing no reference may be missing its data. Flag both.
+- **Invoked, not just named** — every external unit (an external reference file or a `type: handover` doc) must be actually loaded or folded in by a step inline. A step that name-drops an external without invoking it, or an external nothing invokes, is a finding.
 - **Installable citations** — every cited path must exist wherever the document is installed; a pointer to a repo-local or session artifact that will not ship with the document is a defect.
 - **Dynamic references** — runtime-produced context (data-load commands, external skill/tool calls, sub-agents, hooks) is legitimate; check that each is invoked from a step at its moment, and that live-state commands are safe to run at load.
 
@@ -137,6 +155,7 @@ Verdict rule: any scenario-walk stall or mis-route, or any finding that would ca
 >- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
 >- If a step cannot be completed, move to the step that handles the condition/error.
 >- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
+>- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
 
 ## +Assemble the Document Set
 
@@ -156,7 +175,7 @@ A run that cannot proceed moves straight to composing the report.
 
 ### Gather:
 
-The path to the document arrives in the request that spawned this review; resolve it and read the document. Collect every path it cites (external references, assets, templates) and read each; a cited file that does not exist is recorded now as an `Installable citations` finding, not silently skipped. Confirm the document carries the DraftHorse segment dividers — a document without them gets a report saying it is not reviewable against this spec, not a forced audit.
+The path to the document arrives in the request that spawned this review; resolve it and read the document. Collect every path it cites (external references, assets, templates) and read each; a cited file that does not exist is recorded now as an `Installable citations` finding, not silently skipped. A cited file whose frontmatter is `type: handover` is recorded as a handover doc, to be audited under `Handover Checks` rather than as a reference. Confirm the document carries the DraftHorse segment dividers — a document without them gets a report saying it is not reviewable against this spec, not a forced audit.
 
 ## +Check the Frame
 
@@ -168,11 +187,11 @@ The document set is assembled and the frame has not been checked.
 
 #### Step finished when:
 
-Every test in `Scaffold Checks`, `Notation Checks`, and `Frontmatter Checks` has been applied to the document and each failure recorded as a finding.
+Every test in `Scaffold Checks`, `Notation Checks`, `Frontmatter Checks` and `Handover Checks` (if applicable) has been applied to the document and each failure recorded as a finding.
 
 ### Lint:
 
-Sweep the document top to bottom against the three check groups. These are mechanical pass/fail inspections — check the preamble word for word, the machinery headings' exact text and order, the invariant form of every bold-caps token, the frontmatter fields against the document's actual role.
+Sweep the document top to bottom against the check groups. These are mechanical pass/fail inspections — check the preamble word for word, the machinery headings' exact text and order, the invariant form of every bold-caps token, the frontmatter fields against the document's actual role. Where the document or a cited file is a handover, apply `Handover Checks`.
 
 ## +Audit the References
 

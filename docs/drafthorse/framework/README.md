@@ -12,6 +12,12 @@ This folder is the **framework**: the normative reference for writing DraftHorse
 4. **[References](references.md)** — how steps reach data: internal, external, data-load, external-call.
 5. **[Conventions](conventions.md)** — the bucket of laws and idioms that make a valid document a good one.
 
+## Document variants
+
+The five layers describe the default document — a skill. One variant reuses them all with a small set of deltas:
+
+- **[Handover](handover.md)** — a `type: handover` document: a self-contained sub-procedure a master step folds into the run as sub-steps, extracting heavy or optional work so it does not bloat the parent. Same scaffold and steps; the master step owns the logic around it.
+
 ## Downstream consumers
 
 `../drafthorse-spec-check.md` condenses this framework into the checkable tests that its `usages:` documents audit with. When any layer here changes, update that document first, then regenerate each of its usages from it.

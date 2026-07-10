@@ -21,6 +21,7 @@ Every DraftHorse document opens its steps section with the same short boilerplat
 >- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
 >- If a step cannot be completed, move to the step that handles the condition/error.
 >- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
+>- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
 ```
 
 The preamble is deliberately universal — it names no skill-specific steps, so the same text is copied verbatim into every document.
@@ -83,6 +84,8 @@ A skill ends through its **exit steps** — terminal steps whose completion ends
 The error step is what makes coverage subtractive rather than enumerative: steps claim their conditions, and the error step claims the remainder, so no state is unhandled by construction. Its engagement should surface what happened, where it arose, what state things are now in (especially anything half-applied), and the options.
 
 **Executor exception**: an executor document whose reporting step already surfaces failures, refusals, and no-ops may fold the error drain into that step instead of carrying a separate error step — the reporting step's start condition must then claim the remainder explicitly ("…or a failure has ended the run").
+
+**Handover exception**: a handover document (see [handover.md](handover.md)) requires neither exit step. Its steps run as sub-steps of the master step that folded them in: control returns to the master step when no handover step is left in play, and a failure falls to the master document's problem step — so a handover needs no success exit that ends a run it does not own, and no error drain the master already provides.
 
 ## Loops
 
