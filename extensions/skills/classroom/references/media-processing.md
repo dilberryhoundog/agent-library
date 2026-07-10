@@ -4,13 +4,13 @@ type: handover
 
 # Media Processing (Handover)
 
-Supply verified, fallback-backed media links for the concepts in a build that includes media. A handover doc — an invoking step calls this whenever a build needs media (currently video), and this hands back a per-concept set of durable, live-verified links (or a clean no-media outcome) for that step to place into the documents. Tool grants come from the calling skill.
+Supply verified, fallback-backed media links for the concepts in a build that includes media. A handover doc — a master step folds this in whenever a build needs media (currently video). Its step runs as a sub-step of that master step, and its references and invariants come into play for the run; it leans on the master document's tool grants. It routes no success or failure of its own: the master step reads the verified link set from the run and places it into the documents, and a failure falls to the master document's problem step.
 
 Dead links are a common failure mode for media-based lessons, and a dead link mid-lesson on patchy signal has no quick fix — which is why every link is verified live and never stands alone.
 
 # Agent Invariants
 
-**NEVER** invent a URL or assume one from memory — every link is confirmed against a live search before it is handed back.
+**NEVER** invent a URL or assume one from memory — every link is confirmed against a live search before it is used.
 **ALWAYS** supply 2–3 alternatives per concept, so a single dead link is never a dead lesson.
 
 # --- REFERENCES ---
@@ -40,6 +40,7 @@ Links can shift over time, but the channel name + title will find the media in s
 >- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
 >- If a step cannot be completed, move to the step that handles the condition/error.
 >- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
+>- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
 
 ## +Assemble and Verify Links
 
@@ -55,44 +56,4 @@ Every concept has either 2–3 live-verified links in preferred-durable form, or
 
 ### Build and Prove the Set:
 
-For each concept, draw 2–3 candidate links favouring the `Durable Link Forms` order, preferring the channels in the `Vetted Channel Database` (large, stable, rarely delete content). Verify each candidate with a real web search or fetch to confirm the channel/episode exists and is current, and drop any that fail. If a concept has no suitable media after a genuine search, mark it *no suitable media* rather than forcing a weak link — the invoking step's format decides how a no-media lesson reads.
-
-## +Confirm Coverage and Hand Back
-
-Report the verified set and hand it back to the caller.
-
-#### Start this step when:
-
-Every concept that needs media has verified links or is marked *no suitable media*.
-
-#### Step finished when:
-
-The verified per-concept link set and the standing note have been handed back to the invoking step.
-
-#### Do this next:
-
-Return to the invoking step with the outcome.
-
-### Report and Hand Back:
-
-Hand back to the invoking step the outcome **media links verified** — for each concept, its 2–3 live-verified links (or the *no suitable media* mark), together with the `Standing Note for a Media Library Page` to place on any delivered media library page — so the invoking step can insert them into the documents.
-
-## +Handle a Problem
-
-Surface anything the other steps don't cover, and hand a failure outcome back.
-
-#### Start this step when:
-
-Something has gone wrong, or a situation has arisen that no other step covers — live search is unavailable, so no link can be verified.
-
-#### Step finished when:
-
-The user has been informed of what happened, and the failure outcome has been handed back to the invoking step.
-
-#### Do this next:
-
-Return to the invoking step with the outcome.
-
-### Surface the Problem:
-
-Tell the user plainly what happened and which concepts are affected. Hand back to the invoking step the outcome **links not verified**, naming the reason, so it can decide whether to retry, defer the media, or continue without it.
+For each concept, draw 2–3 candidate links favouring the `Durable Link Forms` order, preferring the channels in the `Vetted Channel Database` (large, stable, rarely delete content). Verify each candidate with a real web search or fetch to confirm the channel/episode exists and is current, and drop any that fail. If a concept has no suitable media after a genuine search, mark it *no suitable media* rather than forcing a weak link — the master step's format decides how a no-media lesson reads.

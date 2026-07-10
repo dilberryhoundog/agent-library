@@ -47,6 +47,7 @@ Lexend body font, A4, colour-coded annotation margin, dotted write-lines, clean 
 >- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
 >- If a step cannot be completed, move to the step that handles the condition/error.
 >- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
+>- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
 
 ## +Confirm Classroom Context
 
@@ -70,7 +71,11 @@ With a classroom confirmed, establish who the work is for.
 
 ### Confirm or Bootstrap:
 
-Check for the `Classroom Signal` in your loaded context. If it is present, a classroom is set up here — proceed. If it is absent, do not assume the current folder is the classroom or scatter files into it: ask the user whether this working directory is the intended classroom project root (they may need to relaunch there), or whether they want to set one up here now. To set one up, follow `references/setup.md` as a handover doc and act on its handback — on **classroom bootstrapped**, proceed; on **bootstrap not completed**, surface the reason and let the user decide whether to retry, relocate, or stop.
+Check for the `Classroom Signal` in your loaded context. If it is present, a classroom is set up here — proceed. If it is absent, do not assume the current folder is the classroom or scatter files into it: ask the user whether this working directory is the intended classroom project root (they may need to relaunch there), or whether they want to set one up here now.
+
+#### Bootstrap a Classroom:
+
+With their consent to set one up here confirmed, follow `references/setup.md` as a handover doc to lay down and configure the project. When its steps are done, show the user what now exists at the root, then proceed on the classroom signal now being present. If the user would rather relaunch elsewhere or not set one up, nothing is written and the run has nothing more to build.
 
 ## +Establish Learner and Intent
 
@@ -102,7 +107,7 @@ The run's intent is to mark completed work the user has supplied, and no review 
 
 #### Step finished when:
 
-The mark-review handover has delivered a review, or has handed back a failure the user has resolved or accepted.
+A review has been produced and saved for the supplied work.
 
 #### Do this next:
 
@@ -110,7 +115,7 @@ Record and present the delivered review.
 
 ### Mark the Work:
 
-Follow `references/mark-review.md` as a handover doc and act on its handback — **review delivered** (carry its saved location onward to be recorded and presented) or **review not delivered** (surface the reason and decide with the user whether to retry, supply more of the work, or stop).
+Follow `references/mark-review.md` as a handover doc to grade the supplied work and produce a saved review document, then carry its saved location onward to be recorded and presented.
 
 ## +Collect Subject Matter
 
@@ -180,9 +185,8 @@ The unit's documents are built from the chosen shapes, any media verified, each 
 
 ### Assemble the Documents:
 
-List `templates/documents/` and copy the shells the deliverable calls for, filling them and inserting components from `templates/blocks/` where the lesson shape calls for them. Apply the `references/pedagogy/` file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow `references/media-processing.md` as a handover doc and place its handback into the documents — **media links verified** (the per-concept links plus the standing note) or **links not verified** (surface the reason and decide with the user whether to defer or continue without it).
-Write each document's HTML into a `source/` folder beside where its PDF is delivered with matching filenames, then convert from that saved file per the `Document Pipeline` — never from an inline string. When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before
-it moves on.
+List `templates/documents/` and copy the shells the deliverable calls for, filling them and inserting components from `templates/blocks/` where the lesson shape calls for them. Apply the `references/pedagogy/` file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow `references/media-processing.md` as a handover doc to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
+Produce each document per the `Document Pipeline`. When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before it moves on.
 
 ## +Build and Approve the Sample
 
@@ -274,7 +278,7 @@ Surface anything the other steps don't cover, and decide with the user how to co
 
 #### Start this step when:
 
-Something has gone wrong, or a situation has arisen that no other step covers — a missing or corrupt `global-requirements.md`, a failed PDF conversion, a handover that handed back a failure the calling step cannot resolve, or requirements that contradict a build invariant.
+Something has gone wrong, or a situation has arisen that no other step covers — a missing or corrupt `global-requirements.md`, a failed PDF conversion, a handover doc's work that could not complete, or requirements that contradict a build invariant.
 
 #### Step finished when:
 
@@ -292,6 +296,5 @@ Tell the user plainly what happened, which step it arose in, what state the buil
 
 : **Matter**: A course's saved source material, held at `<course>/matter/` — what the user supplied and any grounding research, kept as a permanent record the build reads.
 : **Shape**: A course structure or lesson structure chosen from the `templates/course-structures/` and `templates/lesson-structures/` folders; more than one may govern a single build.
-: **Handover Doc**: A standalone document (in `references/`, marked `type: handover`) that a step hands control to for a self-contained portion of the work, and which hands back a named outcome. Cited as "follow `references/X.md` as a handover doc".
-: **Handback**: The named outcome a handover doc returns to the step that called it — a success outcome or a failure outcome — which the calling step then acts on.
+: **Handover Doc**: A standalone document (in `references/`, marked `type: handover`) whose steps a master step folds into the run as sub-steps, its references and invariants coming into play for a self-contained portion of the work — lean extraction of heavy, optional, or side-branching work that would otherwise bloat this skill. The master step owns the logic around it: it reads success from the resulting state and lets any failure fall to the problem step. Cited as "follow `references/X.md` as a handover doc".
 : **Sample**: The scope-and-sequence plus one complete unit, approved for format before the rest of the course is mass-produced.

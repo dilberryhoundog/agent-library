@@ -4,7 +4,7 @@ type: handover
 
 # Classroom Setup (Handover)
 
-Bootstrap a classroom project on first run: copy the init payload to the project root and fill its config, so ordinary builds have the standing constants and learner files they read. A handover doc — an invoking step calls this when no classroom context is loaded, and this hands back a bootstrap outcome for that step to act on. Tool grants come from the calling skill.
+Lay the classroom project skeleton down at the current root and fill its config, so ordinary builds have the standing constants and learner files they read. A handover doc — a master step folds this in once it has confirmed the user wants a classroom set up in the current directory. Its steps run as sub-steps of that master step, and its references and invariants come into play for the run; it leans on the master document's tool grants. It routes no success or failure of its own: when its work is done the master step reads the result from the project state, and a failure falls to the master document's problem step.
 
 # --- REFERENCES ---
 
@@ -48,26 +48,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/install-deps.sh"
 >- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
 >- If a step cannot be completed, move to the step that handles the condition/error.
 >- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
-
-## +Confirm Placement and Consent
-
-Make sure this directory is the right home before writing anything into it.
-
-#### Start this step when:
-
-A bootstrap has been requested and the user has not yet confirmed both the directory and their consent to set up here.
-
-#### Step finished when:
-
-The user has confirmed the current working directory is the folder they want the classroom to live in, and has agreed to set one up here — or has said they want to relaunch elsewhere or not proceed, in which case nothing has been written.
-
-#### Do this next:
-
-With placement and consent confirmed, copy the init payload; if the user declines or wants to relaunch elsewhere, go to the problem step to hand a not-completed outcome back.
-
-### Confirm Two Things:
-
-Ask the user directly. First, **the directory**: is the current working directory the folder they want this classroom to live in? If they may have launched in the wrong place, have them relaunch in the intended project root rather than scattering files where they are. Second, **consent**: confirm they want to set up a classroom here at all. Write nothing until both are answered.
+>- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
 
 ## +Copy the Init Payload
 
@@ -75,7 +56,7 @@ Lay the project skeleton down at the root.
 
 #### Start this step when:
 
-Placement and consent are confirmed, and the init payload has not yet been copied to the root.
+The user's consent to set up a classroom in the current working directory is confirmed, and the init payload has not yet been copied to the root.
 
 #### Step finished when:
 
@@ -120,43 +101,3 @@ The dependency is installed via the `Warm the PDF Engine` command, or the user h
 ### Pre-install or Skip:
 
 The `classroom-pdf` MCP server installs its own dependency on first use, so this is optional. If the user wants the first PDF to be fast, run the `Warm the PDF Engine` command; otherwise skip it.
-
-## +Confirm Setup Complete
-
-Report what now exists and hand the outcome back to the caller.
-
-#### Start this step when:
-
-The project root is configured — payload copied and config files filled or flagged.
-
-#### Step finished when:
-
-The user has been shown a short summary of what now exists at the root, and the bootstrap outcome has been handed back to the invoking step.
-
-#### Do this next:
-
-Return to the invoking step with the outcome.
-
-### Summarise and Hand Back:
-
-Tell the user the classroom is set up and list what now exists at the root, per the `Bootstrapped Project Layout`. Hand back to the invoking step the outcome **classroom bootstrapped** — `global-requirements.md`, `.claude/rules/classroom.md`, and `students/` now exist at the root, and ordinary builds can read the config as usual — so it can proceed to the build.
-
-## +Handle a Problem
-
-Surface anything the other steps don't cover, and hand a failure outcome back.
-
-#### Start this step when:
-
-A situation has arisen that no other step covers — the user has declined or stopped, the payload source cannot be located, or the copy fails.
-
-#### Step finished when:
-
-The user has been informed of what happened and what state the root is in, and the failure outcome has been handed back to the invoking step.
-
-#### Do this next:
-
-Return to the invoking step with the outcome.
-
-### Surface the Problem:
-
-Tell the user plainly what happened, which part of setup it arose in, and what now exists at the root (especially any partial copy). Hand back to the invoking step the outcome **bootstrap not completed**, naming the reason and what (if anything) was written, so it can decide whether to retry, relocate, or abandon the build.

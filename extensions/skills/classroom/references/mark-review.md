@@ -4,7 +4,7 @@ type: handover
 
 # Mark and Review (Handover)
 
-Grade a learner's completed or annotated work for a unit and produce a saved review document. A handover doc — an invoking step calls this when the user wants completed work marked, and this hands back a delivered review for that step to record and present. Tool grants come from the calling skill.
+Grade a learner's completed or annotated work for a unit and produce a saved review document. A handover doc — a master step folds this in when the user wants completed work marked. Its steps run as sub-steps of that master step, and its references and invariants come into play for the run; it leans on the master document's tool grants and references. It routes no success or failure of its own: the master step reads the saved review from the run to record and present it, and a failure falls to the master document's problem step.
 
 # Agent Invariants
 
@@ -25,6 +25,7 @@ Grade a learner's completed or annotated work for a unit and produce a saved rev
 >- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
 >- If a step cannot be completed, move to the step that handles the condition/error.
 >- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
+>- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
 
 ## +Assess the Work
 
@@ -52,48 +53,8 @@ The unit has been assessed strand by strand and no review document has been prod
 
 #### Step finished when:
 
-The `templates/documents/review-document.html` shell has been filled with the assessment and delivered as a saved document (HTML source retained, converted to A4 PDF), following the same document pipeline as any other classroom build.
+The `templates/documents/review-document.html` shell has been filled with the assessment and delivered as a saved document per the `Document Pipeline`.
 
 ### Fill and Save:
 
-Copy the `Review Document Template` shell and fill every bracketed field from the assessment — per-strand gradings and evidence, strengths, and next-step recommendations, repeating strand rows as needed. Deliver it the same way as any other classroom document: write the HTML to a `source/` folder, convert that saved file to A4 PDF with the `classroom-pdf` server's `html_to_pdf` tool (or, if it is unavailable, deliver paste-ready HTML for the user to print to PDF at A4), and save to a suitable project working location.
-
-## +Hand Back the Review
-
-Report the delivered review and hand it back to the caller.
-
-#### Start this step when:
-
-The review document has been produced and saved.
-
-#### Step finished when:
-
-The saved review's location has been handed back to the invoking step.
-
-#### Do this next:
-
-Return to the invoking step with the outcome.
-
-### Report and Hand Back:
-
-Hand back to the invoking step the outcome **review delivered** — the saved review document and its location — so the invoking step can record it and present it to the user.
-
-## +Handle a Problem
-
-Surface anything the other steps don't cover, and hand a failure outcome back.
-
-#### Start this step when:
-
-Something has gone wrong, or a situation has arisen that no other step covers — the supplied work cannot be matched to a unit, or the review cannot be produced or converted.
-
-#### Step finished when:
-
-The user has been informed of what happened, and the failure outcome has been handed back to the invoking step.
-
-#### Do this next:
-
-Return to the invoking step with the outcome.
-
-### Surface the Problem:
-
-Tell the user plainly what happened and what state the review is in. Hand back to the invoking step the outcome **review not delivered**, naming the reason, so it can decide whether to retry, request more of the work, or continue.
+Copy the `Review Document Template` shell and fill every bracketed field from the assessment — per-strand gradings and evidence, strengths, and next-step recommendations, repeating strand rows as needed. Then deliver it per the `Document Pipeline`, saving to a suitable project working location.
