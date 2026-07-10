@@ -41,7 +41,7 @@ Every strand of the unit is resolved — graded with the evidence behind it, or 
 
 ### Grade Against the Unit:
 
-Read the supplied work against the unit it belongs to. A unit's **strands** are the learning areas it covers (its subject or skill areas) — enumerate them from the unit's scope-and-sequence entry and its lesson documents. For each strand, judge the grading and note the specific evidence behind it; identify what the learner does well; and draw concrete, actionable next-step recommendations. Ground every judgement in the material actually provided — where a strand's work is missing, record that rather than guessing at a grade.
+Read the supplied work against the unit it belongs to. Enumerate the unit's strands from its scope-and-sequence entry and its lesson documents. For each strand, judge the grading and note the specific evidence behind it; identify what the learner does well; and draw concrete, actionable next-step recommendations. Ground every judgement in the material actually provided — where a strand's work is missing, record that rather than guessing at a grade.
 
 ## +Produce and Deliver the Review
 

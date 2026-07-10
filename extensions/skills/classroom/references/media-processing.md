@@ -48,7 +48,7 @@ For each concept, build a small set of durable candidate links and prove each on
 
 #### Start this step when:
 
-A build needs media for one or more concepts, and those concepts do not yet have verified links.
+A build needs media for one or more concepts, and those concepts are not yet resolved — neither verified links nor a *no suitable media* mark against them.
 
 #### Step finished when:
 

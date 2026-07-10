@@ -17,7 +17,8 @@ Assemble home-education materials tailored to a specific learner and the family'
 
 ## Storage Model
 
-=== where each piece lives ===
+<!-- used implicitly via the students/, matter/, and CLAUDE.md paths but never cited by name in a step; cite it at first point of use (e.g. +Confirm Classroom Context) or remove after extended use proves it redundant -->
+=== Where each piece lives ===
 
 - **Project storage root** — the family's configuration, created once at setup: `global-requirements.md` (standing constants — spelling, page size, cost rule, worldview defaults), `students/` (one file per learner), `CLAUDE.md` (project config + status notes), `.claude/rules/classroom.md` (the static rule that emits the signal below).
 - **This skill** — the reusable library: `templates/` (course/lesson shapes, document shells, blocks) and `references/` (this file's siblings).
@@ -32,10 +33,12 @@ Assemble home-education materials tailored to a specific learner and the family'
 ## Document Pipeline
 
 === how every document is produced ===
-Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits. If the tool is unavailable on this host, still write the HTML to `source/`, deliver paste-ready HTML, and tell the user to convert in the browser (Print → Save as PDF, A4, margins off).
+Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits.
+If the tool is unavailable on this host, still write the HTML to `source/`, deliver paste-ready HTML, and tell the user to convert in the browser (Print → Save as PDF, A4, margins off).
 
 ## House Style
 
+<!-- not cited anywhere, remove after extended use and verifiable redundant -->
 === the printable look, held in the shells ===
 Lexend body font, A4, colour-coded annotation margin, dotted write-lines, clean page breaks — carried by the `templates/documents/` shells. Keep new documents consistent with it.
 
@@ -177,7 +180,7 @@ A unit — the sample or a subsequent one — needs its documents, they are not 
 
 #### Step finished when:
 
-The unit's documents are built from the chosen shapes, any media verified, each document's HTML written to `source/` and converted to A4 PDF, and the result checked against the invariants.
+The unit's documents are built from the chosen shapes, every concept's media verified or marked no-suitable-media, each document's HTML written to `source/` and converted to A4 PDF, and the result checked against the invariants.
 
 #### Invariants:
 
@@ -298,3 +301,4 @@ Tell the user plainly what happened, which step it arose in, what state the buil
 : **Shape**: A course structure or lesson structure chosen from the `templates/course-structures/` and `templates/lesson-structures/` folders; more than one may govern a single build.
 : **Handover Doc**: A standalone document (in `references/`, marked `type: handover`) whose steps a master step folds into the run as sub-steps, its references and invariants coming into play for a self-contained portion of the work — lean extraction of heavy, optional, or side-branching work that would otherwise bloat this skill. The master step owns the logic around it: it reads success from the resulting state and lets any failure fall to the problem step. Cited as "follow `references/X.md` as a handover doc".
 : **Sample**: The scope-and-sequence plus one complete unit, approved for format before the rest of the course is mass-produced.
+: **Strand**: A learning area a unit covers — one of its subject or skill areas (literacy, science), enumerated from the unit's scope-and-sequence entry and lesson documents. A build may run a different lesson shape per strand, and a review grades the work strand by strand.
