@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-07-10
+
+### Changed
+
+- Internal: the skill's setup, marking, and media-processing reference docs now use the DraftHorse handover sub-step model, and several skill-authoring audit gaps were closed. No change to how the skill is invoked, its project layout, or its outputs.
+
 ## [0.3.0] - 2026-07-10
 
 ### Added
