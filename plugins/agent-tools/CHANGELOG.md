@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-07-10
+
+### Added
+
+- DraftHorse now supports **handover documents** — a sub-step document type for extracting heavy, optional, or side-branching work into its own `references/` file (marked `type: handover`) that a master step folds in at runtime. The skill guides when to extract a handover and how to write one, and the `drafthorse-saddler` auditor gains a matching set of handover checks. Existing five-part-scaffold documents need no changes.
+
 ## [0.2.0] - 2026-07-08
 
 ### Added
