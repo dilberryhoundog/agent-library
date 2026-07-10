@@ -17,6 +17,26 @@ Cut a step boundary wherever one of these occurs:
 
 Prefer fewer, larger steps over many small ones — a step is sized to all the work the agent can manage in one pass, not to one command. Split only at the edges above; a sequence of commands with a single completion state is one step. Two smells: over-splitting — consecutive steps whose start conditions are just "the previous step finished"; and premature closing — a step that finishes only so the next one can start, while its concern still applies (a wait, a held rule, an open loop). The fix for the second is not merging the steps but leaving the spanning step in play.
 
+## Handover extraction
+
+Some step-shaped work belongs in the map but not in the document: heavy or occasional work that would bloat every ordinary read of the skill. Extract it as a **handover doc** — a separate `references/` file whose frontmatter is the single line `type: handover`, holding its own steps, references, and invariants. A **master step** in the main document folds it in at the moment of use ("follow `references/X.md` as a handover doc"), its steps run as sub-steps of that master step, and the run carries on.
+
+The smells that mark a candidate (or a lump of steps) as handover-shaped — no single one decides it; weigh them together:
+
+- **Largish** — enough work that it likely wants breaking into several sub-steps of its own.
+- **Optional** — off the main happy path; invoked only on certain runs.
+- **Side-branching** — a detour off the main flow rather than a link in its chain.
+- **Many invariants bound to the one body of work** — a cluster of rules all governing the same self-contained slice.
+- **Minimal, distinct tool grants** — needs only a small, self-contained slice of the tool surface.
+
+Shaping a handover, hold its deltas from a skill:
+
+- **Frontmatter is `type: handover` and nothing else** — no `name`, `description`, `allowed-tools`, or invocation surface. Identity moves into the body: a `# Title (Handover)` heading and one identity paragraph stating what it does, when a master step folds it in, and that it routes no success or failure of its own.
+- **No required exit steps** — no success exit, no error drain, no handed-back outcome. Control returns to the master step when no handover step is left in play; a failure falls to the master document's problem step. The master step's own finished condition reads success from the state the handover leaves behind.
+- **Never names its master** — written to be folded into any step that needs it; it may cite the master's ambient references by name (never restating them), but the master never cites the handover's internal references.
+- **Grants come from the master** — everything the handover's steps do must be covered by the main document's `allowed-tools`.
+- **One level only** — a handover must not fold in another handover; work that deep belongs in its own skill, reached as an external call.
+
 ## Every map carries
 
 - **A success exit** — a terminal step whose start condition is "all the work is finished", stated exhaustively (every item processed, declined, or reported empty), and whose body reports the outcome.

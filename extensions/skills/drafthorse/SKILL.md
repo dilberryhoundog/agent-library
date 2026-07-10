@@ -29,6 +29,8 @@ Every DraftHorse document has five parts, in this order:
 4. **Steps** — the working body, opened by the universal steps preamble; standalone steps (contract in H4s, engagement under an H3), closed by a success exit and an error step.
 5. **Terms** — the glossary, `: **Term**: meaning` form. Delete when empty.
 
+One variant reuses the whole scaffold: a **handover doc** — a `references/` file whose frontmatter is the single line `type: handover`, holding heavy or occasional step-shaped work that a master step in the main document folds in at its moment of use. Its deltas from a skill (bare frontmatter, identity paragraph, no exit steps, grants from the master) are catalogued in `references/step-splitting.md`.
+
 ## The Template
 
 `assets/SKILL-template.md` is the fill-in skeleton for the draft — the scaffold with every part annotated, the steps preamble baked in verbatim, and the error step shipped as real text.
@@ -46,6 +48,7 @@ The tests a finished document must pass:
 - **Cite references at the moment of use** — inside the sentence that needs them, not as a list at the top of a step.
 - **Inline vs external references** — compact and always-relevant context inline; expansive and sometimes-relevant context external.
 - **Invocation-shaped description** — model-invoked: agent-facing triggers; user-invoked: short human summary.
+- **A handover fits its master step** — a handover doc's work sits wholly inside the master step's start and finished criteria: the finished condition reads the state the handover leaves behind, with no handed-back outcome; a failure falls to the main document's error step.
 - **Single source of truth** — one meaning, one home (documents that never share run-time context may deliberately repeat).
 - **Remove no-ops** — a line the agent already obeys by default is paid-for noise.
 
@@ -65,6 +68,7 @@ Phase-specific judgment, loaded by the step that needs it:
 >- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
 >- If a step cannot be completed, move to the step that handles the condition/error.
 >- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
+>- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
 
 ## +Gather Requirements
 
@@ -139,7 +143,7 @@ The user has approved the step map — and the map holds up on its own: every st
 
 ### Shape the Map:
 
-Follow `references/step-splitting.md`. From the step candidates and the requirements, shape the steps: for each, a name, a one-line purpose, the references it operates on and at which moment, and its place in the flow — including loops, genuine bounded decisions, the success exit, and the error step. Present the map to the user for tuning.
+Follow `references/step-splitting.md`. From the step candidates and the requirements, shape the steps: for each, a name, a one-line purpose, the references it operates on and at which moment, and its place in the flow — including loops, genuine bounded decisions, the success exit, and the error step. Weigh any candidate cluster flagged handover-shaped (and any lump the smells fit) against the handover extraction smells in that guide; where they hold, map it as a handover doc with the master step that folds it in, and offer the extraction to the user with the map. Present the map to the user for tuning.
 
 ## +Set Invariants
 
@@ -171,7 +175,7 @@ The draft is written to the destination with every template placeholder resolved
 
 ### Write:
 
-Copy `assets/SKILL-template.md` to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. Write every step's conditions and *do this next* guidance per `references/condition-writing.md`. Keep the steps preamble verbatim; keep the error step.
+Copy `assets/SKILL-template.md` to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. Write every step's conditions and *do this next* guidance per `references/condition-writing.md`. Keep the steps preamble verbatim; keep the error step. Write each handover doc the map calls for as its own `references/` file per the deltas in `references/step-splitting.md` — same scaffold and verbatim preamble, `type: handover` frontmatter, identity paragraph, no exit steps — and cite it from its master step as "follow `references/X.md` as a handover doc".
 
 ## +Review
 
@@ -240,3 +244,5 @@ Terms used in this skill:
 : **Step Candidate**: A piece of work extracted from the reference terrain or the requirements — ordered actions, conditionals, anything the agent does — awaiting shaping into a step.
 : **Gap**: A reference the document needs but that does not exist yet — named and classified during collection, produced in `+Fill Reference Gaps`.
 : **Mode**: Whether the build creates a new document or converts an existing one.
+: **Handover Doc**: A `type: handover` document in `references/` whose steps a master step in the main document folds into the run as sub-steps — the extraction target for heavy, optional, or side-branching work.
+: **Master Step**: The step in the main document that folds a handover doc in, owns the logic around it, and reads success from the state the handover leaves behind.

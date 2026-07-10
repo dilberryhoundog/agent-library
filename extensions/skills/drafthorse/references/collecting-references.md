@@ -40,6 +40,11 @@ Extract each hit into the **step candidates** list, phrased as work ("interview 
 
 Small self-contained logic inside a reference is tolerable (the interpreter is an agent), but every hit above should at least be weighed — the audit exists because unextracted work is the most common conversion defect.
 
+Two carve-outs to the audit:
+
+- A reference file whose frontmatter is already `type: handover` is a **handover doc**, not a reference — its steps and logic are its job, so it is not mined for embedded work. Record it in the set as a handover and note which step folds it in.
+- A hit (or cluster of hits) that is all work and looks heavy, optional, or side-branching may be **handover-shaped**: extract it into the step candidates like any other work, but flag the cluster as a possible handover extraction. The call is made while shaping the map — the smells and the how-to live in `step-splitting.md`.
+
 ## Output of this phase
 
 Two artifacts: the classified reference set (name, placement, and what each holds), and the step-candidates list (each candidate's work statement and its source). What happens to them — the gate, the hand-over, the re-harvest — is the step's business, not this guide's.

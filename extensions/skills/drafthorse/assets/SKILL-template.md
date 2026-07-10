@@ -46,6 +46,7 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 >- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
 >- If a step cannot be completed, move to the step that handles the condition/error.
 >- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
+>- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
 
 <!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). H4 headings are the step's contract; the H3 opens the work. A step names another step only in its "Do this next:" slot; conditions are written in state terms, never step terms. -->
 
