@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-10
+
+### Added
+
+- Git Box: new `multi-commit-and-push` workflow — split a working tree into multiple scoped commits (each staging only its own files), then push once every commit succeeds.
+
+### Fixed
+
+- Versioning: the skill is now granted the tools its steps actually use, so releases run without missing-permission stalls.
+
+### Changed
+
+- Git Box / agent-commit: clarified skill invariants and chat-context handling.
+
 ## [0.7.0] - 2026-07-08
 
 ### Changed
