@@ -107,7 +107,7 @@ The user has approved the reference set and step-candidate list — and the set 
 
 ### Harvest and Audit:
 
-Follow `references/collecting-references.md`. Gather every piece of source material (in a conversion, the existing document is the primary ore). Classify each piece as inline static, external static, or dynamic. Audit every piece for embedded work — ordered actions, conditionals, anything the agent *does* rather than *reads* — and extract those into a **step candidates** list; what remains is data. A reference the document needs but that does not exist yet — a dynamic command block to write, a format to design, an external file to author — is recorded in the set as a **gap**, not produced here.
+Follow `references/collecting-references.md` — it carries the harvest, the classification axes, the embedded-work audit that fills the **step candidates** list, and how a needed-but-missing reference is recorded as a **gap** rather than produced here.
 
 #### Present and Hand Over:
 
@@ -119,7 +119,7 @@ Produce the references that do not exist yet, so the steps have a complete set t
 
 #### Start this step when:
 
-The reference set is approved and it contains unfilled gaps — whether recorded at collection, or discovered later while mapping, drafting, or reviewing.
+The reference set is approved, and a reference the document needs is recorded as an unfilled gap — however late it surfaced.
 
 #### Step finished when:
 
@@ -127,7 +127,7 @@ Every recorded gap exists in usable form and the reference set is complete and a
 
 ### Produce:
 
-Author each gap in its classified form: write and sanity-check dynamic command blocks (run the command where it is safe and read-only; otherwise reason it through), design the formats and templates the steps will emit or consume, and write any external reference files. Each produced reference keeps the moment-of-use note from its classification.
+Author each gap in its classified form: write and reason through dynamic command blocks (this skill authors the block, it does not execute it — sanity-check by reading, and where a command's shape is uncertain ask the user to run it and share the output), design the formats and templates the steps will emit or consume, and write any external reference files. Each produced reference keeps the moment-of-use note from its classification.
 
 ## +Map the Steps
 
