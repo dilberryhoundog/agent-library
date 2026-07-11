@@ -21,8 +21,14 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap');
 
-  /* ---- A4 print setup ---- */
-  @page { size: A4; margin: 0; }
+  /* ---- A4 print setup ----
+     Content pages use real per-sheet margins so any .page whose content
+     overflows one sheet keeps its top/bottom margin on continuation sheets.
+     Full-bleed pages (cover) opt out via the named page rule below.
+     Pass zero margins to the PDF renderer; these CSS margins are the
+     single source of truth. */
+  @page { size: A4; margin: 18mm 20mm 16mm 18mm; }
+  @page cover { margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
     --accent: #2d6a4f;        /* set per unit; colour-codes cover + margin */
@@ -51,7 +57,10 @@
 
   @media print {
     body { background: #fff; }
-    .page { margin: 0; box-shadow: none; page-break-after: always; }
+    /* min-height = 297mm minus the 18mm/16mm page margins, so the annotation
+       band runs the full sheet even when content is short. */
+    .page { width: auto; min-height: 263mm; margin: 0; padding: 0; box-shadow: none; page-break-after: always; }
+    .step, .q, .challenge, .confidence-block, .concept-box, .reflect-box, .draw-box, .working-space { break-inside: avoid; page-break-inside: avoid; }
   }
 
   /* ---- Cover ---- */
@@ -64,6 +73,11 @@
   .cover .sub { font-size: 14pt; opacity: 0.9; }
   .cover .namebox { margin-top: 40px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.4);
     border-radius: 12px; padding: 16px 24px; font-size: 12pt; }
+  /* Full-bleed in print: the cover opts out of the default page margins via the
+     named "cover" page. Must come after the base .cover rule to win the cascade. */
+  @media print {
+    .cover { page: cover; width: 210mm; height: 297mm; margin: 0; box-shadow: none; page-break-after: always; }
+  }
 
   /* ---- Headings & lesson scaffold ---- */
   .unit-header { border-bottom: 2.5px solid var(--accent); padding-bottom: 8px; margin-bottom: 14px; }

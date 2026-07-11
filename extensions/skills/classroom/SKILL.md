@@ -33,8 +33,9 @@ Assemble home-education materials tailored to a specific learner and the family'
 ## Document Pipeline
 
 === how every document is produced ===
-Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits.
+Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits. Always pass zero margins explicitly (`margin: {"top":"0","bottom":"0","left":"0","right":"0"}`) — the shells' CSS `@page` rules own the margins, and the renderer applies its own defaults if the parameter is omitted.
 If the tool is unavailable on this host, still write the HTML to `source/`, deliver paste-ready HTML, and tell the user to convert in the browser (Print → Save as PDF, A4, margins off).
+Page geometry lives in the shells' `@page` rules: content pages carry real per-sheet margins (so content overflowing one sheet keeps its margins on continuation sheets), while full-bleed pages (covers, certificate) opt out via a named `@page` rule with `margin: 0` and may use the full 297mm height. Don't reintroduce `@page { margin: 0 }` on content pages or emulate margins with `.page` box padding in print.
 
 ## House Style
 
