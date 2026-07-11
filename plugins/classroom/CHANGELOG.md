@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-07-12
+
+### Fixed
+
+- Fixed page-margin and print-layout breaks in document templates (answer key, competency report, parent lesson guide, review document, scope and sequence, workbook) — continuation sheets were losing top/bottom margins when content overflowed one A4 page. Tables now repeat header rows across page breaks and avoid splitting rows/callouts mid-page.
+
 ## [0.3.1] - 2026-07-10
 
 ### Changed
