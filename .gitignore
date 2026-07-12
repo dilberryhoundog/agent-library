@@ -3,3 +3,4 @@
 # YYYY-MM-DD-HHMMSS-<slug>.txt export filename, anchored to the root only,
 # so skill reference .txt files in subdirectories stay tracked.
 /20??-??-??-*.txt
+/archive
