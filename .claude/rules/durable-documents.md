@@ -1,1 +1,1 @@
-../../../extensions/rules/durable-documents.md
+../../extensions/rules/durable-documents.md
