@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-07-12
+
+### Changed
+
+- `doc-reviewer` agent rebuilt on the DraftHorse step framework: standalone
+  steps with explicit start/finished conditions, and data (defect classes,
+  report format, verdict rule) moved into references.
+- `doc-reviewer` reports now open with an `ACCEPTANCE TEST:` header (formerly
+  `GOAL-CHECK:`), and the optional input is renamed accordingly.
+- `doc-reviewer` defect taxonomy reworked into predetermined wrongs, each with
+  a recognition shape and a pass/fail ask: Unreachable meaning, Negative
+  mirror, No-op, Ambiguous executable, Self trigger, Audience mismatch,
+  Missing environment.
+
 ## [2.0.0] - 2026-06-18
 
 ### Added
