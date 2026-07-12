@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-07-13
+
+### Fixed
+
+- The versioning skill now verifies a unit's paths are tracked by git before it computes the release range. Previously a wrong path — a typo, a stale symlink, a renamed directory — matched nothing and produced an empty range, indistinguishable from a unit with no commits, so a release you asked for could be silently reported as "nothing to release" and skipped. A bad path now fails loudly and names itself.
+- Releases of units whose assets are symlinked are no longer at risk of the same silent skip: the skill now spells out how a symlink target is converted to a repository-relative path, a conversion it previously assumed.
+
 ## [0.8.1] - 2026-07-12
 
 ### Fixed
