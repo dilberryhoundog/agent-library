@@ -11,7 +11,7 @@ A token written in **bold capitals** is an invariant keyword — a hard rule the
 ## Structural markings (not executable — these organise and name)
 
 - `## +Step Name` — a step node: `+` prefix, Title Case, H2. The `+` distinguishes steps from reference and term headings.
-- `#### Start this step when:` / `#### Step finished when:` / `#### Do this next:` / `#### Invariants:` — the machinery headings, always H4, in this order (the last two optional): the step's contract, read without engaging (see [steps.md](steps.md)).
+- `#### Start this step when:` / `#### Step finished when:` / `#### Decision:` / `#### Do this next:` / `#### Invariants:` — the machinery headings, always H4, in this order (the last three optional): the step's contract, read without engaging (see [steps.md](steps.md)).
 - `###` — the engagement heading: one H3 named for the work opens the step's body; the work may structure itself with H4 sub-headings of its own.
 - `# --- REFERENCES --- / # --- STEPS --- / # --- TERMS ---` — the segment dividers of the scaffold (see [scaffold.md](scaffold.md)).
 - `=== Mini Heading ===` — a lightweight in-block label, lighter than a `####`.

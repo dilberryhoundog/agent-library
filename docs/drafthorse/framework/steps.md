@@ -43,6 +43,10 @@ The state that makes this the right work, in state terms. Excludes half-applied 
 
 This step's own completion criteria — checkable and exhaustive, nothing else.
 
+#### Decision:
+
+Optional. A choice that governs the step's scope or shape, which the agent resolves before the engagement can be performed. Omit when the step's scope is fixed.
+
 #### Do this next:
 
 Optional prose guidance onward: the happy-path pointer, a loop back to an earlier step, a bail on failure, or the skill's exit. Omit when the dovetail is obvious.
@@ -63,6 +67,14 @@ The `+` prefix marks a heading as a step node, distinguishing steps from referen
 Every step ends on its **step finished when** condition. The condition must be **checkable** — the agent can tell done from not-done — and **exhaustive** — it encompasses all the work ("every chosen unit released, declined, or reported nothing-to-release", not "the releases are done"). A vague condition invites premature completion; because conditions carry the routing, a weak one is the equivalent of a broken edge. A finished condition never mentions another step, narrates where the flow goes, or issues instructions — routing belongs to start conditions and *do this next*; work belongs to the engagement.
 
 Start conditions carry a symmetric duty: they must **exclude half-applied states**. A start condition phrased only as "the prerequisite is met" still holds after the step failed partway, inviting a destructive re-run; phrase it to exclude work already partially done ("…and no part of the release has been applied yet"), handing the half-applied state to the error step.
+
+## Decision
+
+The optional slot for a choice that governs the step's **scope or shape** — what the step targets, or how many times it runs — which the agent must resolve before the engagement can be performed. It sits with the machinery, not under the engagement, because an agent reading a step's contract to decide whether and how to enter it needs this in view at that altitude; folded into the work, it reads as guidance for performing the work, which it is not.
+
+Use it where run state decides the step's extent: an invocation naming one item versus a bare invocation that must survey every item and ask the user which to act on. Three limits keep the slot from becoming a dumping ground — it carries no work (the engagement does that), it carries no routing between steps (start conditions and *do this next* do that), and it must resolve to a fact the step's own finished condition depends on. A choice that fails all three is either engagement prose or a routing condition wearing the wrong heading.
+
+A genuine bounded fork inside the work — both branches the step's own business, neither changing what the step targets — stays in the engagement as plain prose.
 
 ## Do this next
 

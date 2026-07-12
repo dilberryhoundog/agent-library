@@ -45,7 +45,11 @@ Shaping a handover, hold its deltas from a skill:
 
 ## Decisions
 
-A Decision section belongs inside a step only for a genuine bounded choice — the work forks and both forks are this step's business. Written as plain prose: what is being decided, between what, and by what signal. Routing between steps is never a Decision — that is what start conditions (and a step's optional *do this next* guidance) do.
+A `#### Decision:` block belongs to a step whose **scope or shape** is decided by run state — what the step targets, or how many times it runs. It sits with the step's other H4 machinery, above the engagement heading, because an agent reading the contract to decide whether and how to enter the step needs it in view there: a skill invoked with a named unit computes that one unit's range, while a bare invocation surveys every unit and asks the user which to act on, and the finished condition ("every targeted unit has a range") means different things in each case.
+
+Written as plain prose: what is being decided, between what, and by what signal. Three limits hold it in place — it carries no work (the engagement does that), it carries no routing between steps (start conditions and *do this next* do that), and it resolves to a fact the step's own finished condition depends on. Routing between steps written as a Decision is a defect.
+
+A genuine bounded fork inside the work — both forks the step's business, neither changing what the step targets — is not a Decision block; it stays in the engagement as plain prose.
 
 ## Placing the references
 

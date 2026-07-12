@@ -48,7 +48,7 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 >- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
 >- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
 
-<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). H4 headings are the step's contract; the H3 opens the work. A step names another step only in its "Do this next:" slot; conditions are written in state terms, never step terms. -->
+<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). H4 headings are the step's contract — its conditions, any scope decision, its routing hint and its invariants; the H3 opens the work. A step names another step only in its "Do this next:" slot; conditions are written in state terms, never step terms. -->
 
 ## +<Step Name>
 
@@ -61,6 +61,10 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 #### Step finished when:
 
 <!-- This step's own completion criteria only — checkable and exhaustive. Could the agent claim this is met while work remains? If yes, sharpen it. No other steps, no routing, no instructions. -->
+
+#### Decision:
+
+<!-- Optional: a choice that governs this step's scope or shape — what it targets, how many times it runs — resolved before the work can be performed. Carries no work and no routing, and resolves to a fact the finished condition depends on. Delete the section when the step's scope is fixed. -->
 
 #### Do this next:
 
