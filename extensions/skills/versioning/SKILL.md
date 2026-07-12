@@ -4,7 +4,7 @@ description: Cut a semantic-version release for a configured unit — bump, chan
 disable-model-invocation: true
 argument-hint: [ unit-name ]
 model: sonnet
-allowed-tools: Read, Write, Edit, Agent(dev-tools:breaking-change-detector), Bash(date *), Bash(git status *), Bash(git symbolic-ref *), Bash(git branch *), Bash(gh auth status), Bash(git tag *), Bash(git log *), Bash(git diff *), Bash(git add *), Bash(git commit *), Bash(git push *), Bash(git ls-remote *), Bash(gh release *), Bash(find * -type l), Bash(readlink *)
+allowed-tools: Read, Write, Edit, Agent(dev-tools:breaking-change-detector), Bash(date *), Bash(git status *), Bash(git symbolic-ref *), Bash(git branch *), Bash(gh auth status), Bash(git tag *), Bash(git log *), Bash(git diff *), Bash(git ls-files *), Bash(git add *), Bash(git commit *), Bash(git push *), Bash(git ls-remote *), Bash(gh release *), Bash(find * -type l), Bash(readlink *)
 ---
 
 # Versioning
@@ -17,6 +17,7 @@ The skill is universal: it carries the _how_ (semver rules, commit mapping, comm
 
 **NEVER** move or overwrite an existing tag. If the tag already exists, stop and ask.
 **NEVER** update a unit's release artifacts — manifest, changelog, commit, tag, push — before the user has explicitly approved the proposed bump and changelog for that unit.
+**NEVER** collect a unit's paths into a shell variable and expand it into a pathspec (`-- $PATHS`). Wherever a command filters by the unit's paths, write the resolved paths out literally, one after another, space-separated, on the command line.
 
 # --- REFERENCES ---
 
@@ -110,19 +111,19 @@ Create or repair the repository's versioning config with the user.
 
 #### Start this step when:
 
-No versioning config exists in this repository, or a requested unit is not defined in the existing config.
+No versioning config exists in this repository, a requested unit is not defined in the existing config, or a defined unit's definition is wrong — most often paths that no longer resolve or are not tracked by git.
 
 #### Step finished when:
 
-A user-approved config is on disk covering every requested unit.
+A user-approved config is on disk, covering every requested unit.
 
 #### Do this next:
 
-The units are now identified in the config — proceed to preflight.
+Carry on with the release.
 
 ### Create or Amend the Config:
 
-Interview the repository to discover its units — how many deliverables, where each manifest's literal version string lives, the tag pattern, where each changelog lives, and which units publish GitHub releases — using the discovery heuristics and field rules in `references/config-template.md`, and confirm the findings with the user. Draft the config from the template at its preferred placement; when a config already exists, add or amend only the missing unit's block, following the existing units' conventions rather than recreating the file. Show the drafted config or amended block to the user before it is used.
+Interview the repository to discover its units — how many deliverables, where each manifest's literal version string lives, the tag pattern, where each changelog lives, and which units publish GitHub releases — using the discovery heuristics and field rules in `references/config-template.md`, and confirm the findings with the user. Draft the config from the template at its preferred placement; when a config already exists, add or amend only the block of the unit that is missing or wrong, following the existing units' conventions rather than recreating the file. When repairing a unit whose paths failed verification, re-derive them from the repository as it stands now — a path may have been renamed, moved, or deleted since the config was written. Show the drafted config or amended block to the user before it is used.
 
 ## +Preflight
 
@@ -156,23 +157,40 @@ The release preconditions have been verified this run, and a targeted unit does 
 
 Every targeted unit has a computed range. A named unit with no commits in range is reported "nothing to release" and is finished. After a bare invocation, the user has chosen which unit(s) to release.
 
+#### Decision:
+
+How the skill was invoked decides the scope. A named unit gets its range computed directly. A bare invocation computes the range state for every unit in the config, reports each unit's pending commits or "nothing to release", and asks the user which unit(s) to release — units are then released one at a time, in the order chosen.
+
 ### Compute the Range:
 
-Resolve the unit's paths: by default, the unit directory plus the repo-relative target of every symlink inside it; a path-resolution rule in the config, when present, overrides this default. Resolve the symlink targets with this command block:
+Resolve the unit's paths: by default, the unit directory plus the repo-relative target of every symlink inside it; a path-resolution rule in the config, when present, overrides this default. List the symlinks and read their targets with this command block:
 
 ```bash
-# Symlinks in the unit directory, then each one's repo-relative target
+# Symlinks in the unit directory, then each one's raw target
 find <unit-dir> -type l
 readlink <symlink>
 ```
 
+`readlink` returns the target **relative to the symlink's own directory**, not to the repository root. Convert it before use: join the target onto the symlink's directory, then resolve the `../` segments. Worked example —
+
+- symlink: `plugins/dev-tools/skills/versioning`
+- `readlink` output: `../../../extensions/skills/versioning`
+- symlink's directory: `plugins/dev-tools/skills`
+- joined: `plugins/dev-tools/skills/../../../extensions/skills/versioning`
+- resolved (each `..` climbs one level: `skills` → `dev-tools` → `plugins`): `extensions/skills/versioning`
+
+The repo-relative form is what every later command takes. A raw `readlink` target passed to git is rejected as outside the repository, or silently matches nothing.
+
 Compute the range with this command block — the unit's latest tag matching its tag pattern, then `<last-tag>..HEAD` filtered to the unit's paths:
 
 ```bash
+# Every resolved path must be tracked — run this before filtering anything
+git ls-files --error-unmatch <unit paths>
+
 # Latest tag for the unit (pattern from project config, e.g. 'chat-tools/v*' or 'v*')
 git tag -l '<pattern>' --sort=-version:refname | head -1
 
-# Commits in range, attributed to the unit by path
+# Commits in range, attributed to the unit by path filters
 git log <last-tag>..HEAD --oneline -- <unit paths>
 
 # Full messages (bodies may contain BREAKING CHANGE footers)
@@ -181,11 +199,15 @@ git log <last-tag>..HEAD --format='%H%n%s%n%b%n---' -- <unit paths>
 
 In a multi-unit repository, a commit belongs to a unit when it touches that unit's paths. A commit spanning several units appears in each unit's range — record it in each affected changelog.
 
-**First release** (no tag matches): the baseline is the manifest's current version (`0.1.0` when no manifest exists — confirm with the user). Skip the bump derivation and release the baseline version itself unless the user prefers otherwise; the changelog entry summarises the unit's history to date rather than itemising every commit.
+#### First release
 
-#### Decision:
+When no tag matches the unit's pattern, the unit has never been released and there is no prior version to measure from. Record it as a first release, and record its candidate baseline version: the manifest's current version, or `0.1.0` when the unit has no manifest. The range is the unit's whole history to date.
 
-How the skill was invoked decides the scope. A named unit gets its range computed directly. A bare invocation computes the range state for every unit in the config, reports each unit's pending commits or "nothing to release", and asks the user which unit(s) to release — units are then released one at a time, in the order chosen.
+#### Path errors
+
+`git log` ignores a pathspec that matches nothing, so a wrong path and a quiet unit produce the same empty output. Verifying the paths first is what tells them apart: once every resolved path is tracked, an empty range is the repository's answer and can be acted on.
+
+`git ls-files --error-unmatch` fails on the first path it cannot match, naming it. When it fails, the paths are wrong, not the repository quiet — the unit's definition cannot produce a range, and no range may be filtered through unverified paths. Report the path git rejected and how it was resolved (a symlink target converted wrongly, a stale target, or a config path that no longer exists), and leave the unit without a computed range.
 
 ## +Breaking Changes
 
@@ -203,7 +225,7 @@ The scan has run, been skipped with its reason, or failed — and the verdict (i
 
 Inspect the diff's shape (`git diff <range> --stat -- <paths>`). When any changed file defines a user-facing surface (commands, skill definitions, manifests, config schemas, documented formats) — or when uncertain — spawn the `dev-tools:breaking-change-detector` agent, passing the commit range, the unit's paths, and the unit's current version. A confirmed breaking change sets the bump floor to major, overriding a lower commit-derived bump.
 
-Skip the scan (recording the reason) when every changed file is non-contract by location (tests, CI, internal scripts, release housekeeping) or the commit-derived bump is already major. When the agent cannot be spawned (not installed, or the spawn errors), record the scan as failed and continue on the commit-derived bump.
+Skip the scan (recording the reason) when the unit is a first release — nothing has been published that a change could break — when every changed file is non-contract by location (tests, CI, internal scripts, release housekeeping), or when the commit-derived bump is already major. When the agent cannot be spawned (not installed, or the spawn errors), record the scan as failed and continue on the commit-derived bump.
 
 ## +Propose
 
@@ -220,6 +242,10 @@ The user has seen the bump, the reasoning, and the draft changelog, and has resp
 ### Derive and Present:
 
 Map each conventional commit in range to a bump level using the `Bump Mapping` reference, judged against the compatibility promise in the `Semver` reference. Apply the bump floor from the breaking-change scan — it overrides a lower commit-derived bump; report any discrepancy. Present the commit list, what each commit maps to, the resulting bump (e.g. "2 feat, 1 fix → minor: 1.0.1 → 1.1.0"), and a draft changelog entry per the `Changelog Rules` reference. Always show the reasoning so the user can audit and learn the mapping, and state whether the breaking-change scan ran, was skipped (with the reason), or failed. When the range contains only commits that change nothing user-visible, ask the user whether a release is warranted at all before proposing a bump.
+
+#### First release
+
+A unit recorded as a first release has no prior version to bump from. Derive nothing: present its recorded baseline version as the proposal, with a changelog entry that summarises the unit's history to date rather than itemising every commit in range. The user approves the baseline, edits it, or names a different starting version.
 
 ## +Execute
 
