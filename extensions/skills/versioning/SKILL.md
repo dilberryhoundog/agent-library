@@ -4,14 +4,14 @@ description: Cut a semantic-version release for a configured unit — bump, chan
 disable-model-invocation: true
 argument-hint: [ unit-name ]
 model: sonnet
-allowed-tools: Read, Write, Edit, Agent(dev-tools:breaking-change-detector), Bash(git status *), Bash(git symbolic-ref *), Bash(git branch *), Bash(gh auth status), Bash(git tag *), Bash(git log *), Bash(git diff *), Bash(git add *), Bash(git commit *), Bash(git push *), Bash(git ls-remote *), Bash(gh release *), Bash(find * -type l), Bash(readlink *)
+allowed-tools: Read, Write, Edit, Agent(dev-tools:breaking-change-detector), Bash(date *), Bash(git status *), Bash(git symbolic-ref *), Bash(git branch *), Bash(gh auth status), Bash(git tag *), Bash(git log *), Bash(git diff *), Bash(git add *), Bash(git commit *), Bash(git push *), Bash(git ls-remote *), Bash(gh release *), Bash(find * -type l), Bash(readlink *)
 ---
 
 # Versioning
 
 A release turns committed work into a named, documented snapshot. This skill derives the version bump from conventional commits, proposes it with visible reasoning, and on confirmation updates every version location in sync.
 
-The skill is universal: it carries the _how_ (semver rules, commit mapping, command sequences). The _where_ (which files hold versions, tag patterns, changelog paths) lives in each repository's project config, never in this skill.
+The skill is universal: it carries the _how_ (semver rules, commit mapping, command sequences). The _where_ (which files hold versions, tag patterns, changelog paths) lives in each repository's project config.
 
 # Agent Invariants
 
@@ -31,6 +31,8 @@ Local:
 !`git branch --show-current`
 === GitHub Authenticated ===
 !`gh auth status`
+=== Today's Date ===
+!`date +%Y-%m-%d`
 
 ## Request
 
@@ -64,9 +66,9 @@ Commits that change nothing user-visible (CI tweaks, internal refactors) may be 
 
 ## Changelog Rules
 
-Follow the Keep a Changelog format (https://keepachangelog.com). A changelog is written for humans deciding whether to upgrade — never paste the git log.
+Follow the Keep a Changelog format (https://keepachangelog.com). A changelog is written for humans deciding whether to upgrade.
 
-- Newest version first. Heading format: `## [X.Y.Z] - YYYY-MM-DD`.
+- Newest version first. Heading format: `## [X.Y.Z] - YYYY-MM-DD`, dated from the `Preflight` reference's `Today's Date` — never from memory.
 - Group entries under `### Added`, `### Changed`, `### Fixed`, `### Deprecated`, `### Removed`, `### Security`. Include only sections that have entries.
 - Each entry describes what a user of the unit notices, in plain language.
 - Maintain an `## [Unreleased]` section at the top; releasing moves its entries under the new version heading.
@@ -217,7 +219,7 @@ The user has seen the bump, the reasoning, and the draft changelog, and has resp
 
 ### Derive and Present:
 
-Map each conventional commit in range to a bump level using the `Bump Mapping` reference, judged against the compatibility promise in the `Semver` reference. Apply the bump floor from the breaking-change scan — it overrides a lower commit-derived bump; report any discrepancy. Present the commit list, what each commit maps to, the resulting bump (e.g. "2 feat, 1 fix → minor: 1.0.1 → 1.1.0"), and a draft changelog entry per the `Changelog Rules` reference, written user-facing — what a user of the unit notices, not a git log dump. Always show the reasoning so the user can audit and learn the mapping, and state whether the breaking-change scan ran, was skipped (with the reason), or failed. When the range contains only commits that change nothing user-visible, ask the user whether a release is warranted at all before proposing a bump.
+Map each conventional commit in range to a bump level using the `Bump Mapping` reference, judged against the compatibility promise in the `Semver` reference. Apply the bump floor from the breaking-change scan — it overrides a lower commit-derived bump; report any discrepancy. Present the commit list, what each commit maps to, the resulting bump (e.g. "2 feat, 1 fix → minor: 1.0.1 → 1.1.0"), and a draft changelog entry per the `Changelog Rules` reference. Always show the reasoning so the user can audit and learn the mapping, and state whether the breaking-change scan ran, was skipped (with the reason), or failed. When the range contains only commits that change nothing user-visible, ask the user whether a release is warranted at all before proposing a bump.
 
 ## +Execute
 
@@ -233,33 +235,35 @@ The manifest, changelog, commit, tag, push, and any GitHub release are complete 
 
 #### Invariants:
 
-**NEVER** use heredocs — they are blocked in some sandboxed shells. Build multi-line content with `Write` in a temp directory _outside the repository_ and pass it via `-F` / `--notes-file`, or use repeated `-m` flags. Files written inside the repo would dirty the tree and fail verification.
-**ALWAYS** create annotated tags (`git tag -a`), never lightweight.
+**NEVER** use heredocs — they are blocked in some sandboxed shells. Build multi-line content with `Write` to `/tmp/versioning-<unit>-<X.Y.Z>.md` and pass that path via `-F` / `--notes-file`, or use repeated `-m` flags. **NEVER** write it inside the repository — that would dirty the tree and fail verification.
+**ALWAYS** create annotated tags (`git tag -a`).
 **ALWAYS** release one commit per unit; stage only the files belonging to that release.
 **NEVER** stage untracked files that are not the manifest or changelog; untracked files may exist but do not enter the release commit.
 
 ### Apply the Release:
 
-Follow this sequence, substituting values from the project config and using the user's final bump and changelog text. Content rule: the tag message and the GitHub release notes are both the unit's changelog entry for this version (the heading and its sections, verbatim).
+Follow this sequence, substituting values from the project config and using the user's final bump and changelog text. Content rule: the tag message and the GitHub release notes are both the unit's changelog entry for this version (the heading and its sections, verbatim) — so one written file serves both.
 
 ```bash
 # 1. Update the manifest version field (edit the file directly), then update the changelog per the `Changelog Rules` reference.
 
-# 2. Release commit — stage only this release's files
+# 2. Write the changelog entry to /tmp/versioning-<unit>-<X.Y.Z>.md with `Write` — it is both the tag message and the release notes.
+
+# 3. Release commit — stage only this release's files
 git add <manifest> <changelog>
 git commit -m "chore(release): <unit> v<X.Y.Z>"
 
-# 3. Annotated tag (message file written beforehand, outside the repo)
-git tag -a <tag> -F <tag-message-file>
+# 4. Annotated tag
+git tag -a <tag> -F /tmp/versioning-<unit>-<X.Y.Z>.md
 
-# 4. Push commit and tag together — tags do not push by default
+# 5. Push commit and tag together — tags do not push by default
 git push --follow-tags
 
-# 5. GitHub release (when the config enables it; notes file written beforehand, outside the repo)
-gh release create <tag> --title "<unit> v<X.Y.Z>" --notes-file <notes-file>
+# 6. GitHub release (when the config enables it)
+gh release create <tag> --title "<unit> v<X.Y.Z>" --notes-file /tmp/versioning-<unit>-<X.Y.Z>.md
 ```
 
-When the unit's manifest is `none`, skip the manifest edit, stage only the changelog, and treat the tag as the version's source of truth. When the unit has no changelog yet, create it from the skill directory's `assets/CHANGELOG-template.md`, replacing the placeholder version, date, and entry with the actual baseline. When any command fails partway, stop — do not retry commands that already succeeded.
+When the unit's manifest is `none`, skip the manifest edit, stage only the changelog, and treat the tag as the version's source of truth. When the unit has no changelog yet, create it from the skill directory's `assets/CHANGELOG-template.md`, replacing the placeholder version, date, and entry with the actual baseline. When any command in the sequence fails, move to `+Handle a Problem`.
 
 ## +Verify
 
@@ -278,7 +282,7 @@ Every version location agrees and the unit is reported released, or a mismatch i
 Work through this checklist — every location must agree on the released version `X.Y.Z`:
 
 - [ ] Manifest version field reads `X.Y.Z` (skip when the unit's manifest is `none`).
-- [ ] Changelog's top released heading reads `X.Y.Z` with today's date.
+- [ ] Changelog's top released heading reads `X.Y.Z`, dated to the `Preflight` reference's `Today's Date`.
 - [ ] `git tag -l '<tag>'` shows the tag, and `git ls-remote --tags origin` shows it on the remote.
 - [ ] `gh release view <tag>` succeeds (when releases are enabled).
 - [ ] No modified or staged files remain (`git status --porcelain --untracked-files=no` is empty).
@@ -325,7 +329,7 @@ Tell the user plainly what happened, where in the release it arose, what state t
 
 #### Github release failure
 
-when only the GitHub release step failed (e.g. `gh` missing or unauthenticated), instruct the user to publish the release manually for the existing tag.
+When only the GitHub release step failed (e.g. `gh` missing or unauthenticated), instruct the user to publish the release manually for the existing tag.
 
 # --- TERMS ---
 
