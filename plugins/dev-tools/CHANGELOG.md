@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-13
+
+### Added
+
+- The breaking-change scan now reports why each finding did or did not affect the version — naming the surface it touches, or marking it as costing only a revision round.
+- Findings the scan cannot settle are now put to you as uncertain, with what would settle each, instead of being silently resolved as breaking.
+- A release that stops partway can now be completed from where it stopped, rather than being restarted.
+
+### Changed
+
+- The breaking-change detector now judges agent-harness changes on their own terms: a stricter audit rule, or a newly permitted document form, no longer counts as breaking simply because a document reads differently.
+- The detector is handed the commit range, paths, and version it needs, and works from a single diff — it no longer re-derives what the release already knows, cutting the time a scan takes.
+- The detector now runs on a stronger model for the judgment work.
+
+### Fixed
+
+- A breaking change on a pre-1.0 unit no longer proposes a major bump; the pre-1.0 rule is applied as documented.
+
 ## [0.8.2] - 2026-07-13
 
 ### Fixed
