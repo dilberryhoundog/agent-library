@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-07-12
+
+### Fixed
+
+- The versioning skill now reads the release date from a live lookup instead of leaving the agent to infer one, so changelog headings and GitHub releases carry the correct date rather than a guessed one.
+- The versioning skill now writes its tag message and release notes to a single named file outside the repository, so a release can no longer dirty the working tree and fail its own verification.
+
+### Changed
+
+- The versioning skill's release-process guidance is now carried in the skill itself rather than a separate reference file — same instructions, one fewer file to load.
+
 ## [0.8.0] - 2026-07-10
 
 ### Added
