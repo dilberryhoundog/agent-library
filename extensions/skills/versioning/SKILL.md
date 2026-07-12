@@ -16,8 +16,8 @@ The skill is universal: it carries the _how_ (semver rules, commit mapping, comm
 # Agent Invariants
 
 **NEVER** move or overwrite an existing tag. If the tag already exists, stop and ask.
+**NEVER** collect a unit's paths into a shell variable and expand it into a pathspec (`-- $PATHS`). Wherever a command filters by the unit's paths, write the resolved paths out literally, one after another, space-separated, on the command line. A variable expands unsplit in zsh, reaching git as a single pathspec that matches nothing.
 **NEVER** update a unit's release artifacts — manifest, changelog, commit, tag, push — before the user has explicitly approved the proposed bump and changelog for that unit.
-**NEVER** collect a unit's paths into a shell variable and expand it into a pathspec (`-- $PATHS`). Wherever a command filters by the unit's paths, write the resolved paths out literally, one after another, space-separated, on the command line.
 
 # --- REFERENCES ---
 
@@ -155,11 +155,15 @@ The release preconditions have been verified this run, and a targeted unit does 
 
 #### Step finished when:
 
-Every targeted unit has a computed range. A named unit with no commits in range is reported "nothing to release" and is finished. After a bare invocation, the user has chosen which unit(s) to release.
+Every targeted unit has a computed range and a recorded current version — the version carried by its last matching tag, or its candidate baseline when the unit is a first release. A named unit with no commits in range is reported "nothing to release" and is finished. After a bare invocation, the user has chosen which unit(s) to release.
 
 #### Decision:
 
-How the skill was invoked decides the scope. A named unit gets its range computed directly. A bare invocation computes the range state for every unit in the config, reports each unit's pending commits or "nothing to release", and asks the user which unit(s) to release — units are then released one at a time, in the order chosen.
+How the skill was invoked decides which units this step targets: an invocation naming a unit targets that unit alone; a bare invocation targets every unit in the config.
+
+#### Do this next:
+
+Release the chosen units one at a time, in the order chosen.
 
 ### Compute the Range:
 
@@ -197,7 +201,11 @@ git log <last-tag>..HEAD --oneline -- <unit paths>
 git log <last-tag>..HEAD --format='%H%n%s%n%b%n---' -- <unit paths>
 ```
 
+The last matching tag also carries the unit's current version: strip the fixed prefix its tag pattern defines (`chat-tools/v0.8.2` under pattern `chat-tools/v*` gives `0.8.2`). Record it with the range — later steps bump from it, and the breaking-change scan is briefed with it.
+
 In a multi-unit repository, a commit belongs to a unit when it touches that unit's paths. A commit spanning several units appears in each unit's range — record it in each affected changelog.
+
+Run the resolution and the command block above once per targeted unit. After a bare invocation, present the survey to the user — each unit's pending commits, or "nothing to release" — and ask which unit(s) to release; the units they choose are the ones that carry on into the release.
 
 #### First release
 
@@ -219,11 +227,19 @@ A chosen unit has commits in range but no breaking-change verdict recorded yet.
 
 #### Step finished when:
 
-The scan has run, been skipped with its reason, or failed — and the verdict (including any bump floor) is recorded for the unit.
+The scan has run, been skipped, or failed — and the outcome is recorded for the unit: a scan that ran records its verdict, its bump floor, and any uncertain findings it returned; a scan that was skipped or failed records that, and its reason, in place of a floor.
 
 ### Scan for Breaking Changes:
 
-Inspect the diff's shape (`git diff <range> --stat -- <paths>`). When any changed file defines a user-facing surface (commands, skill definitions, manifests, config schemas, documented formats) — or when uncertain — spawn the `dev-tools:breaking-change-detector` agent, passing the commit range, the unit's paths, and the unit's current version. A confirmed breaking change sets the bump floor to major, overriding a lower commit-derived bump.
+Inspect the diff's shape (`git diff <range> --stat -- <paths>`). When any changed file defines a user-facing surface (commands, skill definitions, manifests, config schemas, documented formats) — or when uncertain — spawn the `dev-tools:breaking-change-detector` agent with a brief in this shape:
+
+```txt
+Range:   <the computed commit range>
+Paths:   <the unit's resolved paths, written out literally>
+Version: <the unit's current version, or "first release">
+```
+
+The agent takes these as given and does not recompute them, so a brief missing any of the three fails the scan rather than sending it off to re-derive what this step already holds. Record the bump floor from the agent's report as returned — Record the report's uncertain findings alongside the verdict: they set no floor, and the user rules on them at the proposal.
 
 Skip the scan (recording the reason) when the unit is a first release — nothing has been published that a change could break — when every changed file is non-contract by location (tests, CI, internal scripts, release housekeeping), or when the commit-derived bump is already major. When the agent cannot be spawned (not installed, or the spawn errors), record the scan as failed and continue on the commit-derived bump.
 
@@ -233,7 +249,7 @@ Derive and present the proposed bump for the unit.
 
 #### Start this step when:
 
-A unit has commits in range and a breaking-change verdict recorded, but no proposal has been shown to the user yet.
+A unit has commits in range and a breaking-change verdict recorded, and neither an approval nor a decline stands for it — including a unit whose approval has since been revised or withdrawn, which leaves it unapproved and awaiting a fresh proposal.
 
 #### Step finished when:
 
@@ -241,7 +257,8 @@ The user has seen the bump, the reasoning, and the draft changelog, and has resp
 
 ### Derive and Present:
 
-Map each conventional commit in range to a bump level using the `Bump Mapping` reference, judged against the compatibility promise in the `Semver` reference. Apply the bump floor from the breaking-change scan — it overrides a lower commit-derived bump; report any discrepancy. Present the commit list, what each commit maps to, the resulting bump (e.g. "2 feat, 1 fix → minor: 1.0.1 → 1.1.0"), and a draft changelog entry per the `Changelog Rules` reference. Always show the reasoning so the user can audit and learn the mapping, and state whether the breaking-change scan ran, was skipped (with the reason), or failed. When the range contains only commits that change nothing user-visible, ask the user whether a release is warranted at all before proposing a bump.
+Map each conventional commit in range to a bump level using the `Bump Mapping` reference, judged against the compatibility promise in the `Semver` reference. Apply the bump floor from the breaking-change scan — it overrides a lower commit-derived bump; report any discrepancy. Present the commit list, what each commit maps to, the resulting bump (e.g. "2 feat, 1 fix → minor: 1.0.1 → 1.1.0"), and a draft changelog entry per the `Changelog Rules` reference. Always show the reasoning so the user can audit and learn the mapping, and state whether the breaking-change scan ran, was skipped (with the reason), or failed. When the scan ran, name the class each finding was given — the surface it touches, or revision-cost — so the user can see why a change did or did not set the floor. Put any uncertain findings to the user with what would settle each: they carry no floor of their own, so the user decides whether one lifts the bump. When the range contains only commits that change nothing
+user-visible, ask the user whether a release is warranted at all before proposing a bump.
 
 #### First release
 
@@ -253,7 +270,7 @@ Apply the approved release.
 
 #### Start this step when:
 
-The user has approved a proposed bump and changelog for a unit (with any edits applied), and no part of that release — commit, tag, or GitHub release — has been applied yet. A half-applied release never re-enters this step; it belongs to `+Handle a Problem`.
+The user has approved a proposed bump and changelog for a unit (with any edits applied), and either no part of that release — commit, tag, push, GitHub release — has been applied yet, or a release that stopped partway has been surfaced to the user and they have decided to complete it from where it stopped. A half-applied release never re-enters this step unclaimed: until the user has decided to complete it, it belongs to `+Handle a Problem`.
 
 #### Step finished when:
 
@@ -265,6 +282,7 @@ The manifest, changelog, commit, tag, push, and any GitHub release are complete 
 **ALWAYS** create annotated tags (`git tag -a`).
 **ALWAYS** release one commit per unit; stage only the files belonging to that release.
 **NEVER** stage untracked files that are not the manifest or changelog; untracked files may exist but do not enter the release commit.
+**NEVER** redo an artifact that already exists. A release commit, an annotated tag, a pushed ref, and a published GitHub release are all durable — completing a release applies only the artifacts that are missing.
 
 ### Apply the Release:
 
@@ -289,7 +307,21 @@ git push --follow-tags
 gh release create <tag> --title "<unit> v<X.Y.Z>" --notes-file /tmp/versioning-<unit>-<X.Y.Z>.md
 ```
 
-When the unit's manifest is `none`, skip the manifest edit, stage only the changelog, and treat the tag as the version's source of truth. When the unit has no changelog yet, create it from the skill directory's `assets/CHANGELOG-template.md`, replacing the placeholder version, date, and entry with the actual baseline. When any command in the sequence fails, move to `+Handle a Problem`.
+When the unit's manifest is `none`, skip the manifest edit, stage only the changelog, and treat the tag as the version's source of truth. When the unit has no changelog yet, create it from the skill directory's `assets/CHANGELOG-template.md`, replacing the placeholder version, date, and entry with the actual baseline.
+
+#### Completing a release that stopped partway
+
+A release the user has decided to complete resumes from where it stopped. Take an inventory of the version's artifacts first — a command that already succeeded leaves a durable trace:
+
+```bash
+# Which artifacts for this version already exist?
+git log --oneline -1                                  # is the release commit already made?
+git tag -l '<tag>'                                    # does the annotated tag exist locally?
+git ls-remote --tags origin 'refs/tags/<tag>'         # is the tag on the remote?
+gh release view <tag>                                 # is the GitHub release published?
+```
+
+Read the manifest and changelog to see whether they already carry the version. Then apply only the artifacts the inventory shows missing, in the sequence's own order, using the user's approved bump and changelog text. Rewrite the notes file when it is gone — a temporary file does not survive, while the commit and tag it fed do.
 
 ## +Verify
 
