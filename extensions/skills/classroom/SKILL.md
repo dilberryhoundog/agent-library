@@ -33,9 +33,24 @@ Assemble home-education materials tailored to a specific learner and the family'
 ## Document Pipeline
 
 === how every document is produced ===
-Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits. Always pass zero margins explicitly (`margin: {"top":"0","bottom":"0","left":"0","right":"0"}`) — the shells' CSS `@page` rules own the margins, and the renderer applies its own defaults if the parameter is omitted.
+Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits.
 If the tool is unavailable on this host, still write the HTML to `source/`, deliver paste-ready HTML, and tell the user to convert in the browser (Print → Save as PDF, A4, margins off).
-Page geometry lives in the shells' `@page` rules: content pages carry real per-sheet margins (so content overflowing one sheet keeps its margins on continuation sheets), while full-bleed pages (covers, certificate) opt out via a named `@page` rule with `margin: 0` and may use the full 297mm height. Don't reintroduce `@page { margin: 0 }` on content pages or emulate margins with `.page` box padding in print.
+
+**Page geometry is not written into documents.** The `html_to_pdf` tool injects it — sheet size, per-sheet margins, page breaks, full-bleed pages, break guards — from the renderer's own `print-base.css`. Documents carry identity only: colour, type, components. A hand-written document gets correct paging for free, without knowing the rules exist.
+
+Three classes are the interface to that geometry, and they are all a document needs:
+
+- `block` — on a component that must not be split across a page break (a card, a call-out, a question).
+- `bleed` — on a page that reaches the paper's edge (a cover, a certificate). It is capped at one sheet, so it cannot spill a near-empty page carrying its background.
+- `annotated` — on a content page that wants the Apple-Pencil annotation band down its outer edge. The band repeats onto continuation sheets and never lands on a cover.
+
+**Off-limits in a document's print CSS**: do not re-declare the paging rules, do not size any box to the sheet in print (`height`/`min-height` of `297mm`, `100%`, and the like — a box that asserts the sheet's height spills a phantom page), and do not set `@page { margin: 0 }` on content pages (a content page with no page margin has no margin on its continuation sheets either — use `bleed` for anything that must reach the edge). Sheet-sized preview boxes belong under `@media screen`.
+
+**To change geometry for one document**, declare an `@page` rule in that document: the base is injected first, so the document's own `@page` wins. `templates/documents/certificate.html` is the worked example (landscape, no margin). Reach for this only when a document's geometry genuinely differs.
+
+**Verify every conversion by its page count.** The tool reports the page count of the PDF it wrote; check it against the count the document was written to have. A surplus page means content overflowed its sheet — the one failure that is invisible in the HTML.
+
+Inline SVG diagrams clip at the `viewBox` edge: anything drawn or labelled beyond it is simply cut, so leave room inside the box for text that sits near the edges.
 
 ## House Style
 
