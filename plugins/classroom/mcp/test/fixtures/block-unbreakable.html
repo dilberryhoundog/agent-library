@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<!-- A tall component carrying `block` must move whole to the next sheet rather
+     than split across the break. -->
+<html lang="en-AU"><head><meta charset="UTF-8"><title>unbreakable block</title>
+<style>.tall { height: 120mm; background: #eeeeff; border: 1px solid #9999ff; }</style>
+</head>
+<body>
+  <div class="page">
+    <p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p><p>filler</p>
+    <div class="tall block"><p>This block must not be split.</p></div>
+  </div>
+</body></html>

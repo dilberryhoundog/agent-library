@@ -11,15 +11,22 @@
 // some cowork containers), the tool self-heals by running install-deps.sh once
 // and retrying. This keeps the server startable before its dependency exists.
 
+const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const readline = require("readline");
 const { createRequire } = require("module");
 const { spawnSync } = require("child_process");
 
+const { countPages } = require("./pdf-inspect.js");
+
 const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, "..");
 const DATA_DIR =
   process.env.CLAUDE_PLUGIN_DATA || path.join(os.homedir(), ".claude", "classroom-data");
+
+// The single authority for page geometry. Injected into every document, so no
+// document has to carry (or can silently corrupt) its own paging rules.
+const PRINT_BASE = path.join(__dirname, "print-base.css");
 
 // ----- dependency loading ---------------------------------------------------
 
@@ -59,28 +66,22 @@ function loadPuppeteer() {
 const TOOL = {
   name: "html_to_pdf",
   description:
-    "Render HTML to a faithful, print-ready PDF (A4 by default) using headless Chromium. " +
-    "Use this to convert finished classroom documents (workbooks, answer keys, guides) into " +
-    "the deliverable PDF. Pass either inline `html` or a path to an HTML file via `htmlPath`.",
+    "Render an HTML classroom document (workbook, answer key, guide, certificate) to a " +
+    "print-ready A4 PDF using headless Chromium. Pass either inline `html` or a path to an " +
+    "HTML file via `htmlPath`.\n\n" +
+    "Page geometry — sheet size, per-sheet margins, page breaks, full-bleed covers — is " +
+    "supplied by the renderer's own print-base.css, injected into every document. Documents " +
+    "carry no paging rules of their own; a document that genuinely needs different geometry " +
+    "declares its own CSS `@page` rule, which wins over the injected base.\n\n" +
+    "The result reports the PDF's page count. Check it against the page count the document " +
+    "was written to have: a surplus page is the signature of content overflowing its sheet.",
   inputSchema: {
     type: "object",
     properties: {
       html: { type: "string", description: "Inline HTML string to render. Provide this OR htmlPath." },
       htmlPath: { type: "string", description: "Absolute path to an HTML file to render. Provide this OR html." },
       outputPath: { type: "string", description: "Absolute path where the PDF is written (e.g. /project/workbook.pdf)." },
-      format: { type: "string", description: "Paper size. Default 'A4'.", default: "A4" },
-      landscape: { type: "boolean", description: "Landscape orientation. Default false.", default: false },
       printBackground: { type: "boolean", description: "Print background colours/images. Default true.", default: true },
-      margin: {
-        type: "object",
-        description: "Page margins, e.g. {\"top\":\"0\",\"bottom\":\"0\",\"left\":\"0\",\"right\":\"0\"}. Default 0 all sides so the document's own layout controls margins.",
-        properties: {
-          top: { type: "string" },
-          bottom: { type: "string" },
-          left: { type: "string" },
-          right: { type: "string" },
-        },
-      },
     },
     required: ["outputPath"],
   },
@@ -92,6 +93,16 @@ async function renderPdf(args) {
   }
   if (!args.html && !args.htmlPath) {
     throw new Error("Provide either `html` (inline) or `htmlPath` (a file).");
+  }
+
+  let printBase;
+  try {
+    printBase = fs.readFileSync(PRINT_BASE, "utf8");
+  } catch (_) {
+    // Rendering without the geometry base would silently produce a document
+    // with no page margins, no page breaks, and no full-bleed handling. Fail
+    // instead: a loud error beats a plausible-looking, wrong PDF.
+    throw new Error(`The print geometry base is missing (expected at ${PRINT_BASE}). The plugin install is incomplete.`);
   }
 
   const puppeteer = loadPuppeteer();
@@ -107,15 +118,30 @@ async function renderPdf(args) {
     } else {
       await page.setContent(args.html, { waitUntil: "networkidle0" });
     }
-    const margin = args.margin || { top: "0", bottom: "0", left: "0", right: "0" };
+
+    // Inject the geometry base as the FIRST stylesheet in <head>, so a
+    // document's own rules come later and win the cascade — that ordering is
+    // what makes `@page` overridable by a document that needs it (a landscape
+    // certificate, say) while every other document inherits the house geometry.
+    await page.evaluate((css) => {
+      const style = document.createElement("style");
+      style.setAttribute("data-classroom-print-base", "");
+      style.textContent = css;
+      document.head.insertBefore(style, document.head.firstChild);
+    }, printBase);
+
+    // preferCSSPageSize makes the document's CSS `@page` the authority on sheet
+    // size. Without it Chromium's own `format` wins and the CSS is decorative —
+    // which is why page geometry used to be unpredictable. No `format`,
+    // `landscape` or `margin` argument is passed for the same reason: one
+    // authority for geometry, and it is the CSS.
     await page.pdf({
       path: args.outputPath,
-      format: args.format || "A4",
-      landscape: args.landscape === true,
       printBackground: args.printBackground !== false,
-      margin,
+      preferCSSPageSize: true,
     });
-    return args.outputPath;
+
+    return { outputPath: args.outputPath, pageCount: countPages(fs.readFileSync(args.outputPath)) };
   } finally {
     await browser.close();
   }
@@ -163,9 +189,18 @@ async function handle(msg) {
         return;
       }
       try {
-        const outPath = await renderPdf((params && params.arguments) || {});
+        const { outputPath, pageCount } = await renderPdf((params && params.arguments) || {});
+        const sheets = pageCount === 1 ? "1 page" : `${pageCount} pages`;
         reply(id, {
-          content: [{ type: "text", text: `PDF written to ${outPath}` }],
+          content: [
+            {
+              type: "text",
+              text:
+                `PDF written to ${outputPath} (${sheets}).\n` +
+                "Check that page count against the count this document was written to have. " +
+                "A surplus page means content overflowed its sheet.",
+            },
+          ],
         });
       } catch (err) {
         reply(id, {
@@ -185,17 +220,21 @@ async function handle(msg) {
   }
 }
 
-const rl = readline.createInterface({ input: process.stdin });
-rl.on("line", (line) => {
-  const trimmed = line.trim();
-  if (!trimmed) return;
-  let msg;
-  try {
-    msg = JSON.parse(trimmed);
-  } catch (_) {
-    return; // ignore non-JSON lines
-  }
-  Promise.resolve(handle(msg)).catch((err) => {
-    if (msg && msg.id != null) replyError(msg.id, -32603, String(err && err.message));
+module.exports = { renderPdf, loadPuppeteer, DATA_DIR };
+
+if (require.main === module) {
+  const rl = readline.createInterface({ input: process.stdin });
+  rl.on("line", (line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    let msg;
+    try {
+      msg = JSON.parse(trimmed);
+    } catch (_) {
+      return; // ignore non-JSON lines
+    }
+    Promise.resolve(handle(msg)).catch((err) => {
+      if (msg && msg.id != null) replyError(msg.id, -32603, String(err && err.message));
+    });
   });
-});
+}

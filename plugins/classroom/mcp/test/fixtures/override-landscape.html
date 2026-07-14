@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<!-- The sanctioned override: a document declaring its own @page. The injected
+     base is first in the cascade, so this wins. Certificates use it. -->
+<html lang="en-AU"><head><meta charset="UTF-8"><title>landscape override</title>
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  .cert { height: 100vh; overflow: hidden; background: #eee;
+          display: flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+  <div class="cert"><h1>Certificate</h1></div>
+</body></html>
