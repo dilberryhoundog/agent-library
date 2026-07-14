@@ -5,13 +5,27 @@
   HOUSE STYLE for every printable in this skill. Copy this file, then:
     1) Set the program title, unit name, and unit accent colour (--accent).
     2) Build a cover page (provided).
-    3) Repeat the .lesson block once per lesson, following the chosen lesson
+    3) Repeat the .page block once per lesson, following the chosen lesson
        structure (default: Watch / Concept / Notes / Practice / Reflect).
     4) End the unit with the reflection page (provided).
   INVARIANTS: A4 only; Australian English; answers live in the SEPARATE
   answer-key template, never here; confidence stars + reflection included.
-  The block styles below mirror templates/blocks/*.html so this file is
-  self-contained.
+
+  PAGE GEOMETRY IS NOT IN THIS FILE. The html_to_pdf tool injects it (sheet
+  size, per-sheet margins, page breaks, full-bleed, break guards) from the
+  renderer's print-base.css. This file styles identity only: colour, type,
+  components. Three rules follow from that:
+    - A component that must not be split across a page break carries `block`.
+    - A full-bleed page (the cover) carries `bleed`.
+    - A content page that wants the Apple-Pencil annotation band carries
+      `annotated`; the band is the page box's right border, so it repeats on
+      continuation sheets and never lands on a cover.
+    - Never size a box to the sheet in print, and never re-declare the paging
+      rules — a box that asserts the sheet's height spills a phantom page.
+  To change geometry for THIS document only, declare an `@page` rule here: the
+  base is injected first, so a document's own `@page` wins. This file does that
+  once, to narrow the right page margin so the annotation band sits close to the
+  paper's edge.
 -->
 <html lang="en-AU">
 <head>
@@ -21,63 +35,47 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap');
 
-  /* ---- A4 print setup ----
-     Content pages use real per-sheet margins so any .page whose content
-     overflows one sheet keeps its top/bottom margin on continuation sheets.
-     Full-bleed pages (cover) opt out via the named page rule below.
-     Pass zero margins to the PDF renderer; these CSS margins are the
-     single source of truth. */
-  @page { size: A4; margin: 18mm 20mm 16mm 18mm; }
-  @page cover { margin: 0; }
+  /* The one geometry rule this document owns: a narrow right page margin, so
+     the annotation band (the page box's right border, supplied by the injected
+     base to every `.page.annotated`) sits close to the paper's edge. */
+  @page { size: A4; margin: 18mm 12mm 16mm 18mm; }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
-    --accent: #2d6a4f;        /* set per unit; colour-codes cover + margin */
+    --accent: #2d6a4f;              /* set per unit; colour-codes cover + band */
     --accent-soft: #e8f3ee;
     --ink: #1a1a1a;
-    --margin-tint: #fffdf2;   /* annotation-margin wash */
+    --annotation-tint: #fffdf2;     /* the band's wash — read by the print base */
+    --annotation-width: 34mm;       /* the band's width — read by the print base */
   }
-  body { font-family: 'Lexend', Arial, sans-serif; color: var(--ink); background: #e8e8e8; font-size: 12pt; line-height: 1.5; }
+  body { font-family: 'Lexend', Arial, sans-serif; color: var(--ink); font-size: 12pt; line-height: 1.5; }
 
-  /* ---- A4 page ---- */
-  .page {
-    position: relative;
-    width: 210mm; min-height: 297mm;
-    margin: 10mm auto; background: #fff;
-    padding: 18mm 20mm 16mm 18mm;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  }
-  /* Wide right-hand annotation margin (Apple Pencil) */
-  .page::after {
-    content: ''; position: absolute; top: 0; right: 0;
-    width: 34mm; height: 100%;
-    background: var(--margin-tint); border-left: 1.5px solid var(--accent);
-    z-index: 0;
-  }
-  .content { position: relative; z-index: 1; width: calc(100% - 38mm); }
-
-  @media print {
-    body { background: #fff; }
-    /* min-height = 297mm minus the 18mm/16mm page margins, so the annotation
-       band runs the full sheet even when content is short. */
-    .page { width: auto; min-height: 263mm; margin: 0; padding: 0; box-shadow: none; page-break-after: always; }
-    .step, .q, .challenge, .confidence-block, .concept-box, .reflect-box, .draw-box, .working-space { break-inside: avoid; page-break-inside: avoid; }
+  /* ---- Screen preview only ----
+     The white A4 card on grey is a preview device, and it stays out of print:
+     a sheet-sized box in print fights the page box for the sheet's height and
+     spills near-empty pages. In print the page box IS the sheet. */
+  @media screen {
+    body { background: #e8e8e8; }
+    .page {
+      width: 210mm; min-height: 297mm;
+      margin: 10mm auto; background: #fff;
+      padding: 18mm 12mm 16mm 18mm;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .page.annotated { border-right: var(--annotation-width) solid var(--annotation-tint); }
+    .cover { width: 210mm; height: 297mm; margin: 10mm auto; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
   }
 
   /* ---- Cover ---- */
-  .cover { width: 210mm; height: 297mm; margin: 10mm auto; padding: 26mm;
+  .cover { padding: 26mm;
     background: linear-gradient(160deg, var(--accent) 0%, #14342a 100%);
     color: #fff; display: flex; flex-direction: column; justify-content: center;
-    align-items: center; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+    align-items: center; text-align: center; }
   .cover .badge { font-size: 10pt; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.85; }
   .cover h1 { font-size: 34pt; font-weight: 800; margin: 10px 0; }
   .cover .sub { font-size: 14pt; opacity: 0.9; }
   .cover .namebox { margin-top: 40px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.4);
     border-radius: 12px; padding: 16px 24px; font-size: 12pt; }
-  /* Full-bleed in print: the cover opts out of the default page margins via the
-     named "cover" page. Must come after the base .cover rule to win the cascade. */
-  @media print {
-    .cover { page: cover; width: 210mm; height: 297mm; margin: 0; box-shadow: none; page-break-after: always; }
-  }
 
   /* ---- Headings & lesson scaffold ---- */
   .unit-header { border-bottom: 2.5px solid var(--accent); padding-bottom: 8px; margin-bottom: 14px; }
@@ -113,30 +111,31 @@
 </head>
 <body>
 
-<!-- ============ COVER ============ -->
-<div class="cover">
+<!-- ============ COVER (full bleed) ============ -->
+<div class="cover bleed">
   <div class="badge">[Program Name]</div>
   <h1>[Unit Title]</h1>
   <div class="sub">[Subject &middot; Age/Year &middot; Number of weeks]</div>
   <div class="namebox">Name: ____________________&nbsp;&nbsp;&nbsp; Start date: ____________</div>
 </div>
 
-<!-- ============ ONE LESSON (repeat this whole .page per lesson) ============ -->
-<div class="page"><div class="content">
+<!-- ============ ONE LESSON (repeat this whole .page per lesson) ============
+     Components carry `block` so they are never split across a page break. -->
+<div class="page annotated">
   <div class="unit-header">
     <div class="week">Unit X &middot; Week / Lesson N</div>
     <h2>[Lesson Title]</h2>
   </div>
 
   <!-- STEP 1: WATCH -->
-  <div class="step">
+  <div class="step block">
     <span class="step-label">&#128250; Watch</span>
     <p>Watch the video, then jot one thing you noticed. (Follow link rules: channel/search link + a backup.)</p>
     <div class="write-line"></div>
   </div>
 
   <!-- STEP 2: KEY CONCEPT — visual example BEFORE reading -->
-  <div class="step">
+  <div class="step block">
     <span class="step-label">&#11088; Key Concept</span>
     <div class="concept-box">
       <strong>[Concept name]</strong>
@@ -145,7 +144,7 @@
   </div>
 
   <!-- STEP 3: GUIDED NOTES — skeleton, not blank void -->
-  <div class="step">
+  <div class="step block">
     <span class="step-label">&#9999;&#65039; My Notes</span>
     <ol class="steps">
       <li>The main idea is ________________________________</li>
@@ -156,51 +155,51 @@
   <!-- STEP 4: PRACTICE — varied formats + working space -->
   <div class="step">
     <span class="step-label">&#10003; Practice</span>
-    <div class="q"><span class="qnum">1.</span> [Multiple choice question]
+    <div class="q block"><span class="qnum">1.</span> [Multiple choice question]
       <div class="mc">
         <label>&#9711; A) ____</label><label>&#9711; B) ____</label><label>&#9711; C) ____</label>
       </div>
     </div>
-    <div class="q"><span class="qnum">2.</span> [Write-the-answer question]
+    <div class="q block"><span class="qnum">2.</span> [Write-the-answer question]
       <div class="write-line"></div>
     </div>
-    <div class="working-space"><span class="ws-label">Working Space</span></div>
+    <div class="working-space block"><span class="ws-label">Working Space</span></div>
   </div>
 
   <!-- Optional: Real-World Caravan Challenge -->
-  <div class="challenge">
+  <div class="challenge block">
     <div class="ch-title">&#128666; Real-World Caravan Challenge</div>
     <p>[One concrete task applying today's concept to life on the road.]</p>
     <div class="write-line"></div>
   </div>
 
   <!-- Optional: drawing / make-it -->
-  <div class="step">
+  <div class="step block">
     <span class="step-label">&#9986;&#65039; Make / Draw</span>
     <div class="draw-box">draw here</div>
   </div>
 
   <!-- STEP 5: REFLECT — confidence stars -->
-  <div class="confidence-block">
+  <div class="confidence-block block">
     <p class="confidence-prompt">How do I feel about this lesson? <span class="hint">(colour the stars)</span></p>
     <div class="stars">&#9734; &#9734; &#9734; &#9734; &#9734;</div>
     <p class="confidence-scale">1 = still tricky &middot; 3 = getting there &middot; 5 = I&rsquo;ve got it!</p>
   </div>
 
   <footer>[Program Name] &middot; Unit X &middot; A4 &middot; print with wide margin for Apple Pencil annotation</footer>
-</div></div>
+</div>
 
 <!-- ============ END-OF-UNIT REFLECTION (one per unit) ============ -->
-<div class="page"><div class="content reflection-page">
+<div class="page annotated reflection-page">
   <h2>My Reflection &mdash; End of Unit</h2>
   <p style="font-style:italic;color:#555;margin-bottom:14px;">There are no wrong answers here. This page is just for you.</p>
-  <div class="reflect-box"><h4>&#128172; One thing I understand better now:</h4>
+  <div class="reflect-box block"><h4>&#128172; One thing I understand better now:</h4>
     <div class="write-line"></div><div class="write-line"></div></div>
-  <div class="reflect-box"><h4>&#129300; One thing I still find tricky:</h4>
+  <div class="reflect-box block"><h4>&#129300; One thing I still find tricky:</h4>
     <div class="write-line"></div><div class="write-line"></div></div>
-  <div class="reflect-box"><h4>&#10067; A question I still have:</h4>
+  <div class="reflect-box block"><h4>&#10067; A question I still have:</h4>
     <div class="write-line"></div></div>
-</div></div>
+</div>
 
 </body>
 </html>

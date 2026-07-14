@@ -139,6 +139,15 @@ async function main() {
     const missing = r.pages.filter((p) => !p.colours.includes(BAND));
     check("band tint appears on EVERY sheet", missing.length === 0, `${missing.length} sheet(s) without the band`);
   }
+  {
+    // A fixed band repeats on every sheet, which must not include a cover: the
+    // bleed stacks above it. CSS cannot select a sheet by number, so the cover
+    // has to cover the band rather than the band having to skip the cover.
+    const r = await render("band-with-cover.html");
+    check("cover + content renders exactly 2 sheets", r.pageCount === 2, `got ${r.pageCount}`);
+    check("band does NOT appear on the full-bleed cover", !r.pages[0].colours.includes(BAND), "band leaked onto the cover");
+    check("band DOES appear on the content sheet", r.pages[1].colours.includes(BAND), "band missing from the content sheet");
+  }
 
   // ---- Table headers ------------------------------------------------------
   console.log("\ntables");

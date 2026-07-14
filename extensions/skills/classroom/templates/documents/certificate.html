@@ -2,6 +2,15 @@
 <!--
   TEMPLATE: Completion Certificate (A4 landscape). Awarded at the end of a
   course/unit. Set student name, course title, date, and accent colour.
+
+  PAGE GEOMETRY IS NOT IN THIS FILE, with one deliberate exception. The
+  html_to_pdf tool injects the house geometry (portrait A4, per-sheet margins,
+  page breaks, full-bleed) from the renderer's print-base.css. A certificate is
+  the one document that genuinely needs different geometry, so it declares its
+  own `@page` below — landscape, no margin. That works because the base is
+  injected FIRST, so a document's own `@page` wins the cascade. This is the
+  worked example of the override lever; use it only when a document's geometry
+  really does differ, and change nothing else about the paging rules.
 -->
 <html lang="en-AU">
 <head>
@@ -9,13 +18,24 @@
 <title>Certificate of Completion</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800&family=Playfair+Display:wght@700&display=swap');
-  @page { size:A4 landscape; margin:0; } * { margin:0; padding:0; box-sizing:border-box; }
+
+  /* The override: this document is landscape and reaches the paper's edge. */
+  @page { size: A4 landscape; margin: 0; }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
   :root { --accent:#2d6a4f; }
-  body { font-family:'Lexend',Arial,sans-serif; background:#e8e8e8; }
-  .cert { width:297mm; height:210mm; margin:10mm auto; background:#fff; padding:18mm;
-    box-shadow:0 4px 20px rgba(0,0,0,0.15); border:3px double var(--accent);
+  body { font-family:'Lexend',Arial,sans-serif; }
+
+  /* The certificate fills its sheet. `bleed` (from the injected base) caps it at
+     one sheet and clips it, so it cannot spill a second, near-empty page. */
+  .cert { padding:18mm; background:#fff; border:3px double var(--accent);
     display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
-  @media print { body{background:#fff;} .cert{margin:0;box-shadow:none;} }
+
+  /* Screen preview only — a sheet-sized box must never reach print. */
+  @media screen {
+    body { background:#e8e8e8; }
+    .cert { width:297mm; height:210mm; margin:10mm auto; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
+  }
   .ribbon { font-size:11pt; letter-spacing:0.25em; text-transform:uppercase; color:var(--accent); }
   .cert h1 { font-family:'Playfair Display',serif; font-size:40pt; color:var(--accent); margin:6px 0 18px; }
   .awarded { font-size:13pt; color:#444; }
@@ -26,7 +46,7 @@
 </style>
 </head>
 <body>
-<div class="cert">
+<div class="cert bleed">
   <div class="ribbon">Certificate of Completion</div>
   <h1>Well Done!</h1>
   <div class="awarded">This certificate is proudly awarded to</div>

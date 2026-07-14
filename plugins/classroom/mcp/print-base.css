@@ -97,16 +97,20 @@
   /* A table spanning sheets repeats its header row. */
   thead { display: table-header-group; }
 
-  /* The annotation band (a tinted margin for Apple-Pencil notes). Fixed
-     position repeats it on every sheet, at the sheet's own edge. A document
-     that uses it must also reserve the space with a wider right page margin —
-     see workbook-a4.html, which pairs it with a named `@page` of its own. */
-  .annotation-band {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 34mm;
-    height: 100%;
+  /* The annotation band: a tinted strip down the outer edge of every content
+     sheet, for Apple-Pencil notes. Opt in with `<div class="page annotated">`.
+
+     It is the page box's own right BORDER, which is what makes it repeat: a
+     block broken across sheets paints its left and right borders on every
+     fragment, so the band follows the content by ordinary CSS. (The obvious
+     alternative — a `position: fixed` strip — repeats per sheet too, but which
+     sheets it lands on shifts with unrelated document structure, and it paints
+     over full-bleed covers. A border does neither.)
+
+     A document opting in narrows its right page margin to sit the band near the
+     paper's edge — see workbook-a4.html. */
+  .page.annotated {
+    border-right: var(--annotation-width, 34mm) solid var(--annotation-tint, #fffdf2);
   }
 
   /* Links print as plain text; the URL is noise on paper. */

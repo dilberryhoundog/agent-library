@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<!-- The annotation band repeats on every sheet, which must NOT include a
+     full-bleed cover. The band tint belongs on the content sheets only. -->
+<html lang="en-AU"><head><meta charset="UTF-8"><title>band with cover</title>
+<style>
+  @page { size: A4; margin: 18mm 12mm 16mm 18mm; }
+  :root { --annotation-tint: #fffdf2; --annotation-width: 34mm; }
+  .bleed { background: #2d6a4f; color: #fff; }
+</style>
+</head>
+<body>
+  <div class="bleed"><h1>Cover Title</h1></div>
+  <div class="page annotated"><h2>Lesson</h2><p>Content sheet, which does carry the band.</p></div>
+</body></html>

@@ -4,6 +4,16 @@
   approved FIRST (Agent Invariant 4: sample-first gate). Shows every unit, its
   weeks, the concepts covered, and how they cluster per the chosen course
   structure. This is what the user approves before mass production.
+
+  PAGE GEOMETRY IS NOT IN THIS FILE. The html_to_pdf tool injects it (sheet size,
+  per-sheet margins, page breaks, full-bleed, break guards) from the renderer's
+  print-base.css. This file styles identity only: colour, type, components.
+    - A component that must not be split across a page break carries `block`.
+    - Table rows and repeating table headers are handled by the base.
+    - Never size a box to the sheet in print, and never re-declare the paging
+      rules — a box that asserts the sheet's height spills a phantom page.
+  To change geometry for THIS document only, declare an `@page` rule here: the
+  base is injected first, so a document's own `@page` wins.
 -->
 <html lang="en-AU">
 <head>
@@ -11,17 +21,15 @@
 <title>Scope &amp; Sequence — A4</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap');
-  /* Real per-sheet margins: content that overflows one sheet keeps its top/bottom
-     margin on every continuation sheet. Pass zero margins to the PDF renderer so
-     these CSS margins are the single source of truth. */
-  @page { size: A4; margin: 18mm 20mm; } * { margin:0; padding:0; box-sizing:border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; }
   :root { --accent:#2d6a4f; --accent-soft:#e8f3ee; }
-  body { font-family:'Lexend',Arial,sans-serif; color:#1a1a1a; background:#e8e8e8; font-size:12pt; }
-  .page { width:210mm; min-height:297mm; margin:10mm auto; background:#fff; padding:18mm 20mm; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
-  @media print { body{background:#fff;} .page{width:auto;min-height:0;margin:0;padding:0;box-shadow:none;page-break-after:always;} }
-  /* Keep table rows whole and repeat the header row on continuation sheets. */
-  thead { display:table-header-group; }
-  tr, .goals { break-inside:avoid; page-break-inside:avoid; }
+  body { font-family:'Lexend',Arial,sans-serif; color:#1a1a1a; font-size:12pt; }
+
+  /* Screen preview only — a sheet-sized box must never reach print. */
+  @media screen {
+    body { background:#e8e8e8; }
+    .page { width:210mm; min-height:297mm; margin:10mm auto; background:#fff; padding:18mm 20mm; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
+  }
   h1 { font-size:24pt; color:var(--accent); margin-bottom:4px; }
   .sub { color:#555; margin-bottom:18px; }
   table { width:100%; border-collapse:collapse; margin:10px 0; font-size:11pt; }
@@ -36,7 +44,7 @@
   <h1>[Study Title] — Scope &amp; Sequence</h1>
   <div class="sub">[Subject &middot; Learner &middot; Total weeks &middot; Course structure used]</div>
 
-  <div class="goals"><strong>This year's goals:</strong> [the concrete goals from the student file].</div>
+  <div class="goals block"><strong>This year's goals:</strong> [the concrete goals from the student file].</div>
 
   <table>
     <thead><tr><th>Unit</th><th>Weeks</th><th>Focus / concept cluster</th><th>Key activities</th></tr></thead>
