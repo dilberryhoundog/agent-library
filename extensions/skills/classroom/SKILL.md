@@ -35,25 +35,23 @@ Assemble home-education materials tailored to a specific learner and the family'
 === how every document is produced ===
 Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits.
 
-<!-- New content, from issue #29 refactor: needs adjusting for drafthorse and durability...
+=== page geometry is injected, not authored ===
+The `html_to_pdf` tool injects all page geometry — sheet size, per-sheet margins, page breaks, full-bleed pages — from its own `print-base.css`. Documents carry identity only (colour, type, components) and inherit paging for free. Three classes are the whole interface to it:
 
+- `block` — on a component that must not split across a page break (a card, a call-out, a question).
+- `bleed` — on a page that reaches the paper's edge (a cover, a certificate); capped at one sheet, so it cannot spill a near-empty page carrying its background.
+- `annotated` — on a content page wanting the Apple-Pencil annotation band down its outer edge; the band repeats onto continuation sheets and never lands on a cover.
 
-**Page geometry is not written into documents.** The `html_to_pdf` tool injects it — sheet size, per-sheet margins, page breaks, full-bleed pages, break guards — from the renderer's own `print-base.css`. Documents carry identity only: colour, type, components. A hand-written document gets correct paging for free, without knowing the rules exist.
+A document whose geometry must genuinely differ declares its own `@page` rule, which wins over the injected base — `templates/documents/certificate.html` is the worked example (landscape, no margin). The constraints on a document's own print CSS, and the reasoning behind them, live in the `print-base.css` header (`${CLAUDE_PLUGIN_ROOT}/mcp/print-base.css`).
 
-Three classes are the interface to that geometry, and they are all a document needs:
+Inline SVG diagrams clip at the `viewBox` edge — leave room inside the box for anything drawn or labelled near it.
 
-- `block` — on a component that must not be split across a page break (a card, a call-out, a question).
-- `bleed` — on a page that reaches the paper's edge (a cover, a certificate). It is capped at one sheet, so it cannot spill a near-empty page carrying its background.
-- `annotated` — on a content page that wants the Apple-Pencil annotation band down its outer edge. The band repeats onto continuation sheets and never lands on a cover.
+=== the conversion report ===
+Every conversion returns a report with three fields:
 
-**Off-limits in a document's print CSS**: do not re-declare the paging rules, do not size any box to the sheet in print (`height`/`min-height` of `297mm`, `100%`, and the like — a box that asserts the sheet's height spills a phantom page), and do not set `@page { margin: 0 }` on content pages (a content page with no page margin has no margin on its continuation sheets either — use `bleed` for anything that must reach the edge). Sheet-sized preview boxes belong under `@media screen`.
-
-**To change geometry for one document**, declare an `@page` rule in that document: the base is injected first, so the document's own `@page` wins. `templates/documents/certificate.html` is the worked example (landscape, no margin). Reach for this only when a document's geometry genuinely differs.
-
-**Verify every conversion by its page count.** The tool reports the page count of the PDF it wrote; check it against the count the document was written to have. A surplus page means content overflowed its sheet — the one failure that is invisible in the HTML.
-
-Inline SVG diagrams clip at the `viewBox` edge: anything drawn or labelled beyond it is simply cut, so leave room inside the box for text that sits near the edges.
--->
+- **Print mode** — `standard` when the document inherits the house geometry, `customised` when its own `@page` overrides the base (the report also names which properties it overrode).
+- **Sheets** — the PDF's page count. The shells lay out one sheet per `.page` box (a `.bleed` is one full-bleed sheet), so a document's intended count is the number of those boxes; a report showing more means content overflowed onto an extra sheet — the failure that is invisible in the HTML.
+- **Flags** — layout facts to weigh: a near-empty sheet, or one whose size is not the expected one.
 
 ## House Style
 
@@ -199,7 +197,7 @@ A unit — the sample or a subsequent one — needs its documents, they are not 
 
 #### Step finished when:
 
-The unit's documents are built from the chosen shapes, every concept's media verified or marked no-suitable-media, each document's HTML written to `source/` and converted to A4 PDF, and the result checked against the invariants.
+The unit's documents are built from the chosen shapes, every concept's media verified or marked no-suitable-media, each document's HTML written to `source/` and converted to A4 PDF whose conversion report matches the document's intent — sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected (`standard` unless the document declares its own `@page`), and no unresolved layout flags — and the result satisfies the invariants.
 
 #### Invariants:
 
@@ -216,7 +214,7 @@ Deliver a finished document as a print-ready file when the PDF renderer cannot r
 
 #### Start this step when:
 
-A document's HTML is written to `source/`, the `html_to_pdf` tool is unavailable on this host (absent, or unable to bring up its engine), and the document has not yet been delivered by the fallback route.
+A document's HTML is written to `source/`, the `html_to_pdf` tool is unavailable on this host (absent, or unable to bring up its engine), and the document has no current fallback delivery — none produced yet, or its `source/` HTML has changed since the last standalone was written.
 
 #### Step finished when:
 
@@ -240,7 +238,7 @@ The shapes are chosen and, for a build larger than a single lesson, no current s
 
 #### Step finished when:
 
-The scope-and-sequence and one complete sample unit are built, and the user has explicitly approved the format.
+The scope-and-sequence and one complete sample unit are built — each conversion report matching intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected, no unresolved layout flags) — and the user has explicitly approved the format.
 
 #### Do this next:
 

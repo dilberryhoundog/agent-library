@@ -8,16 +8,12 @@ Deliver a finished classroom document as a print-ready file when the `html_to_pd
 
 The document shells carry no page geometry of their own — the `html_to_pdf` tool injects it from `print-base.css` at conversion. So a shell handed straight to a browser prints with no margins, no page breaks, and the wrong sheet size. The fix is to do by hand what the tool does automatically: inline that same geometry into a throwaway delivery copy, and leave the editable `source/` file untouched for when the renderer returns.
 
-# Agent Invariants
-
-**NEVER** write the injected geometry into the `source/` HTML — it stays the clean, renderer-ready copy that later sessions reopen. The inlined file is a separate, throwaway delivery artifact.
-
 # --- REFERENCES ---
 
 ## The Geometry Base
 
-=== the stylesheet the renderer injects, and where the agent inlines it ===
-The geometry lives at `${CLAUDE_PLUGIN_ROOT}/mcp/print-base.css`. Inline it as a `<style>` element that is the **first child of `<head>`** — first, so the document's own `<style>` (and any `@page` it declares) comes later and wins the cascade, exactly as it does under the tool.
+=== the stylesheet the renderer injects, and where it belongs ===
+The geometry lives at `${CLAUDE_PLUGIN_ROOT}/mcp/print-base.css`. Its correct position is the **first child of `<head>`**: earlier than the document's own `<style>`, so that `<style>` (and any `@page` it declares) comes later and wins the cascade, exactly as under the tool.
 
 # --- STEPS ---
 
@@ -35,11 +31,15 @@ Turn a geometry-less source document into a file that prints correctly from a br
 
 #### Start this step when:
 
-A document's HTML is written to `source/`, the renderer cannot run, and no print-ready standalone has yet been produced for it.
+A document's HTML is written to `source/`, the renderer cannot run, and no current print-ready standalone exists for it — none produced yet, or the `source/` HTML has changed since the last one was written.
 
 #### Step finished when:
 
 A standalone file sits beside the source (named to mark it a delivery copy, e.g. `workbook.print.html` next to `workbook.html`) with the geometry base inlined as the first `<style>` in its `<head>`, the `source/` HTML is unchanged, and the user has been told to open the standalone and print it to PDF at A4 (Print → Save as PDF, paper A4).
+
+#### Invariants:
+
+**NEVER** write the injected geometry into the `source/` HTML — it stays the clean, renderer-ready copy that later sessions reopen. The inlined file is a separate, throwaway delivery artifact.
 
 ### Inline and Hand Over:
 
