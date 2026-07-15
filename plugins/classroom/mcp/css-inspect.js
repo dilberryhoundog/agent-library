@@ -15,7 +15,8 @@
 // Every `@page` block in the source, unnamed or named:
 //   @page { size: A4 landscape; margin: 0 }   ->  name: "", body: "size:...; margin:0"
 //   @page cover { margin: 0 }                 ->  name: "cover", body: "margin:0"
-const PAGE_RULE = /@page\s+([A-Za-z-]+)?\s*\{([^}]*)\}/g;
+//   @page{ margin: 0 }                        ->  name: "", body: "margin:0" (no space)
+const PAGE_RULE = /@page\s*([A-Za-z-]+)?\s*\{([^}]*)\}/g;
 
 // The `size:` value of the default (unnamed) @page, normalised to lower case.
 // Used by the layout half as the EXPECTED sheet size: a document that legitimately

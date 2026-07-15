@@ -197,6 +197,47 @@ async function main() {
     check("a legitimate landscape override is NOT flagged as a wrong sheet size", !/not A4 landscape/.test(report) && !/not A4\b/.test(report), report);
   }
 
+  // ---- Deeper layout facts (Phase 3) --------------------------------------
+  // The report's Flags half must catch symptoms the page count cannot: content
+  // wider than the column, an SVG escaping its viewBox, a sparse continuation
+  // sheet. In standard mode the report also states the usable content box.
+  console.log("\ndeeper layout facts");
+  {
+    const outputPath = path.join(OUT, "report-box.pdf");
+    const result = await renderPdf({ htmlPath: path.join(FIXTURES, "content-short.html"), outputPath });
+    const report = buildReport(result);
+    check("standard mode states the usable content box", /Content box: 170 × 261 mm/.test(report), report);
+  }
+  {
+    const outputPath = path.join(OUT, "report-wide.pdf");
+    const result = await renderPdf({ htmlPath: path.join(FIXTURES, "overflow-wide.html"), outputPath });
+    const report = buildReport(result);
+    check("an over-wide element is caught by the DOM pass", result.dom.overflow.length > 0, JSON.stringify(result.dom));
+    check("the over-wide element is named by selector as overflowing", /\.too-wide overflows the content box by \d/.test(report), report);
+  }
+  {
+    const outputPath = path.join(OUT, "report-svg.pdf");
+    const result = await renderPdf({ htmlPath: path.join(FIXTURES, "svg-overflow.html"), outputPath });
+    const report = buildReport(result);
+    check("an SVG drawing outside its viewBox is flagged", /svg\.diagram draws outside its viewBox/.test(report), report);
+  }
+  {
+    // A genuinely full multi-sheet document must NOT trip the sparse-sheet flag
+    // on its continuation sheets — only an early page break should.
+    const outputPath = path.join(OUT, "report-long.pdf");
+    const result = await renderPdf({ htmlPath: path.join(FIXTURES, "content-long.html"), outputPath });
+    const report = buildReport(result);
+    check("a filled multi-sheet document raises no sparse-sheet flag", !/% full/.test(report), report);
+  }
+  {
+    // Fixed-width content inside a `.bleed` legitimately uses the full sheet, not
+    // the content column — the DOM pass must exempt it, not flag it as overflow.
+    const outputPath = path.join(OUT, "report-bleed-wide.pdf");
+    const result = await renderPdf({ htmlPath: path.join(FIXTURES, "bleed-wide.html"), outputPath });
+    const report = buildReport(result);
+    check("full-bleed fixed-width content is NOT flagged as content-box overflow", !/overflows the content box/.test(report), report);
+  }
+
   console.log(`\n${passed} passed, ${failures.length} failed\n`);
   if (failures.length) {
     for (const f of failures) console.log(`  FAILED: ${f}`);

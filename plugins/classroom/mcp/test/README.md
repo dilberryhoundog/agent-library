@@ -32,3 +32,7 @@ Both faults depend on what a given document happens to reset, which is why they 
 - `block-unbreakable.html` — an element carrying `block` moves whole to the next sheet rather than splitting.
 - `annotation-band.html` — a fixed-position band repeats on every sheet.
 - `table-long.html` — a table taller than one sheet keeps its margins and repeats its header row.
+- `overflow-wide.html` — an element wider than the content column is caught by the DOM pass and named by its selector.
+- `svg-overflow.html` — an SVG whose geometry escapes its `viewBox` is flagged.
+
+Beyond the geometry rules, the suite also pins the conversion report: `css-inspect.js`'s source disclosure (standard vs. customised print mode), and `buildReport`'s shape — sheet count, usable content box, and the layout flags (sparse sheet, wrong size, over-wide element, out-of-viewBox SVG).

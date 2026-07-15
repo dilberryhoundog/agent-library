@@ -35,7 +35,7 @@ Assemble home-education materials tailored to a specific learner and the family'
 === how every document is produced ===
 Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits.
 
-=== page geometry is injected, not authored ===
+=== print base ===
 The `html_to_pdf` tool injects all page geometry — sheet size, per-sheet margins, page breaks, full-bleed pages — from its own `print-base.css`. Documents carry identity only (colour, type, components) and inherit paging for free.
 
 === print classes ===
@@ -57,11 +57,12 @@ A document whose geometry must genuinely differ overrides the base — its own r
 Inline SVG diagrams clip at the `viewBox` edge — leave room inside the box for anything drawn or labelled near it.
 
 === the conversion report ===
-Every conversion returns a report with three fields:
+Every conversion returns a report with these fields:
 
 - **Print mode** — `standard` when the document inherits the house geometry, `customised` when its own `@page` overrides the base (the report also names which properties it overrode).
 - **Sheets** — the PDF's page count. The shells lay out one sheet per `.page` box (a `.bleed` is one full-bleed sheet), so a document's intended count is the number of those boxes; a report showing more means content overflowed onto an extra sheet — the failure that is invisible in the HTML.
-- **Flags** — layout facts to weigh: a near-empty sheet, or one whose size is not the expected one.
+- **Content box** — the usable area per sheet in the house geometry (present in `standard` mode), so how many cards or questions fit is arithmetic rather than trial and error.
+- **Flags** — layout facts to weigh: a near-empty or sparse sheet, one whose size is not the expected one, an element wider than the content box (named by its selector, to find in source), or an SVG drawing outside its `viewBox`.
 
 ## House Style
 
@@ -215,7 +216,7 @@ The unit's documents are built from the chosen shapes, every concept's media ver
 
 ### Assemble the Documents:
 
-List `templates/documents/` and copy the shells the deliverable calls for, filling them and inserting components from `templates/blocks/` where the lesson shape calls for them. Apply the `references/pedagogy/` file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow `references/media-processing.md` as a handover doc to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
+List `templates/documents/` and copy the shells the deliverable calls for, filling them and inserting components from `templates/blocks/` where the lesson shape calls for them, sizing each page's content to the usable content box the conversion report states rather than by trial and error. Apply the `references/pedagogy/` file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow `references/media-processing.md` as a handover doc to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
 Produce each document per the `Document Pipeline`. When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before it moves on.
 
 ## +Deliver Without the Renderer
@@ -346,6 +347,7 @@ Tell the user plainly what happened, which step it arose in, what state the buil
 
 : **Matter**: A course's saved source material, held at `<course>/matter/` — what the user supplied and any grounding research, kept as a permanent record the build reads.
 : **Shape**: A course structure or lesson structure chosen from the `templates/course-structures/` and `templates/lesson-structures/` folders; more than one may govern a single build.
+: **House Geometry**: The page geometry the `html_to_pdf` tool injects from `print-base.css`. The base every document inherits unless it declares its own `@page` to override it.
 : **Handover Doc**: A standalone document (in `references/`, marked `type: handover`) whose steps a master step folds into the run as sub-steps, its references and invariants coming into play for a self-contained portion of the work — lean extraction of heavy, optional, or side-branching work that would otherwise bloat this skill. The master step owns the logic around it: it reads success from the resulting state and lets any failure fall to the problem step. Cited as "follow `references/X.md` as a handover doc".
 : **Sample**: The scope-and-sequence plus one complete unit, approved for format before the rest of the course is mass-produced.
 : **Strand**: A learning area a unit covers — one of its subject or skill areas (literacy, science), enumerated from the unit's scope-and-sequence entry and lesson documents. A build may run a different lesson shape per strand, and a review grades the work strand by strand.

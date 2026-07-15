@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<!-- A full-bleed cover carrying a fixed-width banner wider than the 170mm
+     content column but within the 210mm sheet. Because `.bleed` opts into the
+     zero-margin cover page, this is correct — the DOM overflow pass must NOT
+     flag it. It exercises the `.bleed` exemption. -->
+<html lang="en-AU"><head><meta charset="UTF-8"><title>bleed wide banner</title>
+<style>.bleed { background: #2d6a4f; color: #fff; }</style>
+</head>
+<body>
+  <div class="bleed">
+    <h1>Cover Title</h1>
+    <div class="banner" style="width: 200mm; height: 20mm; background: #1b4332;">Full-width banner</div>
+  </div>
+</body></html>

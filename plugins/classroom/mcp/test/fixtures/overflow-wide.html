@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<!-- A block wider than the print content column. The DOM inspection must name
+     it as overflowing the content box; the fault is invisible in the page
+     count because the extra width spills sideways, not onto a new sheet. -->
+<html lang="en-AU"><head><meta charset="UTF-8"><title>wide overflow</title></head>
+<body>
+  <div class="page">
+    <h2>Wide page</h2>
+    <div class="too-wide" style="width: 260mm; background: #eef;">
+      A block set to 260mm — wider than the ~170mm content column.
+    </div>
+  </div>
+</body></html>
