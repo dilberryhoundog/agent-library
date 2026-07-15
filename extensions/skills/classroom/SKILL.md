@@ -36,13 +36,23 @@ Assemble home-education materials tailored to a specific learner and the family'
 Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits.
 
 === page geometry is injected, not authored ===
-The `html_to_pdf` tool injects all page geometry — sheet size, per-sheet margins, page breaks, full-bleed pages — from its own `print-base.css`. Documents carry identity only (colour, type, components) and inherit paging for free. Three classes are the whole interface to it:
+The `html_to_pdf` tool injects all page geometry — sheet size, per-sheet margins, page breaks, full-bleed pages — from its own `print-base.css`. Documents carry identity only (colour, type, components) and inherit paging for free.
+
+=== print classes ===
 
 - `block` — on a component that must not split across a page break (a card, a call-out, a question).
 - `bleed` — on a page that reaches the paper's edge (a cover, a certificate); capped at one sheet, so it cannot spill a near-empty page carrying its background.
 - `annotated` — on a content page wanting the Apple-Pencil annotation band down its outer edge; the band repeats onto continuation sheets and never lands on a cover.
 
-A document whose geometry must genuinely differ declares its own `@page` rule, which wins over the injected base — `templates/documents/certificate.html` is the worked example (landscape, no margin). The constraints on a document's own print CSS, and the reasoning behind them, live in the `print-base.css` header (`${CLAUDE_PLUGIN_ROOT}/mcp/print-base.css`).
+=== overides ===
+A document whose geometry must genuinely differ overrides the base — its own rules win because the base is injected first. The available overrides:
+
+| Override             | Effect                                     | How                                                                                                                                            |
+|----------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| Own `@page`          | This document's sheet size and margins     | Declare `@page { … }` in the document. `templates/documents/certificate.html` is the worked example: `@page { size: A4 landscape; margin: 0 }` |
+| `@page annotated`    | The annotation band's sheet margins        | Declare `@page annotated { margin: … }`. Move it together with `--annotation-width` — the strip width and its margin are a pair                |
+| `--annotation-width` | The band's strip width (default `34mm`)    | Set on `:root` in the document                                                                                                                 |
+| `--annotation-tint`  | The band's wash colour (default `#fffdf2`) | Set on `:root` in the document                                                                                                                 |
 
 Inline SVG diagrams clip at the `viewBox` edge — leave room inside the box for anything drawn or labelled near it.
 
