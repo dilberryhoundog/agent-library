@@ -21,12 +21,25 @@ const mm = (pt) => pt / PT_PER_MM;
 
 function countPages(pdfBuffer) {
   const text = pdfBuffer.toString("latin1");
-  const pagesMatch = text.match(/\/Type\s*\/Pages\b[^>]*?\/Count\s+(\d+)/);
-  if (pagesMatch) return parseInt(pagesMatch[1], 10);
-  const countFirst = text.match(/\/Count\s+(\d+)[^>]*?\/Type\s*\/Pages\b/);
-  if (countFirst) return parseInt(countFirst[1], 10);
-  const pageObjs = text.toString().match(/\/Type\s*\/Page[^s]/g);
-  return pageObjs ? pageObjs.length : 0;
+  // The page tree is not always a single /Pages node. Once a document grows past
+  // a handful of pages, Chromium splits it into a ROOT /Pages node (whose /Count
+  // is the total) over intermediate /Pages nodes carrying PARTIAL counts — and an
+  // intermediate node can sit earlier in the byte stream than the root. Reading
+  // the FIRST /Count therefore under-counts by whatever the other subtrees hold.
+  // Take the MAX /Count across every /Pages node (the root's total is the
+  // largest), matching /Count on either side of /Type within the same dict.
+  const counts = [];
+  let m;
+  const forward = /\/Type\s*\/Pages\b[^>]{0,400}?\/Count\s+(\d+)/g;
+  while ((m = forward.exec(text)) !== null) counts.push(parseInt(m[1], 10));
+  const backward = /\/Count\s+(\d+)[^>]{0,400}?\/Type\s*\/Pages\b/g;
+  while ((m = backward.exec(text)) !== null) counts.push(parseInt(m[1], 10));
+  // Cross-check against the leaf /Page objects (\b after "Page" excludes
+  // "/Pages"); they give the same total whenever they are not hidden inside
+  // compressed object streams, and correct a /Count that only saw a subtree.
+  const leaves = (text.match(/\/Type\s*\/Page\b/g) || []).length;
+  if (leaves) counts.push(leaves);
+  return counts.length ? Math.max(...counts) : 0;
 }
 
 // Every "N 0 obj ... endobj" in the file, keyed by object number.

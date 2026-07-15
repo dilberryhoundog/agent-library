@@ -88,6 +88,14 @@ async function main() {
     check("three short .page boxes render exactly 3 sheets", r.pageCount === 3, `got ${r.pageCount}`);
     check("no trailing blank sheet after the last .page", !r.pages[r.pages.length - 1].textless, "final sheet has no text");
   }
+  {
+    // A ten-sheet document (bleed cover + 9 content pages) splits Chromium's PDF
+    // page tree into a root /Pages node over intermediate nodes with partial
+    // counts. countPages must total the whole tree, not the first subtree it sees.
+    const r = await render("pages-ten.html");
+    check("a ten-sheet document counts exactly 10 sheets (split page tree)", r.pageCount === 10, `got ${r.pageCount}`);
+    check("the per-page inspection also finds 10 sheets", r.pages.length === 10, `got ${r.pages.length}`);
+  }
 
   // ---- Full bleed ---------------------------------------------------------
   // The `.bleed` box must fill its sheet edge-to-edge and STOP there. It is

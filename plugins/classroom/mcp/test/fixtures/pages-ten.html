@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<!-- Ten sheets: a bleed cover plus nine content pages. At this size Chromium
+     splits the PDF page tree into a root /Pages node over intermediate nodes
+     with partial counts, which is what made countPages under-count. The count
+     must be exactly 10. -->
+<html lang="en-AU"><head><meta charset="UTF-8"><title>ten sheets</title>
+<style>.bleed { background: #2d6a4f; color: #fff; }</style></head>
+<body>
+  <div class="bleed"><h1>Cover</h1></div>
+  <div class="page"><h2>Page 1</h2><p>Content for sheet 1.</p></div>
+  <div class="page"><h2>Page 2</h2><p>Content for sheet 2.</p></div>
+  <div class="page"><h2>Page 3</h2><p>Content for sheet 3.</p></div>
+  <div class="page"><h2>Page 4</h2><p>Content for sheet 4.</p></div>
+  <div class="page"><h2>Page 5</h2><p>Content for sheet 5.</p></div>
+  <div class="page"><h2>Page 6</h2><p>Content for sheet 6.</p></div>
+  <div class="page"><h2>Page 7</h2><p>Content for sheet 7.</p></div>
+  <div class="page"><h2>Page 8</h2><p>Content for sheet 8.</p></div>
+  <div class="page"><h2>Page 9</h2><p>Content for sheet 9.</p></div>
+</body></html>
