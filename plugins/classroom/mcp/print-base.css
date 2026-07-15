@@ -37,6 +37,11 @@
    via this named page. `.bleed` selects it. */
 @page cover { margin: 0; }
 
+/* The annotation band's sheet: a narrower right margin makes room for the band
+   near the paper's edge. `.page.annotated` selects it, so opting into the band
+   is the class alone — no document needs its own @page for it. */
+@page annotated { margin: 18mm 12mm 16mm 18mm; }
+
 @media print {
   /* The sheet's own box. This is load-bearing, not tidiness: the user-agent
      stylesheet gives `body` an 8px margin, and that margin is added to the
@@ -98,18 +103,19 @@
   thead { display: table-header-group; }
 
   /* The annotation band: a tinted strip down the outer edge of every content
-     sheet, for Apple-Pencil notes. Opt in with `<div class="page annotated">`.
+     sheet, for Apple-Pencil notes. Opt in with `<div class="page annotated">`
+     and nothing else — the class carries its own geometry.
 
-     It is the page box's own right BORDER, which is what makes it repeat: a
-     block broken across sheets paints its left and right borders on every
-     fragment, so the band follows the content by ordinary CSS. (The obvious
-     alternative — a `position: fixed` strip — repeats per sheet too, but which
-     sheets it lands on shifts with unrelated document structure, and it paints
-     over full-bleed covers. A border does neither.)
+     The strip is the page box's own right BORDER, which is what makes it repeat:
+     a block broken across sheets paints its borders on every fragment, so the
+     band follows the content by ordinary CSS. (A `position: fixed` strip repeats
+     too, but which sheets it lands on shifts with unrelated document structure,
+     and it paints over full-bleed covers. A border does neither.)
 
-     A document opting in narrows its right page margin to sit the band near the
-     paper's edge — see workbook-a4.html. */
+     `page: annotated` swaps in the named page above, whose narrower right margin
+     makes room for the strip — so a document never hand-tunes an @page for it. */
   .page.annotated {
+    page: annotated;
     border-right: var(--annotation-width, 34mm) solid var(--annotation-tint, #fffdf2);
   }
 

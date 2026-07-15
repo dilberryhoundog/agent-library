@@ -11,8 +11,8 @@
   INVARIANTS: A4 only; Australian English; answers live in the SEPARATE
   answer-key template, never here; confidence stars + reflection included.
 
-  This file declares its own @page (a narrow right margin) so the annotation
-  band on `.page.annotated` sits near the paper's edge.
+  Content pages carry `annotated` for the Apple-Pencil band; the cover carries
+  `bleed`. Both classes bring their own geometry — this file adds no @page.
 -->
 <html lang="en-AU">
 <head>
@@ -22,18 +22,11 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap');
 
-  /* The one geometry rule this document owns: a narrow right page margin, so
-     the annotation band (the page box's right border, supplied by the injected
-     base to every `.page.annotated`) sits close to the paper's edge. */
-  @page { size: A4; margin: 18mm 12mm 16mm 18mm; }
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
     --accent: #2d6a4f;              /* set per unit; colour-codes cover + band */
     --accent-soft: #e8f3ee;
     --ink: #1a1a1a;
-    --annotation-tint: #fffdf2;     /* the band's wash — read by the print base */
-    --annotation-width: 34mm;       /* the band's width — read by the print base */
   }
   body { font-family: 'Lexend', Arial, sans-serif; color: var(--ink); font-size: 12pt; line-height: 1.5; }
 
@@ -49,7 +42,7 @@
       padding: 18mm 12mm 16mm 18mm;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     }
-    .page.annotated { border-right: var(--annotation-width) solid var(--annotation-tint); }
+    .page.annotated { border-right: 34mm solid #fffdf2; }
     .cover { width: 210mm; height: 297mm; margin: 10mm auto; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
   }
 
