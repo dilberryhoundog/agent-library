@@ -17,8 +17,9 @@ const os = require("os");
 const path = require("path");
 const fs = require("fs");
 
-const { renderPdf } = require("../server.js");
+const { renderPdf, buildReport } = require("../server.js");
 const { inspect } = require("../pdf-inspect.js");
+const { disclose } = require("../css-inspect.js");
 
 // The MCP host sets PUPPETEER_CACHE_DIR from .mcp.json; standalone runs need it
 // pointed at the same Chromium the server uses.
@@ -156,6 +157,44 @@ async function main() {
     check("long table spans more than one sheet", r.pageCount > 1, `got ${r.pageCount}`);
     const bad = r.pages.filter((p) => !p.textMargins || p.textMargins.top < 17);
     check("every table sheet keeps its top margin", bad.length === 0, "a sheet lost its top margin");
+  }
+
+  // ---- Source disclosure: the static, pre-flight half ---------------------
+  // disclose() reads the DOCUMENT's own CSS only. A plain document overrides
+  // nothing; the certificate case declares its own @page and must be disclosed
+  // as such, with the properties it set.
+  console.log("\nsource disclosure");
+  {
+    const src = fs.readFileSync(path.join(FIXTURES, "content-short.html"), "utf8");
+    const d = disclose(src);
+    check("a plain document discloses no override", d.overrides === false, JSON.stringify(d));
+  }
+  {
+    const src = fs.readFileSync(path.join(FIXTURES, "override-landscape.html"), "utf8");
+    const d = disclose(src);
+    check("a document's own @page is disclosed as an override", d.overrides === true, JSON.stringify(d));
+    check("the overridden properties are named", d.properties.includes("@page size") && d.properties.includes("@page margin"), JSON.stringify(d.properties));
+    check("the declared size is parsed for the layout half", /a4\s+landscape/.test(d.declaredSize || ""), `declaredSize=${d.declaredSize}`);
+  }
+
+  // ---- The conversion report: disclosure + layout facts, combined ---------
+  // buildReport is what the agent sees after every conversion. Its presence is
+  // the verification mechanism, so its shape is pinned here.
+  console.log("\nconversion report");
+  {
+    const outputPath = path.join(OUT, "report-standard.pdf");
+    const result = await renderPdf({ htmlPath: path.join(FIXTURES, "content-short.html"), outputPath });
+    const report = buildReport(result);
+    check("standard document reports inheriting print mode", /Print mode: standard/.test(report), report);
+    check("standard document reports its sheet count", /Sheets: 1/.test(report), report);
+    check("a clean standard document reports no flags", /Flags: none/.test(report), report);
+  }
+  {
+    const outputPath = path.join(OUT, "report-override.pdf");
+    const result = await renderPdf({ htmlPath: path.join(FIXTURES, "override-landscape.html"), outputPath });
+    const report = buildReport(result);
+    check("override reports customised print mode with its properties", /Print mode: customised — overrides \[.*@page size.*\]/.test(report), report);
+    check("a legitimate landscape override is NOT flagged as a wrong sheet size", !/not A4 landscape/.test(report) && !/not A4\b/.test(report), report);
   }
 
   console.log(`\n${passed} passed, ${failures.length} failed\n`);

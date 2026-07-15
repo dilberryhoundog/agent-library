@@ -18,7 +18,8 @@ const readline = require("readline");
 const { createRequire } = require("module");
 const { spawnSync } = require("child_process");
 
-const { countPages } = require("./pdf-inspect.js");
+const { inspect } = require("./pdf-inspect.js");
+const { disclose } = require("./css-inspect.js");
 
 const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, "..");
 const DATA_DIR =
@@ -73,8 +74,9 @@ const TOOL = {
     "supplied by the renderer's own print-base.css, injected into every document. Documents " +
     "carry no paging rules of their own; a document that genuinely needs different geometry " +
     "declares its own CSS `@page` rule, which wins over the injected base.\n\n" +
-    "The result reports the PDF's page count. Check it against the page count the document " +
-    "was written to have: a surplus page is the signature of content overflowing its sheet.",
+    "Every conversion returns a report: the print mode (inheriting the house geometry, or " +
+    "customised via the document's own `@page`), the sheet count, and any layout flags — a " +
+    "near-empty sheet, or a sheet whose size is not the expected one.",
   inputSchema: {
     type: "object",
     properties: {
@@ -94,6 +96,10 @@ async function renderPdf(args) {
   if (!args.html && !args.htmlPath) {
     throw new Error("Provide either `html` (inline) or `htmlPath` (a file).");
   }
+
+  // Source disclosure is a STATIC read of the document's own CSS, taken before
+  // injection so the base's @page rules are never mistaken for the document's.
+  const source = args.htmlPath ? fs.readFileSync(path.resolve(args.htmlPath), "utf8") : args.html;
 
   let printBase;
   try {
@@ -141,10 +147,66 @@ async function renderPdf(args) {
       preferCSSPageSize: true,
     });
 
-    return { outputPath: args.outputPath, pageCount: countPages(fs.readFileSync(args.outputPath)) };
+    return {
+      outputPath: args.outputPath,
+      disclosure: disclose(source),
+      inspection: inspect(args.outputPath),
+    };
   } finally {
     await browser.close();
   }
+}
+
+// ----- the conversion report ------------------------------------------------
+//
+// Combines the static source disclosure with the rendered layout facts into the
+// single report the agent sees after every conversion. Its PRESENCE is the
+// verification mechanism — reacting to present tool output is default agent
+// behaviour, so the skill carries no "check the page count" instruction.
+
+const A4 = { w: 209.9, h: 297, label: "A4" };
+
+// The sheet the layout half expects, derived from what the document disclosed.
+// `null` when the declared size is one we cannot map to millimetres — better to
+// emit no size flag than a wrong one.
+function expectedSheet(declaredSize) {
+  if (!declaredSize) return A4; // inheriting, or an override that left size alone
+  const landscape = /\blandscape\b/.test(declaredSize);
+  let base;
+  if (/\ba4\b/.test(declaredSize)) base = { w: 209.9, h: 297 };
+  else if (/\bletter\b/.test(declaredSize)) base = { w: 215.9, h: 279.4 };
+  else return null;
+  const { w, h } = landscape ? { w: base.h, h: base.w } : base;
+  const label = /\ba4\b/.test(declaredSize) ? "A4" : "Letter";
+  return { w, h, label: landscape ? `${label} landscape` : label };
+}
+
+const near = (a, b) => Math.abs(a - b) <= 1;
+
+function layoutFlags(inspection, expected) {
+  const flags = [];
+  inspection.pages.forEach((p, i) => {
+    const n = i + 1;
+    if (p.textless) flags.push(`sheet ${n} is near-empty`);
+    if (expected && p.widthMm != null && p.heightMm != null &&
+        !(near(p.widthMm, expected.w) && near(p.heightMm, expected.h))) {
+      flags.push(`sheet ${n} is ${p.widthMm}×${p.heightMm}mm, not ${expected.label}`);
+    }
+  });
+  return flags;
+}
+
+function buildReport({ outputPath, disclosure, inspection }) {
+  const mode = disclosure.overrides
+    ? `customised — overrides [${disclosure.properties.join(", ")}]`
+    : "standard — inheriting from print-base.css";
+  const flags = layoutFlags(inspection, expectedSheet(disclosure.declaredSize));
+  return (
+    `PDF written to ${outputPath}.\n` +
+    `  Print mode: ${mode}\n` +
+    `  Sheets: ${inspection.pageCount}\n` +
+    `  Flags: ${flags.length ? flags.join("; ") : "none"}`
+  );
 }
 
 // ----- JSON-RPC plumbing ----------------------------------------------------
@@ -189,18 +251,9 @@ async function handle(msg) {
         return;
       }
       try {
-        const { outputPath, pageCount } = await renderPdf((params && params.arguments) || {});
-        const sheets = pageCount === 1 ? "1 page" : `${pageCount} pages`;
+        const result = await renderPdf((params && params.arguments) || {});
         reply(id, {
-          content: [
-            {
-              type: "text",
-              text:
-                `PDF written to ${outputPath} (${sheets}).\n` +
-                "Check that page count against the count this document was written to have. " +
-                "A surplus page means content overflowed its sheet.",
-            },
-          ],
+          content: [{ type: "text", text: buildReport(result) }],
         });
       } catch (err) {
         reply(id, {
@@ -220,7 +273,7 @@ async function handle(msg) {
   }
 }
 
-module.exports = { renderPdf, loadPuppeteer, DATA_DIR };
+module.exports = { renderPdf, buildReport, loadPuppeteer, DATA_DIR };
 
 if (require.main === module) {
   const rl = readline.createInterface({ input: process.stdin });
