@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-07-16
+
+### Fixed
+
+- The conversion report under-counted sheets on documents of roughly eight or more pages. `html_to_pdf`'s sheet tally read only the first node of the PDF's page tree, but Chromium splits that tree into partial-count subtrees as a document grows — so a ten-page handbook reported "Sheets: 8". The count now totals the whole page tree (cross-checked against the page objects), so it matches the real PDF. Because a build is checked against the report's sheet count, the under-count could send you hunting for pages that were never missing.
+
 ## [0.4.0] - 2026-07-16
 
 ### Added
