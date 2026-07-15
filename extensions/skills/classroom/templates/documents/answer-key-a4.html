@@ -14,15 +14,15 @@
 <title>Answer Key — Parent Only</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap');
-  /* Per-sheet margins survive on continuation sheets when a .page overflows one
-     sheet; pass zero margins to the PDF renderer so CSS owns the margins. */
-  @page { size: A4; margin: 18mm 20mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root { --accent: #7a1a1a; --accent-soft: #fbeaea; --ink: #1a1a1a; }
-  body { font-family: 'Lexend', Arial, sans-serif; color: var(--ink); background: #e8e8e8; font-size: 12pt; line-height: 1.5; }
-  .page { width: 210mm; min-height: 297mm; margin: 10mm auto; background: #fff; padding: 18mm 20mm; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-  @media print { body { background:#fff; } .page { width:auto; min-height:0; margin:0; padding:0; box-shadow:none; page-break-after: always; }
-    .ans, .worked, .common-errors { break-inside:avoid; page-break-inside:avoid; } }
+  body { font-family: 'Lexend', Arial, sans-serif; color: var(--ink); font-size: 12pt; line-height: 1.5; }
+
+  /* Screen preview only — a sheet-sized box must never reach print. */
+  @media screen {
+    body { background: #e8e8e8; }
+    .page { width: 210mm; min-height: 297mm; margin: 10mm auto; background: #fff; padding: 18mm 20mm; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+  }
 
   .keyflag { background: var(--accent); color:#fff; text-align:center; font-weight:800; letter-spacing:0.15em;
     text-transform:uppercase; padding:8px; border-radius:8px; margin-bottom:16px; }
@@ -43,18 +43,18 @@
 
   <!-- Repeat per lesson, matching workbook numbering -->
   <h3 style="color:var(--accent);margin:14px 0 6px;">Lesson N — [Title]</h3>
-  <div class="ans"><span class="qnum">1.</span> [Correct option] </div>
-  <div class="ans"><span class="qnum">2.</span> [Answer]
+  <div class="ans block"><span class="qnum">1.</span> [Correct option] </div>
+  <div class="ans block"><span class="qnum">2.</span> [Answer]
     <div class="worked">Worked solution: [steps, for anything procedural].</div>
   </div>
-  <div class="ans"><span class="qnum">Caravan Challenge.</span> Open-ended — any well-reasoned answer earns full marks.</div>
+  <div class="ans block"><span class="qnum">Caravan Challenge.</span> Open-ended — any well-reasoned answer earns full marks.</div>
 
-  <div class="common-errors">
+  <div class="common-errors block">
     <h4>Common errors to watch for</h4>
     <p>[The mistakes this topic typically produces, so the parent knows what to look for.]</p>
   </div>
 
-  <div class="marking">
+  <div class="marking block">
     <strong>Marking guide:</strong> Partial marks where method is correct but a single
     arithmetic slip occurs. [Add a percentage-to-grade band for assessments.]
   </div>

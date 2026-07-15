@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<!-- An SVG whose drawn geometry escapes its viewBox: the circle at cx=190 with
+     r=20 reaches x=210, well past the 0..100 viewBox. The DOM inspection must
+     flag it — content drawn outside the viewBox is clipped on paper. -->
+<html lang="en-AU"><head><meta charset="UTF-8"><title>svg outside viewBox</title></head>
+<body>
+  <div class="page">
+    <h2>Diagram page</h2>
+    <svg class="diagram" viewBox="0 0 100 100" width="80mm" height="80mm">
+      <rect x="10" y="10" width="30" height="30" fill="#2d6a4f"></rect>
+      <circle cx="190" cy="50" r="20" fill="#c00"></circle>
+    </svg>
+  </div>
+</body></html>

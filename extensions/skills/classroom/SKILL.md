@@ -33,9 +33,36 @@ Assemble home-education materials tailored to a specific learner and the family'
 ## Document Pipeline
 
 === how every document is produced ===
-Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits. Always pass zero margins explicitly (`margin: {"top":"0","bottom":"0","left":"0","right":"0"}`) — the shells' CSS `@page` rules own the margins, and the renderer applies its own defaults if the parameter is omitted.
-If the tool is unavailable on this host, still write the HTML to `source/`, deliver paste-ready HTML, and tell the user to convert in the browser (Print → Save as PDF, A4, margins off).
-Page geometry lives in the shells' `@page` rules: content pages carry real per-sheet margins (so content overflowing one sheet keeps its margins on continuation sheets), while full-bleed pages (covers, certificate) opt out via a named `@page` rule with `margin: 0` and may use the full 297mm height. Don't reintroduce `@page { margin: 0 }` on content pages or emulate margins with `.page` box padding in print.
+Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits.
+
+=== print base ===
+The `html_to_pdf` tool injects all page geometry — sheet size, per-sheet margins, page breaks, full-bleed pages — from its own `print-base.css`. Documents carry identity only (colour, type, components) and inherit paging for free.
+
+=== print classes ===
+
+- `block` — on a component that must not split across a page break (a card, a call-out, a question).
+- `bleed` — on a page that reaches the paper's edge (a cover, a certificate); capped at one sheet, so it cannot spill a near-empty page carrying its background.
+- `annotated` — on a content page wanting the Apple-Pencil annotation band down its outer edge; the band repeats onto continuation sheets and never lands on a cover.
+
+=== overides ===
+A document whose geometry must genuinely differ overrides the base — its own rules win because the base is injected first. The available overrides:
+
+| Override             | Effect                                     | How                                                                                                                                            |
+|----------------------|--------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| Own `@page`          | This document's sheet size and margins     | Declare `@page { … }` in the document. `templates/documents/certificate.html` is the worked example: `@page { size: A4 landscape; margin: 0 }` |
+| `@page annotated`    | The annotation band's sheet margins        | Declare `@page annotated { margin: … }`. Move it together with `--annotation-width` — the strip width and its margin are a pair                |
+| `--annotation-width` | The band's strip width (default `34mm`)    | Set on `:root` in the document                                                                                                                 |
+| `--annotation-tint`  | The band's wash colour (default `#fffdf2`) | Set on `:root` in the document                                                                                                                 |
+
+Inline SVG diagrams clip at the `viewBox` edge — leave room inside the box for anything drawn or labelled near it.
+
+=== the conversion report ===
+Every conversion returns a report with these fields:
+
+- **Print mode** — `standard` when the document inherits the house geometry, `customised` when its own `@page` overrides the base (the report also names which properties it overrode).
+- **Sheets** — the PDF's page count. The shells lay out one sheet per `.page` box (a `.bleed` is one full-bleed sheet), so a document's intended count is the number of those boxes; a report showing more means content overflowed onto an extra sheet — the failure that is invisible in the HTML.
+- **Content box** — the usable area per sheet in the house geometry (present in `standard` mode), so how many cards or questions fit is arithmetic rather than trial and error.
+- **Flags** — layout facts to weigh: a near-empty or sparse sheet, one whose size is not the expected one, an element wider than the content box (named by its selector, to find in source), or an SVG drawing outside its `viewBox`.
 
 ## House Style
 
@@ -181,7 +208,7 @@ A unit — the sample or a subsequent one — needs its documents, they are not 
 
 #### Step finished when:
 
-The unit's documents are built from the chosen shapes, every concept's media verified or marked no-suitable-media, each document's HTML written to `source/` and converted to A4 PDF, and the result checked against the invariants.
+The unit's documents are built from the chosen shapes, every concept's media verified or marked no-suitable-media, each document's HTML written to `source/` and converted to A4 PDF whose conversion report matches the document's intent — sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected (`standard` unless the document declares its own `@page`), and no unresolved layout flags — and the result satisfies the invariants.
 
 #### Invariants:
 
@@ -189,8 +216,28 @@ The unit's documents are built from the chosen shapes, every concept's media ver
 
 ### Assemble the Documents:
 
-List `templates/documents/` and copy the shells the deliverable calls for, filling them and inserting components from `templates/blocks/` where the lesson shape calls for them. Apply the `references/pedagogy/` file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow `references/media-processing.md` as a handover doc to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
+List `templates/documents/` and copy the shells the deliverable calls for, filling them and inserting components from `templates/blocks/` where the lesson shape calls for them, sizing each page's content to the usable content box the conversion report states rather than by trial and error. Apply the `references/pedagogy/` file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow `references/media-processing.md` as a handover doc to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
 Produce each document per the `Document Pipeline`. When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before it moves on.
+
+## +Deliver Without the Renderer
+
+Deliver a finished document as a print-ready file when the PDF renderer cannot run on this host.
+
+#### Start this step when:
+
+A document's HTML is written to `source/`, the `html_to_pdf` tool is unavailable on this host (absent, or unable to bring up its engine), and the document has no current fallback delivery — none produced yet, or its `source/` HTML has changed since the last standalone was written.
+
+#### Step finished when:
+
+The document has been delivered as a self-contained, print-ready standalone — the injected geometry inlined into a delivery copy, the `source/` HTML left untouched — and the user has been told how to produce the A4 PDF from it.
+
+#### Do this next:
+
+With the document delivered by hand, carry on with the remaining documents, or record what the response produced.
+
+### Deliver by Hand:
+
+Follow `references/deliver-without-renderer.md` as a handover doc to inline the geometry base into a print-ready standalone and hand it to the user, leaving the `source/` file as the editable copy for when the renderer returns.
 
 ## +Build and Approve the Sample
 
@@ -202,7 +249,7 @@ The shapes are chosen and, for a build larger than a single lesson, no current s
 
 #### Step finished when:
 
-The scope-and-sequence and one complete sample unit are built, and the user has explicitly approved the format.
+The scope-and-sequence and one complete sample unit are built — each conversion report matching intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected, no unresolved layout flags) — and the user has explicitly approved the format.
 
 #### Do this next:
 
@@ -300,6 +347,7 @@ Tell the user plainly what happened, which step it arose in, what state the buil
 
 : **Matter**: A course's saved source material, held at `<course>/matter/` — what the user supplied and any grounding research, kept as a permanent record the build reads.
 : **Shape**: A course structure or lesson structure chosen from the `templates/course-structures/` and `templates/lesson-structures/` folders; more than one may govern a single build.
+: **House Geometry**: The page geometry the `html_to_pdf` tool injects from `print-base.css`. The base every document inherits unless it declares its own `@page` to override it.
 : **Handover Doc**: A standalone document (in `references/`, marked `type: handover`) whose steps a master step folds into the run as sub-steps, its references and invariants coming into play for a self-contained portion of the work — lean extraction of heavy, optional, or side-branching work that would otherwise bloat this skill. The master step owns the logic around it: it reads success from the resulting state and lets any failure fall to the problem step. Cited as "follow `references/X.md` as a handover doc".
 : **Sample**: The scope-and-sequence plus one complete unit, approved for format before the rest of the course is mass-produced.
 : **Strand**: A learning area a unit covers — one of its subject or skill areas (literacy, science), enumerated from the unit's scope-and-sequence entry and lesson documents. A build may run a different lesson shape per strand, and a review grades the work strand by strand.

@@ -11,15 +11,23 @@
 // some cowork containers), the tool self-heals by running install-deps.sh once
 // and retrying. This keeps the server startable before its dependency exists.
 
+const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const readline = require("readline");
 const { createRequire } = require("module");
 const { spawnSync } = require("child_process");
 
+const { inspect } = require("./pdf-inspect.js");
+const { disclose } = require("./css-inspect.js");
+
 const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT || path.resolve(__dirname, "..");
 const DATA_DIR =
   process.env.CLAUDE_PLUGIN_DATA || path.join(os.homedir(), ".claude", "classroom-data");
+
+// The single authority for page geometry. Injected into every document, so no
+// document has to carry (or can silently corrupt) its own paging rules.
+const PRINT_BASE = path.join(__dirname, "print-base.css");
 
 // ----- dependency loading ---------------------------------------------------
 
@@ -59,28 +67,24 @@ function loadPuppeteer() {
 const TOOL = {
   name: "html_to_pdf",
   description:
-    "Render HTML to a faithful, print-ready PDF (A4 by default) using headless Chromium. " +
-    "Use this to convert finished classroom documents (workbooks, answer keys, guides) into " +
-    "the deliverable PDF. Pass either inline `html` or a path to an HTML file via `htmlPath`.",
+    "Render an HTML classroom document (workbook, answer key, guide, certificate) to a " +
+    "print-ready A4 PDF using headless Chromium. Pass either inline `html` or a path to an " +
+    "HTML file via `htmlPath`.\n\n" +
+    "Page geometry — sheet size, per-sheet margins, page breaks, full-bleed covers — is " +
+    "supplied by the renderer's own print-base.css, injected into every document. Documents " +
+    "carry no paging rules of their own; a document that genuinely needs different geometry " +
+    "declares its own CSS `@page` rule, which wins over the injected base.\n\n" +
+    "Every conversion returns a report: the print mode (inheriting the house geometry, or " +
+    "customised via the document's own `@page`), the sheet count, the usable content box, and " +
+    "any layout flags — a near-empty or sparse sheet, a sheet of the wrong size, an element " +
+    "overflowing the content box (named by selector), or an SVG drawing outside its viewBox.",
   inputSchema: {
     type: "object",
     properties: {
       html: { type: "string", description: "Inline HTML string to render. Provide this OR htmlPath." },
       htmlPath: { type: "string", description: "Absolute path to an HTML file to render. Provide this OR html." },
       outputPath: { type: "string", description: "Absolute path where the PDF is written (e.g. /project/workbook.pdf)." },
-      format: { type: "string", description: "Paper size. Default 'A4'.", default: "A4" },
-      landscape: { type: "boolean", description: "Landscape orientation. Default false.", default: false },
       printBackground: { type: "boolean", description: "Print background colours/images. Default true.", default: true },
-      margin: {
-        type: "object",
-        description: "Page margins, e.g. {\"top\":\"0\",\"bottom\":\"0\",\"left\":\"0\",\"right\":\"0\"}. Default 0 all sides so the document's own layout controls margins.",
-        properties: {
-          top: { type: "string" },
-          bottom: { type: "string" },
-          left: { type: "string" },
-          right: { type: "string" },
-        },
-      },
     },
     required: ["outputPath"],
   },
@@ -92,6 +96,20 @@ async function renderPdf(args) {
   }
   if (!args.html && !args.htmlPath) {
     throw new Error("Provide either `html` (inline) or `htmlPath` (a file).");
+  }
+
+  // Source disclosure is a STATIC read of the document's own CSS, taken before
+  // injection so the base's @page rules are never mistaken for the document's.
+  const source = args.htmlPath ? fs.readFileSync(path.resolve(args.htmlPath), "utf8") : args.html;
+
+  let printBase;
+  try {
+    printBase = fs.readFileSync(PRINT_BASE, "utf8");
+  } catch (_) {
+    // Rendering without the geometry base would silently produce a document
+    // with no page margins, no page breaks, and no full-bleed handling. Fail
+    // instead: a loud error beats a plausible-looking, wrong PDF.
+    throw new Error(`The print geometry base is missing (expected at ${PRINT_BASE}). The plugin install is incomplete.`);
   }
 
   const puppeteer = loadPuppeteer();
@@ -107,18 +125,226 @@ async function renderPdf(args) {
     } else {
       await page.setContent(args.html, { waitUntil: "networkidle0" });
     }
-    const margin = args.margin || { top: "0", bottom: "0", left: "0", right: "0" };
+
+    // Inject the geometry base as the FIRST stylesheet in <head>, so a
+    // document's own rules come later and win the cascade — that ordering is
+    // what makes `@page` overridable by a document that needs it (a landscape
+    // certificate, say) while every other document inherits the house geometry.
+    await page.evaluate((css) => {
+      const style = document.createElement("style");
+      style.setAttribute("data-classroom-print-base", "");
+      style.textContent = css;
+      document.head.insertBefore(style, document.head.firstChild);
+    }, printBase);
+
+    // preferCSSPageSize makes the document's CSS `@page` the authority on sheet
+    // size. Without it Chromium's own `format` wins and the CSS is decorative —
+    // which is why page geometry used to be unpredictable. No `format`,
+    // `landscape` or `margin` argument is passed for the same reason: one
+    // authority for geometry, and it is the CSS.
     await page.pdf({
       path: args.outputPath,
-      format: args.format || "A4",
-      landscape: args.landscape === true,
       printBackground: args.printBackground !== false,
-      margin,
+      preferCSSPageSize: true,
     });
-    return args.outputPath;
+
+    // Deeper layout facts the PDF byte stream cannot carry — an element wider
+    // than its content column, or an SVG drawing past its viewBox — need the
+    // live DOM, named by selector so an offender is findable in source. Only
+    // meaningful when the usable content box is known: in standard mode it is
+    // the base's sheet minus the base's margins; a document that overrides
+    // `@page` moves the box out from under us, so DOM facts are skipped (noted
+    // in the report) rather than measured against the wrong frame.
+    const disclosure = disclose(source);
+    const usableBox = disclosure.overrides ? null : usableContentBox(printBase);
+    let dom = null;
+    if (usableBox) {
+      // Lay the DOM out at the print content width so "wider than the column"
+      // is a true measurement, and read it under print media so the measured
+      // rules are the ones that reach paper.
+      await page.emulateMediaType("print");
+      await page.setViewport({
+        width: Math.round(usableBox.wMm * PX_PER_MM),
+        height: Math.round(usableBox.hMm * PX_PER_MM),
+      });
+      dom = await page.evaluate(domInspect);
+    }
+
+    return {
+      outputPath: args.outputPath,
+      disclosure,
+      inspection: inspect(args.outputPath),
+      usableBox,
+      dom,
+    };
   } finally {
     await browser.close();
   }
+}
+
+// ----- the conversion report ------------------------------------------------
+//
+// Combines the static source disclosure with the rendered layout facts into the
+// single report the agent sees after every conversion. Its PRESENCE is the
+// verification mechanism — reacting to present tool output is default agent
+// behaviour, so the skill carries no "check the page count" instruction.
+
+const A4 = { w: 209.9, h: 297, label: "A4" };
+
+const PX_PER_MM = 96 / 25.4; // CSS px per millimetre at 96dpi
+
+// The usable content box in standard mode: the base's sheet minus the base's
+// own `@page` margins, read straight from the injected CSS so the number tracks
+// the base and is never a magic constant. Returns null if the base's default
+// @page cannot be parsed for millimetre margins.
+function usableContentBox(printBase) {
+  // Strip CSS comments first: the base's header comment quotes an example
+  // `@page { … margin: 0 }` that would otherwise be matched ahead of the real
+  // rule and parse to a null margin.
+  const css = printBase.replace(/\/\*[\s\S]*?\*\//g, "");
+  const pageRule = css.match(/@page\s*\{([^}]*)\}/); // the default (unnamed) @page
+  if (!pageRule) return null;
+  const marginDecl = pageRule[1].match(/\bmargin\s*:\s*([^;]+)/);
+  if (!marginDecl) return null;
+  const parts = marginDecl[1].trim().split(/\s+/).map((v) => {
+    if (/^0$/.test(v)) return 0; // bare zero is a valid CSS length
+    const m = v.match(/^(-?[\d.]+)mm$/);
+    return m ? Number(m[1]) : null;
+  });
+  if (parts.some((v) => v == null)) return null;
+  // CSS margin shorthand: 1 → all; 2 → v h; 3 → t h b; 4 → t r b l.
+  const [t, r = t, b = t, l = r] = parts;
+  // Nominal A4 (210 × 297) for the stated design figure, not the PDF's measured
+  // 209.9 — the usable box is an authoring number, not a rendered measurement.
+  return {
+    wMm: +(210 - l - r).toFixed(1),
+    hMm: +(297 - t - b).toFixed(1),
+  };
+}
+
+// Runs INSIDE the browser (serialised by page.evaluate): reports elements wider
+// than the print content column, and SVGs whose drawn geometry escapes their
+// viewBox — each named by a synthesised selector so it can be found in source.
+function domInspect() {
+  const PX = 96 / 25.4;
+  const mm = (px) => +(px / PX).toFixed(1);
+  const selectorOf = (el) => {
+    if (el.id) return "#" + el.id;
+    const cls = (el.getAttribute("class") || "").trim().split(/\s+/).filter(Boolean);
+    return el.tagName.toLowerCase() + (cls.length ? "." + cls[0] : "");
+  };
+
+  const contentRight = document.documentElement.clientWidth; // = the column width
+  // Worst overflow per selector: two elements that share a synthesised selector
+  // collapse to one entry, and the larger overflow is the one worth reporting.
+  const worst = new Map();
+  document.querySelectorAll("body *").forEach((el) => {
+    // Full-bleed elements legitimately use the whole sheet, not the content
+    // column (`.bleed` opts into the zero-margin `cover` page), so measuring
+    // them against the column is a false positive. Exempt them and their
+    // descendants — `closest` matches the element itself too.
+    if (el.closest(".bleed")) return;
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) return;
+    const over = r.right - contentRight;
+    if (over <= 8) return; // ~2mm slack absorbs sub-pixel rounding
+    const s = selectorOf(el);
+    if (!worst.has(s) || over > worst.get(s)) worst.set(s, over);
+  });
+  const overflow = [...worst].map(([selector, over]) => ({ selector, overflowMm: mm(over) }));
+
+  const svgOutside = [];
+  const seenSvg = new Set();
+  document.querySelectorAll("svg[viewBox]").forEach((svg) => {
+    const vb = svg.viewBox.baseVal;
+    if (!vb.width || !vb.height) return; // an empty/malformed viewBox measures nothing
+    let bb;
+    try { bb = svg.getBBox(); } catch (_) { return; }
+    const out =
+      bb.x < vb.x - 0.5 ||
+      bb.y < vb.y - 0.5 ||
+      bb.x + bb.width > vb.x + vb.width + 0.5 ||
+      bb.y + bb.height > vb.y + vb.height + 0.5;
+    if (!out) return;
+    const s = selectorOf(svg);
+    if (seenSvg.has(s)) return;
+    seenSvg.add(s);
+    svgOutside.push({ selector: s });
+  });
+
+  return { overflow, svgOutside };
+}
+
+// The sheet the layout half expects, derived from what the document disclosed.
+// `null` when the declared size is one we cannot map to millimetres — better to
+// emit no size flag than a wrong one.
+function expectedSheet(declaredSize) {
+  if (!declaredSize) return A4; // inheriting, or an override that left size alone
+  const landscape = /\blandscape\b/.test(declaredSize);
+  let base;
+  if (/\ba4\b/.test(declaredSize)) base = { w: 209.9, h: 297 };
+  else if (/\bletter\b/.test(declaredSize)) base = { w: 215.9, h: 279.4 };
+  else return null;
+  const { w, h } = landscape ? { w: base.h, h: base.w } : base;
+  const label = /\ba4\b/.test(declaredSize) ? "A4" : "Letter";
+  return { w, h, label: landscape ? `${label} landscape` : label };
+}
+
+const near = (a, b) => Math.abs(a - b) <= 1;
+
+// The share of a sheet's height that carries text, from the text bounding box.
+// `bottom` measures to the lowest run's START, so a filled sheet reads slightly
+// under 1 and a sparse one near 0 — coarse by design, enough to flag an early
+// page break, not to quote a precise percentage.
+function fillFraction(p) {
+  if (!p.textMargins || p.heightMm == null) return null;
+  const used = p.heightMm - p.textMargins.top - p.textMargins.bottom;
+  return Math.max(0, used) / p.heightMm;
+}
+
+function layoutFlags(inspection, expected, dom) {
+  const flags = [];
+  const last = inspection.pages.length - 1;
+  inspection.pages.forEach((p, i) => {
+    const n = i + 1;
+    if (p.textless) {
+      flags.push(`sheet ${n} is near-empty`);
+    } else {
+      const fill = fillFraction(p);
+      // A non-final sheet running far short of the column suggests an early
+      // page break; the final sheet is expected to be part-full.
+      if (fill != null && i < last && fill < 0.4) {
+        flags.push(`sheet ${n} is only ${Math.round(fill * 100)}% full`);
+      }
+    }
+    if (expected && p.widthMm != null && p.heightMm != null &&
+        !(near(p.widthMm, expected.w) && near(p.heightMm, expected.h))) {
+      flags.push(`sheet ${n} is ${p.widthMm}×${p.heightMm}mm, not ${expected.label}`);
+    }
+  });
+  if (dom) {
+    for (const o of dom.overflow) {
+      flags.push(`${o.selector} overflows the content box by ${o.overflowMm}mm`);
+    }
+    for (const s of dom.svgOutside) {
+      flags.push(`${s.selector} draws outside its viewBox`);
+    }
+  }
+  return flags;
+}
+
+function buildReport({ outputPath, disclosure, inspection, usableBox, dom }) {
+  const mode = disclosure.overrides
+    ? `customised — overrides [${disclosure.properties.join(", ")}]`
+    : "standard — inheriting from print-base.css";
+  const flags = layoutFlags(inspection, expectedSheet(disclosure.declaredSize), dom);
+  const box = usableBox ? `\n  Content box: ${usableBox.wMm} × ${usableBox.hMm} mm usable per sheet` : "";
+  return (
+    `PDF written to ${outputPath}.\n` +
+    `  Print mode: ${mode}\n` +
+    `  Sheets: ${inspection.pageCount}` + box + `\n` +
+    `  Flags: ${flags.length ? flags.join("; ") : "none"}`
+  );
 }
 
 // ----- JSON-RPC plumbing ----------------------------------------------------
@@ -163,9 +389,9 @@ async function handle(msg) {
         return;
       }
       try {
-        const outPath = await renderPdf((params && params.arguments) || {});
+        const result = await renderPdf((params && params.arguments) || {});
         reply(id, {
-          content: [{ type: "text", text: `PDF written to ${outPath}` }],
+          content: [{ type: "text", text: buildReport(result) }],
         });
       } catch (err) {
         reply(id, {
@@ -185,17 +411,21 @@ async function handle(msg) {
   }
 }
 
-const rl = readline.createInterface({ input: process.stdin });
-rl.on("line", (line) => {
-  const trimmed = line.trim();
-  if (!trimmed) return;
-  let msg;
-  try {
-    msg = JSON.parse(trimmed);
-  } catch (_) {
-    return; // ignore non-JSON lines
-  }
-  Promise.resolve(handle(msg)).catch((err) => {
-    if (msg && msg.id != null) replyError(msg.id, -32603, String(err && err.message));
+module.exports = { renderPdf, buildReport, loadPuppeteer, DATA_DIR };
+
+if (require.main === module) {
+  const rl = readline.createInterface({ input: process.stdin });
+  rl.on("line", (line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    let msg;
+    try {
+      msg = JSON.parse(trimmed);
+    } catch (_) {
+      return; // ignore non-JSON lines
+    }
+    Promise.resolve(handle(msg)).catch((err) => {
+      if (msg && msg.id != null) replyError(msg.id, -32603, String(err && err.message));
+    });
   });
-});
+}

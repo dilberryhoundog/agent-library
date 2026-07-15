@@ -22,7 +22,7 @@ the skill's references/students/\_template.md and writing students/<name>.md. --
 
 ## PDF delivery
 
-Write each document's HTML to a `source/` folder beside its PDF, then convert it by passing that file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server). The saved HTML is the editable copy — corrections and later units reopen it. Fallback when the tool is unavailable: still save the HTML, then the user prints to PDF (A4, margins off).
+Write each document's HTML to a `source/` folder beside its PDF, then convert it by passing that file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server). The saved HTML is the editable copy — corrections and later units reopen it. The classroom skill owns how documents are built and what geometry they inherit; follow it for that work.
 
 ## Status / resume notes
 

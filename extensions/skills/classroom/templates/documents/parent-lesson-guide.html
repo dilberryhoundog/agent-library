@@ -10,14 +10,15 @@
 <title>Parent Lesson Guide — A4</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap');
-  /* Per-sheet margins survive on continuation sheets when a .page overflows one
-     sheet; pass zero margins to the PDF renderer so CSS owns the margins. */
-  @page { size:A4; margin:18mm 20mm; } * { margin:0; padding:0; box-sizing:border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; }
   :root { --accent:#3a5a78; --accent-soft:#e9f0f6; }
-  body { font-family:'Lexend',Arial,sans-serif; color:#1a1a1a; background:#e8e8e8; font-size:12pt; line-height:1.5; }
-  .page { width:210mm; min-height:297mm; margin:10mm auto; background:#fff; padding:18mm 20mm; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
-  @media print { body{background:#fff;} .page{width:auto;min-height:0;margin:0;padding:0;box-shadow:none;page-break-after:always;}
-    .card, .supplies { break-inside:avoid; page-break-inside:avoid; } }
+  body { font-family:'Lexend',Arial,sans-serif; color:#1a1a1a; font-size:12pt; line-height:1.5; }
+
+  /* Screen preview only — a sheet-sized box must never reach print. */
+  @media screen {
+    body { background:#e8e8e8; }
+    .page { width:210mm; min-height:297mm; margin:10mm auto; background:#fff; padding:18mm 20mm; box-shadow:0 4px 20px rgba(0,0,0,0.15); }
+  }
   h1 { font-size:22pt; color:var(--accent); } h3 { color:var(--accent); margin:14px 0 6px; }
   .card { border:1.5px solid #cdd8e2; border-radius:10px; padding:12px 16px; margin:10px 0; }
   .card .meta { font-size:10pt; color:#666; margin-bottom:6px; }
@@ -31,7 +32,7 @@
   <p style="color:#555;">Open-and-go. Each week: ~[time]. Answers are in the separate Answer Key.</p>
 
   <!-- Repeat per week/lesson -->
-  <div class="card">
+  <div class="card block">
     <div class="meta">Unit X &middot; Week N &middot; ~[time]</div>
     <h3>[Lesson Title]</h3>
     <div class="supplies"><strong>You'll need:</strong> [cheap, lightweight supplies].</div>
