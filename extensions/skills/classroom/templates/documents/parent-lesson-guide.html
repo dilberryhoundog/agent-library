@@ -3,16 +3,6 @@
   TEMPLATE: Parent Lesson Guide (A4) — how to RUN each week: prep, supplies,
   timing, what to watch for, and answers' location. The open-and-go companion to
   the student workbook. Keep prep minimal (caravan constraint).
-
-  PAGE GEOMETRY IS NOT IN THIS FILE. The html_to_pdf tool injects it (sheet size,
-  per-sheet margins, page breaks, full-bleed, break guards) from the renderer's
-  print-base.css. This file styles identity only: colour, type, components.
-    - A component that must not be split across a page break carries `block`.
-    - Table rows and repeating table headers are handled by the base.
-    - Never size a box to the sheet in print, and never re-declare the paging
-      rules — a box that asserts the sheet's height spills a phantom page.
-  To change geometry for THIS document only, declare an `@page` rule here: the
-  base is injected first, so a document's own `@page` wins.
 -->
 <html lang="en-AU">
 <head>

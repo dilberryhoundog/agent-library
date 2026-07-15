@@ -22,9 +22,7 @@ the skill's references/students/\_template.md and writing students/<name>.md. --
 
 ## PDF delivery
 
-Write each document's HTML to a `source/` folder beside its PDF, then convert it by passing that file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server). The saved HTML is the editable copy — corrections and later units reopen it. Fallback when the tool is unavailable: still save the HTML, then the user prints to PDF (A4, margins off).
-
-Page geometry is injected by the tool and is not written into documents. A document carries identity styling only, plus three classes: `block` on a component that must not split across a page break, `bleed` on a page that reaches the paper's edge, `annotated` on a content page wanting the annotation band. Never size a box to the sheet in print. To change geometry for one document, declare an `@page` rule in it — the injected base loads first, so the document's own rule wins. The tool reports the PDF's page count: check it against the count the document was written to have, since a surplus page means content overflowed its sheet.
+Write each document's HTML to a `source/` folder beside its PDF, then convert it by passing that file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server). The saved HTML is the editable copy — corrections and later units reopen it. The classroom skill owns how documents are built and what geometry they inherit; follow it for that work.
 
 ## Status / resume notes
 

@@ -3,14 +3,8 @@
   TEMPLATE: Completion Certificate (A4 landscape). Awarded at the end of a
   course/unit. Set student name, course title, date, and accent colour.
 
-  PAGE GEOMETRY IS NOT IN THIS FILE, with one deliberate exception. The
-  html_to_pdf tool injects the house geometry (portrait A4, per-sheet margins,
-  page breaks, full-bleed) from the renderer's print-base.css. A certificate is
-  the one document that genuinely needs different geometry, so it declares its
-  own `@page` below — landscape, no margin. That works because the base is
-  injected FIRST, so a document's own `@page` wins the cascade. This is the
-  worked example of the override lever; use it only when a document's geometry
-  really does differ, and change nothing else about the paging rules.
+  This file declares its own @page (landscape, no margin) — the worked example
+  of overriding the injected house geometry for a document that needs it.
 -->
 <html lang="en-AU">
 <head>

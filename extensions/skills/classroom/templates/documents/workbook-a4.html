@@ -11,21 +11,8 @@
   INVARIANTS: A4 only; Australian English; answers live in the SEPARATE
   answer-key template, never here; confidence stars + reflection included.
 
-  PAGE GEOMETRY IS NOT IN THIS FILE. The html_to_pdf tool injects it (sheet
-  size, per-sheet margins, page breaks, full-bleed, break guards) from the
-  renderer's print-base.css. This file styles identity only: colour, type,
-  components. Three rules follow from that:
-    - A component that must not be split across a page break carries `block`.
-    - A full-bleed page (the cover) carries `bleed`.
-    - A content page that wants the Apple-Pencil annotation band carries
-      `annotated`; the band is the page box's right border, so it repeats on
-      continuation sheets and never lands on a cover.
-    - Never size a box to the sheet in print, and never re-declare the paging
-      rules — a box that asserts the sheet's height spills a phantom page.
-  To change geometry for THIS document only, declare an `@page` rule here: the
-  base is injected first, so a document's own `@page` wins. This file does that
-  once, to narrow the right page margin so the annotation band sits close to the
-  paper's edge.
+  This file declares its own @page (a narrow right margin) so the annotation
+  band on `.page.annotated` sits near the paper's edge.
 -->
 <html lang="en-AU">
 <head>

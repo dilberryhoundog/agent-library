@@ -34,7 +34,9 @@ Assemble home-education materials tailored to a specific learner and the family'
 
 === how every document is produced ===
 Documents are authored as HTML and delivered as A4 PDF. Write each document's HTML into a `source/` folder beside where its PDF is delivered, with matching filenames (`unit-04/source/workbook.html` beside `unit-04/workbook.pdf`), then convert by passing that saved file's path as `htmlPath` to the `html_to_pdf` tool (classroom-pdf MCP server) — never from an inline string, since the saved file is the copy every later session edits.
-If the tool is unavailable on this host, still write the HTML to `source/`, deliver paste-ready HTML, and tell the user to convert in the browser (Print → Save as PDF, A4, margins off).
+
+<!-- New content, from issue #29 refactor: needs adjusting for drafthorse and durability...
+
 
 **Page geometry is not written into documents.** The `html_to_pdf` tool injects it — sheet size, per-sheet margins, page breaks, full-bleed pages, break guards — from the renderer's own `print-base.css`. Documents carry identity only: colour, type, components. A hand-written document gets correct paging for free, without knowing the rules exist.
 
@@ -51,6 +53,7 @@ Three classes are the interface to that geometry, and they are all a document ne
 **Verify every conversion by its page count.** The tool reports the page count of the PDF it wrote; check it against the count the document was written to have. A surplus page means content overflowed its sheet — the one failure that is invisible in the HTML.
 
 Inline SVG diagrams clip at the `viewBox` edge: anything drawn or labelled beyond it is simply cut, so leave room inside the box for text that sits near the edges.
+-->
 
 ## House Style
 
@@ -206,6 +209,26 @@ The unit's documents are built from the chosen shapes, every concept's media ver
 
 List `templates/documents/` and copy the shells the deliverable calls for, filling them and inserting components from `templates/blocks/` where the lesson shape calls for them. Apply the `references/pedagogy/` file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow `references/media-processing.md` as a handover doc to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
 Produce each document per the `Document Pipeline`. When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before it moves on.
+
+## +Deliver Without the Renderer
+
+Deliver a finished document as a print-ready file when the PDF renderer cannot run on this host.
+
+#### Start this step when:
+
+A document's HTML is written to `source/`, the `html_to_pdf` tool is unavailable on this host (absent, or unable to bring up its engine), and the document has not yet been delivered by the fallback route.
+
+#### Step finished when:
+
+The document has been delivered as a self-contained, print-ready standalone — the injected geometry inlined into a delivery copy, the `source/` HTML left untouched — and the user has been told how to produce the A4 PDF from it.
+
+#### Do this next:
+
+With the document delivered by hand, carry on with the remaining documents, or record what the response produced.
+
+### Deliver by Hand:
+
+Follow `references/deliver-without-renderer.md` as a handover doc to inline the geometry base into a print-ready standalone and hand it to the user, leaving the `source/` file as the editable copy for when the renderer returns.
 
 ## +Build and Approve the Sample
 
