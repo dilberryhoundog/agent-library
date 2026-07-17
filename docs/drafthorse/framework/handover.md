@@ -1,14 +1,21 @@
 # Handover Documents
 
-A **handover** is a standard DraftHorse document — invariants, references, steps, terms — carrying `type: handover` as its whole frontmatter, extracted from a parent document so that heavy, optional, or side-branching work does not bloat the parent's ordinary read. It is not a new primitive; it is a **document variant**, built from the same scaffold, notation, steps, and references as any skill, with the deltas this file names.
+A **handover** is a standard DraftHorse document — invariants, references, steps, terms — carrying `type: handover` as its whole frontmatter. They reside in a `handovers/` folder inside the `skills/` folder.
+Extracted from a parent document so that heavy, optional, or side-branching work does not bloat the parent's ordinary read.
+Handovers are a **drafthorse document variant**, built from the same scaffold, notation, steps, and references as any drafthorse skill.
 
-The name is the thesis. Where the skill is the harness the agent pulls in, a handover is a set of **sub-steps**: a bundle of steps, references, and invariants that a step — the **master step** — folds into the run at the moment it is needed, then the run carries on. A skill cites it inline like any reference; citing it *as a handover doc* is the progressive-disclosure trigger that tells the agent to follow the link and execute what it finds.
+The name describes the process. The main skill is the working location, a handover is a set of **sub-steps** the agent pulls in to help complete the skill.
+Conceptualised as a bundle of steps, references, and invariants that a step — the **master step** — folds into the run at the moment it is needed, then the run carries on. A skill cites it inline using `Handover notation`; citing it is the progressive-disclosure trigger that tells the agent to follow the link and execute what it finds.
 
 ## Why extract one
 
-Progressive disclosure is the whole point: a SKILL.md stays lean and pulls in supporting material only when a step reaches for it. A reference does this for **data**. A handover does it for **work** — step-shaped work that is too heavy to sit inline in the Steps segment, yet runs only sometimes, so folding it into the main flow would make every ordinary read pay for a path most runs never take.
+Progressive disclosure: a SKILL.md stays lean and pulls in supporting material only when a step reaches for it. Work too heavy to sit inline in the Steps segment, or runs only sometimes, so keeping it from the main flow prevents paying tokens for heavy, intermittent work.
 
-The originating case: a five-step project bootstrap — a nested conditional, an interview, a judgment call — that runs once per project. Left in the skill's Steps it bloats every build; mis-filed as a reference it is embedded work masquerading as data. Extracted as a handover it is neither: a self-contained sub-procedure the one master step folds in when, and only when, a project needs setting up.
+Common use cases:
+
+- Setup processes only called once.
+- Large branching, the main skill operates as the orchestrator.
+- Bulky work items, that is not essential for every run.
 
 ## The sub-step model
 
@@ -24,22 +31,32 @@ The model is a set of sub-steps, not a function call: there is no formal call/re
 
 **One level only.** A handover must not fold in another handover. Work deep enough to want nesting has outgrown a handover — it belongs in its own skill, reached as an external call.
 
-## Frontmatter — `type: handover` and nothing else
+## Handover Location and Naming
 
-A handover's frontmatter is the single line `type: handover`. It carries no `name`, `description`, `allowed-tools`, or invocation surface — a handover is never reached by the user or by an autonomous model decision; it is reached only by a step that cites it. That one line is the **tell**: it is what flips a spec review into handover-audit mode, and what cues a citing agent that this file is followed and executed, not read as data.
+`<skill>/setup-handover.md` is the convention for storing handover files. right next to the main skill file. This is not official skill architecture, but however intiutive for agents navigating drafthorse skills. The key point is that handovers are not alongside references in the `references/` folder, but in the root folder as a sibling to the main skill file.
+
+Handover naming convention: append `-handover` to the file name, so the file recognisable in the root folder as a subtype of the main skill.
+
+## Frontmatter
+
+A handover's frontmatter is the single line `type: handover`. It carries no `name`, `description`, `allowed-tools`, or harness facing invocation surface — a handover is never reached by the user or by an autonomous model decision; it is reached only by a step that cites it.
 
 With no `name`/`description`, identity moves into the body as an **identity paragraph**: a `# Title (Handover)` heading and one short paragraph stating what the handover does, when a master step folds it in, and — for the cold reader — that its steps/references/invariants come into play for the run, it leans on the master's grants and references, and it routes no success or failure of its own.
 
+## Document Reviews
+
+The location, naming, and referencing conventions of handover documents allow agents reviewing the main skill for spec compliance, to also walk through the handover files. This enables reviewing the skill for drafthorse compliance across all surfaces. Ensure any reviwer agents know the conventions, to enable handover walking.
+
 ## Standalone
 
-A handover **never names its master.** It is written to be folded into *any* step that needs its work, so it cannot know which one. It may lean on master-supplied references, but by *role or name*, not by pointing at the master document. This is what keeps it reusable and keeps a spec reviewer able to audit it on its own terms.
+A handover **never names its master step.** It is an atomic piece of work, with self contained drafthorse utilities. It does operate however under the main skills utilities and is therefore subject to them. This keeps it reusable and keeps a spec reviewer able to audit it on its own terms.
 
 ## Steps inside a handover
 
 Step anatomy, conditions, and in-play semantics are unchanged (see [steps.md](steps.md)), and a handover opens its steps section with the same universal preamble as any document — the preamble's handover line is what tells a cold reader that exits and errors belong to the master step. Two differences follow from the sub-step model:
 
 - **No required exit steps.** A skill needs a success exit (whose completion ends the run) and an error drain. A handover needs neither: when no handover step is left in play, control simply returns to the master step, and a failure falls to the master document's problem step. A handover *may* carry a local problem step to surface something to the user mid-work, but it owes the master no handback and needs no terminal success step whose only job is to report an outcome.
-- **Conditions read the work, not a handback.** The last working step finishes on its own completion state; it does not add a step whose sole purpose is to name and return an outcome. The master step reads that state through its own finished condition.
+- **Conditions read the work, not a handback.** The last working step finishes on its own completion state; it does not add a step whose sole purpose is to name and return an outcome from the handover. The master step reads that state through its own finished condition.
 
 ## Extraction smells
 

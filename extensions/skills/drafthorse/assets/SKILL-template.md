@@ -40,6 +40,19 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 # --- STEPS ---
 
+<!-- TODO: Suggested preamble changes;
+```
+Steps are universal and standalone.
+- All their work, instructions and rules are self-contained.
+- Invoke them anytime when they meet start conditions.
+- Completed only when all finishing conditions are met
+- Incompletable active steps are handled with an error drain step.
+- Handovers are slave steps. Flow control always belongs to the master step.
+- References inline. Internal, External and Handovers all uniquely handled using link notation.
+- Multiple steps activation, looping back, dormant steps are all valid patterns.
+```
+-->
+
 > A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
 >
 >- Fully meet a step's *step finished when* conditions before considering it done.
@@ -54,29 +67,45 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 <!-- One-line statement of what this step does. -->
 
-#### Start this step when:
+#### Start this step when these are true:
 
 <!-- The state that makes this the right work, in state terms. Exclude half-applied states — a condition that still holds after the step failed partway invites a destructive re-run. -->
 
-#### Step finished when:
+- <condition 1>
+- <condition 2>
+  **OR these are true:**
+- <other condition 1>
+- <other condition 2>
+
+#### Step finished when these are true:
 
 <!-- This step's own completion criteria only — checkable and exhaustive. Could the agent claim this is met while work remains? If yes, sharpen it. No other steps, no routing, no instructions. -->
 
-#### Decision:
+- <condition 1>
+- <condition 2>
+  **OR these are true:**
+- <other condition 1>
+- <other condition 2>
+
+#### Agent Decision:
 
 <!-- Optional: a choice that governs this step's scope or shape — what it targets, how many times it runs — resolved before the work can be performed. Carries no work and no routing, and resolves to a fact the finished condition depends on. Delete the section when the step's scope is fixed. -->
 
-#### Do this next:
+#### Suggested next actions:
 
-<!-- Optional prose: happy-path pointer, loop back, bail on failure, or skill exit. Points only — never restate the destination's conditions. Delete when the dovetail is obvious. -->
+<!-- Optional prose: loop back, bail on failure, or skill exit. Points only — never restate the destination's conditions. Omit when the dovetail is obvious. -->
 
-#### Invariants:
+#### Step invariants:
 
 <!-- Rules in force while the step is in play. Delete the section if none. -->
 
 ### <Heading Named for the Work>:
 
 <!-- The engagement — the work, as prose. Cite references inline at the moment they matter. Structure with H4 sub-headings when the work has distinct parts. -->
+
+#### <Sub-heading>:
+
+<!-- Separate the engagement into distinct sections, if necessary, to help the agent differentiate varied context. -->
 
 ## +<Success Exit Step Name>
 

@@ -1,14 +1,18 @@
 # Steps
 
-A step is an **atomic, bounded, standalone unit of work** that breaks a task or outcome into a piece the agent can complete in one pass. Sized to encompass all the work the agent can manage at once; listed in the usual execution order as a reading aid, not a boundary.
+A step is an **atomic, bounded, standalone unit of work** that breaks a task or outcome into a piece the agent can complete in one pass. Sized to encompass all the work the agent can manage at once; Steps are listed in a conceptual order, but don't have to be necessarily executed in that order, the steps conditions guide the entry and the exit of the steps.
 
-A step knows nothing about any other step, except where its *do this next* guidance explicitly points. It describes the state it starts from and the state it leaves behind, in plain English and in **state terms, never step terms** ("a report has arrived", not "after the previous step"). Chaining is emergent: one step's completion state dovetails into another's start condition, and the executing agent's judgment is the router. This keeps steps light — no hand-holding narration — and keeps every routing fact in exactly one home.
+A step knows nothing about any other step, except where its *do this next* guidance explicitly points. It describes the state it starts from and the state it leaves behind, in plain English and in **state terms, never step terms** ("a report has arrived", not "after the previous step").
+Chaining is emergent: one step's completion state dovetails into another's start condition, and the executing agent's judgment is the router. This keeps steps light — no hand-holding narration — and keeps every routing fact in exactly one home.
 
-Responsibility is strictly divided: **start conditions carry the routing** (a step set is correct when the start conditions cover the skill's possible states, with an error step claiming the remainder), **finished conditions carry only their own step's completion criteria**, and the optional **do this next** slot is the only place a step may name another step.
+Responsibility is strictly divided: **start conditions carry the routing** (a step set is correct when the start conditions cover the skill's possible states, with an error step claiming the remainder), **finished conditions carry only their own step's completion criteria**,
+The optional **do this next** slot is a direction finder for lost agents. A breadcrumbs feature, loosely describing next steps possibilities.
 
 ## In play
 
-A step is **in play** from when its start condition is met until its finished condition is met. Multiple steps can be in play at once: a long-running or supervisory step (a dispatcher looping over items, a step awaiting a background agent) stays open while intermediate steps start and finish inside its span, and its invariants remain in force the whole time. Sharp conditions are what make this unambiguous — the set of in-play steps at any moment should be exactly the intended one.
+A step is **in play** from when its start condition activates, until its finished condition is met. As soon as the start condition is met, a step can begin, it doesn't need to wait for others to finish. This means steps can begin, while others have started but not yet completed. (eg an error step catching errors on other steps).
+Also Multiple steps can be in play at once: a long-running or supervisory step (a dispatcher looping over items, a step awaiting a background agent) stays open while intermediate steps start and finish inside its span, and its invariants remain in force the whole time.
+Sharply written conditions are what make steps atomic and uniquely scoped.
 
 ## The steps preamble
 
@@ -30,59 +34,88 @@ The preamble is deliberately universal — it names no skill-specific steps, so 
 
 The H4 headings are the framework's machinery — the step's contract, read without engaging. The H3 opens the engagement — the work itself. Contract first, work below.
 
+<!-- TODO: Change the machinery headings; 
+Induces better automatic understanding -->
+
 ```markdown
 ## +Step Name
 
 One-line statement of what this step does — the step's identity when scanning.
 
-#### Start this step when:
+#### Start this step when these are true:
 
-The state that makes this the right work, in state terms. Excludes half-applied states.
+The state that makes this the right work, in state terms. Handles half-applied states.
 
-#### Step finished when:
+#### Step finished when these are true:
 
-This step's own completion criteria — checkable and exhaustive, nothing else.
+This step's own completion criteria — checkable and exhaustive.
 
-#### Decision:
+#### Agent decision:
 
-Optional. A choice that governs the step's scope or shape, which the agent resolves before the engagement can be performed. Omit when the step's scope is fixed.
+Optional. A choice that governs the step's scope or shape, which the agent resolves. Omit when the step's scope is fixed.
 
-#### Do this next:
+#### Suggested next actions:
 
 Optional prose guidance onward: the happy-path pointer, a loop back to an earlier step, a bail on failure, or the skill's exit. Omit when the dovetail is obvious.
 
-#### Invariants:
+#### Step invariants:
 
 Rules in force while the step is in play, in the bold-caps invariant form. Omit when none.
 
 ### <Heading Named for the Work>:
 
 The engagement, written as prose. Reference pointers are cited inline at the moment they matter. Structure the work with H4 sub-headings of its own when it has distinct parts.
+
+#### <Engagement sub heading>
+
+Separate the engagement into distinct sections, if necessary, to help the agent differentiate varied context.
 ```
 
 The `+` prefix marks a heading as a step node, distinguishing steps from reference and term headings. The machinery headings are fixed and self-describing; the engagement heading is the step's own — name it for the work (its generic name is Engagement).
 
 ## Conditions
 
-Every step ends on its **step finished when** condition. The condition must be **checkable** — the agent can tell done from not-done — and **exhaustive** — it encompasses all the work ("every chosen unit released, declined, or reported nothing-to-release", not "the releases are done"). A vague condition invites premature completion; because conditions carry the routing, a weak one is the equivalent of a broken edge. A finished condition never mentions another step, narrates where the flow goes, or issues instructions — routing belongs to start conditions and *do this next*; work belongs to the engagement.
+Every step ends on its **step finished when** condition. The condition must be **checkable** — the agent can tell done from not-done — and **exhaustive** — it encompasses all the work ("every chosen unit released, declined, or reported nothing-to-release", not "the releases are done").
+A vague condition invites premature completion; because conditions carry the routing, a weak one is the equivalent of a broken edge.
+A finished condition never mentions another step, narrates where the flow goes, or issues instructions — routing belongs to start conditions and *do this next* gives tips where to look for next steps.
 
+<!-- TODO: discuss if this is necessary?
+Given that an error step can begin without the step in question finishing, is it plausible that half applied states be handled in error steps. 
+I feel after a little usage in the wild that these are getting a little unruly, handling all the half applied states, making it unclear the bonafide finish conditions.
+-->
 Start conditions carry a symmetric duty: they must **exclude half-applied states**. A start condition phrased only as "the prerequisite is met" still holds after the step failed partway, inviting a destructive re-run; phrase it to exclude work already partially done ("…and no part of the release has been applied yet"), handing the half-applied state to the error step.
 
 ## Decision
 
-The optional slot for a choice that governs the step's **scope or shape** — what the step targets, or how many times it runs — which the agent must resolve before the engagement can be performed. It sits with the machinery, not under the engagement, because an agent reading a step's contract to decide whether and how to enter it needs this in view at that altitude; folded into the work, it reads as guidance for performing the work, which it is not.
+<!-- TODO: Refactor to align with orignal intention
+This slot is given so that the agent can "break" out of computer mode and make a decision. Often needed when state is undecided upon skill invocation but emerges during invocation, and it is now upto the agent to make a decision. 
+The step's finishing conditions can be easily satisfied by claiming "when a decision is made", or any other valid condition.
+This can also be a flip,flop between loading different references or the like. 
+At its core: control handed to the agent momentarily while the step is in play.
+-->
 
-Use it where run state decides the step's extent: an invocation naming one item versus a bare invocation that must survey every item and ask the user which to act on. Three limits keep the slot from becoming a dumping ground — it carries no work (the engagement does that), it carries no routing between steps (start conditions and *do this next* do that), and it must resolve to a fact the step's own finished condition depends on. A choice that fails all three is either engagement prose or a routing condition wearing the wrong heading.
+The optional slot for a choice that governs the step's **scope or shape** — what the step targets, or how many times it runs — which the agent must resolve before the engagement can be performed.
+
+Use it where run state decides the step's extent: an invocation naming one item versus a bare invocation that must survey every item and ask the user which to act on. Three limits keep the slot from becoming a dumping ground — it carries no work (the engagement does that), it carries no routing between steps (start conditions do that), and it must resolve to a fact the step's own finished condition depends on. A choice that fails all three is either engagement prose or a routing condition wearing the wrong heading.
 
 A genuine bounded fork inside the work — both branches the step's own business, neither changing what the step targets — stays in the engagement as plain prose.
 
 ## Do this next
 
-The routing-hint slot, and the one sanctioned home for cross-step reference. Written as prose; not always needed — omit it when the next step's start condition picks up the completion state unaided. Its uses: highlighting the happy path, a loop instruction ("return to the first step for the next item"), the exit of a finishing step ("end the skill and return to the user"), or a bail that keeps a step from hanging on unmeetable completion conditions ("if errors are present, report them in the problem step; otherwise move on"). It points; it never restates the destination's conditions — those stay authoritative in the destination's own start condition.
+The routing-hint slot, and the one sanctioned home for cross-step reference. Written as prose; not always needed — omit when the next step's start condition picks up the completion state unaided.
+
+Use when:
+
+- Highlighting the happy path,
+- A loop instruction ("return to the first step for the next item"),
+- The exit of a finishing step ("end the skill and return to the user")
+- A bail that keeps a step from hanging on unmeetable completion conditions ("if errors are present, report them in the problem step; otherwise move on").
+
+It points; it never restates the destination's conditions — those stay authoritative in the destination's own start condition.
 
 ## User gates
 
-A **gate** is a step whose completion requires the user's approval of an artifact the step produced. Gates are **compound**: the finished condition is the user's approval *and* the artifact's own substantive conditions — never approval alone (a rubber-stamp must not launder a defective artifact) and never mere presentation. Presenting the artifact is part of the engagement.
+A **gate** is a step whose completion requires the user's approval of an artifact the step produced. Gates are **compound**: user approval does not satisfy step completion on its own. The agent must write this into step finishing conditions in addition to other satisfiers.
 
 Approval is state, and it is revocable: revising an approved artifact un-approves it and everything downstream of it, so the owning step's start condition holds again. Gate-shaped start conditions ("X is approved and Y has not been approved") depend on this rule.
 

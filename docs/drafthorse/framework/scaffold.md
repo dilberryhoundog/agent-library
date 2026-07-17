@@ -4,9 +4,9 @@ The scaffold is the fixed frame every DraftHorse document shares: five parts, al
 
 Four of the parts sit in the body, divided by purpose: References is the data segment (context the steps act on), Steps is the working segment (where the work lives), and Terms is the glossary. Frontmatter sits above the line as the declaration segment.
 
-## The five parts
+## DraftHorse Utilities
 
-1. **Frontmatter** — the declaration segment: identity, permissions, invocation surface, config wiring. Sets up what the document is and what it may do, before any of its prose runs.
+1. **Frontmatter** — the declaration segment required by agent harnesses: identity, permissions, invocation surface, config wiring. Sets up what the document is and what it may do, before any of its prose runs.
 2. **Agent Invariants (global)** — rules that hold across the whole document, every step, no exceptions.
 3. **References** — the data segment: constants, maps, formats, context. Patterns (static vs dynamic) are catalogued in [references.md](references.md).
 4. **Steps** — the working body: self-contained units, each declaring when it starts and when it is finished, opened by the universal steps preamble. The anatomy is catalogued in [steps.md](steps.md).
@@ -16,12 +16,15 @@ Four of the parts sit in the body, divided by purpose: References is the data se
 
 Frontmatter wires the document before any of its prose runs. Four concerns live here:
 
-- **Identity** — `name` and `description`. The description is written for whoever can actually reach the document (see the *invocation-shaped description* convention).
-- **Permissions** — `allowed-tools`. A document's grants transfer to a sub-agent that invokes it, so permissions can be delivered at the step that needs them rather than held globally.
-- **Invocation surface** — `disable-model-invocation` and `user-invocable` decide who may reach the document: the agent autonomously, the user by name, or only a calling agent. This is what enforces an orchestrator/executor split — a front-door document the user enters, executor documents that cannot be called sideways.
-- **Config wiring** — user configuration is fed into the document's commands directly, so a step receives a resolved value rather than reaching for it.
+- **Identity** — `name` and `description`. The description is written for the specific audience the document is intended for (see the *invocation-shaped description* convention).
+- **Permissions** — `allowed-tools`. A skill's permissions transfer to a sub-agent that invokes it, if a DraftHorse step invokes child skills these permissions transfer at the moment of invocation also, allowing permissions to be delivered at the step that needs them rather than held globally. This also ensure grants
+- **Invocation surface** — `disable-model-invocation` and `user-invocable` decide who is the document's audience: The agent autonomously, the user by chat command, or only a calling agent. This is what enforces an orchestrator/executor split — a front-door document the user enters, executor documents that cannot be called sideways.
 
-One variant empties this segment: a **handover** document (see [handover.md](handover.md)) carries `type: handover` as its whole frontmatter — no identity, permissions, or invocation surface — because it is reached only by a step that folds it in, and its identity moves into an identity paragraph in the body.
+<!-- TODO: Uncertain explanation, decode this to refactor
+- **Config wiring** — user configuration is fed into the document's commands directly, so a step receives a resolved value rather than reaching for it.
+-->
+
+A **handover** document (see [handover.md](handover.md)) as a variant, carries only `type: handover` as its whole frontmatter — no identity, permissions, or invocation surface is present because these are all inherited from the main invoking skill.
 
 ## Agent Invariants (global)
 

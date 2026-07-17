@@ -6,6 +6,10 @@ usages:
   - drafthorse_saddler.md - Keep preamble, replace all the remaining sections.
 ---
 
+<!-- TODO: Incorporate new conventions into this document
+Search the newly adjusted/added conventions to mine for relevant instructions. Keep any new additions in sharp prose
+-->
+
 # Agent Invariants
 
 **DO NOT** rewrite or edit the document under review. Produce findings only; the fix direction in a finding is guidance, never applied text.
@@ -57,6 +61,9 @@ Four concerns live in frontmatter; check each against the document's role:
 - **Handover variant** — a document whose frontmatter is the single line `type: handover` is a handover; skip the identity, invocation, and permission checks above for it and audit it under `Handover Checks` instead.
 
 ## Handover Checks
+
+<!-- TODO: Include new handover review, location, naming, referencing conventions
+-->
 
 A **handover** is a `type: handover` drafthorse document folded into the run by a **master step** in a master document — its steps run as sub-steps of the master step, and its references and invariants come into play for the run as if written into that step. Apply these whenever the reviewed document is a handover, or a reviewed skill cites one; they replace the skill-shaped checks for that file.
 
@@ -142,7 +149,9 @@ FINDINGS:
    Fix direction: <what would resolve it — direction, not rewritten text>
 ```
 
-Verdict rule: any scenario-walk stall or mis-route, or any finding that would cause an executing agent to misexecute (a broken edge, a launderable gate, a destructive re-run, unclaimed state), forces `revise`. Borderline findings alone permit `pass`; on a pass, list the borderline items so the requester can judge. Order findings scenario-walk breaks first, then the rest by reviewer judgment. The cost of a false pass is an agent silently misexecuting a run; the cost of a false finding is one round of revision. Prefer the finding.
+**Verdict rule**: any scenario-walk stall or mis-route, or any finding that would cause an executing agent to misexecute (a broken edge, a launderable gate, a destructive re-run, unclaimed state), forces `revise`.
+Borderline findings alone permit `pass`; on a pass, list the borderline items so the requester can judge. Order findings scenario-walk breaks first, then the rest by reviewer judgment.
+The cost of a false pass is an agent silently misexecuting a run; the cost of a false finding is one round of revision. Prefer the finding.
 
 # --- STEPS ---
 
@@ -221,6 +230,10 @@ Every test in `Condition Checks` and `Step-Shape Checks` has been applied to eve
 ### Test Each Step:
 
 Take the steps one at a time: purpose line, start condition (state terms, de-hold, half-applied exclusion), finished condition (checkable, exhaustive, own-step-only, compound if a gate), do-this-next (points without restating, contradicts nothing), invariants (behaviour-changing, correctly scoped), standalone test, sizing smells. Then judge the set as a whole: negative space claimed, exit steps present, error drain whole or explicitly folded, and the `Document-Wide Checks` swept over everything.
+
+<!-- TODO: New handover audit step
+Similar shape to the steps and references checks.
+-->
 
 ## +Walk the Scenarios
 
