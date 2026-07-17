@@ -21,6 +21,11 @@ New/changed checks (each keyed to its source plan):
 - Stamp check: every audited document carries `harness-format: DraftHorse` (exact casing).
 - Terminology/heading re-keys: machinery heading strings, parent/child vocabulary, utilities terms — the spec-check's own prose and check strings updated to match the migrated framework.
 - Known deliberate patterns preserved as non-defects: `#### Decision:`-above-H3 step-scope machinery; shared-worker references (the data-not-work false positive) — revisit whether the new handover conventions now resolve the latter properly.
+- **Upstream authority rule** (new) — extend the frontmatter `update_instructions`, which currently govern only the downstream half ("never let the usages drift ahead of this file"). Nothing today protects the spec-check from drifting from the framework, or forbids the fix applied backwards. Add, in substance:
+
+  > The framework is the authority; this document condenses it. Where a check and the framework disagree, the check is wrong. A document under review is never edited to satisfy a check — file the disagreement against this document instead.
+
+  Why it is load-bearing rather than hygiene: this upgrade's wave order deliberately moves the framework first (waves 1–3) and folds it in here last (wave 4), so the spec-check is knowingly stale for the whole upgrade. That lag is the condition that produced the defects — `handover.md`'s false "same universal preamble" claim was written to silence a spec-check flag, and it is fully compliant with the current instructions. The rule is what makes the lag safe. Evidence set: the handover.md claim, the Config-wiring bullet live here (:60) while scaffold.md's twin was commented out, and the two long-lived saddler false positives above.
 
 ## Dependencies
 
