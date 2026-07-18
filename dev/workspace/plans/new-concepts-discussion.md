@@ -310,3 +310,15 @@ Verdict: **deprecate.** The `:` form is a notation with no job. It marks a list 
 ### decision
 
 — Deprecate the `:` prefix and the trailing-colon form. Term entries become standard bolded list entries: `- **Term** — <meaning>`, the house shape for every named list entry. Title Case term names are UNAFFECTED and stay mandated (notation.md:26), as does Title Case on References entries — only the `:` notation is dropped. [plan-reference-notation.md](plan-reference-notation.md) §17 is void: classroom needs no restoration, and is a de-prefixing site like every other skill. Executed by [plan-terms-notation.md](plan-terms-notation.md).
+
+## 17. Duplicate SKILL template deleted
+
+What it is: two near-identical copies of the DraftHorse SKILL template — `docs/drafthorse/template/SKILL.md` (under the framework docs) and `extensions/skills/drafthorse/assets/SKILL-template.md` (the drafthorse skill's working asset).
+
+Raised: mid-upgrade, on noticing the framework copy was untouched while the asset copy had begun migrating (partial step migration, OR separator) — the two had started to diverge. Every plan that swept templates listed them as a pair, and would have migrated the same file twice in wave 3.
+
+Verdict: **delete the framework copy.** Two verbatim copies of one template is the single-source-of-truth violation the conventions warn against; divergence had already begun. The asset copy is canonical — it is what the convert/author workflow actually copies from, and nothing (README, marketplace.json, symlinks) references the framework copy. Its only inbound references were the migration lists in the plans.
+
+### decision
+
+— `docs/drafthorse/template/SKILL.md` DELETED (folder removed; it held nothing else). `extensions/skills/drafthorse/assets/SKILL-template.md` is the sole SKILL template. Migration lists in [plan-utilities-term.md](plan-utilities-term.md), [plan-terms-notation.md](plan-terms-notation.md), and [plan-half-applied-dispositions.md](plan-half-applied-dispositions.md) had their `template/SKILL.md` entries struck; the 00-INDEX working-context surface list updated; report-call-sites.md left as the historical inventory (its `template/SKILL.md` lines are now void, noted where the plans cite it).

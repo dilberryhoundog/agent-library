@@ -11,7 +11,7 @@ The exclusion rule dies entirely — no start condition carries half-applied exc
 - `docs/drafthorse/framework/conventions.md` — delete the "Start conditions exclude half-applied states" bullet (line 22); the error-step convention bullet ("claims the remainder", currently DUPLICATED at lines 28–29 — keep one) gains "half-applied states are part of the remainder".
 - `docs/drafthorse/framework/steps.md` — delete the exclusion paragraph (line 83) and the TODO above it (line 79); resolve the step-anatomy template line ("Handles half-applied states", line 47) by removing the clause entirely; rewrite "Exit steps and the error step" with the disposition catalogue (half-applied disposition as above; add other standard patterns as identified).
 - `extensions/skills/drafthorse/assets/SKILL-template.md` — remove the exclusion guidance comment (line 72); align the error-step scaffold with the catalogue.
-- Stale "exclude half-applied" call sites across drafthorse SKILL.md, condition-writing.md, template/SKILL.md, versioning SKILL.md — see report-call-sites.md §6 for the full list; spec-check/saddler sites are owned by [plan-spec-check-saddler.md](plan-spec-check-saddler.md).
+- Stale "exclude half-applied" call sites across drafthorse SKILL.md, condition-writing.md, versioning SKILL.md — see report-call-sites.md §6 for the full list (its `template/SKILL.md` entry is void — that file was DELETED, §17); spec-check/saddler sites are owned by [plan-spec-check-saddler.md](plan-spec-check-saddler.md).
 
 ## Dependencies
 

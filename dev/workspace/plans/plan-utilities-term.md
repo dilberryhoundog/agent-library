@@ -18,7 +18,7 @@ Three points settled:
 - [x] `docs/drafthorse/framework/notation.md` — DONE (notation session). "the segment dividers of the scaffold" → the scaffold's dividers.
 - [x] `docs/drafthorse/framework/conventions.md` — DONE (conventions session). "the data segment holds…" → the References utility holds.
 - `docs/drafthorse/framework/handover.md` — line 12: "the Steps segment" → the Steps utility.
-- Stale-term sweep (call-sites report §1): `docs/drafthorse/template/SKILL.md` (lines 2, 26), `extensions/skills/drafthorse/assets/SKILL-template.md` (lines 2, 26), `extensions/skills/drafthorse/SKILL.md` (lines 24, 28). spec-check/saddler occurrences (five-parts at :23/:22, segment nouns and `Segment dividers` at :39/:38, plus the audit-step prose) are owned by [plan-spec-check-saddler.md](plan-spec-check-saddler.md).
+- Stale-term sweep (call-sites report §1): `extensions/skills/drafthorse/assets/SKILL-template.md` (lines 2, 26), `extensions/skills/drafthorse/SKILL.md` (lines 24, 28). (`docs/drafthorse/template/SKILL.md` DELETED — see [new-concepts-discussion.md](new-concepts-discussion.md) §17; the assets template is the sole canonical copy.) spec-check/saddler occurrences (five-parts at :23/:22, segment nouns and `Segment dividers` at :39/:38, plus the audit-step prose) are owned by [plan-spec-check-saddler.md](plan-spec-check-saddler.md).
 - DO NOT sweep `extensions/skills/versioning/SKILL.md:178` — "resolve the `../` segments" is path segments, an unrelated sense.
 - `extensions/rules/DraftHorse.md` stub's utilities list — on hold with [plan-drafthorse-rule.md](plan-drafthorse-rule.md); ignore.
 
@@ -26,4 +26,4 @@ Three points settled:
 
 - UNBLOCKS the references.md opening noun — [plan-reference-notation.md](plan-reference-notation.md) parked it pending this; "References is the data utility" is already correct and needs no change.
 - Feeds [plan-spec-check-saddler.md](plan-spec-check-saddler.md) (terminology in the checks; the five-parts and segment-divider strings are keyed on there).
-- Split across sessions by contended file: scaffold.md is uncontended and carries the bulk (its own session), but the one-line de-segmenting edits belong to their file's wave-1 group — notation.md:22 to the notation.md session, conventions.md:32 to the conventions.md session, handover.md:12 to the handover.md session. The template/SKILL.md sweep rides wave 3.
+- Split across sessions by contended file: scaffold.md is uncontended and carries the bulk (its own session), but the one-line de-segmenting edits belong to their file's wave-1 group — notation.md:22 to the notation.md session, conventions.md:32 to the conventions.md session, handover.md:12 to the handover.md session. The assets SKILL-template.md sweep rides wave 3.

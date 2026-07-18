@@ -6,7 +6,7 @@ Branch: `drafthorse-spec-upgrade`. One plan doc per unified concept/TODO; this i
 
 The three surfaces this upgrade operates on:
 
-- `docs/drafthorse/` — the framework (authoring spec): `framework/{scaffold,conventions,steps,notation,references,handover,environments→surfaces}.md` + `framework/README.md`, `drafthorse-spec-check.md` (the audit spec; its frontmatter `update_instructions` govern the saddler), and `template/SKILL.md`.
+- `docs/drafthorse/` — the framework (authoring spec): `framework/{scaffold,conventions,steps,notation,references,handover,environments→surfaces}.md` + `framework/README.md`, and `drafthorse-spec-check.md` (the audit spec; its frontmatter `update_instructions` govern the saddler). The former `template/SKILL.md` was deleted as a redundant duplicate of the skill's `assets/SKILL-template.md` (§17); that asset is now the sole SKILL template.
 - `extensions/skills/drafthorse/` — the drafthorse skill (the convert/author workflow): `SKILL.md`, `assets/SKILL-template.md`, `assets/HANDOVER-template.md`, `references/` (condition-writing, step-splitting, collecting-references).
 - `extensions/agents/drafthorse-saddler.md` — the audit subagent, REGENERATED from drafthorse-spec-check.md, never hand-edited.
 

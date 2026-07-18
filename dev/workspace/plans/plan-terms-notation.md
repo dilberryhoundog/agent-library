@@ -17,7 +17,7 @@ Framework — DONE in the notation.md session:
 
 Migration — wave 3, rides the atomic sweep ([plan-machinery-headings.md](plan-machinery-headings.md) + [plan-parent-child-vocab.md](plan-parent-child-vocab.md)); same files, one pass:
 
-- [ ] `docs/drafthorse/template/SKILL.md` + `extensions/skills/drafthorse/assets/SKILL-template.md` — the two `: **<Term>**: <meaning>` example lines and the Terms comment ("Title Case names, `:` form" → "Title Case names, bolded list entries").
+- [ ] `extensions/skills/drafthorse/assets/SKILL-template.md` — the two `: **<Term>**: <meaning>` example lines and the Terms comment ("Title Case names, `:` form" → "Title Case names, bolded list entries"). (The former `docs/drafthorse/template/SKILL.md` twin was DELETED — §17.)
 - [ ] `extensions/skills/classroom/SKILL.md` — six term entries.
 - [ ] `extensions/skills/versioning/SKILL.md` — three term entries.
 - [ ] `extensions/skills/git-box/SKILL.md` — six term entries.
