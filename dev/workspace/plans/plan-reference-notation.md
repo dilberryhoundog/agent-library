@@ -14,7 +14,7 @@ Internal: link text = the reference's heading text; anchor = lowercase, dashes f
   - Add the **User configuration** dynamic-reference entry.
   - FIX the dynamic-family shape sentence — "The family shares one shape: the step invokes a native capability and folds the result back in as context" is *pull*, and is false for **Data load** as well as for User configuration (a `!`command`` block is harness-substituted before the agent reads any prose; the step invokes nothing). The next sentence is the accurate one: the unifying trait is runtime-produced context. Define the family by the trait, not by an invocation shape only some members have.
 - Framework docs' bare-filename cross-links (`[steps.md](steps.md)` style throughout scaffold/conventions/steps/references) — per the decided external convention these become `[Steps](steps.md)` etc.; sweep them (call-sites §9 inventory).
-- classroom Terms `:` prefix regression (call-sites §8): notation.md still mandates the `:` prefix and classroom is the lone outlier — restore the prefix in classroom SKILL.md's Terms entries as part of this notation pass.
+- ~~classroom Terms `:` prefix regression (call-sites §8): notation.md still mandates the `:` prefix and classroom is the lone outlier — restore the prefix in classroom SKILL.md's Terms entries as part of this notation pass.~~ **VOID.** The premise is false: classroom carries the `:` prefix like every other skill, so there was no outlier and no regression. Reconsidered from scratch, the notation itself was deprecated — see [new-concepts-discussion.md](new-concepts-discussion.md) §16 and [plan-terms-notation.md](plan-terms-notation.md). classroom is a de-prefixing site in wave 3, not a restoration site.
 
 ## Dependencies
 

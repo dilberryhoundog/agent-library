@@ -135,7 +135,7 @@ What it is: a named convention for the framework (and a committed section in dur
 
 Verdict: **medium value in the framework, already-earned value in durable-documents.** The four defects live in durable-documents.md and are excellent; the DraftHorse convention's value is only the bridge — declaring that DraftHorse prose is subject to that rule-set plus the one genuinely DraftHorse-specific claim: agents inside DraftHorse guardrails don't need Why, because the conditions and funnels carry the justification. That last claim is new and good; the rest is a pointer.
 
-Suggestions: write the convention as two sentences — the DraftHorse-specific claim ("guardrails replace justification: inside a DraftHorse document, instruct the How; the conditions carry the Why") plus a citation to durable-documents.md for the defect catalogue. Re-listing the four defects in conventions.md would violate this file's own first convention.
+Suggestions: write the convention as two sentences — the DraftHorse-specific claim ("guardrails replace justification: inside a DraftHorse document, instruct the How; the conditions carry the Why") plus a citation to durable-documents.md for the defect catalogue. Re-listing the four defects in conventions.md would violate this file's own first convention. **REJECTED — see decision.**
 
 Questions: is "instruct the How, not the Why" absolute? Steps.md itself currently explains Why in several load-bearing places (e.g. why start conditions exclude half-applied states — "invites a destructive re-run"). I'd argue a one-clause consequence attached to a rule is not "explaining why", it's the test that makes the rule checkable — worth saying so, or reviewers will strip the tests out.
 
@@ -145,7 +145,15 @@ Suggestions: conventions lead to rules placement. it is the resolution of that c
 
 ### decision
 
-— Keeps as is.
+— The conventions.md TODO block's own bullets are the convention, promoted as written. The two-sentence + pointer suggestion is rejected: the four defects are named in conventions.md directly, and `Remove no-ops` is deleted as absorbed by the *No-op* bullet. "Instruct the How, not the Why" is preferred, not absolute — a one-clause consequence that makes a rule checkable is a test, not a Why violation. This does not breach Single source of truth: a convention resolves into rules, and rules sit outside the SSoT convention — SSoT governs within DraftHorse documents, not where runtime artifacts reflect the docs.
+
+The landed text (conventions.md):
+
+- **Sharp Prose** — Agent decision burden is reduced using DraftHorse. Keep prose sharp and to the point. Do not use:
+    - *Why* — Agents don't need to know "why" they need to do something if they have been given adequate DraftHorse guardrails / funnels.
+    - *Unreachable Meanings* — Context evident in the current session, but confusing outside. Future readers cannot reach the session-specific meanings.
+    - *Negative mirrors* — a negative restated after a positive affirmation. Says the same thing but in reverse.
+    - *No-op* — Restating what an agent already does by default. Sharp prose changes behaviour.
 
 ## 8. Naming, not Explaining
 
@@ -249,6 +257,10 @@ Questions: what drew you to "utilities" — is the intended sense "the working m
 
 — Keep "Utilities", defined by the house metaphor: utilities are the active systems of the house (power, water, internet) as distinct from the structure — frontmatter, invariants, references, steps, terms, and handovers are all live systems. The metaphor must appear as the definition sentence in scaffold.md. Open: the count ("five parts" → six utilities with Handovers joining) and the segment-divider asymmetry (handovers have no body segment) — settle when editing scaffold.md.
 
+### decision — AMENDED (scaffold.md session)
+
+— **The house metaphor is NOT written into scaffold.md.** It did its job as the reasoning that settled the word, and it stays on the record here for that purpose; it earns nothing in the document itself. Spelling out "power, water, internet" to a reader who is about to read a list of five plainly-named utilities explains what the list already shows. The definition sentence is now: *"The document's utilities are intuitive so that they need not be expressed to a new reader."* The count is settled at five (handover is a dynamic reference, not a peer utility — see [plan-utilities-term.md](plan-utilities-term.md)), and the segment asymmetry dissolved with the word "segment".
+
 ## 14. DraftHorse rule set (extensions/rules/DraftHorse.md)
 
 What it is: a planned consumer-facing rule — the operator's guide — so an agent handed a DraftHorse document knows how to navigate and run it: utilities overview, notation overview, step-handling dynamics, handover-handling dynamics, consumer conventions.
@@ -286,3 +298,15 @@ sure keep the discipline, adopt the framing.
 ### decision
 
 — Keep the discipline, adopt the framing. Three limits stay verbatim; the definition widens to the intent level ("run state the document could not decide in advance, resolved by the agent's judgment while the step is in play") with scope/shape and reference flip/flop shown as instances. A Decision must resolve to a named fact — "a decision was made" is banned as a finished condition. No real excluded case exists, so this is a wording widen, not a semantic one.
+
+## 16. Terms `:` notation deprecated
+
+What it is: the term-definition form `: **Term**: <meaning>` — a leading colon marking a definition-list entry, a trailing colon separating name from meaning. Mandated at notation.md:25 ("`:` prefix — a term definition in the Terms section"), scaffold.md:43 ("defined with the `:` form"), and spec-check:51 → saddler:50 ("term entries use the `:` definition prefix"). In service in classroom, versioning, git-box, all three git skills, and both templates.
+
+Raised: during the wave-1 notation session, while executing [plan-reference-notation.md](plan-reference-notation.md) §17 — an item that asks to *restore* the prefix in classroom on the reading that classroom is the lone outlier. The survey behind that item was wrong: classroom carries the prefix like everything else. With the premise gone, the item was reconsidered from scratch and the notation itself put in question.
+
+Verdict: **deprecate.** The `:` form is a notation with no job. It marks a list entry as a definition — but the Terms section is already a glossary under a `# --- TERMS ---` divider, so the marking says what the location has said. It is the only place in DraftHorse where a bolded named list entry takes a special shape; conventions, references, notation's own entries, and every in-step list use `- **Name** — meaning`. That inconsistency is load: one more marking to teach, to check, and to get wrong, buying nothing a cold reader did not already have.
+
+### decision
+
+— Deprecate the `:` prefix and the trailing-colon form. Term entries become standard bolded list entries: `- **Term** — <meaning>`, the house shape for every named list entry. Title Case term names are UNAFFECTED and stay mandated (notation.md:26), as does Title Case on References entries — only the `:` notation is dropped. [plan-reference-notation.md](plan-reference-notation.md) §17 is void: classroom needs no restoration, and is a de-prefixing site like every other skill. Executed by [plan-terms-notation.md](plan-terms-notation.md).

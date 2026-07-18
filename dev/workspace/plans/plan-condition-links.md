@@ -9,7 +9,7 @@ Ban `**AND**`. A plain `- <condition>` list is implicitly conjunctive. `**OR the
 ## Work
 
 - `docs/drafthorse/framework/notation.md` — rewrite the "Condition links" entry (line 11–13): remove `**AND**`, state implicit-AND semantics, give the canonical `**OR these are true:**` form with one example; fixes the comma-splice defect at line 13 in passing.
-- `extensions/skills/drafthorse/assets/SKILL-template.md` — already demonstrates the form (lines 74–88); verify both condition blocks conform, no other change.
+- `extensions/skills/drafthorse/assets/SKILL-template.md` — does NOT conform after all; two edits, wave 3. (a) Lines 76 and 86 indent the separator as a list-continuation line under the preceding bullet (`  **OR these are true:** (optional)`), which markdown parses as a child of that condition rather than as a divider between two lists. The canonical form decided in the notation session is a standalone line with blank lines either side; migrate both blocks. (b) Line 90 reads `#### Agent Decision:` — canonical is `#### Agent decision:` (steps.md:52); rides the [plan-machinery-headings.md](plan-machinery-headings.md) sweep.
 - `extensions/skills/drafthorse/references/condition-writing.md` — the conditions authoring guide never mentions the notation (call-sites gap §5); add the implicit-AND + OR-separator rule with the same example.
 
 ## Dependencies

@@ -4,7 +4,7 @@ Status: Ready. Sources: concept 13. Decision in [new-concepts-discussion.md](new
 
 ## Decision
 
-"Utilities" is KEPT and becomes the single collective noun, defined by the house metaphor: utilities are the active systems of the house (power, water, internet) as distinct from the structure — frontmatter, invariants, references, steps, and terms are all live systems coming together in unison. The metaphor MUST appear as the definition sentence in scaffold.md, or the word re-triggers the "optional tools" misreading in every future reader.
+"Utilities" is KEPT and becomes the single collective noun. The house metaphor (utilities are the active systems of the house — power, water, internet — as distinct from the structure) is the reasoning that settled the word and stays on the record in the discussion doc, but it is **NOT written into scaffold.md**: AMENDED in the scaffold.md session, reversing "the metaphor MUST appear as the definition sentence". Explaining the word to a reader who is about to read a list of five plainly-named utilities tells them what the list already shows, and the feared "optional tools" misreading does not survive contact with that list. The definition sentence is: *"The document's utilities are intuitive so that they need not be expressed to a new reader."*
 
 Three points settled:
 
@@ -14,9 +14,9 @@ Three points settled:
 
 ## Work
 
-- `docs/drafthorse/framework/scaffold.md` — opening paragraph: house-metaphor definition sentence, "five parts" → five utilities. Delete the second paragraph wholesale (it exists only to assign the segment words). Heading/list alignment: `## DraftHorse Utilities` now sits over a list the prose agrees with. Per-utility prose drops its segment nouns: `## Frontmatter — the declaration segment` (line 15), the References section's "The data segment." opener (line 35), and the list entries at lines 9 and 11.
-- `docs/drafthorse/framework/notation.md` — line 22: "the segment dividers of the scaffold" → the scaffold's dividers.
-- `docs/drafthorse/framework/conventions.md` — line 32: "the data segment holds…" → the References utility holds.
+- [x] `docs/drafthorse/framework/scaffold.md` — DONE. Opening paragraph: definition sentence (see the amendment above — no metaphor), "five parts" → five utilities. Second paragraph deleted wholesale (it existed only to assign the segment words). Heading/list alignment: `## DraftHorse Utilities` now sits over a list the prose agrees with. Per-utility prose dropped its segment nouns: `## Frontmatter — the declaration segment` → `## Frontmatter`, the References section's "The data segment." opener, and the list entries.
+- [x] `docs/drafthorse/framework/notation.md` — DONE (notation session). "the segment dividers of the scaffold" → the scaffold's dividers.
+- [x] `docs/drafthorse/framework/conventions.md` — DONE (conventions session). "the data segment holds…" → the References utility holds.
 - `docs/drafthorse/framework/handover.md` — line 12: "the Steps segment" → the Steps utility.
 - Stale-term sweep (call-sites report §1): `docs/drafthorse/template/SKILL.md` (lines 2, 26), `extensions/skills/drafthorse/assets/SKILL-template.md` (lines 2, 26), `extensions/skills/drafthorse/SKILL.md` (lines 24, 28). spec-check/saddler occurrences (five-parts at :23/:22, segment nouns and `Segment dividers` at :39/:38, plus the audit-step prose) are owned by [plan-spec-check-saddler.md](plan-spec-check-saddler.md).
 - DO NOT sweep `extensions/skills/versioning/SKILL.md:178` — "resolve the `../` segments" is path segments, an unrelated sense.
