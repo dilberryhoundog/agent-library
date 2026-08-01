@@ -80,11 +80,11 @@ The payload is present at the root and its config files still hold unfilled brac
 
 #### Step finished when these are true:
 
-`CLAUDE.md`'s bracketed fields (family/classroom name, working-outputs location) are filled from the user and resolved prompts deleted, and `global-requirements.md` is either filled with the user or explicitly flagged to them as a starter to complete before the first build.
+`CLAUDE.md`'s bracketed fields (family/classroom name, working-outputs location) are filled from the user and resolved prompts deleted, `global-requirements.md` is either filled with the user or explicitly flagged to them as a starter to complete before the first build, and the optional pre-install of the PDF dependency has been offered and the user's answer taken.
 
 ### Fill the Config:
 
-Fill `CLAUDE.md`'s bracketed fields from a short interview, leaving the learner roster and status notes to populate as work happens. Then fill `global-requirements.md` with the user — its constants (spelling, page size, cost rule, worldview defaults) are read on every build, so they should be real before any document is produced; if the user defers, say plainly that it is an unfinished starter. Learners are added later, not now: when one is needed, read `references/students/_template.md` for the fields and write `students/<name>.md`.
+Fill `CLAUDE.md`'s bracketed fields from a short interview, leaving the learner roster and status notes to populate as work happens. Then fill `global-requirements.md` with the user — its constants (spelling, page size, cost rule, worldview defaults) are read on every build, so they should be real before any document is produced; if the user defers, say plainly that it is an unfinished starter. Learners are added later, not now: when one is needed, read [Template](references/students/_template.md) for the fields and write `students/<name>.md`. Finally, offer the optional pre-install of the PDF dependency — it makes the first conversion fast — and take the user's yes or no.
 
 ## +Warm the PDF Engine
 
@@ -92,12 +92,12 @@ Optionally pre-install the PDF dependency so the first conversion is fast.
 
 #### Start this step when these are true:
 
-The project is configured and the user has asked to pre-install the PDF dependency.
+The project is configured and the user has accepted the offer to pre-install the PDF dependency.
 
 #### Step finished when these are true:
 
-The dependency is installed via the `Warm the PDF Engine` command, or the user has declined and it is left to install itself on first use.
+The dependency is installed via the `Warm the PDF Engine` command.
 
-### Pre-install or Skip:
+### Pre-install:
 
-The `classroom-pdf` MCP server installs its own dependency on first use, so this is optional. If the user wants the first PDF to be fast, run the `Warm the PDF Engine` command; otherwise skip it.
+Run the `Warm the PDF Engine` command. Where it is not run, the `classroom-pdf` MCP server installs its own dependency on first use instead.

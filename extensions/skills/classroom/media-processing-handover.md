@@ -6,8 +6,6 @@ harness-format: DraftHorse, Handover
 
 Supply verified, fallback-backed media links for the concepts in a build that includes media. A parent step folds this in whenever a build needs media (currently video).
 
-Dead links are a common failure mode for media-based lessons, and a dead link mid-lesson on patchy signal has no quick fix — which is why every link is verified live and never stands alone.
-
 # Agent Invariants
 
 **NEVER** invent a URL or assume one from memory — every link is confirmed against a live search before it is used.
@@ -25,7 +23,7 @@ c. A hardcoded `watch?v=` link — only when verified and from a large, stable s
 ## Vetted Channel Database
 
 === the growing list of reliable channels, by area ===
-`references/vetted-video-channels.md` — pre-vetted channels to prefer when sourcing links. External data that grows over time; load it when building a candidate set.
+[Vetted Video Channels](references/vetted-video-channels.md) — pre-vetted channels to prefer when sourcing links. External data that grows over time; load it when building a candidate set.
 
 ## Standing Note for a Media Library Page
 

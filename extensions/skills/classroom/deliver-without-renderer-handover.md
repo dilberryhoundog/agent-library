@@ -6,8 +6,6 @@ harness-format: DraftHorse, Handover
 
 Deliver a finished classroom document as a print-ready file when the `html_to_pdf` tool is unavailable on this host, so a build is not blocked by a missing PDF engine. A parent step folds this in whenever a document is ready but the renderer cannot run.
 
-The document shells carry no page geometry of their own — the `html_to_pdf` tool injects it from `print-base.css` at conversion. So a shell handed straight to a browser prints with no margins, no page breaks, and the wrong sheet size. The fix is to do by hand what the tool does automatically: inline that same geometry into a throwaway delivery copy, and leave the editable `source/` file untouched for when the renderer returns.
-
 # --- REFERENCES ---
 
 ## The Geometry Base

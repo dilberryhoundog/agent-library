@@ -15,7 +15,7 @@ Grade a learner's completed or annotated work for a unit and produce a saved rev
 ## Review Document Template
 
 === the graded per-unit review layout ===
-`templates/documents/review-document.html` — the A4 review shell: per-strand gradings, the evidence behind each grade, strengths, and specific next-step recommendations. Distinct from `templates/documents/competency-report.html`, which is a light end-of-course summary rather than a per-unit graded review. Fill every bracketed field; repeat strand rows as needed; keep the A4 house style (Lexend, clean print).
+[Review Document](templates/documents/review-document.html) — the A4 review shell: per-strand gradings, the evidence behind each grade, strengths, and specific next-step recommendations. Distinct from `templates/documents/competency-report.html`, which is a light end-of-course summary rather than a per-unit graded review. Fill every bracketed field; repeat strand rows as needed; keep the A4 house style (Lexend, clean print).
 
 # --- STEPS ---
 
@@ -53,7 +53,7 @@ The unit has been assessed strand by strand and no review document has been prod
 
 #### Step finished when these are true:
 
-The `templates/documents/review-document.html` shell has been filled with the assessment and delivered as a saved document per the `Document Pipeline`.
+The `Review Document Template` shell has been filled with the assessment and delivered as a saved document per the `Document Pipeline`.
 
 ### Fill and Save:
 

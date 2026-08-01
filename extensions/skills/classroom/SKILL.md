@@ -11,14 +11,13 @@ Assemble home-education materials tailored to a specific learner and the family'
 
 # Agent Invariants
 
-**ALWAYS** use the spelling convention and page size declared in `global-requirements.md` (or a student-file override) on every printable — read the value, never assume it.
+**ALWAYS** use the spelling convention and page size declared in `global-requirements.md` (or a student-file override) on every printable — read the value.
 **NEVER** add or strip worldview or content framing the user has not asked for — read the student and `global-requirements.md` files and follow them, in both directions.
 
 # --- REFERENCES ---
 
 ## Storage Model
 
-<!-- used implicitly via the students/, matter/, and CLAUDE.md paths but never cited by name in a step; cite it at first point of use (e.g. +Confirm Classroom Context) or remove after extended use proves it redundant -->
 === Where each piece lives ===
 
 - **Project storage root** — the family's configuration, created once at setup: `global-requirements.md` (standing constants — spelling, page size, cost rule, worldview defaults), `students/` (one file per learner), `CLAUDE.md` (project config + status notes), `.claude/rules/classroom.md` (the static rule that emits the signal below).
@@ -67,7 +66,6 @@ Every conversion returns a report with these fields:
 
 ## House Style
 
-<!-- not cited anywhere, remove after extended use and verifiable redundant -->
 === the printable look, held in the shells ===
 Lexend body font, A4, colour-coded annotation margin, dotted write-lines, clean page breaks — carried by the `templates/documents/` shells. Keep new documents consistent with it.
 
@@ -97,15 +95,15 @@ The classroom signal is confirmed present, or a classroom has just been bootstra
 
 #### Suggested next actions:
 
-With a classroom confirmed, establish who the work is for.
+With a classroom confirmed, establish who the work is for; where the user declined to set one up, conclude the run.
 
 #### Step invariants:
 
-**DO NOT** write build or config files into a directory whose classroom context is unconfirmed.
+**DO NOT** write into a directory whose classroom context is neither confirmed nor being bootstrapped with the user's consent.
 
 ### Confirm or Bootstrap:
 
-Check for the [Classroom Signal](#classroom-signal) in your loaded context. If it is present, a classroom is set up here — proceed. If it is absent, do not assume the current folder is the classroom or scatter files into it: ask the user whether this working directory is the intended classroom project root (they may need to relaunch there), or whether they want to set one up here now.
+Check for the [Classroom Signal](#classroom-signal) in your loaded context. If it is present, a classroom is set up here — proceed. If it is absent, ask the user whether this working directory is the intended classroom project root (they may need to relaunch there), or whether they want to set one up here now.
 
 #### Bootstrap a Classroom:
 
@@ -129,7 +127,7 @@ For a mark-work intent, mark the completed work; for a build, gather the subject
 
 ### Establish Who and What:
 
-Identify the learner and read the relevant file(s) in the project's `students/`, the project's `global-requirements.md`, and the prior status notes in `CLAUDE.md`; search the earlier conversation for an existing course. Do not ask for anything already held in those files or the conversation. If the learner has no file yet, offer to create one under the project's `students/` using the field definitions in [Template](references/students/_template.md) (with [Example Learner](references/students/example-learner.md) as a worked example of a filled profile). Settle with the user what the run is for — a new build, continuing a course, or marking completed work — so the right work follows.
+Read the [Storage Model](#storage-model) for where each piece lives. Identify the learner and read the relevant file(s) in the project's `students/`, the project's `global-requirements.md`, and the prior status notes in `CLAUDE.md`; search the earlier conversation for an existing course. Do not ask for anything already held in those files or the conversation. If the learner has no file yet, offer to create one under the project's `students/` using the field definitions in [Template](references/students/_template.md) (with [Example Learner](references/students/example-learner.md) as a worked example of a filled profile). Settle with the user what the run is for — a new build, continuing a course, or marking completed work — so the right work follows.
 
 ## +Mark Completed Work
 
@@ -141,7 +139,7 @@ The run's intent is to mark completed work the user has supplied, and no review 
 
 #### Step finished when these are true:
 
-A review has been produced and saved for the supplied work.
+A review has been produced for the supplied work and its saved location is known.
 
 #### Suggested next actions:
 
@@ -207,11 +205,11 @@ Produce one unit's documents to the governing format — the shared assembly wor
 
 #### Start this step when these are true:
 
-A unit — the sample or a subsequent one — needs its documents, they are not yet assembled to the governing format, and the unit is not left half-built by a prior failed attempt (which the error step claims first).
+A unit — the sample or a subsequent one — needs its documents and they are not yet assembled to the governing format.
 
 #### Step finished when these are true:
 
-The unit's documents are built from the chosen shapes, every concept's media verified or marked no-suitable-media, each document's HTML written to `source/` and converted to A4 PDF whose conversion report matches the document's intent — sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected (`standard` unless the document declares its own `@page`), and no unresolved layout flags — and the result satisfies the invariants.
+The unit's documents are built from the chosen shapes, every concept's media verified or marked no-suitable-media, each document's HTML written to `source/` and delivered — either converted to A4 PDF whose conversion report matches the document's intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected — `standard` unless the document declares its own `@page` — and no unresolved layout flags), or handed over as a print-ready standalone where the renderer cannot run — and the result satisfies the invariants.
 
 #### Step invariants:
 
@@ -219,7 +217,7 @@ The unit's documents are built from the chosen shapes, every concept's media ver
 
 ### Assemble the Documents:
 
-List [Documents](templates/documents/) and copy the shells the deliverable calls for, filling them and inserting components from [Blocks](templates/blocks/) where the lesson shape calls for them, sizing each page's content to the usable content box the conversion report states rather than by trial and error. Apply the [Pedagogy](references/pedagogy/) file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow [Media Processing — Handover](media-processing-handover.md) to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
+List [Documents](templates/documents/) and copy the shells the deliverable calls for, filling them to the [House Style](#house-style) and inserting components from [Blocks](templates/blocks/) where the lesson shape calls for them, sizing each page's content to the usable content box the conversion report states rather than by trial and error. Apply the [Pedagogy](references/pedagogy/) file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow [Media Processing — Handover](media-processing-handover.md) to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
 Produce each document per the `Document Pipeline`. When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before it moves on.
 
 ## +Deliver Without the Renderer
@@ -248,7 +246,7 @@ Produce a sample and get its format approved before mass production.
 
 #### Start this step when these are true:
 
-The shapes are chosen and, for a build larger than a single lesson, no current sample format is approved.
+The shapes are chosen, the build is larger than a single lesson, and no current sample format is approved.
 
 #### Step finished when these are true:
 
@@ -260,7 +258,7 @@ With the format approved, build the remaining units.
 
 ### Build the Sample:
 
-Produce the scope-and-sequence (`templates/documents/scope-and-sequence.html`) and get one complete sample unit built, then present both and get the user's explicit approval of the format. A format error is cheap to fix at unit 1 and expensive at unit 40, so do not move on without that approval. For a single-lesson build there is nothing to mass-produce: the one lesson is the deliverable.
+Produce the scope-and-sequence from [Scope And Sequence](templates/documents/scope-and-sequence.html) and get one complete sample unit built, then present both and get the user's explicit approval of the format.
 
 ## +Build Remaining Units
 
@@ -284,7 +282,7 @@ Present and record what each response produced.
 
 ### Build to the Approved Format:
 
-Get each remaining unit built, matching the approved sample exactly. A full course cannot be produced in one response — build unit by unit across responses, presenting and recording progress as you go. If the user revises the format after approving it, the approval no longer holds: return to the sample so the new format is approved before building continues.
+Get each remaining unit built, matching the approved sample exactly. A full course cannot be produced in one response — build unit by unit across responses, presenting and recording progress as you go. A format the user revises after approving it is no longer an approved format.
 
 ## +Present and Record State
 
@@ -292,7 +290,7 @@ Save what a response produced, update the project's status, and report honestly.
 
 #### Start this step when these are true:
 
-A build or mark response has produced deliverables that have not yet been saved and recorded.
+A build or mark response has produced deliverables that are not yet recorded in the `CLAUDE.md` status notes and presented to the user.
 
 #### Step finished when these are true:
 
