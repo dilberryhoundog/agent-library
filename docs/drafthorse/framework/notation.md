@@ -12,7 +12,7 @@ Notation is the small set of markings DraftHorse layers on top of plain markdown
 
 - A condition block is a markdown list, and every condition is its own list item.
 - A condition list is implicitly conjunctive — every condition in the list holds. `**AND**` is implied, not written.
-- `**OR these are true:**` — the sole separator, standing on its own line between two condition lists to make them alternatives. Each list ANDs within itself; the lists OR against each other. No precedence rules exist.
+- `**OR these are true:**` — the sole separator, standing on its own line between two condition lists. Each list ANDs within itself; either list satisfied on its own satisfies the block. No precedence rules exist.
 
 ```
 #### Start this step when these are true:

@@ -36,8 +36,8 @@ Mechanical form checks — each is pass/fail by inspection:
 - **Machinery headings** — `#### Start this step when these are true:` and `#### Step finished when these are true:` present on every step, in that order; `#### Agent decision:`, `#### Suggested next actions:` and `#### Step invariants:` optional, in that order after them. All H4, exact wording.
 - **Engagement heading** — one H3 named for the work opens each step's body, below the machinery; the work may structure itself with H4 sub-headings of its own.
 - **Invariant form** — every invariant (global or step-scoped) is a bolded capitalised imperative keyword followed by its rule (`**DO NOT** …`, `**ALWAYS** …`, `**NEVER** …`; the keyword family is open). Nothing that is not a rule may wear the bold-caps form.
-- **Condition block shape** — the conditions to start or finish a step are always a markdown list, one condition per list item, separated if necessary by the `**OR these are true:**` separator. A paragraph or prose-based statement is a finding.
-- **Condition links** — a condition list is implicitly conjunctive; `**AND**` is never written and its presence is a finding. The sole separator is `**OR these are true:**`, exact wording, standing on its own line between two condition lists.
+- **Condition block shape** — the conditions to start or finish a step are always a markdown list, one condition per list item. A paragraph or prose-based statement is a finding.
+- **Condition links** — a condition list is implicitly conjunctive; `**AND**` is implied, not written and its presence is a finding. The sole list separator is `**OR these are true:**`, exact wording, standing on its own line between alternative condition lists, where either list satisfied on its own satisfies the step.
 - **Dividers** — exactly `# --- REFERENCES ---`, `# --- STEPS ---`, `# --- TERMS ---`.
 - **Preamble verbatim** — the steps section opens with a preamble copied unchanged. **Two preambles are legitimate**; a document is checked against the one that fits it, and the wrong one is a finding. A skill or agent document takes the universal preamble:
 
@@ -134,7 +134,7 @@ The conditions carry all the routing a wired graph would; a weak condition is a 
 - **Agent decisions** — an `#### Agent decision:` block holds a choice that governs the step's scope or shape (what it targets, how many times it runs), resolved before the engagement can be performed. Three limits hold it in place: it carries no work, it carries no routing between steps, and it resolves to a fact the step's own finished condition depends on. Failing any of the three, it is engagement prose or a start condition under the wrong heading. It must resolve to a **named fact** — "a decision was made" never satisfies the finished condition that depends on it. A genuine bounded fork inside the work — neither branch changing what the step targets — stays in the engagement as plain prose. Routing between steps written as an Agent decision is a defect. The block sits with the step's other H4 machinery, above the engagement heading; that placement is correct and is not a finding.
 - **Exit steps present** — a success exit whose start condition is the exhaustive all-done state, and an error step whose start condition claims the remainder (in sense: something has gone wrong, or a situation no other step covers) and whose finish is the user or caller informed and the continuation decided. The wordings here are the required **sense, not required text** — a document that adds concrete examples to its error step's condition is sharper, not divergent. The error step's engagement surfaces what happened, where, the current state, and the options.
 - **Half-applied state bails to the user** — a step that fails partway leaves work neither undone nor complete, and the error step is its single disposition: the engagement accounts for what was applied and what was not, reports it to the user with a recommended fix, and ends the run. Three findings sit here: an error step that surfaces failure without accounting for partial application, a step whose engagement resumes over its own partial work, and a start condition carrying a half-applied exclusion clause — the disposition in the wrong home.
-- **Executor exception** — an executor document may fold the error drain into its reporting step; the reporting step's start condition must then claim the remainder explicitly ("…or a failure has ended the run"). Folding without the explicit claim is a finding.
+- **Executor exception** — an executor document may fold the error drain into its reporting step; the reporting step must then claim the remainder explicitly, as an alternative block in its start condition ("a failure has ended the run"). Folding without the explicit claim is a finding.
 - **Handover exception** — where a step folds in a handover, the flow must start at the parent step, run the handover's steps as its child steps, and end back at the parent step — the parent step's own start and finished conditions route the agent in and out. A handover whose flow exits anywhere other than back to its parent step is a finding.
 
 ## Reference Checks
@@ -196,11 +196,19 @@ Resolve the document under review and gather everything it cites.
 
 #### Start this step when these are true:
 
-A review has been requested and the document set is not yet assembled.
+- a review has been requested
+- the document set is not yet assembled
 
 #### Step finished when these are true:
 
-The named document is read in full, every external file it cites is read or recorded as missing, the handover set is resolved from both the `*-handover.md` glob and the document's citations, and the set is confirmed to be a DraftHorse document (stamp and dividers present) — or the run is recorded as unable to proceed (path unresolvable, or the document is not DraftHorse-shaped).
+- the named document is read in full
+- every external file it cites is read or recorded as missing
+- the handover set is resolved from both the `*-handover.md` glob and the document's citations
+- the set is confirmed to be a DraftHorse document (stamp and dividers present)
+
+**OR these are true:**
+
+- the run is recorded as unable to proceed (path unresolvable, or the document is not DraftHorse-shaped)
 
 #### Suggested next actions:
 
@@ -220,11 +228,15 @@ Lint the structure: scaffold order, notation form, frontmatter fit.
 
 #### Start this step when these are true:
 
-The document set is assembled and the frame has not been checked.
+- the document set is assembled
+- the frame has not been checked
 
 #### Step finished when these are true:
 
-Every test in [Scaffold Checks](#scaffold-checks), [Notation Checks](#notation-checks) and [Frontmatter Checks](#frontmatter-checks) has been applied to the document and each failure recorded as a finding.
+- every test in [Scaffold Checks](#scaffold-checks) has been applied to the document
+- every test in [Notation Checks](#notation-checks) has been applied to the document
+- every test in [Frontmatter Checks](#frontmatter-checks) has been applied to the document
+- each failure is recorded as a finding
 
 ### Lint:
 
@@ -236,15 +248,20 @@ Judge the References utility: placement, citation, and hidden work.
 
 #### Start this step when these are true:
 
-The document set is assembled and the references (inline and external) have not been audited.
+- the document set is assembled
+- the references (inline and external) have not been audited
 
 #### Step finished when these are true:
 
-Every test in [Reference Checks](#reference-checks) has been applied to every reference in the set — every embedded-work tell weighed, every citation's moment verified against what the cited file holds, dead weight and missing data flagged — and each failure recorded as a finding.
+- every test in [Reference Checks](#reference-checks) has been applied to every reference in the set
+- every embedded-work tell is weighed
+- every citation's moment is verified against what the cited file holds
+- dead weight and missing data are flagged
+- each failure is recorded as a finding
 
 ### Sweep the Data:
 
-Work through the References segment entry by entry, then each external file. The embedded-work sweep is the heart of this step: hunt the tells in every piece, and weigh each hit — is this inert data an agent reads, or work an agent does? Cross-check citations both ways: from each step out to what it cites, and from each reference back to the step moments that use it.
+Work through the References segment entry by entry, then each external file. The embedded-work sweep is the heart of this step: grep each file for the tells — ordered actions, conditionals, interaction, judgment calls — then weigh each hit by reading around it: is this inert data an agent reads, or work an agent does? Cross-check citations both ways: from each step out to what it cites, and from each reference back to the step moments that use it.
 
 ## +Audit the Steps
 
@@ -252,11 +269,14 @@ Judge every step's contract and shape against the condition and step-shape check
 
 #### Start this step when these are true:
 
-The document set is assembled and the steps have not been audited.
+- the document set is assembled
+- the steps have not been audited
 
 #### Step finished when these are true:
 
-Every test in [Condition Checks](#condition-checks) and [Step-Shape Checks](#step-shape-checks) has been applied to every step — including the exit steps and the error drain — and each failure recorded as a finding.
+- every test in [Condition Checks](#condition-checks) has been applied to every step, including the exit steps and the error drain
+- every test in [Step-Shape Checks](#step-shape-checks) has been applied to every step, including the exit steps and the error drain
+- each failure is recorded as a finding
 
 ### Test Each Step:
 
@@ -268,11 +288,19 @@ Walk every handover in the set against the handover-specific checks and its pair
 
 #### Start this step when these are true:
 
-The document set is assembled, a handover is present in it — cited by the document, discovered by the `*-handover.md` glob, or the reviewed document is itself a handover — and the handovers have not been audited.
+- the document set is assembled
+- a handover is present in it — cited by the document, discovered by the `*-handover.md` glob, or the reviewed document is itself a handover
+- the handovers have not been audited
 
 #### Step finished when these are true:
 
-Every test in [Handover Checks](#handover-checks) has been applied to every handover in the set — the three signals verified, the identity paragraph checked, globals checked against the parent document and the parent step only, tool use swept into the parent's permission check, and each citation's pairing tested against its parent step's start and finished conditions — and each failure recorded as a finding labelled by the file it lands on.
+- every test in [Handover Checks](#handover-checks) has been applied to every handover in the set
+- the three signals are verified on each handover
+- each handover's identity paragraph is checked
+- each handover's globals are checked against the parent document and the parent step only
+- each handover's tool use is swept into the parent's permission check
+- each citation's pairing is tested against its parent step's start and finished conditions
+- each failure is recorded as a finding labelled by the file it lands on
 
 #### Suggested next actions:
 
@@ -294,11 +322,17 @@ Run the document in the head: every realistic path, watching the in-play set.
 
 #### Start this step when these are true:
 
-The frame, references, and steps have all been audited; the handovers have been audited or the set contains none; and no scenario-walk has been completed.
+- the frame has been audited
+- the references have been audited
+- the steps have been audited
+- the handovers have been audited or none are present
+- no scenario-walk has been completed
 
 #### Step finished when these are true:
 
-Every realistic run is walked — the happy path, each decision branch, each loop iteration, each gate refusal and revocation, each failure entry — and at every point the set of in-play steps has been compared against the intended one, with every stall, mis-route, unclaimed state, and unintended overlap recorded as a finding.
+- every realistic run is walked — the happy path, each decision branch, each loop iteration, each gate refusal and revocation, each failure entry
+- at every point the set of in-play steps has been compared against the intended one
+- every stall, mis-route, unclaimed state, and unintended overlap is recorded as a finding
 
 ### Walk:
 
@@ -310,15 +344,16 @@ Present the audit's outcome — the exit for clean runs, defective documents, an
 
 #### Start this step when these are true:
 
-The scenario-walk is complete and all findings are recorded, or a failure (unresolvable path, a document that is not DraftHorse-shaped) has ended the run.
+- the scenario-walk is complete
+- all findings are recorded
+
+**OR these are true:**
+
+- a failure (unresolvable path, a document that is not DraftHorse-shaped) has ended the run
 
 #### Step finished when these are true:
 
-A report in the [Report Format](#report-format) — verdict, scenario-walk account, every recorded finding with its check name and fix direction — is returned as the final message; an ended run's report states plainly why the review could not proceed.
-
-#### Suggested next actions:
-
-Finish the review and return to the caller.
+- a report in the [Report Format](#report-format) — verdict, scenario-walk account, every recorded finding with its check name and fix direction, or a plain statement of why the review could not proceed — is returned as the final message
 
 ### Compose:
 
