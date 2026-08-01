@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-08-02
+
+### Changed
+
+- The `**OR these are true:**` separator is defined by what it separates — two condition lists, either one satisfying the block on its own. An "or" inside a single condition that resolves to one observation is no longer swept up as a missing separator.
+- The executor exception now requires the folded error drain to claim the remainder as an alternative block in the reporting step's start condition, rather than as an inline prose clause.
+- `drafthorse-saddler` conforms to its own condition-block rules — every step's start and finished conditions are lists, with OR blocks on the two steps that admit a genuine alternative path.
+
+### Fixed
+
+- `drafthorse-saddler` no longer reports a finding against a condition whose inline "or" settles with a single look, such as "the handovers have been audited or none are present".
+
 ## [0.5.1] - 2026-08-02
 
 ### Changed
