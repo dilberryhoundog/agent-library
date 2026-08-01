@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-01
+
+### Added
+
+- DraftHorse ships a `HANDOVER-template.md` fill-in scaffold for authoring handover documents, alongside the existing SKILL template.
+- Every DraftHorse document now carries a `harness-format: DraftHorse` frontmatter stamp (handovers: `harness-format: DraftHorse, Handover`), replacing the old `type: handover` marker.
+
+### Changed
+
+- DraftHorse machinery headings renamed: `#### Start this step when:` → `#### Start this step when these are true:`, `#### Do this next:` → `#### Suggested next actions:`, `#### Decision:` → `#### Agent decision:`, `#### Invariants:` → `#### Step invariants:`.
+- Terms are now written as a bulleted `- **Term** —` list instead of the `: **Term**:` definition form.
+- Handover documents are filed at the skill root as `*-handover.md` rather than inside `references/`, and "master step" is now "parent step" throughout.
+- `drafthorse-saddler` audits against the upgraded spec — documents authored under 0.4.0 notation will produce findings on their next audit and need revising to the new forms.
+
 ## [0.4.0] - 2026-07-13
 
 ### Added

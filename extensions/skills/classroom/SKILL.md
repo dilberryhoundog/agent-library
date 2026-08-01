@@ -60,9 +60,9 @@ Inline SVG diagrams clip at the `viewBox` edge — leave room inside the box for
 === the conversion report ===
 Every conversion returns a report with these fields:
 
-- **Print mode** — `standard` when the document inherits the house geometry, `customised` when its own `@page` overrides the base (the report also names which properties it overrode).
+- **Print mode** — `standard` when the document inherits the Page Geometry, `customised` when its own `@page` overrides the base (the report also names which properties it overrode).
 - **Sheets** — the PDF's page count. The shells lay out one sheet per `.page` box (a `.bleed` is one full-bleed sheet), so a document's intended count is the number of those boxes; a report showing more means content overflowed onto an extra sheet — the failure that is invisible in the HTML.
-- **Content box** — the usable area per sheet in the house geometry (present in `standard` mode), so how many cards or questions fit is arithmetic rather than trial and error.
+- **Content box** — the usable area per sheet in the Page Geometry (present in `standard` mode), so how many cards or questions fit is arithmetic rather than trial and error.
 - **Flags** — layout facts to weigh: a near-empty or sparse sheet, one whose size is not the expected one, an element wider than the content box (named by its selector, to find in source), or an SVG drawing outside its `viewBox`.
 
 ## House Style
@@ -105,7 +105,7 @@ With a classroom confirmed, establish who the work is for.
 
 ### Confirm or Bootstrap:
 
-Check for the `Classroom Signal` in your loaded context. If it is present, a classroom is set up here — proceed. If it is absent, do not assume the current folder is the classroom or scatter files into it: ask the user whether this working directory is the intended classroom project root (they may need to relaunch there), or whether they want to set one up here now.
+Check for the [Classroom Signal](#classroom-signal) in your loaded context. If it is present, a classroom is set up here — proceed. If it is absent, do not assume the current folder is the classroom or scatter files into it: ask the user whether this working directory is the intended classroom project root (they may need to relaunch there), or whether they want to set one up here now.
 
 #### Bootstrap a Classroom:
 
@@ -350,7 +350,7 @@ Tell the user plainly what happened, which step it arose in, what state the buil
 
 - **Matter** — A course's saved source material, held at `<course>/matter/` — what the user supplied and any grounding research, kept as a permanent record the build reads.
 - **Shape** — A course structure or lesson structure chosen from the `templates/course-structures/` and `templates/lesson-structures/` folders; more than one may govern a single build.
-- **House Geometry** — The page geometry the `html_to_pdf` tool injects from `print-base.css`. The base every document inherits unless it declares its own `@page` to override it.
+- **Page Geometry** — The CSS print geometry the `html_to_pdf` tool injects from `print-base.css`. The base every document inherits unless it declares its own `@page` to override it.
 - **Handover Doc** — A standalone document in this skill's root folder, its name ending `-handover` and its frontmatter the single line `harness-format: DraftHorse, Handover`, whose steps a parent step folds into the run as child steps, its references and invariants coming into play for a self-contained portion of the work — lean extraction of heavy, optional, or side-branching work that would otherwise bloat this skill. The parent step owns the logic around it: it reads success from the resulting state and lets any failure fall to the problem step. Cited as `[Name — Handover](name-handover.md)`.
 - **Sample** — The scope-and-sequence plus one complete unit, approved for format before the rest of the course is mass-produced.
 - **Strand** — A learning area a unit covers — one of its subject or skill areas (literacy, science), enumerated from the unit's scope-and-sequence entry and lesson documents. A build may run a different lesson shape per strand, and a review grades the work strand by strand.
