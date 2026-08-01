@@ -1,10 +1,10 @@
 ---
-type: handover
+harness-format: DraftHorse, Handover
 ---
 
 # Classroom Setup (Handover)
 
-Lay the classroom project skeleton down at the current root and fill its config, so ordinary builds have the standing constants and learner files they read. A handover doc — a master step folds this in once it has confirmed the user wants a classroom set up in the current directory. Its steps run as sub-steps of that master step, and its references and invariants come into play for the run; it leans on the master document's tool grants. It routes no success or failure of its own: when its work is done the master step reads the result from the project state, and a failure falls to the master document's problem step.
+Lay the classroom project skeleton down at the current root and fill its config, so ordinary builds have the standing constants and learner files they read. A parent step folds this in once it has confirmed the user wants a classroom set up in the current directory.
 
 # --- REFERENCES ---
 
@@ -42,27 +42,27 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/install-deps.sh"
 
 # --- STEPS ---
 
-> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+> Handovers are child steps of a parent step:
 >
->- Fully meet a step's *step finished when* conditions before considering it done.
->- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
->- If a step cannot be completed, move to the step that handles the condition/error.
->- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
->- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
+>- The parent step reads success from the state the handover leaves behind.
+>- Invoke a child step any time its *start* conditions are met.
+>- If all child steps are *finished* or inactive, return to the parent step and continue.
+>- Error handling is covered by the parent document, unless an optional child problem step is present.
+>- Global invariants apply across the whole parent step; step invariants are confined to the child step.
 
 ## +Copy the Init Payload
 
 Lay the project skeleton down at the root.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The user's consent to set up a classroom in the current working directory is confirmed, and the init payload has not yet been copied to the root.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The payload's whole contents are present at the project root, with any pre-existing `CLAUDE.md` preserved rather than overwritten.
 
-#### Invariants:
+#### Step invariants:
 
 **NEVER** overwrite an existing `CLAUDE.md` at the project root — copy everything else, then merge the classroom config block into it.
 
@@ -74,11 +74,11 @@ Run the `Copy the Payload` command from the project root; it brings the `templat
 
 Turn the copied skeleton into this family's actual config.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The payload is present at the root and its config files still hold unfilled bracket prompts or starter placeholders.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 `CLAUDE.md`'s bracketed fields (family/classroom name, working-outputs location) are filled from the user and resolved prompts deleted, and `global-requirements.md` is either filled with the user or explicitly flagged to them as a starter to complete before the first build.
 
@@ -90,11 +90,11 @@ Fill `CLAUDE.md`'s bracketed fields from a short interview, leaving the learner 
 
 Optionally pre-install the PDF dependency so the first conversion is fast.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The project is configured and the user has asked to pre-install the PDF dependency.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The dependency is installed via the `Warm the PDF Engine` command, or the user has declined and it is left to install itself on first use.
 

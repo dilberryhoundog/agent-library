@@ -1,4 +1,5 @@
 ---
+harness-format: DraftHorse
 name: breaking-change-detector
 description: Semantic review of a git commit range for breaking changes. Judges whether changes would force an existing user of the project to alter something on their side. Use during release preparation to verify or escalate a proposed version bump, or whenever asked if a change is breaking.
 tools: Read, Bash
@@ -125,27 +126,29 @@ or "none">
 
 # --- STEPS ---
 
-> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+> Steps are universal and standalone.
 >
->- Fully meet a step's *step finished when* conditions before considering it done.
->- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
->- If a step cannot be completed, move to the step that handles the condition/error.
->- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
->- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
+>- All their work, instructions and rules are self-contained.
+>- Invoke a step any time its *start* conditions are met.
+>- A step is completed only when all its *finished* conditions are met.
+>- A step that cannot be completed falls to the error drain step.
+>- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
+>- References are inline, using Markdown link styling. Always load a cited reference.
+>- Multiple active steps, looping back, and dormant steps are all valid patterns.
 
 ## +Scope the Review
 
 Take the brief and establish what actually changed.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The review has been requested with a brief carrying a range, paths and a version, and the shape of the diff has not been taken.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The range, the paths and the version are read from the brief — and either the version is a first release, which settles the outcome with nothing to diff, or the diff's shape is taken over a path set that resolves and every changed file is triaged as surface-defining or not, with the triage recorded.
 
-#### Invariants:
+#### Step invariants:
 
 **DO NOT** read file contents in this step. Triage from the diff's shape and the commit log alone — the triage is what earns a file its read.
 
@@ -161,15 +164,15 @@ Triage each changed file against `Contract Surfaces`: can this file define a sur
 
 Read the surface-defining files and classify every change in them.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The diff's shape is taken over a range that diffed, the files are triaged, and no verdict has been derived from them.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 Every surface-defining change carries a classification, a named class, before-and-after evidence, and a stated impact; the verdict and the bump floor are derived from the confident findings alone; and the commit messages have been checked against the diff.
 
-#### Invariants:
+#### Step invariants:
 
 **ALWAYS** carry before-and-after evidence from the diff on every finding — a classification asserted without it is not a finding.
 **NEVER** let uncertainty set the bump floor. An unsettled surface is recorded as uncertain, with what would settle it.
@@ -188,15 +191,15 @@ The verdict is the highest classification among the confident findings, and the 
 
 Return the verdict, or report why there is none.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The verdict is derived — from the classified changes, or from a brief carrying a first release — or something has gone wrong that no other step covers: a brief missing its range, paths or version; a range that will not diff; a path set that matches nothing; a repository state that defeats the review.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The report has been returned as the final message text in `The Report Format`, with uncertain findings listed and excluded from the bump floor — or, on failure, the failure is reported plainly in the same message, naming what was missing or broken and what was and was not examined.
 
-#### Do this next:
+#### Suggested next actions:
 
 End the review. The report is the final message; nothing follows it.
 
@@ -208,7 +211,7 @@ When the review cannot be done at all, say so in place of the verdict: what was 
 
 # --- TERMS ---
 
-: **Brief**: The invocation the review is given — the commit range, the unit's resolved paths, and the unit's current version.
-: **Surface-Defining File**: A changed file that can define a contract surface a user depends on, and so earns a full read.
-: **Revision-Cost Change**: A change that tells the user something new without forcing them to alter anything on their side — the user's next revision round absorbs it.
-: **Bump Floor**: The minimum version bump the verdict requires, which the invoking agent applies over any lower bump derived from commit types.
+- **Brief** — The invocation the review is given — the commit range, the unit's resolved paths, and the unit's current version.
+- **Surface-Defining File** — A changed file that can define a contract surface a user depends on, and so earns a full read.
+- **Revision-Cost Change** — A change that tells the user something new without forcing them to alter anything on their side — the user's next revision round absorbs it.
+- **Bump Floor** — The minimum version bump the verdict requires, which the invoking agent applies over any lower bump derived from commit types.

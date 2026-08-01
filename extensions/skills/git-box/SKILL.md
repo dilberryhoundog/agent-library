@@ -1,4 +1,5 @@
 ---
+harness-format: DraftHorse
 name: git-box
 display-name: Git Box
 description: Use Git Box to route basic git procedures to a background agent. So that important work can continue in the foreground of the main chat.
@@ -84,26 +85,29 @@ Use the `gh MCP` to create the issue. Also check open issues for previously repo
 
 # --- STEPS ---
 
-> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+> Steps are universal and standalone.
 >
->- Fully meet a step's *step finished when* conditions before considering it done.
->- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
->- If a step cannot be completed, move to the step that handles the condition/error.
->- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
+>- All their work, instructions and rules are self-contained.
+>- Invoke a step any time its *start* conditions are met.
+>- A step is completed only when all its *finished* conditions are met.
+>- A step that cannot be completed falls to the error drain step.
+>- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
+>- References are inline, using Markdown link styling. Always load a cited reference.
+>- Multiple active steps, looping back, and dormant steps are all valid patterns.
 
 ## +Gather Context
 
 Collate the request, the git state, and the chat context into a single source of truth.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The skill has been invoked and context has not yet been gathered.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The request is unambiguous, within scope, and carries enough context to write the brief — directly or from the user's clarifications.
 
-#### Invariants:
+#### Step invariants:
 
 **DO NOT** run extra commands or read from the filesystem — the context below is the whole source of truth.
 
@@ -124,11 +128,11 @@ When the request is unclear or ambiguous, ask the user for clarification. When i
 
 Reuse a proven workflow as the brief when one fits the request.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 Context is gathered and the workflow check has not yet run.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 A suitable workflow is adopted as the brief draft, or none matched (including an empty map) and the brief will be written fresh — either way, the workflow check is recorded as complete.
 
@@ -140,15 +144,15 @@ Check the `Workflow Map` reference. When the user's request is similar to a list
 
 Turn the gathered context into a brief for the git-robot agent.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The workflow check has completed and the brief is not yet complete — whether starting fresh or finishing an adopted workflow template.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The brief is formatted per the template and covers the user's whole request.
 
-#### Invariants:
+#### Step invariants:
 
 **DO NOT** add any extra prose or context outside the pre-formatted brief.
 
@@ -170,7 +174,7 @@ The brief is formatted per the template and covers the user's whole request.
 - task overview
 ```
 
-#### Decision:
+#### Agent decision:
 
 `git-robot` has inbuilt logic to split commits into logical groupings, and the brief can also do the splitting by sending each logical commit as its own procedure. Choose by your confidence in the gathered context — if unsure, send the responsibility down to the subagent. Whichever way, ensure each procedure's task overview is adequate for the agent to execute.
 
@@ -178,15 +182,15 @@ The brief is formatted per the template and covers the user's whole request.
 
 Invoke the git-robot agent to execute the brief in the background, and hold the line until it reports back.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A complete brief exists and git-robot has not been invoked with it.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The agent has been invoked, the user informed, and the git-robot report has arrived. An invocation failure is a problem for the `+Help` step.
 
-#### Invariants:
+#### Step invariants:
 
 **DO NOT** mutate any files while this step is in play — from invocation until the report arrives.
 
@@ -200,15 +204,15 @@ Inform the user the agent is working on their request in the background: the con
 
 Relay the git-robot report to the user verbatim.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The git-robot report has arrived and has not yet been presented.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The report is presented unaltered, and the run's outcome is recorded — full success, success worth saving as a workflow, or a run with failures, errors, or process problems.
 
-#### Do this next:
+#### Suggested next actions:
 
 A full success ends the skill — return to the user. A run worth saving moves to saving the workflow; failures, errors, or process problems move to help.
 
@@ -237,19 +241,19 @@ Additional Notes:
 
 Save a commonly repeated, successful request as a workflow for consistency and efficiency.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The report has been presented, the request succeeded, and it represents a repeatable workflow.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The workflow issue is created. The skill is complete.
 
-#### Do this next:
+#### Suggested next actions:
 
 End the skill and return to the user.
 
-#### Invariants:
+#### Step invariants:
 
 **ENSURE** the uploaded brief is sanitised by using `****` to mask sensitive words, or a `<placeholder>` to provide a general idea of the requested procedure. The brief will be publicly viewable on github.
 **DO NOT** convert the brief into a template — upload it as it ran.
@@ -283,15 +287,15 @@ The issue resolver converts the brief into a `workflows/` template and updates t
 
 Handle problems from the run with the user — the step for anything the others don't cover.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The report contains failures or errors, the skill process itself misbehaved (including a failed agent invocation), or a situation has arisen that no other step covers.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The user has been informed and has decided how to continue — fixing together in the main chat, filing an issue, or ending here. The skill is complete.
 
-#### Do this next:
+#### Suggested next actions:
 
 End the skill and return to the user.
 
@@ -304,9 +308,9 @@ End the skill and return to the user.
 
 Terms used in this skill:
 
-: **Request**: The responsibility transfer from the user to claude to the subagent and back. Carries summaries of actions required and taken and the result of those actions.
-: **Procedure**: An atomic, self-contained, collection of instructions relating to a specific git command. The agent knows how to execute the procedures (including actions). They are formatted in capital letters and represented with <PROCEDURE> in templates.
-: **Skill Process**: The agent harness components working in harmony, Includes the skill, the agent, other sub skills called by the agent.
-: **Action**: A fine-tuning event on a procedure. Corresponds with similar git commands. They are represented with <action> in templates, and formatted in lowercase.
-: **Result**: The outcome of a procedure mostly mirrors the output or error messages directly from the git command.
-: **Brief**: The template by which the main agent passes the request to the subagent.
+- **Request** — The responsibility transfer from the user to claude to the subagent and back. Carries summaries of actions required and taken and the result of those actions.
+- **Procedure** — An atomic, self-contained, collection of instructions relating to a specific git command. The agent knows how to execute the procedures (including actions). They are formatted in capital letters and represented with <PROCEDURE> in templates.
+- **Skill Process** — The agent harness components working in harmony, Includes the skill, the agent, other sub skills called by the agent.
+- **Action** — A fine-tuning event on a procedure. Corresponds with similar git commands. They are represented with <action> in templates, and formatted in lowercase.
+- **Result** — The outcome of a procedure mostly mirrors the output or error messages directly from the git command.
+- **Brief** — The template by which the main agent passes the request to the subagent.

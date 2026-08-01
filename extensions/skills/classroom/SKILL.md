@@ -1,4 +1,5 @@
 ---
+harness-format: DraftHorse
 name: classroom
 description: Build tailored homeschooling lessons, unit studies, workbooks, courses and the accompanying teacher/parent materials. Use this skill whenever the user wants to create, extend, or rebuild any home-education resource. Also useful when continuing or adding to a course already built, or helping review/mark completed materials.
 allowed-tools: Task, Read, Write, Edit, Glob, WebSearch, WebFetch, Bash(cp:*), Bash(bash:*), mcp__plugin_classroom_classroom-pdf__html_to_pdf
@@ -72,31 +73,33 @@ Lexend body font, A4, colour-coded annotation margin, dotted write-lines, clean 
 
 # --- STEPS ---
 
-> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+> Steps are universal and standalone.
 >
->- Fully meet a step's *step finished when* conditions before considering it done.
->- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
->- If a step cannot be completed, move to the step that handles the condition/error.
->- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
->- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
+>- All their work, instructions and rules are self-contained.
+>- Invoke a step any time its *start* conditions are met.
+>- A step is completed only when all its *finished* conditions are met.
+>- A step that cannot be completed falls to the error drain step.
+>- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
+>- References are inline, using Markdown link styling. Always load a cited reference.
+>- Multiple active steps, looping back, and dormant steps are all valid patterns.
 
 ## +Confirm Classroom Context
 
 Make sure a classroom project is set up here before building anything.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 Classroom work has been requested and no classroom context is confirmed for the current working directory.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The classroom signal is confirmed present, or a classroom has just been bootstrapped here, or the user has chosen not to set one up — and in that last case nothing has been written.
 
-#### Do this next:
+#### Suggested next actions:
 
 With a classroom confirmed, establish who the work is for.
 
-#### Invariants:
+#### Step invariants:
 
 **DO NOT** write build or config files into a directory whose classroom context is unconfirmed.
 
@@ -106,57 +109,57 @@ Check for the `Classroom Signal` in your loaded context. If it is present, a cla
 
 #### Bootstrap a Classroom:
 
-With their consent to set one up here confirmed, follow `references/setup.md` as a handover doc to lay down and configure the project. When its steps are done, show the user what now exists at the root, then proceed on the classroom signal now being present. If the user would rather relaunch elsewhere or not set one up, nothing is written and the run has nothing more to build.
+With their consent to set one up here confirmed, follow [Classroom Setup — Handover](setup-handover.md) to lay down and configure the project. When its steps are done, show the user what now exists at the root, then proceed on the classroom signal now being present. If the user would rather relaunch elsewhere or not set one up, nothing is written and the run has nothing more to build.
 
 ## +Establish Learner and Intent
 
 Identify the learner, load their configuration and course state, and settle what this run is for.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A classroom context is confirmed and the learner, their configuration, and the run's intent are not yet established.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The learner is identified; `global-requirements.md`, the learner's `students/` file, and any prior course state in `CLAUDE.md` have been read; and the run's intent — a new build, continuing a course, or marking completed work — is settled with the user.
 
-#### Do this next:
+#### Suggested next actions:
 
 For a mark-work intent, mark the completed work; for a build, gather the subject matter.
 
 ### Establish Who and What:
 
-Identify the learner and read the relevant file(s) in the project's `students/`, the project's `global-requirements.md`, and the prior status notes in `CLAUDE.md`; search the earlier conversation for an existing course. Do not ask for anything already held in those files or the conversation. If the learner has no file yet, offer to create one under the project's `students/` using the field definitions in `references/students/_template.md` (with `references/students/example-learner.md` as a worked example of a filled profile). Settle with the user what the run is for — a new build, continuing a course, or marking completed work — so the right work follows.
+Identify the learner and read the relevant file(s) in the project's `students/`, the project's `global-requirements.md`, and the prior status notes in `CLAUDE.md`; search the earlier conversation for an existing course. Do not ask for anything already held in those files or the conversation. If the learner has no file yet, offer to create one under the project's `students/` using the field definitions in [Template](references/students/_template.md) (with [Example Learner](references/students/example-learner.md) as a worked example of a filled profile). Settle with the user what the run is for — a new build, continuing a course, or marking completed work — so the right work follows.
 
 ## +Mark Completed Work
 
 Grade completed work the user has supplied and get a review delivered.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The run's intent is to mark completed work the user has supplied, and no review has yet been delivered for it.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 A review has been produced and saved for the supplied work.
 
-#### Do this next:
+#### Suggested next actions:
 
 Record and present the delivered review.
 
 ### Mark the Work:
 
-Follow `references/mark-review.md` as a handover doc to grade the supplied work and produce a saved review document, then carry its saved location onward to be recorded and presented.
+Follow [Mark and Review — Handover](mark-review-handover.md) to grade the supplied work and produce a saved review document, then carry its saved location onward to be recorded and presented.
 
 ## +Collect Subject Matter
 
 Gather the source material the build will draw on and save it as a durable course record.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The run is a build and its subject matter has not been gathered.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 Material the user has supplied is saved to the course's `matter/` folder, and optional grounding research has been offered and — if taken — the chosen candidates it returned have been saved there too.
 
@@ -168,33 +171,33 @@ Take in whatever subject material the user brings and save it to the course's `m
 
 Agree the structure with the user before producing any documents.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The subject matter is in hand and the build's structure has not been aligned with the user.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The proposed structure has been stated and the few genuinely-undecided points — page features, how weeks cluster, delivery order — have been settled with the user.
 
 ### Align Before Building:
 
-State the proposed structure briefly, then ask a few focused questions about anything genuinely undecided. When the user wants to follow, supplement, or avoid gaps against an existing programme, read `references/curriculum-spines.md` and factor it in. Settle this before producing documents — it prevents most rework.
+State the proposed structure briefly, then ask a few focused questions about anything genuinely undecided. When the user wants to follow, supplement, or avoid gaps against an existing programme, read [Curriculum Spines](references/curriculum-spines.md) and factor it in. Settle this before producing documents — it prevents most rework.
 
 ## +Choose Course and Lesson Shapes
 
 Pick the course and lesson shapes by enumerating what actually exists.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The build is aligned and the course and lesson shapes have not been chosen.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The governing shape(s) are chosen with the user — which shape governs which part, and how any wrapper applies — from the shapes present in the template folders.
 
 ### Enumerate and Choose:
 
-List `templates/course-structures/` and `templates/lesson-structures/`, read each file's summary line, and present the ones that fit. Do not work from a memorised list — enumerate every time, so shapes added later are offered automatically.
+List [Course Structures](templates/course-structures/) and [Lesson Structures](templates/lesson-structures/), read each file's summary line, and present the ones that fit. Do not work from a memorised list — enumerate every time, so shapes added later are offered automatically.
 Shapes are not mutually exclusive: more than one can apply to a single build (a different lesson shape for different strands — say one for literacy, another for science), and a wrapper shape (such as a timed-session template) can layer on top of a content shape rather than replacing it.
 Confirm with the user which shape governs which part and how any wrapper applies.
 
@@ -202,56 +205,56 @@ Confirm with the user which shape governs which part and how any wrapper applies
 
 Produce one unit's documents to the governing format — the shared assembly worker, entered whenever any unit needs building.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A unit — the sample or a subsequent one — needs its documents, they are not yet assembled to the governing format, and the unit is not left half-built by a prior failed attempt (which the error step claims first).
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The unit's documents are built from the chosen shapes, every concept's media verified or marked no-suitable-media, each document's HTML written to `source/` and converted to A4 PDF whose conversion report matches the document's intent — sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected (`standard` unless the document declares its own `@page`), and no unresolved layout flags — and the result satisfies the invariants.
 
-#### Invariants:
+#### Step invariants:
 
 **ALWAYS** keep the workbook and answer key as separate documents — answers never appear in the student's workbook (a tiny-font in-line answer only when a student file explicitly allows it for a young learner).
 
 ### Assemble the Documents:
 
-List `templates/documents/` and copy the shells the deliverable calls for, filling them and inserting components from `templates/blocks/` where the lesson shape calls for them, sizing each page's content to the usable content box the conversion report states rather than by trial and error. Apply the `references/pedagogy/` file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow `references/media-processing.md` as a handover doc to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
+List [Documents](templates/documents/) and copy the shells the deliverable calls for, filling them and inserting components from [Blocks](templates/blocks/) where the lesson shape calls for them, sizing each page's content to the usable content box the conversion report states rather than by trial and error. Apply the [Pedagogy](references/pedagogy/) file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow [Media Processing — Handover](media-processing-handover.md) to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
 Produce each document per the `Document Pipeline`. When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before it moves on.
 
 ## +Deliver Without the Renderer
 
 Deliver a finished document as a print-ready file when the PDF renderer cannot run on this host.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A document's HTML is written to `source/`, the `html_to_pdf` tool is unavailable on this host (absent, or unable to bring up its engine), and the document has no current fallback delivery — none produced yet, or its `source/` HTML has changed since the last standalone was written.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The document has been delivered as a self-contained, print-ready standalone — the injected geometry inlined into a delivery copy, the `source/` HTML left untouched — and the user has been told how to produce the A4 PDF from it.
 
-#### Do this next:
+#### Suggested next actions:
 
 With the document delivered by hand, carry on with the remaining documents, or record what the response produced.
 
 ### Deliver by Hand:
 
-Follow `references/deliver-without-renderer.md` as a handover doc to inline the geometry base into a print-ready standalone and hand it to the user, leaving the `source/` file as the editable copy for when the renderer returns.
+Follow [Deliver Without the Renderer — Handover](deliver-without-renderer-handover.md) to inline the geometry base into a print-ready standalone and hand it to the user, leaving the `source/` file as the editable copy for when the renderer returns.
 
 ## +Build and Approve the Sample
 
 Produce a sample and get its format approved before mass production.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The shapes are chosen and, for a build larger than a single lesson, no current sample format is approved.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The scope-and-sequence and one complete sample unit are built — each conversion report matching intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected, no unresolved layout flags) — and the user has explicitly approved the format.
 
-#### Do this next:
+#### Suggested next actions:
 
 With the format approved, build the remaining units.
 
@@ -263,19 +266,19 @@ Produce the scope-and-sequence (`templates/documents/scope-and-sequence.html`) a
 
 Build the rest of the course to the approved format.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A sample format has been approved and has not since been revised, and units remain unbuilt.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 Every remaining unit has been built to the approved format.
 
-#### Do this next:
+#### Suggested next actions:
 
 Present and record what each response produced.
 
-#### Invariants:
+#### Step invariants:
 
 **ALWAYS** match the approved sample's lesson steps, blocks, and layout on every later unit — drift is a defect.
 
@@ -287,15 +290,15 @@ Get each remaining unit built, matching the approved sample exactly. A full cour
 
 Save what a response produced, update the project's status, and report honestly.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A build or mark response has produced deliverables that have not yet been saved and recorded.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The finished files are saved to the project's working-outputs location, the `CLAUDE.md` status notes reflect what now exists and what remains, and the user has been given an honest done-and-remaining summary.
 
-#### Invariants:
+#### Step invariants:
 
 **NEVER** imply completeness that is not there — a full course is built unit by unit across responses; say plainly what remains.
 
@@ -307,15 +310,15 @@ Save the finished files to the working-outputs location recorded in `CLAUDE.md`,
 
 Report the run's outcome and end the skill.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The run's intent is fully satisfied — a build built and recorded, work marked and presented, or a setup-only request completed — or the user has chosen to stop (declined setup, or ended the run), and nothing remains to do.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 A closing summary has been given and the skill is complete.
 
-#### Do this next:
+#### Suggested next actions:
 
 End the skill and return to the user.
 
@@ -327,15 +330,15 @@ Summarise what the run produced — the documents, where they were saved, the fo
 
 Surface anything the other steps don't cover, and decide with the user how to continue.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 Something has gone wrong, or a situation has arisen that no other step covers — a missing or corrupt `global-requirements.md`, a failed PDF conversion, a handover doc's work that could not complete, or requirements that contradict a build invariant.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The user has been informed of what happened and what state the build is in, and has decided how to continue.
 
-#### Do this next:
+#### Suggested next actions:
 
 Resume the step the user chose, or end the skill.
 
@@ -345,9 +348,9 @@ Tell the user plainly what happened, which step it arose in, what state the buil
 
 # --- TERMS ---
 
-: **Matter**: A course's saved source material, held at `<course>/matter/` — what the user supplied and any grounding research, kept as a permanent record the build reads.
-: **Shape**: A course structure or lesson structure chosen from the `templates/course-structures/` and `templates/lesson-structures/` folders; more than one may govern a single build.
-: **House Geometry**: The page geometry the `html_to_pdf` tool injects from `print-base.css`. The base every document inherits unless it declares its own `@page` to override it.
-: **Handover Doc**: A standalone document (in `references/`, marked `type: handover`) whose steps a master step folds into the run as sub-steps, its references and invariants coming into play for a self-contained portion of the work — lean extraction of heavy, optional, or side-branching work that would otherwise bloat this skill. The master step owns the logic around it: it reads success from the resulting state and lets any failure fall to the problem step. Cited as "follow `references/X.md` as a handover doc".
-: **Sample**: The scope-and-sequence plus one complete unit, approved for format before the rest of the course is mass-produced.
-: **Strand**: A learning area a unit covers — one of its subject or skill areas (literacy, science), enumerated from the unit's scope-and-sequence entry and lesson documents. A build may run a different lesson shape per strand, and a review grades the work strand by strand.
+- **Matter** — A course's saved source material, held at `<course>/matter/` — what the user supplied and any grounding research, kept as a permanent record the build reads.
+- **Shape** — A course structure or lesson structure chosen from the `templates/course-structures/` and `templates/lesson-structures/` folders; more than one may govern a single build.
+- **House Geometry** — The page geometry the `html_to_pdf` tool injects from `print-base.css`. The base every document inherits unless it declares its own `@page` to override it.
+- **Handover Doc** — A standalone document in this skill's root folder, its name ending `-handover` and its frontmatter the single line `harness-format: DraftHorse, Handover`, whose steps a parent step folds into the run as child steps, its references and invariants coming into play for a self-contained portion of the work — lean extraction of heavy, optional, or side-branching work that would otherwise bloat this skill. The parent step owns the logic around it: it reads success from the resulting state and lets any failure fall to the problem step. Cited as `[Name — Handover](name-handover.md)`.
+- **Sample** — The scope-and-sequence plus one complete unit, approved for format before the rest of the course is mass-produced.
+- **Strand** — A learning area a unit covers — one of its subject or skill areas (literacy, science), enumerated from the unit's scope-and-sequence entry and lesson documents. A build may run a different lesson shape per strand, and a review grades the work strand by strand.

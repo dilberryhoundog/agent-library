@@ -11,7 +11,7 @@ harness-format: DraftHorse, Handover
 
 # Agent Invariants
 
-<!-- The handover's OWN globals — in force for the whole run once folded in, alongside the parent document's. Must be compatible everywhere: never repeat a global the parent already states, never conflict with one. Delete the section if none. -->
+<!-- The handover's OWN globals — in force across the parent step's span, not the whole run: from the parent's side they read as a step invariant on the parent step. Never repeat or conflict with a global the parent document states, or with the parent step's own invariants. Delete the section if none. -->
 
 **DO NOT** <!-- ... -->
 **ALWAYS** <!-- ... -->
@@ -26,12 +26,13 @@ harness-format: DraftHorse, Handover
 
 # --- STEPS ---
 
-> This document is a handover: its steps run as child steps of the parent step that folded it in; a step is in play from when its *start* condition applies until its *finished* conditions are fully met, and multiple steps can be in play at once.
+> Handovers are child steps of a parent step:
 >
->- Fully meet a step's *step finished when* conditions before considering it done.
->- *Suggested next actions* guidance, when present, points the way onward; a step's own start condition is what admits it.
->- There is no exit step and no error drain here: a failure falls to the parent document's problem step.
->- When no child step is left in play, return to the parent step and continue — the parent step's own conditions read the state this work leaves behind.
+>- The parent step reads success from the state the handover leaves behind.
+>- Invoke a child step any time its *start* conditions are met.
+>- If all child steps are *finished* or inactive, return to the parent step and continue.
+>- Error handling is covered by the parent document, unless an optional child problem step is present.
+>- Global invariants apply across the whole parent step; step invariants are confined to the child step.
 
 <!-- Child steps are standard DraftHorse steps: contract (H4 machinery) above, engagement (H3) below, conditions in state terms. No success exit, no error drain — the parent owns both. The last working step finishes on its own completion state; it never names or returns an outcome. -->
 
@@ -46,12 +47,24 @@ harness-format: DraftHorse, Handover
 - <condition 1>
 - <condition 2>
 
+<!-- optional -->
+**OR these are true:**
+
+- <other condition 1>
+- <other condition 2>
+
 #### Step finished when these are true:
 
 <!-- This step's own completion criteria only — checkable and exhaustive. -->
 
 - <condition 1>
 - <condition 2>
+
+<!-- optional -->
+**OR these are true:**
+
+- <other condition 1>
+- <other condition 2>
 
 #### Agent decision:
 
@@ -85,29 +98,10 @@ The handover's work is complete — return to the parent step and continue.
 
 <!-- The engagement. -->
 
-<!-- OPTIONAL local problem step — only to surface something to the user MID-WORK. It owes the parent no handback and drains no errors (the parent's problem step does that). Delete unless genuinely needed.
-
-## +Surface a Problem
-
-#### Start this step when these are true:
-
-- Something mid-work needs the user's input before the child steps can continue.
-
-#### Step finished when these are true:
-
-- The user has been informed and has decided how to continue.
-
-#### Suggested next actions:
-
-Resume the child step the user chose, or return to the parent step.
-
-### Surface the Problem:
-
-Tell the user plainly what happened and what the options are.
--->
+<!-- OPTIONAL: a local problem step is allowed, only to surface something to the user MID-WORK — written as an ordinary step (e.g. `## +Surface a Problem`). It owes the parent no handback and drains no errors; the parent document's problem step does that. -->
 
 # --- TERMS ---
 
-<!-- Glossary for handover-specific terms. Title Case names, `:` form. Terms the parent already defines are ambient — never redefine them. Delete the section if none. -->
+<!-- Glossary for handover-specific terms. Title Case names, bolded list-entry form. Terms the parent already defines are ambient — never redefine them. Delete the section if none. -->
 
-: **<Term>**: <meaning>
+- **<Term>** — <meaning>
