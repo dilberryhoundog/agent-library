@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-08-02
+
+### Changed
+
+- `drafthorse-saddler` now checks condition block shape — the conditions to start or finish a step must be a markdown list with one condition per list item; a prose paragraph in either place is a finding.
+- `drafthorse-saddler` judges each condition item by observation count: an item bundling two separate observations is two conditions and splits.
+- The citation check broadens to heading references — an in-document reference to another section must be a Markdown anchor link (`[Handover Checks](#handover-checks)`) rather than a backticked name.
+- The DraftHorse `condition-writing` reference gains guidance on splitting compound conditions into one-observation items.
+
+Documents authored before this release may produce findings on their next audit; the documents themselves are unchanged and still function.
+
 ## [0.5.0] - 2026-08-01
 
 ### Added
