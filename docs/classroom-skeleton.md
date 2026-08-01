@@ -7,6 +7,7 @@ The skill ships inside the **classroom plugin**, which adds the runtime around i
 ```
 classroom/
 ├── SKILL.md
+├── setup-handover.md                   first-run bootstrap (folded in at setup only)
 ├── templates/                          parts the skill copies and fills
 │   ├── documents/                      the printable layouts (A4 house style)
 │   │   ├── scope-and-sequence.html
@@ -25,7 +26,6 @@ classroom/
 │       ├── video-library
 │       └── craft-activity
 └── references/                         knowledge the skill reads
-    ├── setup.md                         first-run bootstrap (read only at setup)
     ├── students/_template.md            field definitions for a learner file
     ├── pedagogy/                        teaching approaches (one per learner profile)
     ├── vetted-video-channels.md         reliable sources + link procedure
@@ -135,13 +135,15 @@ Reusable components that recur inside lessons regardless of subject, dropped int
 
 ---
 
+## setup-handover.md
+
+First-run bootstrap for a classroom project, held at the skill root as a handover the setup step folds in: confirm the working directory, copy the plugin's init payload to the project root, fill `CLAUDE.md` and `global-requirements.md`, optionally warm the PDF engine. Reached only at setup or repair, never on a normal build, so it does not sit in always-on context.
+
+---
+
 ## references/
 
 Knowledge the skill reads. The family's configuration no longer lives here — it sits at the project storage root (see "## Plugin runtime"). These files are generic engine knowledge.
-
-### references/setup.md
-
-First-run bootstrap for a classroom project: confirm the working directory, copy the plugin's init payload to the project root, fill `CLAUDE.md` and `global-requirements.md`, optionally warm the PDF engine. Read only at setup or repair, never on a normal build, so it does not sit in always-on context.
 
 ### references/students/_template.md
 
@@ -179,11 +181,11 @@ Installs Puppeteer + Chromium into `${CLAUDE_PLUGIN_DATA}` (persisting across pl
 
 ### init payload  (`templates/` at the plugin root)
 
-The project scaffold, copied wholesale to a project root once to bootstrap a classroom (see `references/setup.md`). It contains the project's configuration and signal files — distinct from the skill's internal `templates/` of document/lesson/course parts:
+The project scaffold, copied wholesale to a project root once to bootstrap a classroom (see `setup-handover.md`). It contains the project's configuration and signal files — distinct from the skill's internal `templates/` of document/lesson/course parts:
 
 - **`CLAUDE.md`** — the agent-maintained, all-in-one signal/config for the project: storage map, learner roster, working-outputs location, PDF note, status/resume log. Auto-loads every session; the agent keeps it current.
 - **`.claude/rules/classroom.md`** — the static classroom rule: identifies the project as a classroom and names the skill and the PDF tool. Auto-loads every session; never edited.
 - **`global-requirements.md`** *(config)* — the family's standing constraints starter (setting and practical limits, spelling and page size, cost rules, the separate-answer-key rule, the annotation workflow, worldview defaults, the standard deliverable set, shared learning preferences). The family fills it in; swap it to serve a different family.
 - **`students/`** *(config)* — the per-learner configuration layer at the storage root; one file per learner, created from the skill's `references/students/_template.md`.
 
-The split is deliberate: static classroom context lives in the rule, the mutable resolved config lives in `CLAUDE.md`, both auto-load, and the verbose setup detail stays one hop away in `references/setup.md`.
+The split is deliberate: static classroom context lives in the rule, the mutable resolved config lives in `CLAUDE.md`, both auto-load, and the verbose setup detail stays one hop away in `setup-handover.md`.

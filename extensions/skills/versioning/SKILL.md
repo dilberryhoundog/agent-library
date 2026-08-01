@@ -1,4 +1,5 @@
 ---
+harness-format: DraftHorse
 name: versioning
 description: Cut a semantic-version release for a configured unit — bump, changelog, tag, GitHub release.
 disable-model-invocation: true
@@ -77,27 +78,29 @@ Follow the Keep a Changelog format (https://keepachangelog.com). A changelog is 
 
 # --- STEPS ---
 
-> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+> Steps are universal and standalone.
 >
->- Fully meet a step's *step finished when* conditions before considering it done.
->- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
->- If a step cannot be completed, move to the step that handles the condition/error.
->- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
->- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
+>- All their work, instructions and rules are self-contained.
+>- Invoke a step any time its *start* conditions are met.
+>- A step is completed only when all its *finished* conditions are met.
+>- A step that cannot be completed falls to the error drain step.
+>- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
+>- References are inline, using Markdown link styling. Always load a cited reference.
+>- Multiple active steps, looping back, and dormant steps are all valid patterns.
 
 ## +Dispatch
 
 Identify the versioned units this run will release.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The skill has been invoked and the requested unit(s) are not yet identified.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The config is read and the requested unit(s) identified from the `Request` reference — a named unit found in the config, or every unit when the invocation was bare. When no config exists, or the requested unit is missing from it, that state is established and named to the user instead.
 
-#### Invariants:
+#### Step invariants:
 
 **DO NOT** read any file other than the versioning config, and run no commands — the `Preflight` reference above already holds the live git state.
 
@@ -109,15 +112,15 @@ Read `.claude/rules/versioning.md` in the repository root, or a `## Versioning` 
 
 Create or repair the repository's versioning config with the user.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 No versioning config exists in this repository, a requested unit is not defined in the existing config, or a defined unit's definition is wrong — most often paths that no longer resolve or are not tracked by git.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 A user-approved config is on disk, covering every requested unit.
 
-#### Do this next:
+#### Suggested next actions:
 
 Carry on with the release.
 
@@ -129,15 +132,15 @@ Interview the repository to discover its units — how many deliverables, where 
 
 Verify the release preconditions.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The unit(s) are identified in a config and the release preconditions have not yet been verified this run (or a precondition failed and has since been repaired).
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The tree is clean, the branch is the remote default, and `gh` is authenticated where needed — every precondition confirmed against the reference, not assumed.
 
-#### Invariants:
+#### Step invariants:
 
 **DO NOT** stage, modify, or write any file during preflight.
 
@@ -149,19 +152,19 @@ The `Preflight` reference already holds the live state — read it, do not re-ru
 
 Determine the commit range for the unit(s) under release.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The release preconditions have been verified this run, and a targeted unit does not yet have a computed commit range.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 Every targeted unit has a computed range and a recorded current version — the version carried by its last matching tag, or its candidate baseline when the unit is a first release. A named unit with no commits in range is reported "nothing to release" and is finished. After a bare invocation, the user has chosen which unit(s) to release.
 
-#### Decision:
+#### Agent decision:
 
 How the skill was invoked decides which units this step targets: an invocation naming a unit targets that unit alone; a bare invocation targets every unit in the config.
 
-#### Do this next:
+#### Suggested next actions:
 
 Release the chosen units one at a time, in the order chosen.
 
@@ -221,11 +224,11 @@ When no tag matches the unit's pattern, the unit has never been released and the
 
 Set the bump floor by scanning for changes that break users of the unit.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A chosen unit has commits in range but no breaking-change verdict recorded yet.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The scan has run, been skipped, or failed — and the outcome is recorded for the unit: a scan that ran records its verdict, its bump floor, and any uncertain findings it returned; a scan that was skipped or failed records that, and its reason, in place of a floor.
 
@@ -247,11 +250,11 @@ Skip the scan (recording the reason) when the unit is a first release — nothin
 
 Derive and present the proposed bump for the unit.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A unit has commits in range and a breaking-change verdict recorded, and neither an approval nor a decline stands for it — including a unit whose approval has since been revised or withdrawn, which leaves it unapproved and awaiting a fresh proposal.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The user has seen the bump, the reasoning, and the draft changelog, and has responded — approval or edits recorded with the user's final bump and changelog text, or a decline recorded and the unit finished.
 
@@ -268,15 +271,15 @@ A unit recorded as a first release has no prior version to bump from. Derive not
 
 Apply the approved release.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The user has approved a proposed bump and changelog for a unit (with any edits applied), and either no part of that release — commit, tag, push, GitHub release — has been applied yet, or a release that stopped partway has been surfaced to the user and they have decided to complete it from where it stopped. A half-applied release never re-enters this step unclaimed: until the user has decided to complete it, it belongs to `+Handle a Problem`.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The manifest, changelog, commit, tag, push, and any GitHub release are complete for the unit.
 
-#### Invariants:
+#### Step invariants:
 
 **NEVER** use heredocs — they are blocked in some sandboxed shells. Build multi-line content with `Write` to `/tmp/versioning-<unit>-<X.Y.Z>.md` and pass that path via `-F` / `--notes-file`, or use repeated `-m` flags. **NEVER** write it inside the repository — that would dirty the tree and fail verification.
 **ALWAYS** create annotated tags (`git tag -a`).
@@ -327,11 +330,11 @@ Read the manifest and changelog to see whether they already carry the version. T
 
 Confirm every version location agrees.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A unit's release has been executed but not yet checked for agreement.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 Every version location agrees and the unit is reported released, or a mismatch is recorded.
 
@@ -349,15 +352,15 @@ Work through this checklist — every location must agree on the released versio
 
 Report the run's outcome and end the skill.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 Every requested unit has been released and verified, declined, or reported "nothing to release".
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The summary is presented. The skill is complete.
 
-#### Do this next:
+#### Suggested next actions:
 
 End the skill and return to the user.
 
@@ -369,15 +372,15 @@ Summarise the run per unit — the released version and where it now lives (mani
 
 Surface anything the other steps don't cover, and decide with the user how to continue.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 Something has gone wrong, or a situation has arisen that no other step covers — a verification mismatch, a failed command mid-release, an unresolvable config, an unexpected repository state.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The user has been informed and has decided how to continue.
 
-#### Do this next:
+#### Suggested next actions:
 
 Resume the step the user chose, or end the skill.
 
@@ -392,6 +395,7 @@ When only the GitHub release step failed (e.g. `gh` missing or unauthenticated),
 # --- TERMS ---
 
 Terms used in this skill:
-: **Versioned Unit**: An independently released package defined in the project config, with its own paths, manifest, changelog, tag pattern, and `github-release` flag.
-: **Range**: The commit span released for a unit — `<last-tag>..HEAD` filtered to the unit's paths.
-: **Bump**: The semver increment (major, minor, patch) derived from the conventional commits in range.  
+
+- **Versioned Unit** — An independently released package defined in the project config, with its own paths, manifest, changelog, tag pattern, and `github-release` flag.
+- **Range** — The commit span released for a unit — `<last-tag>..HEAD` filtered to the unit's paths.
+- **Bump** — The semver increment (major, minor, patch) derived from the conventional commits in range.

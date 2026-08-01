@@ -13,5 +13,4 @@ Finished documents are authored as HTML and delivered as A4 PDF. Save each docum
 
 ## Configuration and setup
 
-Resolved, per-project configuration is in `CLAUDE.md`. If this project still has unfilled placeholders, or you need to (re)bootstrap it, the full setup process is in the skill's
-`references/setup.md`.
+Resolved, per-project configuration is in `CLAUDE.md`. If this project still has unfilled placeholders, or you need to (re)bootstrap it, the full setup process is in the skill's `setup-handover.md`, at the skill's root.

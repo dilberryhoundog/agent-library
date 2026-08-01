@@ -1,6 +1,6 @@
 # References
 
-References are the data segment — context a step delivers to the agent. A reference holds the constants, maps, formats, and facts the steps act on (data by preference, not hard law — see the *references carry data* convention). The steps do the timing — a step's job is to put the right context in front of the agent at the right time and place, citing the reference inline at the moment of use (see the *cite references at the moment of use* convention).
+References is the data utility — context a step delivers to the agent. A reference holds the constants, maps, formats, and facts the steps act on (data by preference, not hard law — see the *references carry data* convention). References interlink with steps — a step's job is to put the right context in front of the agent at the right time and place, citing the reference inline at the moment of use (see the *cite references at the moment of use* convention). Every kind of reference has one legal citation form; [Notation](notation.md) gives them.
 
 References fall on one axis: **static** (context that sits in or next to the document) versus **dynamic** (Claude-native functionality that produces context at runtime).
 
@@ -13,10 +13,11 @@ Context that physically lives in the document.
 
 ## Dynamic references
 
-Claude-native functionality that produces context at runtime rather than storing it in the document. The family shares one shape: the step invokes a native capability and folds the result back in as context. The set is open — the unifying trait is runtime-produced context, not a fixed list.
+Claude-native functionality that produces context at runtime rather than storing it in the document. The family shares one trait: the context does not exist until the run, and arrives from outside the prose. How it arrives varies — the step invokes some members and folds the result back in; others are substituted before the agent reads a word. The set is open — runtime-produced context is the whole of the membership test.
 
 - **Data load** — pull live state in as source of truth (e.g. the output of a shell command).
-- **External call** — route out to another skill or tool, which loads its own context and permissions, then returns. (The grants-transfer mechanism is described under frontmatter in [scaffold.md](scaffold.md).)
+- **User configuration** — values the user supplied when the document's package was enabled, substituted into the prose before the run begins. The step reads a resolved value and never reaches for configuration, so the document stays readable cold: what the reader sees is what the agent got. **NEVER** write a step that receives a secret as resolved prose — a secret is reachable only by a subprocess, never by the document.
+- **External call** — route out to another skill or tool, which loads its own context and permissions, then returns. (The grants-transfer mechanism is described under frontmatter in [Scaffold](scaffold.md).)
 - **Agents** — delegate to a sub-agent that returns its result as context.
 - **Hooks** — harness-triggered behaviour that feeds the document.
-- **Handover fold-in** — cite a `type: handover` document *as a handover doc*, folding its steps into the run as sub-steps of the citing master step (see [handover.md](handover.md)). Unlike an external call, it does not route out to an isolated context and return a value — its steps, references, and invariants come into play inside this run, and the master step reads the result from the resulting state.
+- **Handover fold-in** — cite a `harness-format: DraftHorse, Handover` document *as a handover doc*, folding its steps into the run as child steps of the citing parent step (see [Handover](handover.md)). Unlike an external call, it does not route out to an isolated context and return a value — its steps, references, and invariants come into play inside this run, and the parent step reads the result from the resulting state.

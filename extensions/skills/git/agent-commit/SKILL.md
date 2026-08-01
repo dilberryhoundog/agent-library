@@ -1,4 +1,5 @@
 ---
+harness-format: DraftHorse
 name: agent-commit
 description: Execute the commit procedure using this skill. Specialised skill for `Git Robot`, not for general agent usage.
 user-invocable: false
@@ -108,30 +109,33 @@ Keep changes together when they form one cohesive feature, depend on each other 
 
 # --- STEPS ---
 
-> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+> Steps are universal and standalone.
 >
->- Fully meet a step's *step finished when* conditions before considering it done.
->- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
->- If a step cannot be completed, move to the step that handles the condition/error.
->- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
+>- All their work, instructions and rules are self-contained.
+>- Invoke a step any time its *start* conditions are met.
+>- A step is completed only when all its *finished* conditions are met.
+>- A step that cannot be completed falls to the error drain step.
+>- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
+>- References are inline, using Markdown link styling. Always load a cited reference.
+>- Multiple active steps, looping back, and dormant steps are all valid patterns.
 
 ## +Read Procedure
 
 Load the current COMMIT procedure and the real diffs it covers.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A `COMMIT` procedure from the `Brief` awaits processing, and no earlier no-op or refusal has ended the run.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The procedure's directive and its expanded diffs are read, and the action to run is decided — a `new` action, an `amend` action, or a no-op (nothing in the procedure's scope to commit — clean tree, or every changed file outside the directive's scope; or an `amend` that follows a `new`, or a second `amend`, in the same brief). Never invent or force an empty commit.
 
-#### Do this next:
+#### Suggested next actions:
 
 A decided `new` action moves to creating new commits; a decided `amend` action moves to amending; a no-op moves to reporting the result.
 
-#### Invariants:
+#### Step invariants:
 
 **ALWAYS** use the `Expanded Diffs` to write the commit message. Do not guess from filenames or procedure details.
 **NEVER** use extra flags or commands (like `git -C` or `cd`) . trust the working directory is the right place.
@@ -156,15 +160,15 @@ git diff --cached <paths>
 
 Create one or more new commits from the working tree, grouped per the procedure's directive.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The current procedure is `COMMIT(new)` and its commits have not been made.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 Every commit for the current procedure is made and recorded.
 
-#### Do this next:
+#### Suggested next actions:
 
 When further `COMMIT` procedures remain in the `Brief`, return to reading the next one; otherwise move to reporting the result.
 
@@ -186,15 +190,15 @@ Move to the next grouping, following the same procedure, until all the required 
 
 Fold the in-scope changes into the previous commit, or reword its message, per the procedure's task overview.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The current procedure is `COMMIT(amend)` and the amend has not been made.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The amend is complete and recorded, or refused and the refusal recorded.
 
-#### Do this next:
+#### Suggested next actions:
 
 A completed amend with further `COMMIT` procedures remaining returns to reading the next one; a refusal, or no procedures remaining, moves to reporting the result.
 
@@ -209,7 +213,7 @@ git branch -r --contains HEAD
 
 Treat any non-empty result (or an explicit upstream match) as **pushed = true**. If the branch has no upstream and no remote contains `HEAD`, treat as **pushed = false**.
 
-#### Decision:
+#### Agent decision:
 
 Two conditions refuse the amend: the directive suggests changes to more than one previous commit (amend is a single-commit action; splitting is not supported), or the `Check for Push` reveals the commit has been pushed. Either way, amend nothing and record the refusal for the result.
 
@@ -225,19 +229,19 @@ Two conditions refuse the amend: the directive suggests changes to more than one
 
 Emit the outcome back to git-robot so it can render the `COMMIT` Output Directive in its report.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 Every `COMMIT` procedure in the `Brief` has been processed, or a no-op or refusal has ended the run.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The result lines are emitted.
 
-#### Do this next:
+#### Suggested next actions:
 
 The skill is over, hand control back to git-robot.
 
-#### Invariants:
+#### Step invariants:
 
 **DO NOT** add prose beyond the commit lines, any no-op or skip note, and any unstaged out-of-scope paths.
 

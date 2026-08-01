@@ -1,5 +1,6 @@
 ---
-# === FRONTMATTER — the declaration segment ===
+# === FRONTMATTER ===
+harness-format: DraftHorse
 name: <skill-name>
 description: model-invoked; agent-facing, sells usage + trigger conditions. user-invoked; short user-facing summary.
 # --- invocation surface (set the ones that apply, delete the rest) ---
@@ -23,7 +24,7 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 # --- REFERENCES ---
 
-<!-- The data segment. Constants, maps, formats, facts — data by preference, no work. Steps cite these inline at the moment of use. Title Case names. -->
+<!-- The References utility. Constants, maps, formats, facts — data by preference, no work. Steps cite these inline at the moment of use. Title Case names. -->
 
 ## <Reference Name>
 
@@ -40,37 +41,57 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 # --- STEPS ---
 
-> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+> Steps are universal and standalone.
 >
->- Fully meet a step's *step finished when* conditions before considering it done.
->- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
->- If a step cannot be completed, move to the step that handles the condition/error.
->- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
->- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
+>- All their work, instructions, and rules are self-contained.
+>- Invoke a step any time its *start* conditions are met.
+>- A step is completed only when all its *finished* conditions are met.
+>- A step that cannot be completed falls to the error drain step.
+>- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
+>- References are inline, using Markdown link styling. Always load a cited reference.
+>- Multiple active steps, looping back, and dormant steps are all valid patterns.
 
-<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). H4 headings are the step's contract — its conditions, any scope decision, its routing hint and its invariants; the H3 opens the work. A step names another step only in its "Do this next:" slot; conditions are written in state terms, never step terms. -->
+<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). H4 headings are the step's contract — its conditions, any scope decision, its routing hint and its invariants; the H3 opens the work. A step names another step only in its "Suggested next actions:" slot; conditions are written in state terms, never step terms. -->
 
 ## +<Step Name>
 
 <!-- One-line statement of what this step does. -->
 
-#### Start this step when:
+#### Start this step when these are true:
 
-<!-- The state that makes this the right work, in state terms. Exclude half-applied states — a condition that still holds after the step failed partway invites a destructive re-run. -->
+<!-- The state that makes this the right work, in state terms. -->
 
-#### Step finished when:
+- <condition 1>
+- <condition 2>
+
+<!-- optional -->
+**OR these are true:**
+
+- <other condition 1>
+- <other condition 2>
+
+#### Step finished when these are true:
 
 <!-- This step's own completion criteria only — checkable and exhaustive. Could the agent claim this is met while work remains? If yes, sharpen it. No other steps, no routing, no instructions. -->
 
-#### Decision:
+- <condition 1>
+- <condition 2>
+
+<!-- optional -->
+**OR these are true:**
+
+- <other condition 1>
+- <other condition 2>
+
+#### Agent decision:
 
 <!-- Optional: a choice that governs this step's scope or shape — what it targets, how many times it runs — resolved before the work can be performed. Carries no work and no routing, and resolves to a fact the finished condition depends on. Delete the section when the step's scope is fixed. -->
 
-#### Do this next:
+#### Suggested next actions:
 
-<!-- Optional prose: happy-path pointer, loop back, bail on failure, or skill exit. Points only — never restate the destination's conditions. Delete when the dovetail is obvious. -->
+<!-- Optional prose: loop back, bail on failure, or skill exit. Points only — never restate the destination's conditions. Omit when the dovetail is obvious. -->
 
-#### Invariants:
+#### Step invariants:
 
 <!-- Rules in force while the step is in play. Delete the section if none. -->
 
@@ -78,19 +99,23 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 <!-- The engagement — the work, as prose. Cite references inline at the moment they matter. Structure with H4 sub-headings when the work has distinct parts. -->
 
+#### <Sub-heading>:
+
+<!-- Separate the engagement into distinct sections, if necessary, to help the agent differentiate varied context. -->
+
 ## +<Success Exit Step Name>
 
 <!-- Reports the outcome and ends the skill. -->
 
-#### Start this step when:
+#### Start this step when these are true:
 
 <!-- All the work is finished — stated exhaustively ("every item processed, declined, or reported empty"). -->
 
-#### Step finished when:
+#### Step finished when these are true:
 
 <!-- The summary is presented. The skill is complete. -->
 
-#### Do this next:
+#### Suggested next actions:
 
 End the skill and return to the user.
 
@@ -104,25 +129,25 @@ End the skill and return to the user.
 
 Surface anything the other steps don't cover, and decide with the user how to continue.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 Something has gone wrong, or a situation has arisen that no other step covers.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The user has been informed and has decided how to continue.
 
-#### Do this next:
+#### Suggested next actions:
 
 Resume the step the user chose, or end the skill.
 
 ### Surface the Problem:
 
-Tell the user plainly what happened, where it arose, what state things are now in (especially anything half-applied), and what the options are.
+Tell the user plainly what happened, where it arose, what state things are now in (half-applied states also), and what the options are.
 
 # --- TERMS ---
 
-<!-- Glossary for skill-specific terms the steps and references lean on. Title Case names, `:` form. Delete the section if none. -->
+<!-- Glossary for skill-specific terms the steps and references lean on. Title Case names, bolded list-entry form. Delete the section if none. -->
 
-: **<Term>**: <meaning>
-: **<Term>**: <meaning>
+- **<Term>** — <meaning>
+- **<Term>** — <meaning>

@@ -32,4 +32,4 @@ Write each document's HTML to a `source/` folder beside its PDF, then convert it
 
 ## Setup
 
-To (re)bootstrap this project or understand the file layout, read the skill's `references/setup.md`.
+To (re)bootstrap this project or understand the file layout, read the skill's `setup-handover.md`, at the skill's root.

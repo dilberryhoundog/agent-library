@@ -19,11 +19,11 @@ Prefer fewer, larger steps over many small ones — a step is sized to all the w
 
 ## Handover extraction
 
-Some step-shaped work belongs in the map but not in the document: heavy or occasional work that would bloat every ordinary read of the skill. Extract it as a **handover doc** — a separate `references/` file whose frontmatter is the single line `type: handover`, holding its own steps, references, and invariants. A **master step** in the main document folds it in at the moment of use ("follow `references/X.md` as a handover doc"), its steps run as sub-steps of that master step, and the run carries on.
+Some step-shaped work belongs in the map but not in the document: heavy or occasional work that would bloat every ordinary read of the skill. Extract it as a **handover doc** — a separate file in the skill's root folder, its name ending `-handover`, whose frontmatter is the single line `harness-format: DraftHorse, Handover`, holding its own steps, references, and invariants. A **parent step** in the main document folds it in at the moment of use, citing it as `[Name — Handover](name-handover.md)`; its steps run as child steps of that parent step, and the run carries on.
 
 The smells that mark a candidate (or a lump of steps) as handover-shaped — no single one decides it; weigh them together:
 
-- **Largish** — enough work that it likely wants breaking into several sub-steps of its own.
+- **Largish** — enough work that it likely wants breaking into several steps of its own.
 - **Optional** — off the main happy path; invoked only on certain runs.
 - **Side-branching** — a detour off the main flow rather than a link in its chain.
 - **Many invariants bound to the one body of work** — a cluster of rules all governing the same self-contained slice.
@@ -31,10 +31,11 @@ The smells that mark a candidate (or a lump of steps) as handover-shaped — no 
 
 Shaping a handover, hold its deltas from a skill:
 
-- **Frontmatter is `type: handover` and nothing else** — no `name`, `description`, `allowed-tools`, or invocation surface. Identity moves into the body: a `# Title (Handover)` heading and one identity paragraph stating what it does, when a master step folds it in, and that it routes no success or failure of its own.
-- **No required exit steps** — no success exit, no error drain, no handed-back outcome. Control returns to the master step when no handover step is left in play; a failure falls to the master document's problem step. The master step's own finished condition reads success from the state the handover leaves behind.
-- **Never names its master** — written to be folded into any step that needs it; it may cite the master's ambient references by name (never restating them), but the master never cites the handover's internal references.
-- **Grants come from the master** — everything the handover's steps do must be covered by the main document's `allowed-tools`.
+- **Frontmatter is the stamp and nothing else** — `harness-format: DraftHorse, Handover`, with no `name`, `description`, `allowed-tools`, or invocation surface. Identity moves into the body: a `# Title (Handover)` heading and one identity paragraph stating what it does and when a parent step folds it in. The reading model is carried by the handover-variant preamble, so the identity paragraph never restates it.
+- **The handover-variant preamble** — a handover opens its steps section with the variant, not the universal preamble, which routes a failed step to an error drain a handover does not have. `assets/HANDOVER-template.md` carries the canonical text.
+- **No required exit steps** — no success exit, no error drain, no handed-back outcome. Control returns to the parent step when no handover step is left in play; a failure falls to the parent document's problem step. The parent step's own finished condition reads success from the state the handover leaves behind.
+- **Never names its parent** — written to be folded into any step that needs it; it may cite the parent's ambient references by name (never restating them), but the parent never cites the handover's internal references.
+- **Grants come from the parent** — everything the handover's steps do must be covered by the main document's `allowed-tools`.
 - **One level only** — a handover must not fold in another handover; work that deep belongs in its own skill, reached as an external call.
 
 ## Every map carries
@@ -45,11 +46,11 @@ Shaping a handover, hold its deltas from a skill:
 
 ## Decisions
 
-A `#### Decision:` block belongs to a step whose **scope or shape** is decided by run state — what the step targets, or how many times it runs. It sits with the step's other H4 machinery, above the engagement heading, because an agent reading the contract to decide whether and how to enter the step needs it in view there: a skill invoked with a named unit computes that one unit's range, while a bare invocation surveys every unit and asks the user which to act on, and the finished condition ("every targeted unit has a range") means different things in each case.
+An `#### Agent decision:` block belongs to a step whose **scope or shape** is decided by run state — what the step targets, or how many times it runs. It sits with the step's other H4 machinery, above the engagement heading, because an agent reading the contract to decide whether and how to enter the step needs it in view there: a skill invoked with a named unit computes that one unit's range, while a bare invocation surveys every unit and asks the user which to act on, and the finished condition ("every targeted unit has a range") means different things in each case.
 
-Written as plain prose: what is being decided, between what, and by what signal. Three limits hold it in place — it carries no work (the engagement does that), it carries no routing between steps (start conditions and *do this next* do that), and it resolves to a fact the step's own finished condition depends on. Routing between steps written as a Decision is a defect.
+Written as plain prose: what is being decided, between what, and by what signal. Three limits hold it in place — it carries no work (the engagement does that), it carries no routing between steps (start conditions and *suggested next actions* do that), and it resolves to a fact the step's own finished condition depends on. Routing between steps written as an Agent decision is a defect.
 
-A genuine bounded fork inside the work — both forks the step's business, neither changing what the step targets — is not a Decision block; it stays in the engagement as plain prose.
+A genuine bounded fork inside the work — both forks the step's business, neither changing what the step targets — is not an Agent decision block; it stays in the engagement as plain prose.
 
 ## Placing the references
 

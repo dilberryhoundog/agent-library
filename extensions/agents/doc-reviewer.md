@@ -1,4 +1,5 @@
 ---
+harness-format: DraftHorse
 name: doc-reviewer
 description: This agent audits a document for its durability. It executes a dummy run and sweeps passages for seven defect classes. Pass the document's path and an optional acceptance test. Use after creating an agent-facing document (skill, agent, rule, plan, CLAUDE.md) or one that may be read by any agent or human outside this session (README, specs, references).
 tools: Read, Grep, Glob
@@ -102,27 +103,29 @@ FINDINGS:
 
 # --- STEPS ---
 
-> A step is in play from when its *start* condition applies until its *finished* conditions are fully met; multiple steps can be in play at once.
+> Steps are universal and standalone.
 >
->- Fully meet a step's *step finished when* conditions before considering it done.
->- *Do this next* guidance, when present, points the way onward; a step's own start condition is what admits it.
->- If a step cannot be completed, move to the step that handles the condition/error.
->- Steps loop back and stay in play while others run, this is intended. Keep going until you finish a step that ends the skill.
->- A step may fold in a handover doc: follow its steps as sub-steps of that master step, which handles their exits and errors; when they are done, keep going with the master step.
+>- All their work, instructions and rules are self-contained.
+>- Invoke a step any time its *start* conditions are met.
+>- A step is completed only when all its *finished* conditions are met.
+>- A step that cannot be completed falls to the error drain step.
+>- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
+>- References are inline, using Markdown link styling. Always load a cited reference.
+>- Multiple active steps, looping back, and dormant steps are all valid patterns.
 
 ## +Resolve the Brief
 
 Turn the invocation into a readable document and an acceptance test to run.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 An invocation has arrived and the document is not yet in hand.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The document at the passed path is read in full, and an acceptance test is in hand — supplied by the invoker, or derived from the document's apparent purpose and marked as derived.
 
-#### Do this next:
+#### Suggested next actions:
 
 A path that does not resolve to a readable document moves to composing the report.
 
@@ -134,11 +137,11 @@ Read the document at the path given in the `Receives` inputs. When no acceptance
 
 Use the document as its real reader would, before judging it line-by-line.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The document is in hand with an acceptance test, and no cold run has been recorded.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The acceptance test has been walked end to end and every stall point — each place the walk guessed, invented, or could not continue — is recorded as a finding.
 
@@ -155,11 +158,11 @@ Every stall point is a finding.
 
 Put every passage to the seven asks.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 A cold run has been recorded and the passage sweep is not complete.
 
-#### Step finished when:
+#### Step finished when these are true:
 
 Every passage has been put to each ask in the `Defect Classes` reference, every path and reference the document names has been mechanically checked, and each fail is recorded as a finding with its class, location, problem, and fix direction.
 
@@ -171,19 +174,19 @@ Read the document passage by passage against the `Defect Classes` reference — 
 
 Present the audit's outcome to the invoking agent — the exit for reviews, failed runs, and difficulties alike.
 
-#### Start this step when:
+#### Start this step when these are true:
 
 The sweep is complete and the findings are assembled — or a condition no other step covers means no review can be produced (an unresolvable path, an unreadable document, a request outside a single-document audit).
 
-#### Step finished when:
+#### Step finished when these are true:
 
 The report is returned as the final message text — a review per the `Report Format`, or a plain statement of why no review was possible.
 
-#### Do this next:
+#### Suggested next actions:
 
 Finish your turn.
 
-#### Invariants:
+#### Step invariants:
 
 **DO NOT** rewrite the document or include rewritten passages — fix directions only.
 
@@ -193,8 +196,6 @@ Assemble the recorded findings per the `Report Format` reference and choose the 
 
 # --- TERMS ---
 
-Terms used in this agent:
-
-: **Acceptance Test**: The test a review runs the document against — "an agent given only this document and prompt X should produce Y". Supplied by the invoker or derived from the document's apparent purpose.
-: **Stall Point**: A place in the cold run where the walk guessed, invented, or could not continue. Always a finding.
-: **Borderline**: A finding that would not cause a wrong action or wrong answer; it is reported but does not force `revise`.
+- **Acceptance Test** — The test a review runs the document against — "an agent given only this document and prompt X should produce Y". Supplied by the invoker or derived from the document's apparent purpose.
+- **Stall Point** — A place in the cold run where the walk guessed, invented, or could not continue. Always a finding.
+- **Borderline** — A finding that would not cause a wrong action or wrong answer; it is reported but does not force `revise`.

@@ -40,9 +40,9 @@ Extract each hit into the **step candidates** list, phrased as work ("interview 
 
 Small self-contained logic inside a reference is tolerable (the interpreter is an agent), but every hit above should at least be weighed — the audit exists because unextracted work is the most common conversion defect.
 
-Two carve-outs to the audit:
+Two notes on handovers:
 
-- A reference file whose frontmatter is already `type: handover` is a **handover doc**, not a reference — its steps and logic are its job, so it is not mined for embedded work. Record it in the set as a handover and note which step folds it in.
+- **A handover is never a reference, so it is never mined.** A handover doc carries the `harness-format: DraftHorse, Handover` stamp, a `-handover` filename suffix, and sits in the skill's root folder — its steps and logic are its job. Record it in the set as a handover and note which parent step folds it in. The audit has **no carve-out inside `references/`**: that folder holds data, so a stamped file found there is a signal mismatch and a defect, not an exempt handover.
 - A hit (or cluster of hits) that is all work and looks heavy, optional, or side-branching may be **handover-shaped**: extract it into the step candidates like any other work, but flag the cluster as a possible handover extraction. The call is made while shaping the map — the smells and the how-to live in `step-splitting.md`.
 
 ## Output of this phase

@@ -45,4 +45,9 @@ Ask of each passage — is this addressing someone deciding whether to read, ins
 
 Remedy: move it to the document's invocation surface, or delete it.
 
+## Sharp Language
+
+Durability is enhanced by **always** writing in sharp, direct, simple language. Agent's prose must be descriptive but also concise.
+Instruct the **How**, do not explain the **Why**.
+
 ---
