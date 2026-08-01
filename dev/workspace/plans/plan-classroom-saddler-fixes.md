@@ -1,6 +1,8 @@
 # Plan: Classroom Saddler Fixes
 
-Status: Ready — deferred. Source: the wave-4 saddler acceptance run against `extensions/skills/classroom/SKILL.md` (2026-07). These are findings against the classroom DOCUMENT, not the framework — the framework and checker are settled; classroom was simply the migrated skill the saddler was pointed at, and it surfaced real routing defects. Fix as its own task; classroom is an independently versioned plugin, so this rides its own release.
+Status: **DONE (2026-08-01).** All findings below applied, then verified by three saddler runs through the released `agent-tools` plugin — `revise`/8, `revise`/2, then **`pass`**. Each run's new findings were fixed before the next. Outcomes, deviations, and the borderline items left standing are recorded in the wave-5 entry of [00-INDEX.md](00-INDEX.md). One deviation of note: `vetted-video-channels.md`'s empty `Channel` column was REMOVED rather than populated — the row name is now the search key, since every link is verified live at build time anyway.
+
+Original status: Ready — deferred. Source: the wave-4 saddler acceptance run against `extensions/skills/classroom/SKILL.md` (2026-07). These are findings against the classroom DOCUMENT, not the framework — the framework and checker are settled; classroom was simply the migrated skill the saddler was pointed at, and it surfaced real routing defects. Fix as its own task; classroom is an independently versioned plugin, so this rides its own release.
 
 ## Context
 
