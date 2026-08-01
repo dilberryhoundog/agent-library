@@ -4,19 +4,22 @@ DraftHorse is a method for writing SKILL.md (and kindred agent documents) as **s
 
 This folder is the **framework**: the normative reference for writing DraftHorse documents. It is a toolbox of primitives, each describing its own place and purpose, so a builder can reach for the right tool with intent rather than copying an example.
 
-## The five layers (read in this order)
+## The six layers (read in this order)
 
-1. **[Scaffold](scaffold.md)** — the five frame parts every document is built on. The vessel you fill, shown first.
+1. **[Scaffold](scaffold.md)** — the five utilities every document is built on. The vessel you fill, shown first.
 2. **[Notation](notation.md)** — the small set of markings layered on plain markdown: the invariant form and the structural labels.
 3. **[Steps](steps.md)** — the self-contained unit of work: its anatomy, its start/finished conditions, the exit and error steps, and the universal preamble.
 4. **[References](references.md)** — how steps reach data: internal, external, data-load, external-call.
 5. **[Conventions](conventions.md)** — the bucket of laws and idioms that make a valid document a good one.
+6. **[Surfaces](surfaces.md)** — where a document's work is delivered: skill file, sub agent, child skill, handover. Read once the grammar is in hand.
 
 ## Document variants
 
-The five layers describe the default document — a skill. One variant reuses them all with a small set of deltas:
+<!-- TODO: Drafthorse is often placed in agent body also, so default is not the only "skill" -->
 
-- **[Handover](handover.md)** — a `type: handover` document: a self-contained sub-procedure a master step folds into the run as sub-steps, extracting heavy or optional work so it does not bloat the parent. Same scaffold and steps; the master step owns the logic around it.
+The six layers describe the default document — a skill. One variant reuses them all with a small set of deltas:
+
+- **[Handover](handover.md)** — a `harness-format: DraftHorse, Handover` document: a self-contained sub-procedure a parent step folds into the run as child steps, extracting heavy or optional work so it does not bloat the parent. Same scaffold and steps; the parent step owns the logic around it, and the child steps open with the handover-variant preamble.
 
 ## Downstream consumers
 
