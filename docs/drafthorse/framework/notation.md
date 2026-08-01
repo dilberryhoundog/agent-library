@@ -8,10 +8,11 @@ Notation is the small set of markings DraftHorse layers on top of plain markdown
 
 - `**DO NOT** / **ALWAYS** / **NEVER** …` → rule — the invariant form: a bolded imperative keyword followed by the rule it enforces. The keyword family is open (`**ENSURE**`, `**USE**`, and kin are valid); `DO NOT` / `ALWAYS` / `NEVER` are the core set.
 
-**Condition links**
+## Condition Lists
 
-- A condition list is implicitly conjunctive — every condition in the list holds. `**AND**` is never written.
-- `**OR these are true:**` — the sole separator, standing on its own line between two condition lists to make them alternatives. Each list ANDs within itself; the lists OR against each other. No precedence rules exist. The wording echoes the machinery headings, so the heading and the separator state the same semantics.
+- A condition block is a markdown list, and every condition is its own list item.
+- A condition list is implicitly conjunctive — every condition in the list holds. `**AND**` is implied, not written.
+- `**OR these are true:**` — the sole separator, standing on its own line between two condition lists to make them alternatives. Each list ANDs within itself; the lists OR against each other. No precedence rules exist.
 
 ```
 #### Start this step when these are true:
