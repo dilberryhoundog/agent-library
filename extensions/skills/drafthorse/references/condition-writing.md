@@ -18,6 +18,8 @@ A condition list is implicitly conjunctive — every grouped condition holds. `*
 - the report is unchanged
 ```
 
+Split conditions down until each item answers to a single look. One item, one observation, one true-or-false verdict — if deciding an item means checking two separate things about the world, it is two conditions. "A report has arrived and no verdict is recorded" reads as one sentence but takes two looks, so it is two items; "the report is unchanged" takes one look and stands alone.
+
 Reach for the separator sparingly. Two alternative entry states often mean two steps, each with a sharp condition of its own — split before separating.
 
 ## Start conditions (`Start this step when these are true:`)

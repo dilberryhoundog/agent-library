@@ -36,6 +36,7 @@ Mechanical form checks — each is pass/fail by inspection:
 - **Machinery headings** — `#### Start this step when these are true:` and `#### Step finished when these are true:` present on every step, in that order; `#### Agent decision:`, `#### Suggested next actions:` and `#### Step invariants:` optional, in that order after them. All H4, exact wording.
 - **Engagement heading** — one H3 named for the work opens each step's body, below the machinery; the work may structure itself with H4 sub-headings of its own.
 - **Invariant form** — every invariant (global or step-scoped) is a bolded capitalised imperative keyword followed by its rule (`**DO NOT** …`, `**ALWAYS** …`, `**NEVER** …`; the keyword family is open). Nothing that is not a rule may wear the bold-caps form.
+- **Condition block shape** — the conditions to start or finish a step are always a markdown list, one condition per list item, separated if necessary by the `**OR these are true:**` separator. A paragraph or prose-based statement is a finding.
 - **Condition links** — a condition list is implicitly conjunctive; `**AND**` is never written and its presence is a finding. The sole separator is `**OR these are true:**`, exact wording, standing on its own line between two condition lists.
 - **Dividers** — exactly `# --- REFERENCES ---`, `# --- STEPS ---`, `# --- TERMS ---`.
 - **Preamble verbatim** — the steps section opens with a preamble copied unchanged. **Two preambles are legitimate**; a document is checked against the one that fits it, and the wrong one is a finding. A skill or agent document takes the universal preamble:
@@ -63,7 +64,7 @@ A handover takes the handover-variant preamble instead — the universal one rou
 - **In-block labels** — `=== Mini Heading ===` is a lightweight label, lighter than an H4. It is legal anywhere inside a References entry — labelling a code block, a table, a list, or dividing a long entry into named parts. It is a finding only where it stands in for a document-structural heading: outside a References entry, or in place of a step's machinery or engagement heading.
 - **Terms form** — term entries are bolded list entries with Title Case names (`- **Term** — definition`); the `:` definition prefix is retired and its presence is a finding. References entries are also Title Case.
 - **Handover citation form** — a handover is cited as `[Name — Handover](name-handover.md)`, em-dash spacing exact. This is the only legal citation; a bare link to a handover file is a finding.
-- **Citations are links** — every citation of a file or folder the step uses is a Markdown link, never a backticked path. Link text is derived from the name: extension stripped, dashes and underscores become spaces, each word capitalised, and any deliberate casing in the filename kept (`SKILL-template.md` → `[SKILL Template]`). A folder a step lists and picks from is cited as a link to the folder, trailing slash included.
+- **Reference citations are links** — every citation of a reference (file, folder or heading) uses Markdown link notation. File link text is derived from the name: extension stripped, dashes and underscores become spaces, each word capitalised, and any deliberate casing in the filename kept (`SKILL-template.md` → `[SKILL Template]`). A folder reference is cited as a link to the folder, trailing slash included. Heading reference text should mirror the heading, the link is downcased and dash separated.
 - **Relative paths resolve from the citing file** — the target is the path a reader of *that* document must follow, so a document nested below the skill root reaches back with `../`. A skill-root-relative path written from a nested file is a broken link and a finding. Resolve each target against the citing file's own location before passing it.
 
 ## Frontmatter Checks
@@ -75,7 +76,7 @@ Three concerns live in frontmatter, plus the format stamp; check each against th
 - **Identity** — `name` present; `description` is invocation-shaped: a model-invoked document sells its usage and states its trigger conditions to an agent; a user-invoked document carries a short human summary kept out of agent context; an executor-only document says so and warns off general usage. Wrong-audience description is a finding.
 - **Invocation surface** — `disable-model-invocation` / `user-invocable` match the role. An executor document reachable sideways (model-invocable) is a defect; a front-door document the user must enter is user-invocable.
 - **Permissions** — `allowed-tools` (or agent `tools`) match what the steps actually do; grants transfer to a sub-agent that invokes the document, so permissions may be delivered at the step that needs them rather than held globally. A grant no step uses is a finding.
-- **Handover variant** — a document whose frontmatter is the single line `harness-format: DraftHorse, Handover` is a handover; skip the identity, invocation, and permission checks above for it and audit it under `Handover Checks` instead.
+- **Handover variant** — a document whose frontmatter is the single line `harness-format: DraftHorse, Handover` is a handover; skip the identity, invocation, and permission checks above for it and audit it under [Handover Checks](#handover-checks) instead.
 
 ## Handover Checks
 
@@ -98,6 +99,8 @@ A **handover** is a `harness-format: DraftHorse, Handover` document folded into 
 The conditions carry all the routing a wired graph would; a weak condition is a broken edge. Responsibility is strictly divided: start conditions carry the routing, finished conditions carry only their own step's completion criteria, *suggested next actions* is the only sanctioned cross-step reference — an optional pointer, never the routing mechanism.
 
 **Steps are universal.** Every step watches its own start condition at all times, so steps need not chain and more than one may be in play at once. A document is not a defect for lacking a chain; a check that assumes sequence is wrong.
+
+- **One condition per item** — each list item states a single fact the agent settles with one look. The test: to decide this item, how many separate things must be observed? Two observations is two conditions, whatever the sentence shape — "a report has arrived and no verdict is recorded" is two items. Where the shared subject makes a compound answer to one look ("the report is unchanged"), it stands. This is shape, judged before the semantic tests below and across both start and finished blocks.
 
 === Start conditions ===
 
@@ -137,10 +140,10 @@ The conditions carry all the routing a wired graph would; a weak condition is a 
 ## Reference Checks
 
 - **Data, not work** — references hold constants, maps, formats, facts; work lives in steps. Small self-contained logic is tolerable (the interpreter is an agent), but a reference with ordered actions or branching is work asking to be extracted to a step.
-- **Embedded-work tells** — a reference should be data an agent *reads*, not work an agent *does*. Scan each for the tells of hidden work: ordered actions ("first…, then…"), conditionals ("if…, otherwise…"), interaction ("ask the user"), or judgment calls ("decide whether", "verify that"). Such work in a `references/` file is a finding — it belongs in a step or an extracted handover. **The check has no carve-out**: a stamped handover found in `references/` is a signal mismatch (see `Handover Checks`), not an exempt file.
+- **Embedded-work tells** — a reference should be data an agent *reads*, not work an agent *does*. Scan each for the tells of hidden work: ordered actions ("first…, then…"), conditionals ("if…, otherwise…"), interaction ("ask the user"), or judgment calls ("decide whether", "verify that"). Such work in a `references/` file is a finding — it belongs in a step or an extracted handover. **The check has no carve-out**: a stamped handover found in `references/` is a signal mismatch (see [Handover Checks](#handover-checks)), not an exempt file.
 - **Authoring guides** — a reference may teach an agent *how* to do a step's work — judgment, criteria, technique — without becoming work itself. The test is structural: **does the file carry steps with their own start and finished conditions?** If it does not, it is data the citing step reads, and the tells above do not condemn it. If it does, it is a procedure and belongs in a step or a handover. Applying the embedded-work tells to a guide that carries no step contract is a false positive.
 - **Inline vs external** — compact and always-relevant context inline in the References section; expansive and sometimes-relevant context in an external file loaded when a step calls it. Misplacement either way is a finding.
-- **Handover references** — a cited handover is audited under `Handover Checks`, not as a reference (its steps and logic are not embedded-work findings). Check only the pairing here: the handover's work is compatible with the starting and finishing criteria of the invoking parent step — the start condition admits the fold-in, and the finished condition can read the state the handover leaves behind. An incompatible pairing is a finding on the parent step.
+- **Handover references** — a cited handover is audited under [Handover Checks](#handover-checks), not as a reference (its steps and logic are not embedded-work findings). Check only the pairing here: the handover's work is compatible with the starting and finishing criteria of the invoking parent step — the start condition admits the fold-in, and the finished condition can read the state the handover leaves behind. An incompatible pairing is a finding on the parent step.
 - **Moment-of-use citation** — a step cites a reference inside the sentence that needs it, or inside a finished condition to make it binding — never as a list at the top of a step. Each external file's citation moment must actually match what the file holds.
 - **No dead weight** — a reference unused in a step is dead weight; a step citing no reference may be missing its data. Flag both. A **folder-level citation** ("apply the `references/pedagogy/` file matching the learner") discharges the obligation for every file it can resolve to, including files reached only on some runs — a conditionally-reached file in a cited folder is used, not dead weight.
 - **Invoked, not just named** — every external unit (an external reference file or a handover) must be actually loaded or folded in by a step inline. A step that name-drops an external without invoking it, or an external nothing invokes, is a finding.
@@ -205,7 +208,7 @@ A run that cannot proceed moves straight to composing the report.
 
 ### Gather:
 
-Read the named document. Collect every path it cites (external references, assets, templates) and read each; a cited file that does not exist is recorded now as an `Installable citations` finding, not silently skipped. A cited file carrying `harness-format: DraftHorse, Handover` is recorded as a handover doc, to be audited under `Handover Checks` rather than as a reference.
+Read the named document. Collect every path it cites (external references, assets, templates) and read each; a cited file that does not exist is recorded now as an `Installable citations` finding, not silently skipped. A cited file carrying `harness-format: DraftHorse, Handover` is recorded as a handover doc, to be audited under [Handover Checks](#handover-checks) rather than as a reference.
 
 Resolve the handover set from both directions: glob `*-handover.md` at the skill root, and collect every handover citation in the document. Record any disagreement between the two — a citation with no file, or a file nothing cites.
 
@@ -221,11 +224,11 @@ The document set is assembled and the frame has not been checked.
 
 #### Step finished when these are true:
 
-Every test in `Scaffold Checks`, `Notation Checks` and `Frontmatter Checks` has been applied to the document and each failure recorded as a finding.
+Every test in [Scaffold Checks](#scaffold-checks), [Notation Checks](#notation-checks) and [Frontmatter Checks](#frontmatter-checks) has been applied to the document and each failure recorded as a finding.
 
 ### Lint:
 
-Sweep the document top to bottom against the check groups. These are mechanical pass/fail inspections — check the preamble word for word against the variant that fits the document, the machinery headings' exact text and order, the invariant form of every bold-caps token, the condition-list separator, the terms form, and the frontmatter fields against the document's actual role. `Handover Checks` are not applied here; they belong to the handover audit.
+Sweep the document top to bottom against the check groups. These are mechanical pass/fail inspections — check the preamble word for word against the variant that fits the document, the machinery headings' exact text and order, the invariant form of every bold-caps token, the condition-block list shape and the condition-list separator, the terms form, and the frontmatter fields against the document's actual role. [Handover Checks](#handover-checks) are not applied here; they belong to the handover audit.
 
 ## +Audit the References
 
@@ -237,7 +240,7 @@ The document set is assembled and the references (inline and external) have not 
 
 #### Step finished when these are true:
 
-Every test in `Reference Checks` has been applied to every reference in the set — every embedded-work tell weighed, every citation's moment verified against what the cited file holds, dead weight and missing data flagged — and each failure recorded as a finding.
+Every test in [Reference Checks](#reference-checks) has been applied to every reference in the set — every embedded-work tell weighed, every citation's moment verified against what the cited file holds, dead weight and missing data flagged — and each failure recorded as a finding.
 
 ### Sweep the Data:
 
@@ -253,11 +256,11 @@ The document set is assembled and the steps have not been audited.
 
 #### Step finished when these are true:
 
-Every test in `Condition Checks` and `Step-Shape Checks` has been applied to every step — including the exit steps and the error drain — and each failure recorded as a finding.
+Every test in [Condition Checks](#condition-checks) and [Step-Shape Checks](#step-shape-checks) has been applied to every step — including the exit steps and the error drain — and each failure recorded as a finding.
 
 ### Test Each Step:
 
-Take the steps one at a time: purpose line, start condition (state terms, de-hold), finished condition (checkable, exhaustive, own-step-only, compound if a gate), do-this-next (points without restating, contradicts nothing), invariants (behaviour-changing, correctly scoped), standalone test, sizing smells. Then judge the set as a whole: negative space claimed, exit steps present, half-applied state bailed to the user rather than re-run, error drain whole or explicitly folded, and the `Document-Wide Checks` swept over everything.
+Take the steps one at a time: purpose line, start condition (state terms, de-hold), finished condition (checkable, exhaustive, own-step-only, compound if a gate), do-this-next (points without restating, contradicts nothing), invariants (behaviour-changing, correctly scoped), standalone test, sizing smells. Then judge the set as a whole: negative space claimed, exit steps present, half-applied state bailed to the user rather than re-run, error drain whole or explicitly folded, and the [Document-Wide Checks](#document-wide-checks) swept over everything.
 
 ## +Audit the Handovers
 
@@ -269,7 +272,7 @@ The document set is assembled, a handover is present in it — cited by the docu
 
 #### Step finished when these are true:
 
-Every test in `Handover Checks` has been applied to every handover in the set — the three signals verified, the identity paragraph checked, globals checked against the parent document and the parent step only, tool use swept into the parent's permission check, and each citation's pairing tested against its parent step's start and finished conditions — and each failure recorded as a finding labelled by the file it lands on.
+Every test in [Handover Checks](#handover-checks) has been applied to every handover in the set — the three signals verified, the identity paragraph checked, globals checked against the parent document and the parent step only, tool use swept into the parent's permission check, and each citation's pairing tested against its parent step's start and finished conditions — and each failure recorded as a finding labelled by the file it lands on.
 
 #### Suggested next actions:
 
@@ -311,7 +314,7 @@ The scenario-walk is complete and all findings are recorded, or a failure (unres
 
 #### Step finished when these are true:
 
-A report in the `Report Format` — verdict, scenario-walk account, every recorded finding with its check name and fix direction — is returned as the final message; an ended run's report states plainly why the review could not proceed.
+A report in the [Report Format](#report-format) — verdict, scenario-walk account, every recorded finding with its check name and fix direction — is returned as the final message; an ended run's report states plainly why the review could not proceed.
 
 #### Suggested next actions:
 
@@ -319,7 +322,7 @@ Finish the review and return to the caller.
 
 ### Compose:
 
-Assemble every finding recorded across the audit steps, deduplicate (one defect, one finding — cite the single best location), order per the `Report Format` rule, choose the verdict by its rule, and return the report as message text.
+Assemble every finding recorded across the audit steps, deduplicate (one defect, one finding — cite the single best location), order per the [Report Format](#report-format) rule, choose the verdict by its rule, and return the report as message text.
 
 # --- TERMS ---
 
