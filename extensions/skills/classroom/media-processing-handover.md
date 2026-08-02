@@ -6,11 +6,6 @@ harness-format: DraftHorse, Handover
 
 Supply verified, fallback-backed media links for the concepts in a build that includes media. A parent step folds this in whenever a build needs media (currently video).
 
-# Agent Invariants
-
-**NEVER** invent a URL or assume one from memory — every link is confirmed against a live search before it is used.
-**ALWAYS** supply 2–3 alternatives per concept, so a single dead link is never a dead lesson.
-
 # --- REFERENCES ---
 
 ## Durable Link Forms
@@ -46,11 +41,17 @@ For each concept, build a small set of durable candidate links and prove each on
 
 #### Start this step when these are true:
 
-A build needs media for one or more concepts, and those concepts are not yet resolved — neither verified links nor a *no suitable media* mark against them.
+- a build needs media for one or more concepts
+- those concepts are not yet resolved — neither verified links nor a *no suitable media* mark against them
 
 #### Step finished when these are true:
 
-Every concept has either 2–3 live-verified links in preferred-durable form, or is marked *no suitable media* after a real search turned up nothing usable — with no unverified or invented link left in the set.
+- every concept has either 2–3 live-verified links in preferred-durable form, or is marked *no suitable media* after a real search turned up nothing usable
+
+#### Step invariants:
+
+**NEVER** invent a URL or assume one from memory — every link is confirmed against a live search before it is used.
+**NEVER** leave a concept resting on a single link.
 
 ### Build and Prove the Set:
 

@@ -87,11 +87,21 @@ Make sure a classroom project is set up here before building anything.
 
 #### Start this step when these are true:
 
-Classroom work has been requested and no classroom context is confirmed for the current working directory.
+- classroom work has been requested
+- no classroom context is confirmed for the current working directory
 
 #### Step finished when these are true:
 
-The classroom signal is confirmed present, or a classroom has just been bootstrapped here, or the user has chosen not to set one up — and in that last case nothing has been written.
+- the classroom signal is confirmed present
+
+**OR these are true:**
+
+- a classroom has just been bootstrapped here
+
+**OR these are true:**
+
+- the user has chosen not to set one up
+- nothing has been written
 
 #### Suggested next actions:
 
@@ -115,11 +125,18 @@ Identify the learner, load their configuration and course state, and settle what
 
 #### Start this step when these are true:
 
-A classroom context is confirmed and the learner, their configuration, and the run's intent are not yet established.
+- a classroom context is confirmed
+- the learner is not yet established
+- the learner's configuration is not yet established
+- the run's intent is not yet established
 
 #### Step finished when these are true:
 
-The learner is identified; `global-requirements.md`, the learner's `students/` file, and any prior course state in `CLAUDE.md` have been read; and the run's intent — a new build, continuing a course, or marking completed work — is settled with the user.
+- the learner is identified
+- `global-requirements.md` has been read
+- the learner's `students/` file has been read
+- any prior course state in `CLAUDE.md` has been read
+- the run's intent — a new build, continuing a course, or marking completed work — is settled with the user
 
 #### Suggested next actions:
 
@@ -135,11 +152,13 @@ Grade completed work the user has supplied and get a review delivered.
 
 #### Start this step when these are true:
 
-The run's intent is to mark completed work the user has supplied, and no review has yet been delivered for it.
+- the run's intent is to mark completed work the user has supplied
+- no review has yet been delivered for it
 
 #### Step finished when these are true:
 
-A review has been produced for the supplied work and its saved location is known.
+- a review has been produced for the supplied work
+- its saved location is known
 
 #### Suggested next actions:
 
@@ -155,11 +174,14 @@ Gather the source material the build will draw on and save it as a durable cours
 
 #### Start this step when these are true:
 
-The run is a build and its subject matter has not been gathered.
+- the run is a build
+- its subject matter has not been gathered
 
 #### Step finished when these are true:
 
-Material the user has supplied is saved to the course's `matter/` folder, and optional grounding research has been offered and — if taken — the chosen candidates it returned have been saved there too.
+- material the user has supplied is saved to the course's `matter/` folder
+- optional grounding research has been offered
+- any candidates chosen from that research, if it was taken, are saved to `matter/` too
 
 ### Gather and Save the Matter:
 
@@ -171,11 +193,13 @@ Agree the structure with the user before producing any documents.
 
 #### Start this step when these are true:
 
-The subject matter is in hand and the build's structure has not been aligned with the user.
+- the subject matter is in hand
+- the build's structure has not been aligned with the user
 
 #### Step finished when these are true:
 
-The proposed structure has been stated and the few genuinely-undecided points — page features, how weeks cluster, delivery order — have been settled with the user.
+- the proposed structure has been stated
+- the few genuinely-undecided points — page features, how weeks cluster, delivery order — have been settled with the user
 
 ### Align Before Building:
 
@@ -187,11 +211,14 @@ Pick the course and lesson shapes by enumerating what actually exists.
 
 #### Start this step when these are true:
 
-The build is aligned and the course and lesson shapes have not been chosen.
+- the build is aligned
+- the course and lesson shapes have not been chosen
 
 #### Step finished when these are true:
 
-The governing shape(s) are chosen with the user — which shape governs which part, and how any wrapper applies — from the shapes present in the template folders.
+- the governing shape(s) are chosen with the user, from the shapes present in the template folders
+- which shape governs which part is settled
+- how any wrapper applies is settled
 
 ### Enumerate and Choose:
 
@@ -205,11 +232,16 @@ Produce one unit's documents to the governing format — the shared assembly wor
 
 #### Start this step when these are true:
 
-A unit — the sample or a subsequent one — needs its documents and they are not yet assembled to the governing format.
+- a unit — the sample or a subsequent one — needs its documents
+- they are not yet assembled to the governing format
 
 #### Step finished when these are true:
 
-The unit's documents are built from the chosen shapes, every concept's media verified or marked no-suitable-media, each document's HTML written to `source/` and delivered — either converted to A4 PDF whose conversion report matches the document's intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected — `standard` unless the document declares its own `@page` — and no unresolved layout flags), or handed over as a print-ready standalone where the renderer cannot run — and the result satisfies the invariants.
+- the unit's documents are built from the chosen shapes
+- every concept's media is verified or marked no-suitable-media
+- each document's HTML is written to `source/`
+- each document is delivered — either converted to A4 PDF whose conversion report matches the document's intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected — `standard` unless the document declares its own `@page` — and no unresolved layout flags), or handed over as a print-ready standalone where the renderer cannot run
+- the result satisfies the invariants
 
 #### Step invariants:
 
@@ -226,11 +258,14 @@ Deliver a finished document as a print-ready file when the PDF renderer cannot r
 
 #### Start this step when these are true:
 
-A document's HTML is written to `source/`, the `html_to_pdf` tool is unavailable on this host (absent, or unable to bring up its engine), and the document has no current fallback delivery — none produced yet, or its `source/` HTML has changed since the last standalone was written.
+- a document's HTML is written to `source/`
+- the `html_to_pdf` tool is unavailable on this host — absent, or unable to bring up its engine
 
 #### Step finished when these are true:
 
-The document has been delivered as a self-contained, print-ready standalone — the injected geometry inlined into a delivery copy, the `source/` HTML left untouched — and the user has been told how to produce the A4 PDF from it.
+- a print-ready standalone reflecting the current `source/` HTML has been delivered, with the injected geometry inlined into a delivery copy
+- the `source/` HTML is left untouched
+- the user has been told how to produce the A4 PDF from it
 
 #### Suggested next actions:
 
@@ -246,11 +281,14 @@ Produce a sample and get its format approved before mass production.
 
 #### Start this step when these are true:
 
-The shapes are chosen, the build is larger than a single lesson, and no current sample format is approved.
+- the shapes are chosen
+- the build is larger than a single lesson
+- no current sample format is approved
 
 #### Step finished when these are true:
 
-The scope-and-sequence and one complete sample unit are built — each conversion report matching intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected, no unresolved layout flags) — and the user has explicitly approved the format.
+- the scope-and-sequence and one complete sample unit are built, each conversion report matching intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected, no unresolved layout flags)
+- the user has explicitly approved the format
 
 #### Suggested next actions:
 
@@ -266,11 +304,12 @@ Build the rest of the course to the approved format.
 
 #### Start this step when these are true:
 
-A sample format has been approved and has not since been revised, and units remain unbuilt.
+- a sample format has been approved and has not since been revised
+- units remain unbuilt
 
 #### Step finished when these are true:
 
-Every remaining unit has been built to the approved format.
+- every remaining unit has been built to the approved format
 
 #### Suggested next actions:
 
@@ -290,11 +329,15 @@ Save what a response produced, update the project's status, and report honestly.
 
 #### Start this step when these are true:
 
-A build or mark response has produced deliverables that are not yet recorded in the `CLAUDE.md` status notes and presented to the user.
+- a build or mark response has produced deliverables
+- those deliverables are not yet recorded in the `CLAUDE.md` status notes
+- those deliverables are not yet presented to the user
 
 #### Step finished when these are true:
 
-The finished files are saved to the project's working-outputs location, the `CLAUDE.md` status notes reflect what now exists and what remains, and the user has been given an honest done-and-remaining summary.
+- the finished files are saved to the project's working-outputs location
+- the `CLAUDE.md` status notes reflect what now exists and what remains
+- the user has been given an honest done-and-remaining summary
 
 #### Step invariants:
 
@@ -310,11 +353,18 @@ Report the run's outcome and end the skill.
 
 #### Start this step when these are true:
 
-The run's intent is fully satisfied — a build built and recorded, work marked and presented, or a setup-only request completed — or the user has chosen to stop (declined setup, or ended the run), and nothing remains to do.
+- the run's intent is fully satisfied — a build built and recorded, work marked and presented, or a setup-only request completed
+- nothing remains to do
+
+**OR these are true:**
+
+- the user has chosen to stop — declined setup, or ended the run
+- nothing remains to do
 
 #### Step finished when these are true:
 
-A closing summary has been given and the skill is complete.
+- a closing summary has been given
+- the skill is complete
 
 #### Suggested next actions:
 
@@ -330,11 +380,18 @@ Surface anything the other steps don't cover, and decide with the user how to co
 
 #### Start this step when these are true:
 
-Something has gone wrong, or a situation has arisen that no other step covers — a missing or corrupt `global-requirements.md`, a failed PDF conversion, a handover doc's work that could not complete, or requirements that contradict a build invariant.
+- something has gone wrong
+
+**OR these are true:**
+
+- a situation has arisen that no other step covers
+
+Either case covers a missing or corrupt `global-requirements.md`, a failed PDF conversion, a handover doc's work that could not complete, or requirements that contradict a build invariant.
 
 #### Step finished when these are true:
 
-The user has been informed of what happened and what state the build is in, and has decided how to continue.
+- the user has been informed of what happened and what state the build is in
+- the user has decided how to continue
 
 #### Suggested next actions:
 

@@ -33,11 +33,14 @@ Read the learner's work against the unit and grade it strand by strand.
 
 #### Start this step when these are true:
 
-The user has supplied a learner's completed or annotated work for a unit, and it has not yet been assessed.
+- the user has supplied a learner's completed or annotated work for a unit
+- it has not yet been assessed
 
 #### Step finished when these are true:
 
-Every strand of the unit is resolved — graded with the evidence behind it, or marked *work not supplied* where that strand's work is missing — the learner's strengths are identified, and specific next-step recommendations are drawn, all grounded in the supplied work.
+- every strand of the unit is resolved — graded with the evidence behind it, or marked *work not supplied* where that strand's work is missing
+- the learner's strengths are identified
+- specific next-step recommendations are drawn
 
 ### Grade Against the Unit:
 
@@ -49,11 +52,13 @@ Render the assessment into the review document and save it.
 
 #### Start this step when these are true:
 
-The unit has been assessed strand by strand and no review document has been produced from that assessment.
+- the unit has been assessed strand by strand
+- no review document has been produced from that assessment
 
 #### Step finished when these are true:
 
-The `Review Document Template` shell has been filled with the assessment and delivered as a saved document per the `Document Pipeline`.
+- the `Review Document Template` shell has been filled with the assessment
+- it has been delivered as a saved document per the `Document Pipeline`
 
 ### Fill and Save:
 

@@ -29,11 +29,15 @@ Turn a geometry-less source document into a file that prints correctly from a br
 
 #### Start this step when these are true:
 
-A document's HTML is written to `source/`, the renderer cannot run, and no current print-ready standalone exists for it — none produced yet, or the `source/` HTML has changed since the last one was written.
+- a document's HTML is written to `source/`
+- the renderer cannot run
+- no current print-ready standalone exists for it — none produced yet, or the `source/` HTML has changed since the last one was written
 
 #### Step finished when these are true:
 
-A standalone file sits beside the source (named to mark it a delivery copy, e.g. `workbook.print.html` next to `workbook.html`) with the geometry base inlined as the first `<style>` in its `<head>`, the `source/` HTML is unchanged, and the user has been told to open the standalone and print it to PDF at A4 (Print → Save as PDF, paper A4).
+- a standalone file sits beside the source (named to mark it a delivery copy, e.g. `workbook.print.html` next to `workbook.html`), with the geometry base inlined as the first `<style>` in its `<head>`
+- the `source/` HTML is unchanged
+- the user has been told to open the standalone and print it to PDF at A4 (Print → Save as PDF, paper A4)
 
 #### Step invariants:
 

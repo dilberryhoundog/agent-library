@@ -56,11 +56,13 @@ Lay the project skeleton down at the root.
 
 #### Start this step when these are true:
 
-The user's consent to set up a classroom in the current working directory is confirmed, and the init payload has not yet been copied to the root.
+- the user's consent to set up a classroom in the current working directory is confirmed
+- the init payload has not yet been copied to the root
 
 #### Step finished when these are true:
 
-The payload's whole contents are present at the project root, with any pre-existing `CLAUDE.md` preserved rather than overwritten.
+- the payload's whole contents are present at the project root
+- any pre-existing `CLAUDE.md` is preserved rather than overwritten
 
 #### Step invariants:
 
@@ -76,11 +78,14 @@ Turn the copied skeleton into this family's actual config.
 
 #### Start this step when these are true:
 
-The payload is present at the root and its config files still hold unfilled bracket prompts or starter placeholders.
+- the payload is present at the root
+- its config files still hold unfilled bracket prompts or starter placeholders
 
 #### Step finished when these are true:
 
-`CLAUDE.md`'s bracketed fields (family/classroom name, working-outputs location) are filled from the user and resolved prompts deleted, `global-requirements.md` is either filled with the user or explicitly flagged to them as a starter to complete before the first build, and the optional pre-install of the PDF dependency has been offered and the user's answer taken.
+- `CLAUDE.md`'s bracketed fields (family/classroom name, working-outputs location) are filled from the user and their resolved prompts deleted
+- `global-requirements.md` is filled with the user, or explicitly flagged to them as a starter to complete before the first build
+- the optional pre-install of the PDF dependency has been offered and the user's answer taken
 
 ### Fill the Config:
 
@@ -92,11 +97,12 @@ Optionally pre-install the PDF dependency so the first conversion is fast.
 
 #### Start this step when these are true:
 
-The project is configured and the user has accepted the offer to pre-install the PDF dependency.
+- the project is configured
+- the user has accepted the offer to pre-install the PDF dependency
 
 #### Step finished when these are true:
 
-The dependency is installed via the `Warm the PDF Engine` command.
+- the dependency is installed via the `Warm the PDF Engine` command
 
 ### Pre-install:
 
