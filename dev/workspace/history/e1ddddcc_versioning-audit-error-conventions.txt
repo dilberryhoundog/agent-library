@@ -1,0 +1,760 @@
+Session: e1ddddcc-27a0-498e-9fa3-f3d99f64b28f
+Date: 2026-08-02 08:12
+Branch: main
+CWD: ~/Projects/agent-library
+
+============================================================
+[SUMMARY]
+>>>
+A drafthorse-saddler audit of extensions/skills/versioning/SKILL.md returned "revise" with a routing gap plus notation findings, producing a full fix plan at dev/workspace/plans/versioning-drafthorse-fixes.md.
+The audit missed a convention breach it holds a check for: +Execute handled its own half-applied state via a start-condition resume clause, an inventory-and-continue engagement, and an invariant licensing partial re-application.
+Chasing that defect established that the framework demonstrated hard-bail-on-error three times in steps.md but stated it nowhere as a law; conventions.md gained a two-mode error step (Hard bail and clean up / Claim the remainder) and steps.md received a proposed Dispositions rewrite as an inline comment.
+Applied: list-form condition blocks for both exit steps in SKILL-template.md, the source of prose-condition drift across the library. Also drafted dev/workspace/filebox/steps-preamble-changes.md, proposing deprecation of Suggested next actions in favour of weighted step descriptions with declared step functions.
+Remaining work opened as agent-library issues #36 (finalise conventions), #37 (spec alignment sweep, blocked on #36), #38 (step anatomy refactor and terminology), #39 (saddler set-level check misses), #40 (apply versioning fixes).
+<<<
+------------------------------------------------------------
+
+[USER]    💭: none
+your task is to run versioning skill through the saddler agent.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+**Verdict: revise** — `extensions/skills/versioning/SKILL.md`
+
+**Routing gap (the one that forces revise)**
+
+On a bare invocation, Dispatch defines "requested units" as *every* unit in the config (`:101`), but `+Range` only carries the user's *chosen* subset forward (`:161`). A surveyed unit with pending commits that the user doesn't pick is never released, never declined (decline is `+Propose`-only), never "nothing to release". `+Finish`'s start condition (`:357`) treats those three as exhaustive — so it can never fire whenever fewer than all surveyed units are selected. Fix: narrow "requested units" to the chosen subset after `+Range` selects, or add a fourth terminal disposition.
+
+**Structural findings**
+
+- **Condition blocks are prose, not lists** — all ten steps, both start and finished blocks (`:95-97` through `:379-381`). Spec requires one condition per list item.
+- **Bundled conditions** — `+Preflight` finished (`:139-141`) packs tree-clean + branch-match + gh-auth into one clause; `+Range` finished (`:159-161`) packs range + version + selection.
+- **Missing OR separator** — `+Execute` start (`:274-276`) expresses a fresh-release / resume-after-partial fork in prose without `**OR these are true:**`.
+- **Citations aren't links** — every internal References entry and both external files use bare code-spans (`:73, 77, 101, 105, 129, 149, 263, 313, 346`).
+- **Duplicated gate** — global invariant at `:21` restates what `+Execute`'s start condition already enforces.
+- **Gate not compound** — `+Propose` finished (`:257-259`) states only that the user responded, not that the proposal itself is complete (bump derived, breaking-change floor applied).
+
+**Borderline, noted only:** why-prose on the zsh pathspec invariant (`:20`); near-restatement at `:287`.
+
+Nothing edited. Say the word and I'll work through the fixes.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+write a plan to implement these fixes, show where and what, you intend to do for each one. leave a filled in 'fix this problem' check box under each line. I'll unfill any I don't want fixed, or leave an adjusting comment.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/skills/versioning/SKILL.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/references/condition-writing.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/notation.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/versioning-drafthorse-fixes.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Plan written: `dev/workspace/plans/versioning-drafthorse-fixes.md`
+
+**Nine items, all boxes ticked:**
+
+1. **Routing gap** — `+Range` records unchosen units as "not selected"; `+Finish` starts on the *chosen* set plus "nothing awaiting choice"; the summary lists what wasn't picked.
+2. **Condition blocks → lists** — full proposed rewrite for all ten steps, both blocks each. This is the bulk; it absorbs fixes 1, 3, 4 and 7 where they land in the same block.
+3. **Split bundles** — `+Preflight` finished into three items, `+Range` finished into five. Separate box so you can reject the splitting without rejecting the list conversion.
+4. **`+Execute` OR fork** — two lists joined by the separator; the `+Handle a Problem` cross-reference moves out of the condition block into the resume sub-heading.
+5. **Citations → links** — ten sites listed with exact before/after. Mini headings (`Git Status`, `Today's Date`) stay as code-spans since they carry no anchor.
+6. **Drop duplicated gate** at `:21`, with a narrowed alternative offered if you want a global backstop.
+7. **`+Propose` compound gate** — proposal completeness alongside approval.
+8. **Borderline: zsh rationale** at `:20` — I've argued the counter-case in the plan; this is the one I'd lean toward keeping.
+9. **Borderline: staging restatement** at `:287`.
+
+Also a short "not changing" list at the bottom so you can see what I deliberately left alone.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+before we dive into this ive noted something i need confirming. execute seems to suffer from handling half applied state in the start condition. One of the major convention decisions, is that half applied states be handled in the error drain only. freeing up overhead of each step having to handle errors. essentially every major error is a bail to the user for manual handling.
+is saddler flagging this?
+should saddler flag this? 
+does new draft horse doc come with this convention pre built (so saddler doesn't need to handle it, if we manually fix the existing skills?)
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -rn -i "drain\|half-applied\|half applied\|bail\|error step" docs/drafthorse/framework/ extensions/skills/drafthorse/ extensions/agents/drafthorse-saddler.md extensions/rules/DraftHorse.md | head -60
+Description: 
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/assets/SKILL-template.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n -A4 "when these are true:" extensions/skills/drafthorse/assets/SKILL-template.md | head -60
+Description: 
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Confirmed — and you've caught a real miss. Three answers:
+
+**1. Is saddler flagging it?** No, and it should have. Worse, its scenario-walk actively endorsed the behaviour ("mid-release failure, falling to +Handle a Problem, with careful inventory-before-resume in +Execute ... route correctly"). My Fix 4 then compounded it by proposing the half-applied sentence move *into* `+Execute`'s engagement — the wrong home twice over.
+
+**2. Should it?** Yes — the check already exists, verbatim, at `extensions/agents/drafthorse-saddler.md:136`:
+
+> **Half-applied state bails to the user** — ... Three findings sit here: an error step that surfaces failure without accounting for partial application, a step whose engagement resumes over its own partial work, and a start condition carrying a half-applied exclusion clause — the disposition in the wrong home.
+
+`+Execute` trips two of those three: the start condition carries the resume clause (`:276`), and the engagement resumes over its own partial work (`#### Completing a release that stopped partway`, `:315-327`, including the inventory command block). The invariant at `:288` ("completing a release applies only the artifacts that are missing") is the same convention violation in invariant form. Backing convention: `conventions.md:10`, `steps.md:131` ("Never re-run the step over its own partial work"), `condition-writing.md:59`.
+
+So this is a saddler recall failure on a check it holds, not a spec gap.
+
+**3. Does a new DraftHorse doc get it prebuilt?** Partially — enough to be a trap.
+
+- `drafthorse/SKILL.md:46` carries the convention in the digest, and step 196's scenario walk sweeps that digest.
+- `SKILL-template.md:146` ships the error step with "(half-applied states also)" in the engagement.
+- **But** the template never states the disposition — *never re-run the step over its own partial work, end the run, advise manual repair*. That full text lives only in `steps.md:131`, which a drafting agent following the skill doesn't necessarily open. A new doc can therefore grow exactly `+Execute`'s resume path and pass the template.
+
+**Bonus find while checking:** `SKILL-template.md` writes the exit step's and error step's condition blocks as **prose** (`:110-116`, `:132-138`), while the working-step block (`:60-77`) is correctly a list. That's the origin of Fix 2 — versioning copied the template's error step and the prose habit spread across all ten steps. Fixing the corpus without fixing the template just regrows it.
+
+**What this changes in the plan:** Fix 4 needs rewriting into a deletion — drop `+Execute`'s second OR branch, delete `#### Completing a release that stopped partway` and its inventory block, drop the `:288` invariant, and move the accounting into `+Handle a Problem`'s engagement as a hard-exit disposition. Want me to rewrite that section of the plan, and add the two upstream fixes (template prose conditions, template error-step disposition text) as their own items?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+yes, rewrite fix 4 and add the two template fixes. any other error handling in main steps. also are you saying saddler didn't follow its own checks for error fixes.
+how do we update our build skill to ensure that error handling matches the spec?
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/SKILL.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/SKILL.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/versioning-drafthorse-fixes.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/versioning-drafthorse-fixes.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/versioning-drafthorse-fixes.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Plan updated. Summary of what changed and the three answers:
+
+**Fix 4 rewritten** — it's a deletion now, not a separator. Start condition keeps only the fresh-release list (and de-holds naturally: once any artifact exists, "no part applied yet" is false). Invariant `:288` trims to the safety half, dropping the "apply only the artifacts that are missing" resume licence. `#### Completing a release that stopped partway` (`:315-327`) is deleted whole. The inventory commands survive — relocated to the drain as *accounting*, not as a resume plan. This supersedes the `+Execute` OR fork I wrote under Fix 2.
+
+**Other error handling in main steps — one more real one, one question:**
+
+- **Fix 10, `+Range` `#### Path errors`** (`:217-221`). Same shape as `+Execute`. The engagement's disposition is "leave the unit without a computed range", but the finished condition demands every targeted unit *has* one — so the step quietly becomes uncompletable and only reaches the user via the preamble's fall-to-drain. Keep the diagnostic half (how to tell a wrong path from a quiet unit — that's how-to-work). Cut the disposition half, replace with the reporting the drain needs, and add "an unresolvable unit path" to the drain's start-condition examples.
+- **Fix 11, `+Handle a Problem`** now needs equipping, since it's the sole home. Its *suggested next actions* currently says "Resume the step the user chose" — which invites exactly the re-entry Fix 4 removes. Plus a `#### Half-applied release` sub-heading carrying the moved inventory, the report, and the hard exit.
+- **Question 12, `+Preflight`'s repair loop** (`:137`, `:149`). Same *shape* as `+Execute` — handles its own failure, carries a "failed and has since been repaired" clause. My read: not a breach. Nothing has been applied, so there's no partial state, and a dirty tree is a foreseeable entry state, not an error. Left unticked — tick it only if your convention is broader than half-applied state.
+- Explicitly cleared: `+Breaking Changes` recording a skipped/failed scan (a recorded outcome its finished condition covers exhaustively), and `+Verify` → drain on mismatch (a clean dovetail).
+
+**Did saddler follow its own checks?** No. The check is at `drafthorse-saddler.md:136`, worded almost exactly to catch this, and its own step 283 lists "half-applied state bailed to the user rather than re-run" in the set-level sweep. It ran the sweep and returned nothing on it — then its scenario-walk narrated the resume path as correct routing. Recall failure on a held check, not a spec gap. Worth noting the audit reported `PLAUSIBLE`-grade style findings in volume while missing the one convention breach; that's a signal the sweep degraded into pattern-matching notation.
+
+**Two template fixes added** (13, 14) plus a third for the build skill:
+
+- **13** — `SKILL-template.md` ships both exit steps' condition blocks as prose (`:110-116`, `:132-138`) while working steps are lists. Versioning copied the error step verbatim; that's where Fix 2 comes from. Noted that `drafthorse/SKILL.md` is prose throughout too — separate pass.
+- **14** — the template's error engagement names half-applied state but never states its disposition. The rule lives only in `steps.md:131`, which a drafting agent needn't open. That's the hole `+Execute` grew through. Proposed shipped text included.
+
+**How to make the build skill enforce it — Fix 15**, three touches:
+
+- **Conventions Digest `:46`** is the load-bearing one. The rule is currently a subordinate clause inside a long sentence about subtractive coverage — unsweepable. Split it into its own named test naming all three violation shapes (resume path, inventory-and-continue engagement, half-applied clause in a start condition). That converts prose an agent reads past into a test `+Review`'s walk executes, and it mirrors saddler's `:136` so builder and auditor check the same thing.
+- **`+Draft the Skill` `:180`** — one clause after "keep the error step": no working step handles its own failure.
+- **`+Review` `:196`** — sharpen "each failure entry" to name what to confirm.
+
+Numbering note: there's no Fix 12 — that slot is Question 12.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+I still see alot of dancing about handling reruns, in preflight bullet 2 and 3 beyond the 'or'. appear to only handle if the step is being run again. 
+bail to user upon error --> fix any problems manually --> restart the skill for a clean run. would this simplify alot of this faffing about?
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/versioning-drafthorse-fixes.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Yes — it simplifies a lot, and it's the load-bearing item in the plan. Added as **Fix 12**, replacing the old Question 12.
+
+**What you spotted is right:** `+Preflight`'s bullets past the `**OR**` exist only to describe a second pass through the same step. Under bail-and-restart there is no second pass, so the branch is dead weight. Same for its engagement's "offer to fix it with them; after a fix, verify again".
+
+**The sweep it enables** — five deletions, one addition:
+
+- `+Preflight` start: the whole OR branch goes.
+- `+Preflight` engagement: "report and offer to fix... verify again" → "report". Step can't finish, drains.
+- `+Propose` start `:255`: "including a unit whose approval has since been revised or withdrawn..." goes — it's a no-op restatement, since a withdrawn approval already fails "no approval stands".
+- `+Execute` and `+Range`: already covered by Fixes 4 and 10, but this is the real reason for them.
+- `+Handle a Problem` next actions: "Resume the step the user chose" → "End the skill." That also fixes the hedge I left in Fix 11.
+
+Added in place of all that: one Agent Invariant — **NEVER** resume a failed run.
+
+**The line I'd draw**, so this doesn't over-fire: a step may do work the *skill* owns; it may not restore the world to the state the skill *requires*. `+Setup` authoring the versioning config is the skill's own artifact — collaborative work, stays. `+Preflight` fixing your dirty tree or wrong branch is repairing your repo — outside the remit, goes. Without that line, "every error bails" would eat `+Setup` too, and you'd have a skill that refuses to help write the config it needs.
+
+**Cost check:** near zero here. Everything before `+Execute` is read-only or a one-second recomputation, and a failure at `+Execute` ends the release regardless. The only loss is re-doing a `+Propose` conversation for units already approved mid-run. A skill with expensive irreversible pre-work would weigh it differently; this one doesn't.
+
+**Upstream:** this is a general convention, not a versioning quirk. It gives DraftHorse one sentence where `steps.md:131` currently covers only half-applied state, and it widens Fix 15 from "half-applied" to "any failure" — same edits, broader wording, in `conventions.md`, the digest, and saddler's `:136`. I've flagged it in the plan but not drafted it; say the word and it becomes its own item.
+
+Note: Fix 2's `+Preflight` and `+Execute` blocks still show the superseded versions — Fixes 4 and 12 both say so in-line, but if you'd rather I strike them through in Fix 2 like you did with `+Dispatch`, that's a one-minute pass.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+can you dig into the drafthorse conventions etc. i think we have hit on a spec wide fact. infact most claude skills in the wild don't really handle errors like a computer program. the agent bails when the skill doesn't match the state. we can lean on this? to prevent a whole lot of fluffing.
+
+It seems our convention should be. "any unrecoverable error (needs user input) is a hard bail. agent advises manual fixes to finalise the run or to make it resume succesfully."
+this leads our skill to handle the happy path and any known branches, or intended error handling.. no resuming, no half applied state handling. 
+
+Your thoughts? is there threads of this in the spec?
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/conventions.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/steps.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Strong threads — stronger than I expected. The spec already *demonstrates* your convention three times and never *states* it once.
+
+## The load-bearing find: `steps.md:127-133`
+
+The Dispositions catalogue lists three error classes. All three end the run:
+
+- **Half-applied** — "Report the error to the user, exit the skill, advise manual fixing, and suggest an issue... Never re-run the step over its own partial work."
+- **Failed permissions** — "Report what was denied and what it was needed for, then stop... suggest an issue... Never route around a denial."
+- **Insufficient references** — "Report the gap and exit... suggest an issue... Never invent the missing content."
+
+Three classes, one identical shape: **report → advise manual repair → exit → suggest an issue**. The section header even says "**Hard exit and repair** is the default posture" — then scopes it to "destructive errors", which is the mis-statement. Nothing about a missing reference is destructive, and it still hard-exits.
+
+So the spec has your law empirically and states it nowhere. Worse, it's a single-source-of-truth breach *inside the spec* — one fact, three homes, which is why each entry re-states "suggest an issue to inform the skill repair agent" three times. The catalogue should be a law plus a thin per-class list of *what to report*, not three near-duplicate dispositions.
+
+## Supporting threads
+
+- **The preamble already says it.** "A step that cannot be completed falls to the error drain step" — verbatim in every DraftHorse document. Every resume branch in the wild is a document not trusting its own preamble. `+Execute` wrote 13 lines and a bash block to re-implement a line it already carries at `:86`.
+- **`conventions.md:10`** — "coverage is subtractive, not enumerative". A resume path *is* enumerative error handling. The drain exists precisely so steps don't do it; your convention is just applying that consistently instead of stopping at half-applied.
+- **Dormant steps** (`conventions.md:6`, `steps.md:153`) — unfired branches cost nothing, so there's no pressure to make steps multi-purpose across failure states.
+- **`steps.md:108`** — a bail is already a sanctioned *Suggested next actions* use, first-class.
+- **`conventions.md:22`** — Dynamic Improvement is the tail of your convention: bail, advise, and file the issue so the gap gets fixed upstream rather than patched per-skill.
+
+## The one line the convention must not cross
+
+`steps.md:116`: "Approval is state, and it is revocable: revising an approved artifact un-approves it and everything downstream of it, so **the owning step's start condition holds again**."
+
+That's the spec's only sanctioned re-entry, and the mechanism matters — not a recovery branch, just a condition that became true again. Same for loops (`steps.md:151`: "a loop is not a special structure — it is a start condition that holds again").
+
+So the distinction to write in:
+
+- **Re-holding** — the world changed, the condition is true again, the step carries *nothing* about its own history. Legal, and it's how loops and gate revisions work.
+- **Resuming** — the step knows it failed before and behaves differently because of it. Banned.
+
+`+Preflight`'s "or a precondition failed and has since been repaired" fails this test: the repair clause is the step remembering. Strip it and the *plain* condition "preconditions not verified this run" already re-holds correctly — the clause was never doing work.
+
+## Where I'd sharpen your wording
+
+"Any unrecoverable error (needs user input) is a hard bail" — "needs user input" is too wide. Gates need user input and aren't errors. I'd cut it to a three-class taxonomy, which also kills "half-applied handling" as a category outright:
+
+1. **Outcomes** — states the document enumerates in a finished condition. The run continues. Nothing-to-release, a scan skipped, a config absent → `+Setup`. These are the "known branches" from your message, and they are not error handling.
+2. **Errors** — states no step claims. Drain: report what happened and what state things are in, advise the manual fix, end the run, suggest an issue.
+3. **There is no third class.** Recovery happens outside the run, by the user, and the fixed world re-enters through a clean invocation.
+
+The reason this works — and why it's a genuinely agent-shaped convention rather than sloppy engineering — is that an agent can *describe* an unanticipated state in natural language to someone who can act on it. A program can't, so it must enumerate recovery. You're not skipping error handling; you're delegating it to the only party in the loop who can actually do it. (That's a *why* — it belongs in this conversation, not in the documents.)
+
+## What I'd change upstream
+
+Six edits, none large:
+
+- `steps.md:127-133` — collapse Dispositions into one law + per-class report contents; delete the "destructive errors" scoping.
+- `steps.md:118-125` — the error step's engagement line gains "and the manual repair that would let a clean re-run succeed".
+- `conventions.md` — a new entry, **Hard bail and clean re-run**, sitting beside "The error step claims the remainder".
+- `conventions.md:10` — drop "Half-applied states are part of the remainder"; the new entry covers it and more.
+- `drafthorse/SKILL.md:46` — digest test widened from half-applied to any failure (this is Fix 15, now broader).
+- `SKILL-template.md:144-146` + `drafthorse-saddler.md:136` — shipped text and the audit check, both widened to match.
+
+Want me to draft those as a second plan file? I'd keep it separate from the versioning plan — different unit, different release, and the versioning fixes shouldn't wait on a spec change.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok so done some work in `conventions.md` myself. so this may cover some of these. I've also edited steps.md:118 with your recomendations. So read my conventions changes as i have refined the convention and then we'll look at next steps after.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/conventions.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/steps.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Read. The refinement is a genuine improvement on what I proposed — two named modes with the remainder *actively described* is sharper than my three-class taxonomy, because it makes the catch-all earn its keep instead of being a free sentence.
+
+## What lands
+
+**The two-mode error step** (`:24-26`). Splitting hard bail from remainder-claiming resolves something my version fudged: I'd collapsed everything into "drain and exit", which would have made the error step unable to handle a recoverable state it *could* name. Your split keeps both without letting the second one become a resume path.
+
+**"The remainder needs to be actively described"** is the load-bearing clause. It gives the tiebreaker between the two modes a default: named recoverable states get remainder handling, everything unnamed is a hard bail. Worth stating that default explicitly — right now a reader has to infer it.
+
+**`Stepping stones` bullet `:14`** — "leaving that step to focus on its jobs instead of handling every problem it might produce" — is the versioning `+Execute` bug, stated as convention. That's the one I said was missing from the spec, and you've put it in. It's soft though: it describes a benefit, not a test. It won't stop an author, and saddler can't check it. Hardening it into a rule ("a working step carries no disposition of its own; every failure disposition belongs to the error step") is the difference between a convention and an enforceable one.
+
+**`steps.md:125`'s "finish off the skill manually"** is a disposition I hadn't named — the user completes the remaining work by hand rather than re-running. Real and useful, especially for versioning where a half-applied release is four `gh`/`git` commands from done.
+
+## What I'd pin down before this settles
+
+**1. "Interactively fix the problem with the user" (`:25`) contradicts hard bail.** `steps.md:131` says *advise* manual fixing. Your line says the agent *fixes it interactively*. Those are different skills. If the agent repairs the state, the run hasn't ended — the repair loop we just deleted from `+Preflight` has relocated into the error step with unbounded scope.
+
+Your heading says "clean up", which suggests a narrower and defensible reading: the agent may tidy state *it created* — remove a stray notes file, unstage a partial commit — so a re-run starts clean, but never completes the work. That's coherent and worth having. It needs the boundary written in, or "interactively fix the problem" will read as licence to do anything.
+
+**2. Is remainder-claiming sometimes a missing step?** If a recoverable state can be described in advance, it's a known branch — which is a step's start condition, not the drain's business. Describing it in the error step is often a smell that a step is missing. I'd add the guardrail: a described remainder that needs more than a sentence, or carries ordered actions, is a step wearing the error step's coat.
+
+**3. Terminology is drifting.** In circulation right now: "error step", "error drain", "problem step", "hard exit and repair" (`steps.md:129`), "hard bail and clean up" (`conventions.md:25`). Saddler and the template use "error drain" and `+Handle a Problem`. Pick one set and sweep — this is exactly the kind of thing that costs an auditing agent a finding.
+
+## Still outstanding
+
+- **`steps.md:125` is mid-edit** — unclosed paren, stray quote mark at the end.
+- **`steps.md:127-133` Dispositions is untouched** — still says "Hard exit and repair is the default posture for **destructive** errors" (the mis-scoping), and still repeats "suggest an issue to inform the skill repair agent" three times. That's the collapse-into-one-law we discussed.
+- **`conventions.md` has six old/new pairs live at once** plus your working comments. Fine as a draft, but nothing downstream should be updated until it resolves — saddler, the template, and the digest all read from it.
+- **`:15` handover bullet doesn't fully replace `:45`.** Your comment marks the old one "probably redundant", but the old bullet carries a constraint the new one doesn't: the parent's *finished condition reads the state the handover leaves behind*, with no handed-back outcome. That's the rule that stops a handover routing its own exit. Worth folding into `:15` rather than dropping.
+- **Duplication with `steps.md:141-155`** — the `Stepping stones` sub-bullets now restate the Step Usage Patterns catalogue. One fact, two homes, and conventions.md's own first entry forbids it. Suggest the bullet names the patterns and points at `steps.md` for the catalogue.
+
+## Next step, my recommendation
+
+Finish `conventions.md` first — resolve the six pairs, settle the two-mode wording, harden `:14`. It's the source everything else reads from. Then one propagation pass: `steps.md` Dispositions collapse, digest entry, `SKILL-template.md` shipped text, saddler's `:136`. Then the versioning fixes, which is where all this started.
+
+Want me to draft the resolved `conventions.md` — pairs collapsed, my three pin-downs applied, your comments cleared — for you to redline? That's the fastest way to see whether the wording holds.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok here is how i see conventions.md, they aren't rules, auditing tools, etc. they are guiding lights, drafthorse always align with. so yes these 'conventions' need integrating throughout the spec. we need to keep everything else in framework/ and spec-check up to date with what the conventions say. I like to write conventions myself, to capture the true essence, and then let you that agent say "hey these sections in XYZ need changing to align with your conventions".
+
+1a. ok this is meaning interactive through chat turns fix the problem after the skill has ended with the end goal of re-run or not needed.
+1b. these are conventions not agent rules. it means hard bail and clean up the mess.
+2. this exists in git-box already. recoverable errors are surfaced in a report. which the error step handles instead of the happy path step handles. The error prevented main step completion, the error step activates and handles instead, the skill completes, with the error surafaced.
+3. This is conventions, we convert these into a congruent spec. I understand the sentiment though. "hard bail and clean up" is a heading rather than a term. "hard exit and repair" I didn't introduce, where is it written? I call it error/problem step. agent used the term "error drain" probably from some other domain like coding etc.
+
+dispostions can you leave a comment with your complete written change. leaving the original inplace.
+Conventions need a little more work yet, but we can agree the above fixes have been absorbed.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/steps.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Comment block written into `steps.md`, directly under the existing `### Dispositions` section, original left intact.
+
+**What the proposed replacement does:** drops the "default posture for **destructive** errors" scoping (all three catalogued classes hard-bail and none are destructive); makes your two convention modes the dispositions themselves, with each class naming which it takes; states "raise an issue" once instead of three times; shrinks each class to *what it must report*; adds the working-step bar explicitly. It also carries the boundary from 1b — cleanup tidies the mess the run made, it never completes the run's work — and 2's shape: named recoverable failure, error step does what the working step couldn't, run completes, report surfaces it.
+
+**On the terminology question — "hard exit and repair":** it's in your own `steps.md:129`, the Dispositions preamble sentence, pre-dating this conversation. My proposed block retires it in favour of your "hard bail and clean up".
+
+**"error drain" is not borrowed from coding** — I should correct that. It's spec-written, and load-bearing: `steps.md:27`, in the universal steps preamble, "A step that cannot be completed falls to the error drain step." That preamble is copied verbatim into every DraftHorse document, so the term is currently in every skill in the library. `handover.md:58` and `:63` use it, and saddler defines **Error Drain** as a Term at `:369`.
+
+So a rename isn't a docs edit — it touches the preamble in `SKILL-template.md`, `drafthorse/SKILL.md`, `drafthorse-saddler.md`, and all five existing skills. Worth deciding deliberately: "error step" and "problem step" you also use, and `+Handle a Problem` is the template's actual step name. Three names for one thing, one of them baked into boilerplate.
+
+**Absorbed, as agreed:**
+
+- 1a — interactive means across chat turns *after* the skill ends, aiming at re-run or no-longer-needed. My earlier objection dissolves.
+- 1b — conventions are guiding lights, not agent rules; hard bail means clean up the mess.
+- 2 — recoverable-remainder handling is real and already proven in `git-box`: the error step completes the run in the happy-path step's place and surfaces the error in the report. I've kept my "more than a sentence, or ordered actions → it's a step" guardrail in the proposed text as a sizing smell rather than a prohibition; strike it if it reads as over-reach.
+- 3 — terminology settles when the conventions convert into the spec, not before.
+
+Understood on the division of labour: you write the conventions, I find what in `framework/`, the template, the build skill and spec-check has fallen out of alignment and propose the edits. Say when `conventions.md` is ready and I'll run that sweep across the whole spec surface.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok this might have got a little out of hand. conventions has some changes wich sent me down a rabbit holde doing up draftmark (which has now changed into shorthand, lol spasmodic) wich was a markdown formating for making changes. 
+Can you understand the changes i want to make in there? this file might help archive/draftmark/draftmark.md 
+also has these changes put this thread out of alignment. Im not even sure what we where up to?
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ls archive/ 2>/dev/null && echo "---DRAFTMARK---" && find . -iname "*draftmark*" -o -iname "*shorthand*" | grep -v node_modules | head -20 && echo "---GIT---" && git log --oneline -12 && echo "---STATUS---" && git status --short
+Description: 
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/conventions.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/dev/workspace/filebox/steps-preamble-changes.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Yes, I can read them. `<!-- +DRAFT: -->` blocks are shorthand sources or dispositions; `<!-- +++ -->` marks an untouched bullet. Here's what I read your conventions edit as deciding.
+
+## The decisions in `conventions.md`
+
+**Conventions go from 13 bullets to 7**, by folding related ones into three super-conventions.
+
+New:
+- **Building is difficult, so execution is easy** — new entry, DraftHorse as a builder's spec.
+- **Stepping stones** — the step mechanism as one convention, absorbing *Steps are universal* and *Conditions carry routing*, with the open-mechanism consequences (loop back, span, dormant, support, handover) as sub-bullets.
+- **The error step** — two modes: *Hard bail and clean up* (unrecoverable → exit, fix with user, clean slate) and *Claim the remainder* (recoverable, pre-known, actively described → error step resolves and the run completes). Absorbs the old *claims the remainder*.
+- **References all data, no work** — absorbs *inline vs external*, *naming not explaining*, *cite at the moment of use*.
+
+Untouched: *Single source of truth*, *Sharp Prose*, *Dynamic Improvement*.
+
+Removed outright (genuinely duplicated elsewhere): *A handover fits its parent step*, standalone *Naming not Explaining*, standalone *Cite references* and *Inline vs external*.
+
+Migrated out of conventions into spec instructions: *Conditions are checkable and exhaustive*, *Gates are compound*, *Skill Description is invocation-shaped* — these are rules, not guiding lights.
+
+## Three things I can't resolve from the file
+
+1. **A convention with no prose yet.** The shorthand at `:14-21` — self-contained execution absent DraftHorse knowledge; leans on existing markdown, consistent shape, separation of concerns, self-documenting — has no bullet written under it. Intended as its own convention, or as backing detail for *Building is difficult*?
+
+2. **A sub-point that didn't make it into the prose.** Shorthand `:66` — "Always markdown links or harness tools. agent has natural agent understanding" — isn't in the written *References all data* bullet. That's the citation-is-a-link rule. Dropped, or pending?
+
+3. **"Preserve" vs "Remove".** I read *Preserve* as "meaning carried into the new super-convention, old text kept in comment as archive" and *Remove* as "dropped, its home is elsewhere". Confirm — it changes whether the archived text gets deleted on the final pass.
+
+One risk worth flagging on the migrations: before deleting those three from conventions, each needs a verified home. *Conditions checkable/exhaustive* and *Gates compound* already live in `steps.md` (`:77`, `:112`). *Description invocation-shaped* I'd need to confirm sits in `surfaces.md`. Same check for the handover constraint — the old bullet carried "the finished condition reads the state the handover leaves behind, no handed-back outcome", which *Stepping stones* `:41` states more weakly; fine if `handover.md` is its home, which I believe it is.
+
+## Where the thread actually stands
+
+Mostly still aligned — your conventions work **confirmed** the direction rather than diverting it. Status by piece:
+
+**Live and unaffected:** the proposed `### Dispositions` replacement I left as a comment in `steps.md:134`. It was already written against your two-mode error step, so it needs no rework — it's waiting on your review.
+
+**Live, needs one wording change:** `dev/workspace/plans/versioning-drafthorse-fixes.md`, 15 items, boxes ticked. Fix 12 is now slightly too absolute — I wrote "every error bails", but *Claim the remainder* is a legitimate second mode. Versioning's own `#### Github release failure` is a remainder case, not a hard bail. One paragraph to fix.
+
+**New since, and not yet accounted for anywhere:** `dev/workspace/filebox/steps-preamble-changes.md`. It proposes removing *Suggested next actions* from the preamble and giving steps a declared **function** (error / looping / routing / dormant / handover / support). That's a bigger structural change than anything else in flight — it would touch the preamble baked into every existing document, and it partly invalidates the versioning plan, which uses *Suggested next actions* in three places.
+
+**Uncommitted:** `conventions.md`, `steps.md`, the new `docs/shorthand/`, a staged deletion of `docs/draftmark/draftmark.md`, the filebox note, and the versioning plan. Nothing lost, but nothing banked either.
+
+## What I'd do next
+
+Three fronts are open at once and they're stacked: conventions → spec propagation → versioning fixes, with a step-anatomy refactor now cutting across all three. My recommendation is to close them in that order and hold the step-function idea until the first two land — it's the one that rewrites boilerplate in every document, and it'll be much cheaper to do once the conventions underneath it are settled.
+
+Want me to answer the three open questions as proposals so you can just tick them, or would you rather settle those yourself and have me start the spec-alignment sweep?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+1. is a new convention. speaking about how it needs to be understandable to an agent not aware of the drafthorse spec.
+2. pending, needs adding to the conventions. although i fixed a typo.
+3. yes correct but best just leaving inplace. I can easily manually delete if needed.
+
+Yes these migrations have not landed yet. only proposed from conventions.
+
+actually the preamble changes go like this...
+- preamble +DRAFT is in assets/SKILL-template
+- The suggested next actions pointer is deprecated.
+- in place of that the step description gets more weight. It is used to describe what the step does to the reading agent.
+- the list of functions should be choosable to a drafthorse skill builder (probably from the template, but open to ideaas). these then get included in the step description.
+the idea behind this is: a single mechanism for routing (not having a real one and a pointer), The agent having to read the preamble and guess what the step is trying to do, the step instructions are individually customised inplace, lightens the preamble, increases fidelity.
+
+other threads are handling shorthand, draftmark.
+
+Ok so this threads scope is getting huge. we should do any quick work and open issues to do the rest of the work in other sessions. can you give recomendations on what to do here and what to save as an issue.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Here's how I'd cut it.
+
+## Do now — three items, all self-contained
+
+**1. Bank the work.** Six paths are uncommitted: `conventions.md`, `steps.md`, `docs/shorthand/`, the staged `docs/draftmark/draftmark.md` deletion, `dev/workspace/filebox/steps-preamble-changes.md`, and the versioning plan. A week of thinking is sitting unversioned. Two commits — one for the shorthand/draftmark move, one for the drafthorse WIP.
+
+**2. `SKILL-template.md` exit-step condition blocks → lists** (plan Fix 13). Two edits, zero dependencies on anything unsettled. It's a pure notation-compliance fix, and it's the source of the prose-conditions habit spreading through the library. Cheapest high-leverage item on the board.
+
+**3. The versioning SKILL.md fixes** — the whole plan except Fix 14. This is the largest "now" item but it's the only one with a finished, ticked plan, it's the original task, and `agent-tools`… actually `dev-tools` is an independently versioned unit, so it ships without waiting on anything. One prep edit first: Fix 12's wording needs softening, since *Claim the remainder* is now a legitimate mode and versioning's own `#### Github release failure` is a remainder case, not a hard bail.
+
+Small rework risk accepted: Fixes 11 and 12 touch *Suggested next actions* slots that the preamble refactor will deprecate. Two paragraphs' worth. Cheaper than shipping a skill with a known routing stall for however long the refactor takes.
+
+If you want a short session, drop item 3 and issue it — but then the versioning skill stays broken.
+
+## Open as issues — three
+
+**Issue A — Spec alignment sweep: conventions → framework.** Propagate the settled conventions into `steps.md`, `notation.md`, `scaffold.md`, `surfaces.md`, `references.md`, `handover.md`, the digest in `drafthorse/SKILL.md`, `SKILL-template.md`, and `drafthorse-saddler.md`. Includes: applying the proposed `### Dispositions` replacement, landing the three migrations (conditions checkable / gates compound / description invocation-shaped) with a verified home for each before deleting from conventions, verifying the handover constraint survives in `handover.md`, and the template's missing disposition text (plan Fix 14). **Blocked on `conventions.md` finishing** — your two remaining edits.
+
+**Issue B — Step anatomy refactor: deprecate *Suggested next actions*, weight the step description, add step functions.** The biggest ripple in the library: it rewrites the preamble baked verbatim into every document, plus every step in five skills and three agents. I'd **fold the terminology decision into this issue** — error drain / error step / problem step / `+Handle a Problem` are four names for one thing, and "error drain" lives in the preamble line this refactor is rewriting anyway. Settling it separately means touching the same boilerplate twice.
+
+Design questions worth capturing in the issue while they're fresh: where the function list lives (template? `steps.md` catalogue? both?), whether a step declares one function or several, and whether existing documents get retrofitted or only new ones use it.
+
+**Issue C — saddler misses set-level checks.** It holds "half-applied state bails to the user" at `:136` and lists it in the step-283 sweep, ran the audit, and returned nothing on it — while reporting seven notation-level findings. The pattern suggests set-level judgment degrades into notation pattern-matching under load. Worth capturing with this concrete instance as evidence, since it'll be hard to reconstruct later.
+
+## Not an issue
+
+Finishing `conventions.md` — your two edits (the new self-contained-execution convention, the markdown-links sub-point). That's your own work and it unblocks Issue A, so it's the one thing worth doing before the sweep rather than tracking.
+
+Want me to open A, B and C via the GitHub MCP now, and then start on the three do-now items?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok here is the plan...
+1. I will commit. conventions and steps already committed. need versioning plan updated and finalised. also need steps-preamble-changes.md converted to a proper document. you have both the draft and my explanation from before. I will then commit these. shorthand.md is work from another thread.
+2. yes do it.
+3. once updated and i commit. it can be added as an issue also. make it a lightweight issue because we have the plan.
+another issue is the migration, updating and finalisation of conventions.md and steps.md
+write these issues (five?) using gh mcp.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n "Fix 12" -A 30 dev/workspace/plans/versioning-drafthorse-fixes.md | head -40
+Description: 
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/assets/SKILL-template.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/assets/SKILL-template.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/assets/SKILL-template.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/versioning-drafthorse-fixes.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/versioning-drafthorse-fixes.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/versioning-drafthorse-fixes.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n "Fix 13" -A 22 dev/workspace/plans/versioning-drafthorse-fixes.md | tail -14
+Description: 
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/versioning-drafthorse-fixes.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/filebox/steps-preamble-changes.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Done. Here's the state.
+
+## Work applied
+
+**`SKILL-template.md`** — both exit steps now carry list-form condition blocks. The success exit gained `- <condition 1>` placeholders matching the working-step shape; the error step's prose became two finished-condition items. That's the source of the prose-conditions habit spreading through the library, closed. Left its *Suggested next actions* slot alone — that's the refactor's territory.
+
+**`dev/workspace/plans/versioning-drafthorse-fixes.md`** — finalised:
+- Fix 12 rewritten against your settled two-mode convention. It was "every error bails", which was too absolute. Now it states both modes and assigns each versioning failure to one — and it turns out `#### Github release failure` was already a correct *Claim the remainder*, so that stays as-is rather than being flattened into a bail.
+- The "worth promoting upstream" paragraph became a status note; the convention is settled, so the plan implements it rather than proposing it.
+- Fix 13 marked applied; the Upstream section notes 14 and 15 are tracked elsewhere and don't block.
+
+**`dev/workspace/filebox/steps-preamble-changes.md`** — converted from shorthand to a proper proposal: the three moves, the six-function catalogue, what it buys, a ripple list naming every affected file, five open questions, and the terminology decision folded in.
+
+## Issues opened
+
+- **[#36](https://github.com/dilberryhoundog/agent-library/issues/36)** — Finalise `conventions.md`, migrate non-conventions into the spec. Includes your two remaining edits, the three migrations with the "verify a home before deleting" caveat, the handover-constraint check, the *Stepping stones* / Step Usage Patterns duplication, and the pending Dispositions replacement plus the unfinished `steps.md:125` edit.
+- **[#37](https://github.com/dilberryhoundog/agent-library/issues/37)** — Spec alignment sweep. Blocked on #36. Full surface list and eleven specific known items.
+- **[#38](https://github.com/dilberryhoundog/agent-library/issues/38)** — Step anatomy refactor. Points at the filebox document; terminology folded in.
+- **[#39](https://github.com/dilberryhoundog/agent-library/issues/39)** — saddler misses set-level checks. Captures the evidence while it's fresh, including the walk actively endorsing the breach, plus three suggestions and a note that versioning's pre-fix state is a ready-made fixture.
+- **[#40](https://github.com/dilberryhoundog/agent-library/issues/40)** — Versioning skill fixes. Lightweight, points at the plan.
+
+Ready for you to commit. Everything I touched is in `extensions/skills/drafthorse/assets/`, `dev/workspace/plans/`, and `dev/workspace/filebox/`.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+all commited. so can this thread be closed now? have we captured all the work?
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git status --short && echo "---BRANCH---" && git log --oneline -4 && echo "---REMOTE---" && git status -sb | head -1
+Description: 
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '120,132p' docs/drafthorse/framework/steps.md && echo "---DISPOSITIONS COMMENT---" && grep -c "PROPOSED REPLACEMENT" docs/drafthorse/framework/steps.md
+Description: 
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/conventions-authored-by-user.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/drafthorse-shorthand-notation.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/MEMORY.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Yes — with two loose ends and one small correction.
+
+## Verified captured
+
+Everything from this thread has a home:
+
+- Versioning skill fixes → the plan (committed) + [#40](https://github.com/dilberryhoundog/agent-library/issues/40)
+- Conventions finishing work, the three migrations, the Dispositions proposal → [#36](https://github.com/dilberryhoundog/agent-library/issues/36) — I confirmed the proposed replacement comment survived your commits and is still sitting in `steps.md`
+- Spec propagation, digest split, template disposition text, saddler check widening → [#37](https://github.com/dilberryhoundog/agent-library/issues/37)
+- Preamble refactor + terminology → the filebox document (committed) + [#38](https://github.com/dilberryhoundog/agent-library/issues/38)
+- Saddler recall failure → [#39](https://github.com/dilberryhoundog/agent-library/issues/39)
+
+Applied and done: `SKILL-template.md` exit-step condition blocks.
+
+## One stale item
+
+`steps.md:125` — I listed the unfinished edit (unclosed paren, stray quote) in #36. Your last commit fixed it, and the line now reads cleanly with both options stated. Want me to drop that line from the issue body?
+
+## Two loose ends outside this thread
+
+- `docs/draftmark/draftmark.md` is a **staged but uncommitted deletion**, and `docs/shorthand/` is untracked. Both belong to the shorthand thread. Flagging because a staged deletion sitting in the index will get swept into whatever you commit next, in whatever session that happens.
+- You're **4 commits ahead of `origin/drafthorse-spec-upgrade`** — unpushed.
+
+## Memory
+
+Saved two facts that aren't derivable from the repo: that you author the conventions yourself and my job is alignment sweeps and gap analysis rather than drafting entries, and the `+DRAFT` / `+++` shorthand markers with what `Preserve` vs `Remove` mean — so a future session doesn't read a mid-rewrite document as inconsistent and "fix" it.
+
+Thread's closable once you decide on the stale line and push.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+can you remove those memories, the spec is still in flux at the moment, and these might steer the agent in the wrong direction.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: rm ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/conventions-authored-by-user.md ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/drafthorse-shorthand-notation.md && ls ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/
+Description: 
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/MEMORY.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Removed — both files deleted and their index lines stripped from `MEMORY.md`.
+
+Fair call. Both described a spec mid-rewrite, and a memory that outlives the thing it describes steers worse than no memory at all. The shorthand one was the riskier of the two: it encoded `Preserve`/`Remove` semantics from a notation that's still being redesigned in another thread.
+
+Nothing else from this session was written to memory.
+
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/dev-workspace:conversation-capture unknown
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ruby ~/.claude/plugins/cache/DBHD-dev-workspace/dev-workspace/1.1.0/skills/conversation-capture/scripts/conversation-capture e1ddddcc-27a0-498e-9fa3-f3d99f64b28f
+Description: 
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n -A 40 "conversation_capture:" ~/.claude/plugins/cache/DBHD-dev-workspace/dev-workspace/1.1.0/skills/dev-workspace/templates/workspace-config.yml
+Description: 
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: tail -20 ~/Projects/agent-library/dev/workspace/workspace-config.yml
+Description: 
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '196,216p' ~/.claude/plugins/cache/DBHD-dev-workspace/dev-workspace/1.1.0/skills/dev-workspace/templates/workspace-config.yml
+Description: 
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '196,216p' ~/.claude/plugins/cache/DBHD-dev-workspace/dev-workspace/1.1.0/skills/dev-workspace/templates/workspace-config.yml >> ~/Projects/agent-library/dev/workspace/workspace-config.yml && printf '\n' >> ~/Projects/agent-library/dev/workspace/workspace-config.yml && tail -24 ~/Projects/agent-library/dev/workspace/workspace-config.yml
+Description: 
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/workspace-config.yml
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ruby ~/.claude/plugins/cache/DBHD-dev-workspace/dev-workspace/1.1.0/skills/conversation-capture/scripts/conversation-capture e1ddddcc-27a0-498e-9fa3-f3d99f64b28f
+Description: 
+
+------------------------------------------------------------
