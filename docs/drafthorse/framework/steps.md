@@ -122,7 +122,7 @@ A skill ends through its **exit steps** — terminal steps whose completion ends
 - A **success exit** whose start condition is "all the work is finished" (stated exhaustively), and whose engagement reports the outcome.
 - An **error step** whose start condition is "something has gone wrong, or a situation has arisen that no other step covers", and whose completion is "the user has been informed and has decided how to continue".
 
-The error step is what makes coverage subtractive rather than enumerative: steps claim their conditions, and the error step claims the remainder, so no state is unhandled by construction. Its engagement should surface what happened, where it arose, what state things are now in (especially anything half-applied), and the options.
+The error step is what makes coverage subtractive rather than enumerative: steps claim their conditions, and the error step claims the remainder, so no state is unhandled by construction. Its engagement should surface what happened, where it arose, what state things are now in, the options available (either manual repair for a clean re-run or finish off the skill manually).
 
 ### Dispositions
 
@@ -131,6 +131,28 @@ The error step's engagement pairs each general error class with its disposition.
 - **Half-applied state** — step failed partway and its work is neither undone nor complete. Report the error to the user, exit the skill, advise manual fixing, and suggest an issue to inform the skill repair agent (see the *Dynamic Improvement* convention in [Conventions](conventions.md)). Never re-run the step over its own partial work.
 - **Failed permissions** — a tool call, file, or service the step needs was denied. Report what was denied and what it was needed for, then stop and let the user grant access or end the run; suggest an issue to inform the skill repair agent. Never route around a denial with a different tool or path.
 - **Insufficient references** — a cited reference is missing, unreadable, or doesn't cover the case at hand. Report the gap and exit; suggest an issue to inform the skill repair agent. Never invent the missing content.
+
+<!-- PROPOSED REPLACEMENT for the whole `### Dispositions` section above. Aligns with the two-mode error step convention. Changes: the preamble's "default posture for destructive errors" scoping is dropped (three of three catalogued classes hard-bail, and none of them are destructive); the two conventions modes become the dispositions, and each class names which one it takes; "suggest an issue" is stated once instead of three times; the classes shrink to what each must report; a working step is explicitly barred from carrying a disposition of its own. Delete this comment and replace the section when approved.
+-->
+
+```md
+### Dispositions
+
+The error step's engagement pairs each error class with its disposition. Two dispositions cover every class, and every class names which one it takes. A working step carries no disposition of its own — a step that cannot finish falls here.
+
+**Hard bail and clean up** — the state is unrecoverable inside the run: work left unfinished, something destructive, or a state the document cannot name. Clean up the mess this run made interactively with the user, after ending the skill — temporary artifacts, unstaged partial work ~~— then end the skill~~. Report what happened, where it arose, what state things are in now, and the two ways forward: repair the state and re-run for a clean pass, or finish the remaining work by hand. The cleanup never completes the run's own work, and no step re-runs over its own partial work.
+
+**Claim the remainder** — the state is recoverable and the document names it. The error step does what the failing step could not, the run completes, and the report surfaces what went wrong.
+
+Large dispositions can be handled with an issue raised against the skill's repository, so the gap is repaired upstream rather than worked around each run (see the *Dynamic Improvement* convention in [Conventions](conventions.md)).
+
+The class catalogue is open — add classes as they are identified. Each names its disposition and what it must report.
+
+- **Half-applied state** — hard bail. A step failed partway and its work is neither undone nor complete. Report which artifacts were applied and which were not, and the commands that would complete or undo them.
+- **Failed permissions** — hard bail. A tool call, file, or service the step needs was denied. Report what was denied and what it was needed for. Never route around a denial with a different tool or path.
+- **Insufficient references** — hard bail. A cited reference is missing, unreadable, or doesn't cover the case at hand. Report which reference fell short and how. Never invent the missing content.
+- **Named recoverable failure** — claim the remainder. A failure the document describes in advance, which stops the working step but not the run. Report what failed and what the error step did in its place.
+```
 
 ### Exceptions
 
