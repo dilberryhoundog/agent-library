@@ -111,9 +111,13 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 <!-- All the work is finished — stated exhaustively ("every item processed, declined, or reported empty"). -->
 
+- <condition 1>
+
 #### Step finished when these are true:
 
-<!-- The summary is presented. The skill is complete. -->
+<!-- The summary is presented. -->
+
+- <condition 1>
 
 #### Suggested next actions:
 
@@ -131,11 +135,12 @@ Surface anything the other steps don't cover, and decide with the user how to co
 
 #### Start this step when these are true:
 
-Something has gone wrong, or a situation has arisen that no other step covers.
+- something has gone wrong, or a situation has arisen that no other step covers
 
 #### Step finished when these are true:
 
-The user has been informed and has decided how to continue.
+- the user has been informed of what happened and what state things are now in
+- the user has decided how to continue
 
 #### Suggested next actions:
 
