@@ -180,7 +180,7 @@ Map the procedure's directive onto the real changes from the `Expanded Diffs`. A
 
 - Check `git diff --cached --name-only` for pre-staged files outside the current group; unstage each with `git restore --staged <file>` — the change itself is preserved for a later group or procedure. Note every unstaged path for the `Result`.
 - Stage each file in the group with `git add <file>` (re-stage if already staged)
-- Confirm with `git status --short` that the intended files are staged with a clean working tree.
+- Confirm with `git status --short` that the staged column (the first character of each line) lists exactly the group's files. Out-of-scope changes remaining as unstaged (` M`) or untracked (`??`) are the expected result of the unstage bullet — leave them as they are.
 - Run the `Breaking changes` check
 - Commit the changes with `git commit -m <message>` (write the message per `Commit message format`)
 
@@ -221,7 +221,7 @@ Two conditions refuse the amend: the directive suggests changes to more than one
 
 - Check `git diff --cached --name-only` for pre-staged files outside the current group; unstage each with `git restore --staged <file>` — the change itself is preserved for a later group or procedure. Note every unstaged path for the `Result`.
 - Stage each file in the group with `git add <file>` (re-stage if already staged)
-- Confirm with `git status --short` that the intended files are staged with a clean working tree.
+- Confirm with `git status --short` that the staged column (the first character of each line) lists exactly the group's files. Out-of-scope changes remaining as unstaged (` M`) or untracked (`??`) are the expected result of the unstage bullet — leave them as they are.
 - Amend with `git commit --amend`, rewriting the message to stay within `Commit message format`
 - Run the `Breaking changes` check, against the combined change.
 
