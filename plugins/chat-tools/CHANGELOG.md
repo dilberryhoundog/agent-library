@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-08-09
+
+### Changed
+
+- `doc-reviewer` agent migrated to the upgraded DraftHorse spec: renamed machinery headings, parent/child step vocabulary, the `harness-format` stamp, and the bolded Terms form. Invocation and report output are unchanged.
+
 ## [2.1.0] - 2026-07-12
 
 ### Changed
