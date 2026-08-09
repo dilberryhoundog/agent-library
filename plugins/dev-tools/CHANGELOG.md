@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-08-09
+
+### Fixed
+
+- `agent-push` now loads on a branch that has no upstream. Its frontmatter probed `@{upstream}`, which exits non-zero when no upstream is configured — aborting skill load before any instruction or push permission was granted, so a first push through Git Box failed with no fallback. Tracking state now reads from `git status --short --branch`, and unpushed commits from `git log --oneline HEAD --not --remotes=origin`; both succeed whether or not an upstream exists. The commit list is scoped to `origin`, so in a fork a commit already on `upstream` still counts as unpushed.
+
+### Changed
+
+- DraftHorse notation migrated across `git-box`, `agent-commit`, `agent-push`, `agent-switch`, `versioning`, `git-robot`, and `breaking-change-detector`: renamed machinery headings, bolded Terms form, and the `harness-format` stamp. Invocation and behaviour unchanged.
+
 ## [0.9.0] - 2026-07-13
 
 ### Added
