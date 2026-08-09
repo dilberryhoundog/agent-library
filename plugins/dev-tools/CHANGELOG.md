@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-08-09
+
+### Fixed
+
+- The staging confirmation in `agent-commit` no longer asks for a clean working tree. After the step unstages pre-staged out-of-scope files, the tree is deliberately not clean — so the old wording read as a failed check at the exact moment the step had succeeded, inviting the agent to re-stage the strays it had just set aside and recreate the defect the unstage step exists to prevent. The check now confirms the staged column lists exactly the group's files, and names leftover unstaged (` M`) or untracked (`??`) changes as the expected outcome.
+
 ## [0.9.1] - 2026-08-09
 
 ### Fixed
