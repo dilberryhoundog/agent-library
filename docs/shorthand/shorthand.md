@@ -26,7 +26,7 @@ The user reviews the blocks: shuffling, rewording, adding, deleting. User and ag
 
 ## Expanding
 
-Expansion comes after tuning: shorthand expands on approval. The prose is stylistically free with the foundation preserved — round-trip compatible prose. Every block is accounted for, and no new claims appear. Build the document's structure as normal.
+Expansion comes after tuning: shorthand expands on approval. The prose is stylistically free with the foundation preserved — round-trip capable, and convertible back to shorthand. Every block is accounted for, and no new claims are made. Build the document's Markdown structure as normal.
 
 ## Compressing
 

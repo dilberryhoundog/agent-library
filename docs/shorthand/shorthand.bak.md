@@ -26,7 +26,7 @@ User reviews the blocks. Shuffle, reword, add, delete. User and Agent revisions 
 
 ## Expanding
 
-After tuning. Shorthand expands on approval. Stylistically free, foundation preserved. Round-trip compatible prose. Every block accounted. No new claims. Build document structure as normal.
+After tuning. Shorthand expands on approval. Stylistically free, foundation preserved. Round-trip capable. Convertible back to shorthand. Every block accounted. No new claims. Build document structure as normal.
 
 ## Compressing
 
