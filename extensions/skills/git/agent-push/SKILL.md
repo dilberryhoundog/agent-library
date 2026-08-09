@@ -14,6 +14,7 @@ Publish the current branch's commits to its remote. The `PUSH` procedure of the 
 
 **DO NOT** use this skill unless you are a `Git Robot` Agent.
 **NEVER** use force flags when pushing (`--force`, `--force-with-lease`)
+**NEVER** resolve tracking state by querying `@{upstream}` — it exits non-zero on a branch that has no upstream, which fails this skill at load before any push permission is granted. Read tracking from `Branch + tracking`.
 
 # --- REFERENCES ---
 
@@ -24,11 +25,10 @@ These overviews show where the local branch sits relative to its remote — enou
 === Branch + tracking ===  
 !`git status --short --branch`
 
-=== Upstream ===  
-!`git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null`
-
 === Unpushed commits ===  
-!`git log '@{upstream}..HEAD' --oneline 2>/dev/null`
+!`git log --oneline HEAD --not --remotes=origin`
+
+The first line of `Branch + tracking` carries the tracking state. `## <branch>` on its own means no upstream — the branch has never been pushed. `## <branch>...<remote>/<branch>` means an upstream exists, and a trailing `[ahead N]`, `[behind N]`, or `[ahead N, behind M]` reports the divergence. `Unpushed commits` lists the commits that have not reached `origin`, and is empty when there is nothing to deliver. The list is scoped to `origin` alone: in a fork with both `origin` and `upstream` remotes, a commit already on `upstream` still counts as unpushed until it reaches `origin`.
 
 ## Push outcomes
 
@@ -61,7 +61,7 @@ A `PUSH` procedure from the `Brief` awaits processing.
 
 #### Step finished when these are true:
 
-The push shape is decided — unpushed commits with a fast-forwardable remote (or no upstream yet), an up-to-date no-op (empty `Unpushed commits` with an existing upstream), or a rejection (a branch behind or diverged from its upstream).
+The push shape is decided — unpushed commits with a fast-forwardable remote (or no upstream yet), an up-to-date no-op (empty `Unpushed commits` with an existing upstream), or a rejection (`Branch + tracking` reports the branch behind or diverged from its upstream).
 
 #### Suggested next actions:
 
@@ -73,7 +73,7 @@ Unpushed commits with a fast-forwardable remote (or no upstream) move to pushing
 
 ### Review the State:
 
-From the `Brief` read the `PUSH` procedure. Review it against the `Current Git State`: whether an upstream exists, whether unpushed commits exist, and whether the branch can fast-forward its remote.
+From the `Brief` read the `PUSH` procedure. Review it against the `Current Git State`: whether an upstream exists (the `...<remote>/<branch>` form on the `Branch + tracking` line), whether unpushed commits exist, and whether the branch can fast-forward its remote.
 
 ## +Push
 
@@ -95,7 +95,7 @@ Move to reporting the result.
 
 #### Agent decision:
 
-The upstream decides the command. No upstream (`Upstream` was empty): push with `git push -u origin <branch>`, establishing tracking. An existing upstream: push with `git push`.
+The upstream decides the command. No upstream (`Branch + tracking` showed `## <branch>` with no `...<remote>/<branch>`): push with `git push -u origin <branch>`, establishing tracking. An existing upstream: push with `git push`.
 
 #### Run:
 
