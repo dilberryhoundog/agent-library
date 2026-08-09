@@ -1,0 +1,978 @@
+Session: d2d075b6-a578-4458-a460-7caaf9d79b13
+Date: 2026-08-06 12:30
+Branch: drafthorse-spec-upgrade
+CWD: ~/Projects/agent-library
+
+============================================================
+[SUMMARY]
+>>>
+Designed the Shorthand language: markdown written as 2-6 word period-terminated claim blocks, with expand/compress verbs, a tuning loop, and HTML-comment carriage inside full documents. Evolved from an appraisal of the DraftMark spec (draft files, scopes, passes) through progressive simplification into a one-page self-describing spec at docs/shorthand/shorthand.md (shorthand original in shorthand.bak.md). Three cold sub-agent round-trip tests (in-out-in) hardened the spec: added "Reads cleanly", "Keep load-bearing modifiers", settled claim as the unit, and proved round-trip fidelity — retiring Preserve/comment machinery. Key findings: word priors matter (shorthand beats compress), shaved single-word modifiers are compression's failure mode, expansion flourishes become round-trip casualties. Issue #41 filed for building the always-on output style plus report-only auditor sub-agent; draftmark artifacts archived; work moved to new `shorthand` branch cut from main.
+
+<<<
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/model unknown
+
+------------------------------------------------------------
+
+[USER]    💭: none
+just built a spec at docs/draftmark/draftmark.draft.md do you want to read over it and give an appraisal?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+I'll read the draft spec.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/draftmark/draftmark.draft.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/draftmark/draftmark-main.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/draftmark/draftmark-sub.md
+
+------------------------------------------------------------
+
+[USER]    💭: none
+just built a spec at docs/draftmark/draftmark.draft.md do you want to read over it and give an appraisal?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+I'll read the spec now.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ls ~/Projects/agent-library/docs/draftmark/
+Description: List draftmark docs directory
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/draftmark/draftmark.draft.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Read it. It's a strong concept, and writing the spec in its own format is the right move — the file doubles as a worked example and an acceptance test: "can an agnostic agent expand this into the full spec?" I ran that test mentally, and most blocks expand cleanly. These are the ones that don't, plus a few design tensions.
+
+**Blocks I couldn't confidently expand**
+
+- **"git info/ignore. keeps upstream repo clean. keep drafts longterm. source of truth."** (line 14) — this holds a contradiction. If `*.draft.md` goes in `.git/info/exclude`, the draft file has no history, no backup, and is invisible to any other clone — which is the opposite of "longterm source of truth." Either drafts are ephemeral working files (exclude them) or they're the source of truth (commit them, keep `main.md` as the build artifact). Pick one; the spec currently claims both.
+- **The default scope is implicit.** Four scopes are named (Preserve, Remove, Question, Explain) but every draft in this file uses none of them — the base "expand me into prose" function is unnamed. State that an unscoped `+DRAFT:` means "draft content, expand it," or the scope list reads as exhaustive when it isn't.
+- **The `+++` separator** (line 49) — "html comment. single line" but the literal form is never shown. Is it `<!-- +++ -->`? A spec about comment syntax should show its own syntax literally. Also unclear whether it's required after every draft or only at drafted-region/original-content boundaries.
+- **"wait for removal sweep"** (line 45) — the sweep is never defined. Who runs it and when — the CLI strip? A final agent pass? It's load-bearing for the Preserve/Remove scopes and has no home.
+- **Question lifecycle** — Question is "decision clarification" and Explain is "decision reasoning," which is a thin distinction. More importantly: who answers a Question, and where does the answer land — a new Explain comment, an edit to the draft, chat? Unstated.
+
+**Rule the spec breaks itself**
+
+"A shorthand block is 2-6 words long" — several blocks in this file run 7-9 words ("Expansions directly under each draft for inline" is seven; the rule sentence itself is eight). Either loosen the rule (2-8 reads truer to your actual usage) or it will generate spurious violations the moment you build a checker.
+
+**Structural gaps**
+
+- The core pipeline is never stated as a pipeline. That `draft.md` expands into `main.md`, and which direction is authoritative, has to be reverse-engineered from the CLI block ("copy file -> convert to md -> run draft strip"). One draft near the top naming the flow would anchor everything else.
+- The core content contract — "shorthand underpins full prose. no extra statements. nothing left out." (line 40) — is the single most important invariant and it's buried mid-file under Content. It's what makes parity checking possible at all. Promote it.
+- Parity checking (line 105) has no defined invariant. "In sync" needs the round-trip stated: every block accounted for in the prose, no prose without a backing block. It falls out of the line-40 contract, but the link isn't drawn.
+
+**Small stuff**: typos "Exisiting" (line 46) and "seperator" (line 49); "Drafts deformat" (line 52) is cryptic even by shorthand standards — I think it means "a comment inside a comment terminates the draft early," which is worth the extra words.
+
+Net: the shape is right — file convention, comment grammar, scopes, tooling is a sensible decomposition, and the inline-vs-file tradeoff on line 17 is genuinely well thought through. The git-exclude contradiction and the implicit default scope are the two I'd resolve before expanding this into the full spec; the rest are polish.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+read docs/drafthorse/framework/conventions.md you will see the scopes in action.
+ if greater than 6 word. we have oppurtunity to shorten. any suggestions.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/conventions.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Read it — the scopes make sense in action now: Preserve keeping the old convention text visible beside its replacement, Remove with a bracketed destination note, `<!-- +++ -->` fencing off the untouched prose. (One thing conventions.md uses that the spec doesn't define: `<!-- +DRAFT END -->` on line 93 — either spec it or drop it.)
+
+Here are the blocks over six words, with shortenings. Draftmark.draft.md first:
+
+- "A shorthand block is 2-6 words long." (8) → **"Blocks span 2-6 words."**
+- "Each statement or sentence condenses into a block." (8) → **"One statement, one block."**
+- "Expansions directly under each draft for inline." (7) → **"Inline expansions sit under drafts."**
+- "Preserve or remove content by draft scoping." (7) → **"Scopes govern original content."**
+- "Written after the marker, content follows one line down." (9) → split it: **"Written after the marker. Content starts next line."** Two clean blocks instead of one overloaded one.
+- "copy file -> convert to md -> run draft strip." (9-ish) — I'd leave this. It's pipeline notation, not prose; a word count doesn't really apply. If you want it legal, spec a carve-out: arrow chains count as one block.
+
+And in conventions.md's own drafts:
+
+- "Self contained execution absent of drafthorse knowledge." (7) → **"Executes without drafthorse knowledge."**
+- "resolves skill if other steps condition fails" (7) → **"claims states no step covers."** — also truer to the subtractive-coverage idea than "fails."
+- "Call in child steps when active" (6, borderline with the "Handover steps." lead-in) → **"activates child documents."**
+
+A pattern worth noticing: nearly every violation comes from hedging words that shorthand doesn't need — "directly," "or sentence," "by draft scoping," "absent of." The fix is almost always deletion, not rephrasing. If you add one line to the spec it could be that: cut qualifiers first.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok back to draftmark.draft.md read through it again. is it worthy of doing an expansion run on it yet?
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/draftmark/draftmark.draft.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Yes — it's close to ready. Most of what I flagged last pass is resolved: the git contradiction is gone (line 14 now says drafts live long-term locally, excluded from the repo, and downsampling regenerates a missing one — that's coherent), the removal sweep now has a home in the Skill (line 94), the pipeline is named (line 58's "upsample by expanding .draft.md into .md" pairs with the sub-agent's downsample), and the over-length blocks are tightened.
+
+Four small things I'd settle before expanding, because an expansion run will bake in whatever's ambiguous:
+
+1. **The default scope is still unnamed.** Line 70 says "Four scopes" but every content-carrying draft in this file uses none of them. One block in the Scopes section fixes it — something like "No scope means draft content. Expand it." Without this, the expanded spec will describe the scope system while every example contradicts the count.
+2. **`+++` literal form** (line 49) — still never shown as `<!-- +++ -->`. The expansion agent will have to guess the exact syntax of a marker it's writing a spec for. Also, conventions.md uses `<!-- +DRAFT END -->`, which this spec never mentions — spec it or remove it from conventions.md so the two don't disagree.
+3. **Typos in the source blocks**: "Exisiting" (line 46), "seperator" (line 49). Cheap now, annoying after they've been faithfully expanded into prose.
+4. Optional: Question's lifecycle (who answers, where the answer lands) is still unstated, but since Questions are agent-emitted and "use sparingly," you could legitimately let the expansion run surface that as its own Question — which would be a nice bit of dogfooding.
+
+Items 1 and 2 are the only real blockers; they're structural facts the expansion can't invent correctly. Fix those two and I'd call it worthy.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+what? the scope system expanded fine last time. archive/draftmark/draftmark-sub.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: find ~/Projects/agent-library -path '*archive/draftmark*' -o -name 'draftmark-sub.md' 2>/dev/null
+Description: Locate archived draftmark expansion files
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/archive/draftmark/draftmark-sub.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+You're right — I overcalled it. The archived run settles it: the sub-agent expanded that earlier draft without session context, unscoped drafts included, and the prose came out faithful. An agent reads a bare `+DRAFT:` as "content to expand" without being told; the default doesn't need speccing for the expansion to work. The archive even shows the pattern surviving a harder test — the Question/Answer exchange at lines 93-98 resolved the comment-nesting problem in-band, which is exactly the dogfooding I speculated about.
+
+What I was actually reaching for is a much smaller point: "Four scopes" enumerates the special cases while the common case goes unnamed — a precision nit in the spec-as-document, not an expansion blocker. The archived expansion reproduces "There are four scopes" verbatim and the document works fine, so it can ride along or be tuned in the draft pass afterwards.
+
+So, revised verdict: yes, it's worthy of an expansion run now. The only things I'd still touch first are the two typos ("Exisiting" line 46, "seperator" line 49) since the expansion will faithfully carry them into prose — and even those the audit sub-agent would likely catch.
+
+One genuine observation from the archive worth considering, though not a blocker: the old spec had an `Answer:` scope in live use (line 96) that wasn't in its own valid-scopes list, and the current draft drops it entirely. If Question stays, Answer is its natural pair — otherwise answers have nowhere structured to land. Might be worth a draft block in the Scopes section whenever you next touch the file.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+fix the typos then run the expansion through a sub-agent (they do it better) get him to produce a report of difficulties. ofcourse also keep draft and expand into pure file. lets see what happens.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Fixing the two typos, then dispatching the sub-agent with a lean brief — no context from this session, just the file — so the expansion tests the draft on its own merits.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/draftmark/draftmark.draft.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/draftmark/draftmark.draft.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/draftmark/draftmark.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Done. Typos fixed, and the sub-agent expanded the draft cold — no session context, just the file — into `docs/draftmark/draftmark.md` (75 lines of pure prose, no draft comments, headings preserved). I've read the output: it's faithful, and the content contract held — I couldn't find an invented statement or a dropped block.
+
+The sub-agent returned 12 difficulties. The ones worth your attention:
+
+- **"downsample" is used before it's defined** (line 14) — the term first appears in the draft-file section but only becomes inferable from the Sub-agent section at the bottom. It guessed correctly, but by inference.
+- **"git info/exclude" vs "git info/ignore"** — the draft uses both terms (lines 14 and 90) and never says whether it means `.git/info/exclude` specifically. The agent kept the draft's wording rather than resolve it.
+- **The `+++` literal form** — as predicted, it couldn't assert the exact syntax and wrote around it ("a `+++` HTML comment on a single line"). The output spec never shows `<!-- +++ -->`.
+- **"Drafts deformat" is subjectless** (line 52) — it chose "nesting deformats the Draft," which I believe is right, but it was a coin flip.
+- **"prefer 1, accept more"** (line 30) — read as "one block per list item," though it flagged the other reading (one item per block) as plausible.
+- **The scope pairing was inferred, not stated** — that Preserve/Remove handle content while Question/Explain are agent-facing is the agent's own mapping of line 70's compressed blocks; the per-scope drafts support it, but the draft never draws the line itself.
+
+The rest were minor judgement calls: paragraph-per-comment structure, the two file options rendered as a list, keeping the lowercase `## draft file` heading verbatim, and treating "before markdown create or edit" as a verbatim trigger string.
+
+Notable that the difficulty list and my earlier appraisal converge on the same spots (`+++`, deformat, info/exclude) — the notation surfaces its own weak points reliably, which is a good sign for the parity-checking and audit tooling the spec promises. The draft file is untouched, as the source; both files are ready for your tuning pass.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+the litteral form is hard to write in a draft doc as it causes deformating. 
+The big thing I see is that these drafts are good for mind dumping. but not great for a nice looking document. any suggestions here? shuffle things around in the draft to produce better output, but guage that by reading the pure file?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Agreed on the literal form — it can't live inside a draft comment. But it doesn't have to: the draft only needs to *instruct* the example, not contain it. A block like "Fenced separator example." tells the expansion agent to write ` ```md <!-- +++ --> ``` ` in the output. The dangerous sequence exists only in the pure file, where it's fenced and safe. That's the general escape for all self-documentation: examples are output-only artifacts, commissioned by drafts, never embedded in them.
+
+On the bigger observation — you've diagnosed it exactly. The pure file is faithful but flat: 20-odd paragraphs of 1-3 sentences each, because the expansion rule is comment = paragraph, so the output's rhythm is a one-to-one copy of your dumping rhythm. Mind-dump order and document order are different things, and right now the notation only encodes the first. Suggestions, roughly in order of leverage:
+
+1. **Grouping is the shuffle, not just ordering.** Comment boundaries dictate paragraph boundaries, so merging and splitting comments is your primary shaping tool. The three single-block Skill drafts became three stub paragraphs; chained into one comment they'd be one solid paragraph. Rule of thumb: one comment = one idea. Reshape the draft until each comment holds a paragraph's worth of thought.
+
+2. **Let drafts prescribe form, not just content.** The notation already does this once ("Use blocks for list items") — extend it into a small form-hint vocabulary at the head of a block: "As a list.", "Fenced example.", "Bold lead." The four per-scope drafts, hinted "As a list.", would expand into a definition list instead of four stubby paragraphs. Your conventions.md drafts get good-looking output precisely because the surrounding document already establishes a bold-led-bullet pattern to match; a bare creation run has no such pattern, so the hint has to travel in the draft.
+
+3. **Commission examples.** The single biggest gap between the pure file and a nice spec is zero worked examples. Draft blocks like "Fenced example. Preserve wrapping a paragraph." cost you six words and transform the output — and per the point above, they're also the only way to show the deformating syntax.
+
+4. **Consider letting the draft file carry skeleton prose.** The spec currently says the draft file holds no expanded prose, but a load-bearing one-liner or a list lead-in written as real body content would anchor the document's shape, with the mind-dump staying in comments around it. That's your own templating idea (line 60) turned inward. It's a spec relaxation, so your call.
+
+And yes — the loop you're proposing is the right gauge, and it's worth naming in the spec as its own pass: expand, read the pure file, reshape the draft, re-expand. The draft stays the source of truth throughout, and your parity sub-agent is exactly the tool that keeps the loop honest.
+
+Want me to do a shaping pass on draftmark.draft.md along these lines — merge, add form hints, commission the two examples — and re-run the sub-agent so you can compare the two pure files?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+soon. lets look at the expansions. did the agent write them faithfully? or could they have used a little bit more of their oratory expertise?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Faithful to a fault. I put the two files side by side, and the agent's method is visible everywhere: transliteration plus glue. Each shorthand block becomes a clause, in the original block order, using the original vocabulary, joined with "and" or a colon. Line 18 is typical — "Full draft file maintained. No expanded markdown prose. Prevents downsampling to draft for edits." became "A full draft file is maintained, containing no expanded markdown prose. This prevents having to downsample to a draft for edits." That's the draft with grammar added, not prose written from the draft.
+
+The cost shows in three ways. Passive voice dominates ("is maintained," "are dispersed," "is provided") because shorthand blocks drop their subjects and the agent restored them the timid way. Sentence rhythm is uniform because block order was never reordered for emphasis. And vocabulary never sharpens — "handy for reversions" survives verbatim where finished spec prose might not say "handy" at all. There are flickers of craft (the em-dash construction in the Editing section, "invisible when the file is rendered" is a nice unpacking of "rendering invisibility") but they're rare.
+
+Here's the interesting part though: I think the agent was right to hold back, given what the draft told it. The content contract reads "shorthand underpins full prose. must be visible. no extra statements. nothing left out." An agent taking that seriously reads "must be visible" as near-verbatim traceability — and knowing a parity audit will check prose against draft pushes the same direction. Transliteration is the rational strategy under that contract. The oratory wasn't lacking; it was withheld, and your own spec withheld it.
+
+So the fix belongs in the draft, not in the agent prompt: one block in the Content section granting stylistic latitude and saying what "visible" actually binds. Something like — "Blocks bind meaning, not wording. Reorder within a paragraph. Active voice, strong verbs." That licenses the oratory while keeping the invariant that every block's meaning is accounted for and nothing new is smuggled in. It also sharpens what parity checking should test: statement coverage, not phrase matching.
+
+That block would fold naturally into the shaping pass you've already queued up — say the word and I'll do both together.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+hmm an agent with no context will never smuggle anything anyway, so that could be dropped.
+Im also wondering. is this too strict and structured? what is the gold? Im thinking it maybe the shorthand convention and conversion. 
+doc to draft: The agent faithfully extracts the draft from an existing doc.
+draft to doc: the agent get stylistic and formatting license, but foundation preserved. 
+`+DRAFT` comments are always co-mingled with expanded prose. 
+draft.md docs are co-mingled, the final doc is stripped. can be used for quick edits where the comments go in and out without a draft.md created.
+
+thoughts on this?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+I think you've found the actual shape of the thing. Taking the pieces in turn:
+
+**Dropping the no-smuggling clause** — mostly agree, with one nuance. A context-free agent can't smuggle *session* context, true. But it can still pad — plausible generic filler is what agents do when given stylistic license ("this improves maintainability and ensures consistency..."). Your phrase "foundation preserved" covers it if you read it as binding both directions: every block accounted for, no *claims* the blocks don't make. Wording free, claims fixed. That's one clause doing the work the old three did.
+
+**The asymmetric conversions being the gold — yes.** That's the elegant core, and it's worth stating as the heart of the spec: downsample is faithful compression (no license — the draft must honestly represent the doc), upsample is licensed expansion (foundation preserved, prose is the agent's). The shorthand convention is the interchange format between them. Everything else — scopes, tools, file naming — is supporting apparatus around those two moves, and the spec should be shaped to say so.
+
+**Co-mingled draft.md, stripped final** — this is the strongest change, for a reason beyond taste: it's what you already do. conventions.md *is* a co-mingled draft file, and the archived expansion run produced exactly this shape. The spec was describing a mode (draft file with no expanded prose) that your actual practice had already abandoned. Specs that catch up to working practice beat specs that legislate against it.
+
+And it buys you something concrete: **parity checking becomes mechanical.** Under the old model "draft and main in sync" was a semantic judgement needing a sub-agent. Under this model the final doc is a build artifact, and parity is just `strip(draft.md) == main.md` — a diff the CLI can run, no intelligence required. Drift from someone editing the final directly is detected the same way, and resolved by downsampling the diff back in. The sub-agent's job narrows to what genuinely needs judgement: the expansion audit and the downsample itself.
+
+The inline quick-edit case rounds it out nicely — same notation, no file, comments go in and out. One mechanic, two lifetimes.
+
+Two costs to accept with open eyes. A co-mingled file carries every paragraph's shadow forever, so long documents get heavy — though at 2-6 words per block the overhead is small, and it's the price of auditability you were already paying in conventions.md. And Preserve/Remove shrink in importance — they were built for the old edit-in-place model; in the co-mingled world they only matter mid-edit, before a strip. That's fine, but the Scopes section should demote itself accordingly.
+
+Net: this is a simpler and truer spec than the current draft. The shaping pass we queued is now bigger than a shuffle — it's a restructure around the two conversions — but the draft notation is exactly the right place to do that thinking cheaply.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+I mean even leaner. kindof like an output-style. "hey write this plan in shorthand" "great, let me shuffle a few things around, and add a few things". "super can you now expand it into pure markdown". 
+OR
+"hey i've edited a few passages using sharthand drafts" "can your rewrite them into the doc".
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Yes — and I think this reframe finally names what the gold actually is: **shorthand is a negotiation currency.** Tuning a 6-word block is cheap; tuning a paragraph is expensive. When the plan exists as blocks, you can shuffle, veto, and add at almost zero cost, and prose only gets written once, after agreement. That's the whole value proposition, and it needs almost none of the machinery in the current draft.
+
+Both your dialogues work with just two verbs and one convention:
+
+- **The convention**: blocks of 2-6 words, period-terminated, chained for paragraphs. Wrapped in `<!-- +DRAFT: -->` only when they need to live inside a file; bare in chat.
+- **draft**: write (or compress) in shorthand.
+- **expand**: rewrite as prose — wording free, foundation preserved.
+
+That's an output-style-sized artifact, and honestly it's closest to how you already use magic-reply: a trigger vocabulary the agent understands mid-conversation, not a framework it must study. Your second dialogue is the sharpest version — user drops shorthand comments into a doc, says "rewrite them in," agent expands and dissolves them. No file, no passes, no ceremony. The comments go in and out like scaffolding.
+
+What the lean version deliberately gives up, and why that's fine:
+
+- **Cold-context expansion.** The same session drafts and expands, so session context flows into the prose. But for plans and edits, that context is the *point* — no-leakage only mattered for durable spec authoring.
+- **The audit trail.** No shadow record of intent survives. For a plan, the doc is the deliverable; nobody audits it later.
+- **Scopes mostly dissolve.** Preserve/Remove still earn their keep in the edit dialogue ("keep this passage, replace that one"), but Question/Explain are just... talking, which chat already does.
+
+The key move is that the heavy version doesn't die — it's the same convention with layers opted in when the artifact is durable. Something like:
+
+1. **Core** (output-style / rule, a page at most): the shorthand convention + draft/expand. This is what you ship.
+2. **File layer** (opt-in): `.draft.md`, co-mingled drafts, strip-to-final — for documents like conventions.md where the intent record must outlive the session.
+3. **Tooling layer** (opt-in): CLI strip, mechanical parity, sub-agent audit — only earns its complexity on layer 2 artifacts.
+
+This conversation is itself the evidence for the layering: we used the heavy path to build a spec, but every "shuffle this, shorten that, drop this clause" exchange along the way was the lean loop running informally. The lean core is the thing you'd reach for daily; the layers are for the handful of documents that deserve them.
+
+If you want, next step could be drafting that core as an actual output-style or rule file — in shorthand, naturally — and seeing if a page is really all it takes.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+no deeper layers. don't even stipulate `chained shorthand = paragraph`. no CLI strip, no sub agent. no formatting loss. bolding, bullets, tables, can be maintained etc.
+The most important thing is the agent has a constraint. this enforces quality. then from a quality foundation a quality final doc can be expanded. 
+Also it may litterally become a language. rather than a spec. kind like pseudo code.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Pseudocode is exactly the right analogy — and it clarifies what to keep and what to throw away. Nobody ever wrote a spec for pseudocode. It has no CLI, no passes, no file convention, and yet every programmer reads and writes it fluently, because it's a *register*, not a format: structure kept, ceremony stripped. DraftMark as the same thing for documents gives you a clean division of labour — **markdown keeps owning structure** (headings, bullets, bold, tables, all preserved and load-bearing), **DraftMark owns only compression of the prose inside it**. A table in shorthand is still a table; its cells just got terse.
+
+And you're right that the constraint is the entire engine. The word limit isn't a style rule — it's a filter that makes hedging impossible. Prose can launder a vague thought through qualifiers; a six-word block can't hide anything, so every block is forced to be a decision. We watched this happen mechanically earlier: every over-length block in your draft was carrying hedge words, and every fix was deletion. A document drafted under the constraint is all signal, which is why the expansion comes out sound — the agent expands decisions, not vibes. Quality in, quality out.
+
+So the language keeps exactly one rule — compress each statement to a few words, end with a period — and everything else demotes to idiom, learned by exposure the way pseudocode is. Which means the whole thing might genuinely fit in a sentence plus an example:
+
+> **DraftMark** — markdown written in a compressed register: full structure, telegraphic statements. Expand on request; wording free, foundation preserved.
+
+```md
+## Rollout
+Feature-flag the new parser. Two-week canary. **Rollback trigger**: error rate doubles.
+```
+
+If that sentence and example are enough for a cold agent to both write it and expand it — and I suspect they nearly are — then it's a language, and the test is empirical: give exactly that to a context-free sub-agent with a topic, ask for a DraftMark plan, then hand the plan to another one and ask for the expansion. If both come back right, you're done; no spec ever needed. The current draftmark.draft.md then isn't the spec of this — it's a design journal that got you here, and it can retire to the archive alongside the last iteration.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+I want to call it "shorthand". It is thoughts, ideas, decisions, instructions expressed as deliberate shorthand. 2-6 word length compressions. If I said write in "shorthand" what would you think I meant? 
+
+ if inside an existing doc with full form write shorthand in html comments, these could still contain draft markers. agent edits need to be shorthand before full.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Honest test, cold read: if you said "write the plan in shorthand," I'd produce compressed, telegraphic writing — dropped articles, clipped statements, no filler. I would *not* need the concept explained. That's the remarkable thing about the name: it's the first candidate that's self-executing. "DraftMark" carries zero meaning until a spec loads it; "shorthand" arrives pre-loaded in every model and every human, which makes it the most agent-agnostic possible choice — the meaning is reachable from general knowledge alone, no document required.
+
+Where my cold output would drift from your register: I'd likely reach for bullet fragments without terminal periods, maybe abbreviations and symbols ("w/", "&", "→"), and I wouldn't self-enforce a word ceiling — some "shorthand" lines would sprawl to ten words. So the bare word does maybe 80% of the work, and one defining line closes the gap: *deliberate 2-6 word compressions, each ending in a period, markdown structure untouched.* The period rule matters more than it looks — it's what makes each block read as a complete committed statement rather than a note fragment, and it's the least guessable part of your register.
+
+One small tradeoff to accept: "shorthand" is a common lowercase word, so it won't function as a searchable proper noun the way DraftMark would. In practice that costs little — you're invoking it in sentences, not indexing it.
+
+The comment convention slots in cleanly: shorthand is the register, HTML comments are merely *where it lives when a full-form doc hosts it* — invisible when rendered, disposable after expansion. Draft markers stay available inside them as an idiom for the workflows that want them, not a requirement.
+
+And "agent edits need to be shorthand before full" is, I think, the sharpest sentence in this whole redesign — it takes the constraint and installs it at the edit boundary as a protocol. The agent may not write prose into your document until the compressed version has sat in front of you. You review six words, not a paragraph; you tune blocks, not sentences; expansion happens once, after agreement. It's the negotiation-currency insight made mandatory, and it's the single rule that would change day-to-day agent behaviour the most. The whole thing is now: a name that mostly explains itself, one defining line, one protocol rule. That fits in a rule file smaller than this reply.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+write the shorthand rule file, in shorthand ofcourse
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/extensions/rules/shorthand.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Written to `extensions/rules/shorthand.md` — 21 blocks, every one inside the 2-6 word limit, so the file is its own demonstration: a cold agent learns the register by reading it as much as by obeying it.
+
+Choices I made under the constraint:
+
+- **No "why" section.** The quality-through-constraint reasoning we discussed stayed out — harness docs instruct the how. The rule is pure behaviour.
+- **"Full words only."** — three words closing the drift I'd flagged (abbreviations, "&", "→"), which was the one place a cold reading of "shorthand" diverges from your register.
+- **The example survived compression.** It's the fastest teacher for a cold agent and shows structure (heading, bold) riding through untouched.
+- **Draft markers shown literally** — safe at file top level; the deformat hazard only exists inside comments.
+- **Nothing about chaining, paragraphs, or files** — per your cut. Four idioms only: write, expand, comments, edit protocol.
+
+The one block I'd watch is "Every block accounted." — it's compressed right to the edge of the register's readability. If it ever confuses an expanding agent, "Every block accounted for." costs one word and stays legal.
+
+The old apparatus — `docs/draftmark/draftmark.draft.md` and the expanded `draftmark.md` — is now a design journal rather than a live spec. Say the word and I'll move it to `archive/draftmark/` beside the last iteration.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+yes move the draftmark stuff to archive. lets move the shorthand to its own folder in docs. then i want to talk about converting it to an "always on" output style.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: mv docs/draftmark/draftmark.draft.md docs/draftmark/draftmark.md archive/draftmark/ && rmdir docs/draftmark && mkdir docs/shorthand && mv extensions/rules/shorthand.md docs/shorthand/shorthand.md && ls archive/draftmark docs/shorthand
+Description: Archive draftmark files, move shorthand to docs/shorthand
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ls docs/shorthand docs/draftmark archive/draftmark 2>&1; ls extensions/rules
+Description: Check state of moved directories
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ls -la extensions/rules; file docs/shorthand; ls -la docs/shorthand/
+Description: Inspect extensions/rules and docs/shorthand closely
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: mv extensions/rules/shorthand.md docs/shorthand/shorthand.md && ls docs/shorthand/ extensions/rules/
+Description: Move shorthand.md into docs/shorthand
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Done. `archive/draftmark/` now holds all four draftmark files (both generations), and `docs/shorthand/shorthand.md` is the language's new home — `extensions/rules/` is back to its original four.
+
+On the always-on output style — my take, then the decisions it forces:
+
+An output style replaces the harness's output guidance every session, so "always on" means *my chat responses themselves* arrive in shorthand — status, plans, findings, all compressed to blocks. That's your "sharp" style taken to its logical limit, and for most of what an agent says (progress notes, proposals, reports) it would be strictly better: denser signal, cheaper review, and the constraint disciplines my output the same way it disciplined your drafts.
+
+The tension is conversations like this one. Appraisals, tradeoffs, "what do you think" exchanges live on connective reasoning, and shorthand strips connectives by design — you'd get verdicts without the why. There are two honest designs:
+
+- **Full always-on, expand on request.** Everything compressed; you say "expand" when you want prose. One rule, no judgement calls, perfectly mirrors the language itself — compression default, expansion explicit. Costs you an extra turn whenever nuance matters.
+- **Register-switching.** Shorthand for plans, status, and proposals; prose when explaining or discussing. Reads naturally but hands the mode decision to agent judgement, which will wobble at the boundaries.
+
+I'd start with full always-on. It's the testable version — you'll learn within a day which conversations genuinely need prose, and "expand" is a cheap escape hatch. If the friction is real you can soften toward switching later with evidence in hand.
+
+Two structural notes before building it. First, the split of homes stays clean: `docs/shorthand/shorthand.md` remains the canonical language definition; the output style is a separate self-contained artifact in `extensions/output-styles/` (it can't reference the doc — styles travel alone in plugins). Second, the style would displace "sharp" — that's fine, shorthand subsumes it, but worth saying out loud since sharp is your current daily driver. Code blocks, file edits, and document work are untouched either way; the style governs only what I say to you.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok so we probably have a few more tasks to complete before converting into a style. lets throw up options for what else should be defined within shorthand. so that it is a complete spec.
+We will also need to expand it once it is settled so that we can extract the style out of it.
+a few starting points...
+The language style of shorthand?
+define "blocks" somewhere before usage on line 7
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Good instinct — the spec has gaps a cold reader would hit. Here's the full menu as I see it, sorted by my read of what a *complete but still lean* spec needs. Your two starting points are real; I've folded them in.
+
+**Should be in — the spec is incomplete without them:**
+
+1. **Define "block" before use** (your point). Line 7 uses the term cold. Cheapest fix is one block in the intro: "Each statement is a block." — then Writing's "One statement or claim per block" lands with the term already owned.
+2. **Language style of blocks** (your point). The register itself is undefined — my example "Feature-flag new parser." is imperative, "error rate doubles." is declarative, and nothing says which, or whether articles drop. A short `## Style` section settles it: telegraphic register, articles optional, strong verbs, no hedges or qualifiers. That last one is the constraint's enforcement arm made explicit.
+3. **The reverse verb.** The spec defines Expanding but not Compressing — yet "doc to draft: faithful extraction" was half the gold. Without it, an agent asked to "shorthand this doc" has no fidelity contract (compression is *faithful*, no license — the asymmetry with expansion is the whole point). A `## Compressing` section, three or four blocks.
+4. **The deformat hazard.** "Inside full documents" invites shorthand into HTML comments but never warns that wrapping an existing comment breaks the wrapper. One block: "Never wrap existing comments." This is the one hard syntax trap in the language, and it's currently unspecced.
+
+**Worth considering — judgement calls:**
+
+5. **The label idiom.** The example uses `**Rollback**: error rate doubles.` — a bold label fronting a block — but nothing defines it. Either spec it as an idiom (one block) or change the example so it doesn't demonstrate undefined syntax.
+6. **Marker semantics.** You changed draft markers to *required*, so `+DRAFT:` is load-bearing — but the spec never says what the marker does. One block ("Marker flags comments for removal.") closes it. Alternatively, if every shorthand comment is a draft comment, the marker could be folded into the comment rule itself.
+7. **Structure license during expansion.** May the expanding agent create headings or reshape lists, or is structure frozen? "Markdown structure untouched" governs *writing* shorthand; expansion's structural freedom is unstated. One block either way.
+
+**Recommend leaving out — leanness is the ethos:**
+
+8. Chaining/paragraph mapping — you already cut this deliberately; expansion granularity is the agent's stylistic freedom.
+9. Per-container micro-rules (blocks in table cells, one-per-list-item) — idiom, learnable from the example.
+10. Invocation/trigger conditions — that's the output style's frontmatter job, not the spec's (self-trigger defect otherwise).
+
+My shortlist: take 1-4, decide 5-7, skip the rest. And agreed on the sequence — settle the spec in shorthand, then run the expansion, then extract the style from the expanded prose. Tell me which numbers are in and I'll apply them to `docs/shorthand/shorthand.md`, in shorthand.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+1. 2. 3. In
+4. Out. spec just puts new shorthand in comments, nothing else.
+5. In. Any valid markdown is Ok as long as it satisfies shorthand block rules
+6. In but different. We are no longer doing any advanced stuff with +DRAFT markers. tbh just shorthand in pure html comments might suffice. put them above the passage or inline.
+7. Yes shorthand is just constrained prose. the doc still needs building like normal.
+8. 9. Out
+10. Triggers when writing md or txt is the best option. user approval to expand.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Applying all decisions to the spec now — in shorthand, every block checked against the limit.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Applied. The spec is now seven sections, every block within the limit. How each decision landed:
+
+- **Block defined at first breath** — intro now runs "Deliberate 2-6 word statements. Each statement is a block. Blocks end with a period." — the term is owned before Writing uses it.
+- **`## Style`** — four blocks: telegraphic register, articles optional, strong verbs, no hedges or qualifiers.
+- **`## Compressing`** — the asymmetry is now explicit: "Existing prose compresses faithfully. No stylistic license." against Expanding's "Stylistically free, foundation preserved."
+- **Markers gone** (6) — comments are now plain: "New shorthand rides HTML comments. Comments hold shorthand only. Placed above passage or inline." The deformat hazard (4) needed no warning once comments hold shorthand only — nothing else can get wrapped.
+- **Markdown-in-blocks** (5) — "Any valid markdown allowed. Block rules still apply." — which retroactively legalises the example's bold label.
+- **Structure license** (7) — Expanding ends "Build document structure as normal."
+- **Trigger** (10) — intro closes with "Applies to markdown and text writing," and approval moved into Expanding ("User approval before expanding"), so Agent edits ends at "User tunes blocks." — no duplicated approval rule.
+
+One judgement call to flag: I put the trigger in the intro rather than its own section — it's one block, and it'll migrate to the style's frontmatter at extraction time anyway.
+
+The spec is settled pending your read. Next in the sequence when you're ready: the expansion run — cold sub-agent again, same as last time — then we extract the output style from the expanded prose.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+lets expand it yourself. follow our own expansion rules. this should keep it lean and more suitable for an output style.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Expanding it myself under our own rules — approval given, foundation preserved, every block accounted, no new claims. The shorthand file stays as the source; the expansion goes beside it as `shorthand-full.md`, since the compressed version *is* the canonical spec and shouldn't be destroyed by its own expansion.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand-full.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Done — `docs/shorthand/shorthand-full.md`, expanded in place beside its source. The two files are 27 and 33 lines; the expansion came out barely a third longer than the shorthand, which tells you how little padding the constraint left to restore.
+
+My difficulty report, in the tradition:
+
+- **Zero ambiguous blocks.** Every block expanded without a coin flip — the settling pass did its job. Compare the sub-agent's twelve difficulties on the draftmark spec.
+- **One structural judgement**: the expansion went to a sibling file rather than overwriting, because the shorthand version is the canonical spec, not scaffolding. The spec itself doesn't legislate whole-file expansion — it only covers comments — so this was my call under "build structure as normal."
+- **The example carried verbatim** — it's content, not a block, and it already demonstrates the finished register.
+- **One flourish to audit**: "as any normal document demands" in Expanding stretches "Build document structure as normal." slightly — stylistic, not a new claim, but it's the loosest expansion in the file if you want to tighten.
+
+Both registers of the spec now sit side by side, and reading them together is the best argument for the language yet — you can verify foundation-preservation by eye in under a minute.
+
+Ready for the style extraction whenever you are. My suggestion for that step: the style body comes mostly from Style, Writing, and the intro; Expanding/Compressing become the two verbs the style tells the agent to obey mid-conversation; Agent edits becomes the always-on protocol rule. Say the word and I'll draft `extensions/output-styles/shorthand.md`.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+one more test, get a subagent to shorthand the full doc you created. use the expansion rules in the doc itself. we can then see the in-out-in divergence by comparing to the original sharthand.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Dispatching a cold sub-agent to compress `shorthand-full.md` by its own internal rules — it must not see the original, so the brief forbids reading anything else. Then I'll diff the round-trip against your settled original.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand-roundtrip.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+The round-trip is complete and the verdict is strong: after prose and back, the spec survived with only three semantic nicks across roughly 35 blocks — and the sub-agent self-reported all three, which is exactly the honesty the difficulty-report mechanism was designed for.
+
+The genuine losses, all single dropped words:
+
+- **"One statement or claim per block"** came back as "One statement per block." — "or claim" thinned away.
+- **"User approval before expanding"** became "Begins only on approval." — *whose* approval is now implicit.
+- **"HTML comments"** became just "comments." — the one syntax-bearing word in that section.
+
+Everything else is register drift, not meaning drift — and the drift has a consistent direction worth noticing: **the round-trip came back more telegraphic than your original.** "Blocks end with a period." returned as "Every block ends period."; "Applies to markdown and text writing." as "Applies to markdown, text." The agent compressed harder than you write, dropping copulas and prepositions your version keeps, and the result reads noticeably choppier.
+
+That points at a real gap in the spec rather than a fault in the agent: "Articles optional" was read as license to drop *any* small word. Your original draftmark notation had the missing rule all along — **"Reads cleanly."** — and it got lost in the lean rewrite. The round-trip just empirically rediscovered it. One block restored to the Style section would pin the register at your calibration rather than maximum compression.
+
+Two conclusions for the language itself. First, the failure mode of compression is now characterised: it's not lost claims, it's shaved modifiers — the load-bearing single words ("user," "HTML," "or claim") are what need protecting, and "Every claim becomes a block. Nothing dropped." already covers them in principle; the agent just under-weighted what counts as a claim. Second, in-out-in divergence turns out to be a genuinely useful audit — cheap to run, and it found a spec omission that four rounds of human-and-agent review didn't.
+
+Suggested touch-ups before style extraction, all one-block: restore "Reads cleanly." to Style, and consider whether "user approval" and "HTML comments" deserve the spec marking them explicitly as non-droppable — or whether that's over-legislating and the Compressing section's "nothing dropped" just needs to be trusted. The round-trip file is at `docs/shorthand/shorthand-roundtrip.md` if you want to eyeball the diff yourself.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+add "Reads cleanly." to style. why not add to compressing... "keep load bearing modifiers" or something like that?
+then lets run the test again. if i can get in-out-in working very well. then the spec can simply downsample and upsample as it pleases and not need to "Preserve" any text with comment shenanigans.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Both additions are right — "keep load-bearing modifiers" is exactly the counter-rule the first run demanded, and it belongs in Compressing since that's where the erosion happens. Updating both registers of the spec, then re-running the test.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand-full.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand-full.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand-roundtrip-2.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Run 2 is a clear improvement, and the diff against your original tells a precise story.
+
+**What the new rules fixed:**
+
+- **The register snapped back to your calibration.** Run 1's choppiest blocks all healed: "Every block ends period" became "Every block ends with period," "Applies to markdown, text" became "Applies to markdown and text," and Style itself came back as "No hedges, no qualifiers. Result still reads cleanly." — "Reads cleanly." did exactly its job.
+- **"HTML comments" survived** this time, named as a kept load-bearing modifier. "after expansion" was also explicitly retained at the six-word ceiling — the agent was visibly *reasoning with* the new rule.
+
+**What still eroded — down from three losses to two, plus one I caused:**
+
+- **"or claim"** dropped again ("One statement or claim per block" → "One statement per block.") — and this time it went *unflagged*, which makes it the more interesting failure: a loss the difficulty report doesn't catch.
+- **"user's" approval** dropped again, though self-flagged again as "arguably load-bearing but recoverable from context."
+- **"normal"** vanished from "Build structure as documents demand" — but trace that one upstream: my expansion flourish "as any normal document demands" (the one I told you to audit) created the hazard. Lesson for the language: lean expansion isn't just taste, it's round-trip stability. Flourishes become compression casualties one cycle later.
+
+**The residual failure mode is now very specific**: the agent drops a word when it judges the meaning "recoverable from context." Both survivors are exactly that shape. "Keep load-bearing modifiers" made it keep words it recognised as load-bearing; it didn't stop it from *deeming* words recoverable. If you want to close that last gap, the counter-block is something like **"Recoverable is still dropped."** or the blunter **"When unsure, keep the word."** — it attacks the rationalisation rather than the category.
+
+On your real question — whether in-out-in is good enough to retire Preserve-style comment shenanigans: I'd say nearly, with one caveat. Fidelity is now two one-word thinnings per full cycle, both in the report-or-diffable class, and the register is stable. But drift compounds silently over repeated cycles, and one of the two losses escaped the difficulty report. So the honest position: one more rule (the anti-recoverability block), one more run — and if run 3 comes back clean or fully self-flagged, the spec can drop comment preservation and let downsample/upsample run free, with the difficulty report as the only safety net.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+here is a thought of mine...
+- `## compressing` doesn't say that we are writing 'shorthand'. when I said this word, your output shifted dramatically, it was an almost instant win based upon the meaning that word entails, `compresses` probably is a looser meaning that an agent thinks they are just reducing the size of sentences. 
+shorthand is a failthful shortening of prose. mechanistic in nature. it doesn't allow contextual understanding. Infact the doc is light on that power word. eg the opening block could use shorthand instead of or before `compressed writing style`.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+That's a sharper diagnosis than my proposed counter-rule, and I think it's correct at the mechanism level. "Compress" and "shorthand" activate different priors. Compression is a size operation — it invites salience judgement, deciding what's worth keeping, which is precisely where "recoverable from context" rationalisation lives. Shorthand is stenography — mechanistic transcription, where dropping a word because context could restore it isn't thrift, it's a transcription error. The stenographer doesn't get to understand the meeting. When you said the word to me cold, the register shifted instantly because the prior did the work; the spec then went and buried its own power word under the looser one. Rules fight priors weakly — choosing the word with the right prior works with the grain, and it replaces the "Recoverable is still dropped." patch I suggested with something cheaper and more likely to hold.
+
+Following our own protocol — proposed blocks, you tune:
+
+**Opening block** (word leads the spec):
+
+> Shorthand: faithful shortening of prose. Thoughts, decisions, instructions condensed. Deliberate 2-6 word statements. ...rest unchanged.
+
+This also promotes your definition — "faithful shortening" — above "compressed writing style," which can drop entirely or trail as a gloss.
+
+**`## Compressing` → `## Shorthanding`** — you already verb it naturally ("shorthand the full doc"), and the heading rename removes the compression frame at its root. Body:
+
+> Prose rewrites as shorthand. Mechanistic, like stenography. No contextual dropping. Every claim becomes a block. Keep load-bearing modifiers. Nothing dropped, nothing added.
+
+"No contextual dropping." is your "doesn't allow contextual understanding" made into the operative rule — it names the exact rationalisation both run-2 losses used. Arguably "Mechanistic, like stenography." then borders on redundant; I'd keep it anyway since it's the prior-setting block, but it's the one you might cut.
+
+**One more sprinkle**: Expanding's first block could become "Shorthand expands on approval." so both verb sections open with the power word. Writing and Style already sit under the H1's spell and probably don't need it.
+
+Tune those, then I'll apply to both registers of the spec and fire run 3 — prediction: the stenography frame retires "user's" and "or claim" without any anti-recoverability legislation, and if it does, Preserve is dead and the language downsamples freely.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+i made the changes to shorthand.md... can you check/help
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Checked — the restructure is good: the intro now states the loop (draft → tune → expand) and the new `## Tuning` section gives the workflow's middle step a home it never had. Writing the tuning blocks now, plus two mechanical fixes.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Tuning section filled — four blocks: "User reviews the blocks. Shuffle, reword, add, delete. Agent revisions stay shorthand. Loop until satisfied." The third block is the one doing real work: it forbids the agent from sneaking into prose mid-negotiation. I also capitalised two lowercase block-starts ("Full expansion when happy.", "Faithful, mechanistic rendering.").
+
+Three things from the check, for your call:
+
+- **The trigger narrowed.** The old intro said "Applies to markdown and text writing"; the new one opens "Write Markdown in Shorthand" — `.txt` fell out. If that was deliberate, fine; if not, one word restores it.
+- **"Keep agents on track."** is a purpose block — the only *why* in an otherwise all-*how* spec. It reads well as an opening sell, so I left it, but it's the block a durability audit would question.
+- **You kept `## Compressing` as the heading** and went with "Faithful, mechanistic rendering." rather than the stenography/no-contextual-dropping blocks. That's a leaner bet on the same prior — run 3 will tell us if it's enough to kill the "recoverable from context" losses.
+
+One sequencing note before run 3: `shorthand-full.md` is now stale — it predates the intro rewrite, the Tuning section, and the Compressing rewording. The test needs a re-expansion first so the sub-agent compresses a document that actually carries the new rules. Want me to re-expand and fire run 3 in one go?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+yes re-expand and run test 3
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Re-expanding first — lean this round, no flourishes, since we learned they become compression casualties:
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand-full.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand-roundtrip-3.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Run 3 is essentially a clean round trip — and the one exception is telling you something about the spec, not the process.
+
+**The convergence is striking.** Most blocks came back byte-identical or trivially reworded: Style, Tuning, Compressing, Inside full documents all match your original at the meaning level, several word-for-word. "HTML comments" held. The approval question resolved itself upstream — your spec now says "on approval" with Tuning establishing whose, and the round trip preserved exactly that. Register drift: zero. The stenography framing plus "Reads cleanly." have made the spec very nearly a fixed point of its own round trip, which is precisely what a self-describing language should be.
+
+**The lone loss: "or claim" dropped for the third consecutive run, unflagged for the second.** Three independent cold agents, three different framings of the task, and all three silently rendered "One statement or claim per block" as "One statement per block." At this point I'd read that not as a compression failure but as a verdict: the agents parse "or claim" as a synonym pair — a claim *is* a statement — and drop it the way the style tells them to drop redundancy. The language has voted, unanimously. My recommendation: delete "or claim" from the spec rather than defend it. Do that and run 3 retroactively becomes a perfect round trip.
+
+**So, your original question is answered**: in-out-in works very well now. Divergence per full cycle is down to zero semantic losses (once "or claim" is ruled on), stable register, and a difficulty report that surfaces real friction. Preserve is dead — the spec needs no comment shenanigans to protect text, because downsample and upsample are trustworthy inverses. That also retires most of "Inside full documents"'s remaining caution and confirms the spec is settled enough to extract the output style from.
+
+Minor notes from the run for completeness: the sub-agent again treated "two-to-six-word" hyphenation as one word and called it "arguably a cheat the spec doesn't rule on" — twice flagged now, so a ruling block ("Hyphenated compounds count once." or the reverse) would end the recurring question; and it noted coordination between blocks ("and"-linkage) doesn't survive splitting, which is inherent to the register and fine to leave.
+
+Want me to drop "or claim" and add a hyphenation ruling, then we move to the style extraction?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok a few things. 
+- this will be largely done by the main agent. so is it redundant doing a report to themselves? the reason we used subagent is to mimic a main agent compressing a document built in another session. Or should I use a sub-agent to expand and compress anyway? take advantage of their agent body instructions. keeps the reigns on the main agent, and lightens the spec for the output style.
+- 'statement or claim' why two words? does neither capture exactly what we are writing in shorthand?
+- "Re-expanding first — lean this round, no flourishes, since we learned they become compression casualties:" is this something we should capture into `Expanding`? so that the agent expands more safely?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+All three are good catches. Taking them in order:
+
+**1. Sub-agent or not — I'd split by verb, and the tuning loop is what makes it principled.** Writing and tuning are conversational — they belong to the main agent; that's what the output style governs. But expanding and compressing are *mechanistic conversions*, and delegating them to sub-agents buys you three things at once. Compression needs zero context by design, so a cold agent is its natural executor. Expansion is the interesting one: after tuning, the blocks are supposed to carry the whole agreement — so cold expansion isn't a limitation, it's a *proof*. If a context-free agent can't expand the blocks correctly, the blocks were incomplete and the fix is more tuning, not more context. The sub-agent structurally enforces "foundation preserved" instead of the spec having to legislate it. And your difficulty-report question answers itself under this architecture: a report to yourself is indeed redundant, but a sub-agent's report crosses a context boundary — it's the return channel telling the main agent (and you) where the blocks under-specified. So: report stays, but it lives in the sub-agent's body, not the spec. Net effect is exactly what you said — reins on the main agent, and the output style shrinks to just the register and the tuning loop, with expand/compress becoming two small agent files that carry their own machinery.
+
+**2. "Statement or claim" — the two words came from two different heritages, and each belongs to a different section.** "Claim" arrived from the compression/parity lineage: a claim is a *checkable assertion*, which is why "Every claim becomes a block" is right in Compressing — it's the unit of fidelity accounting. But blocks-as-written aren't all claims: "Feature-flag new parser." is an instruction, not an assertion. "Statement" subsumes both, and your intro already enumerates the real answer — "Thoughts, decisions, instructions condensed." So Writing saying "or claim" was duplicating the intro's enumeration in narrower vocabulary — a single-source-of-truth violation, which is presumably why three cold agents unanimously deleted it. The fix: Writing says "One statement per block." (the agents' version), Compressing keeps "claim" (its accounting job). Neither word needed to do both jobs.
+
+**3. Yes — the lean-expansion lesson should be captured, with one wording caution.** The finding was real and mechanical: my flourish ("as any normal document demands") became run 2's compression casualty; lean expansion is round-trip stability. But the block must not collide with "Stylistically free" — the license is over *wording*, not over adding weight. A single block does it: **"Expand lean."** or **"Keep expansions lean."** sitting right after "Stylistically free, foundation preserved." — freedom in how you phrase, none in how much you add. (Resist the urge to add "no flourishes" after it; lean already entails it — that'd be a negative mirror.)
+
+Concrete changes on the table, pending your nod: drop "or claim" from Writing; add "Keep expansions lean." to Expanding; and — the bigger structural one — plan the extraction as *three* artifacts instead of one: a slim always-on output style (register + tuning loop + delegate-the-verbs), plus `shorthand-expander` and `shorthand-compressor` agent bodies carrying the conversion rules and the difficulty report. The hyphenation ruling from run 3 would land in the agent bodies too, not the spec.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+1. not as simple as that. think about changing a passage in a large doc? the model has to compress the passage first. waiting for subagent on every edit would be annoying. for me you expanded fine with the shorthand-full doc. my take is have the subagent as an auditor. it's report is the only thing it does. but it allows the main agent to get the shorthand correct before expanding, wich loses fidelity if done wrong.
+2. why not sentence? why is the word 'statement' better than sentence?
+3. used "round-trip compatible" instead.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+**1. Agreed — auditor is the better architecture, and your latency argument is the decisive one.** The edit loop lives in the hot path: compress a passage, tune, expand — a sub-agent round on every step would make the language feel expensive and nobody would use it. The evidence from our own sessions backs you: my expansions held fine (main agent, full context), while the thing that actually varied in quality was the *shorthand itself* — and bad shorthand is where fidelity dies, because expansion faithfully amplifies whatever the blocks say, wrong included. So the gate belongs exactly where you put it: audit the shorthand *before* expansion, report-only, no writes. That also makes the auditor cheap to skip — quick inline edits go unaudited, consequential documents get the check. It slots into your existing pattern too: it's the saddler shape — read, verify, report.
+
+**2. Because blocks aren't sentences, and the word would pull agents toward making them so.** A sentence is a grammatical unit — subject, verb, the works. Shorthand blocks deliberately break sentencehood: "Two-week canary." has no verb; the whole telegraphic register works by shedding grammar. Tell an agent "one sentence per block" and its grammar prior activates — it will quietly restore articles and copulas to make blocks *sentence-like*, fighting the Style section from inside the Writing section. "Statement" names the semantic unit — a thing stated: thought, decision, instruction — with no grammatical contract attached. It's the word that lets "Complete thought, then period." be true while "Reads cleanly." stays telegraphic. Same word-prior logic as compress-vs-shorthand, one layer down.
+
+**3. "Round-trip compatible prose." is better than my "lean" — it names the invariant instead of the means.** Lean was just *how* you achieve round-trip stability; your block states what must actually be true: prose that compresses back to the same shorthand. And critically, the meaning is reachable from the document alone — the spec defines both directions, so a cold reader can derive what a round trip is without our session. It's also quietly the most demanding block in the spec: it makes the expander self-test every sentence against "would this survive compression?" — which subsumes the no-flourish lesson and the no-new-claims rule in four words.
+
+Your edits have landed the other pieces too — "or claim" is gone from Writing, and "User and Agent revisions stay shorthand" tightens Tuning. The spec reads settled to me now, and the architecture is decided: slim always-on output style for the main agent (register, tuning loop, the verbs), one auditor sub-agent (shorthand check before expansion, report-only). Both extract from this spec whenever you're ready.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+ahh 2. 
+blocks are sentences in shorthand (hence the period). a statement might be more than a sentence? That line should be saying what in the prose condenses into a block, not what the shorthand block's word structure is.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+You're right, and I argued past the actual question. I defended "statement" as a description of what a block *is* — but the line's job is to define the mapping: what unit of prose condenses into one block. And for that job the two words swap places. A statement can sprawl across several sentences (a position, an argument), so "one statement per block" licenses cramming a paragraph's worth of meaning into six words. A sentence is the bounded unit — and your observation nails why it's the natural one: blocks *are* sentences in shorthand. That's what the mandatory period has been encoding all along; the period rule and the sentence mapping are the same fact stated twice, and the spec only ever wrote down one half.
+
+So the line wants to say something like:
+
+> A block is one sentence, condensed.
+
+— which does both jobs at once: names the mapping (one prose sentence → one block) and states the identity (a block is shorthand's sentence, hence the period). "Complete thought, then period." then follows from it naturally instead of floating free.
+
+One boundary case, visible in run 3, worth a conscious ruling rather than an accident: compound sentences. The cold agents split "and"-joined clauses into separate blocks — one prose sentence becoming two. I'd let that stand without legislation: Compressing already accounts at the claim level ("Every claim becomes a block"), so a two-claim sentence honestly yields two blocks, and the sentence mapping in Writing describes the writing act, not a bijection. The two sections carry different units because they do different jobs — same conclusion as before, but now with the right word in each place.
+
+Want me to drop that block into Writing, or will you tune the wording in yourself?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+hmm maybe its claim im looking for? when writing shorthand i tend to make a claim, in 2-6 words. ive also found that multiple blocks sometimes convert into a single sentence. Sentences are also hard to predetermine from the shorthand. a claim is simple. also this allows for claim on both the down and up sampling.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+I think you've landed it — and the merge-on-expansion observation is the clincher. If several blocks routinely fuse into one prose sentence, and one prose sentence can split into several blocks, then the sentence isn't a unit of the language at all — it's a surface artifact of whichever renderer is running. Trying to define blocks against sentences meant defining them against something neither direction preserves. The claim is what actually survives both crossings, which is exactly what the unit of a round-trip language must do.
+
+It also dissolves the compound-sentence boundary case I was proposing to rule on — no ruling needed, because there's no sentence bijection to protect. And it makes the round-trip invariant crisp for the auditor: compression and expansion both preserve the *claim set*. One unit, one accounting rule, both directions.
+
+My earlier objection — that "Feature-flag new parser." is an instruction, not an assertion — dissolves too, now that I look at how the spec divides the labour: the intro's "Thoughts, decisions, instructions" already tells the agent what *kinds* of content blocks carry; "claim" isn't competing with that, it's the counting unit — one committed piece of content per block. The two lines share the job cleanly.
+
+The spec change is one word: Writing's "One statement per block." becomes **"One claim per block."** Everything else already agrees — Compressing has "Every claim becomes a block," and Expanding's "Every block accounted." now means claim-set preservation by definition. The language ends up with a tidy semantic model in three layers: claims (the content), blocks (claims in shorthand), prose (claims rendered) — with sentences deliberately unbound.
+
+Shall I make that one-word edit, or are you tuning it in yourself?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+I edited it, although added a philosophy section. gives a home to and expands "keep agents on track".
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Fixed that, and the Philosophy section is a better resolution than the deletion I'd hinted at — instead of purging the spec's one *why*, you quarantined it: every other section stays pure *how*, and the why has a named home. "Edit agents' changes before committal." is the sharpest block in it — that's the whole value proposition in four words, and it wasn't written down anywhere before. It also sets up the extraction neatly: Philosophy is exactly the material that becomes the output style's description and framing, while the how-sections become its body.
+
+The intro/Writing split reads deliberately now too — "2-6 word statements" describing the *form*, "One claim per block." defining the *unit*. Both words finally in their right jobs.
+
+Spec state as I see it: settled. Every open question from the three test runs has a ruling — claim as the unit, round-trip compatibility named in Expanding, load-bearing modifiers in Compressing, the register pinned by "Reads cleanly.", tuning loop specced, auditor architecture decided (report-only sub-agent, gating expansion when it matters).
+
+Housekeeping that's now pending, whenever you want it: `shorthand-full.md` is stale again (predates Philosophy, Tuning wording, and the claim edit) — worth one final re-expansion, which doubles as the source for extracting the style; and the two `shorthand-roundtrip*.md` files are spent test artifacts, ready for deletion or the archive. Then the fun part: `extensions/output-styles/shorthand.md` and the auditor agent. Say when.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+here's what we do...
+Ive saved the spec in shorthand.bak.md now expand shorthand.md into full prose. then create an issue for the output-style, sub agent (with report). i'll delete the rest of the files.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Expanding the spec in place (backup noted), and loading the GitHub tool in parallel:
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/shorthand/shorthand.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: gh issue list --repo dilberryhoundog/agent-library --limit 5 --state open
+Description: List recent issues to check for duplicates
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+No duplicate — the timeouts genuinely failed. Creating via `gh`:
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: gh issue create --repo dilberryhoundog/agent-library --title "Shorthand: build always-on output style and auditor sub-agent" --body-file - <<'EOF'
+## Source
+
+The Shorthand language spec lives at `docs/shorthand/shorthand.md` (full prose) with its shorthand-register original at `docs/shorthand/shorthand.bak.md`. Both are authoritative; the prose version expands the shorthand version block-for-block.
+
+## Deliverable 1 — output style
+
+Create `extensions/output-styles/shorthand.md`, an always-on output style for the main agent.
+
+- Body extracts from the spec's Style, Writing, Tuning, Expanding, Compressing, Inside full documents, and Agent edits sections.
+- The Philosophy section maps to the style's description/framing, not its body (it is the spec's *why*; the body carries only *how*).
+- The main agent performs compressing and expanding itself, inline — these verbs are not delegated. Sub-agent latency on every edit was rejected during design.
+- Core protocol: agent edits are proposed as shorthand (in HTML comments inside existing documents) before any full prose is written; the user tunes blocks; expansion only on user approval.
+- Trigger scope: writing markdown and text.
+
+## Deliverable 2 — auditor sub-agent
+
+Create an auditor agent (e.g. `extensions/agents/shorthand-auditor.md`), report-only, no writes.
+
+- Job: audit shorthand before expansion, and/or audit an expansion against its shorthand.
+- Checks: one claim per block, 2-6 word blocks with terminal periods, telegraphic register that still reads cleanly, load-bearing modifiers kept, claim-set preservation (nothing dropped, nothing added), round-trip compatible prose.
+- Output: a difficulties/divergence report listing each questionable block or passage with what is unclear or lost. The report crosses the context boundary back to the main agent; it is the only artifact.
+- Optional in the workflow: quick inline edits skip the audit; consequential documents use it as a gate before expansion.
+
+## Design findings to honour (from round-trip testing)
+
+- Word priors matter: "shorthand" (stenography prior, mechanistic) outperforms "compress" (summarisation prior, lossy). Keep the spec's vocabulary in both artifacts.
+- Compression's failure mode is shaved single-word modifiers ("user", "HTML") rationalised as recoverable from context — the auditor should weight these heavily.
+- Expansion flourishes become compression casualties one cycle later; "round-trip compatible prose" is the operative constraint.
+- The claim is the unit of the language in both directions; sentences are surface artifacts and are deliberately unbound.
+
+## Distribution
+
+Wire the new assets into a plugin via symlinks per repository convention (likely `chat-tools` or `agent-tools`; decide at build time).
+EOF
+Description: Create shorthand build issue on agent-library repo
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Both done.
+
+**The spec is expanded in place** — `docs/shorthand/shorthand.md` is now full prose, expanded block-for-block from the backup under our own rules: lean, round-trip compatible, every block accounted, no new claims. The one section that needed a light judgement call was Philosophy, where "Agent understands." folded into the brain-dump sentence as its payoff clause rather than standing alone — the claim survives intact.
+
+**Issue #41 is up**: https://github.com/dilberryhoundog/agent-library/issues/41 (the GitHub MCP timed out twice, so it went through `gh` — I checked for accidental duplicates from the timeouts first; there were none). The issue is written to be self-contained for whatever session picks it up: both deliverables specced (always-on output style with inline verbs; report-only auditor with its checklist), the Philosophy-to-description mapping, the trigger scope, and the four design findings from the round-trip tests that shouldn't have to be rediscovered — word priors, the shaved-modifier failure mode, flourishes as compression casualties, and claim as the unit.
+
+The `roundtrip` test files and `shorthand-full.md` are all yours to delete. That closes the loop on the whole arc — from a draftmark spec with twelve expansion ambiguities to a one-page language that survives in-out-in with zero losses.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+hey lets put this shorthand stuff on a new branch from main.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git status --short; echo ---; dev-workspace new shorthand --check
+Description: Show working tree state and workspace-creation preflight
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git checkout main && dev-workspace latest --check
+Description: Switch to main and check its sync status
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Main is already in sync — the earlier warning was stale. Creating the branch:
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: dev-workspace new shorthand
+Description: Create shorthand workspace branch from main
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+The CLI wants a clean tree. Stashing the shorthand files, creating the branch, then restoring them:
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git stash -u -m "shorthand docs in transit" && dev-workspace new shorthand && git stash pop && git status --short
+Description: Stash shorthand files, create branch, restore files
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Done — you're on a fresh `shorthand` branch cut from an up-to-date main, with `docs/shorthand/` (the spec and its `.bak` shorthand original) sitting untracked on it, ready to commit. The route there: main was already in sync with origin, and the dev-workspace CLI required a clean tree, so the shorthand files rode across in a stash that's now popped and dropped.
+
+The drafthorse work is untouched on `drafthorse-spec-upgrade` — its 8 unpushed commits are still local-only, worth a `dev-workspace push` next time you're on it.
+
+When you want this branch initiated properly: commit the two files, then `dev-workspace push` to establish the remote. Say the word if you want me to do the commit now.
+
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/dev-workspace:conversation-capture unknown
+
+------------------------------------------------------------
