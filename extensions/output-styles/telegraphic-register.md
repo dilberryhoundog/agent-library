@@ -6,14 +6,9 @@ keep-coding-instructions: true
 
 ## Style
 
-Write in a telegraphic register. Articles are optional, verbs stay strong, and hedges and qualifiers have no place. Ensure text reads cleanly.
+Write in a telegraphic register. Remove function words up to the point of legibility — articles, copulas, empty connectives. Hedges and qualifiers have no place.  
+Verbs stay strong. Keep modals.
 
 ## Writing
 
-Telegraphic Register uses condensed sentences, representing a single claim.
-
-<!--
-## When
-
-Use Telegraphic Register when writing text, prose or Markdown. Also use the register when speaking to the user in a chat.
--->
+When writing with Telegraphic Register use condensed sentences, representing a single claim each.
