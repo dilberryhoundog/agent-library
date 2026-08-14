@@ -101,11 +101,14 @@ Collate the request, the git state, and the chat context into a single source of
 
 #### Start this step when these are true:
 
-The skill has been invoked and context has not yet been gathered.
+- the skill has been invoked
+- context has not yet been gathered
 
 #### Step finished when these are true:
 
-The request is unambiguous, within scope, and carries enough context to write the brief — directly or from the user's clarifications.
+- the request is unambiguous
+- the request is within scope
+- the request carries enough context to write the brief, directly or from the user's clarifications
 
 #### Step invariants:
 
@@ -130,11 +133,19 @@ Reuse a proven workflow as the brief when one fits the request.
 
 #### Start this step when these are true:
 
-Context is gathered and the workflow check has not yet run.
+- context is gathered
+- the workflow check has not yet run
 
 #### Step finished when these are true:
 
-A suitable workflow is adopted as the brief draft, or none matched (including an empty map) and the brief will be written fresh — either way, the workflow check is recorded as complete.
+- a suitable workflow is adopted as the brief draft
+- the workflow check is recorded as complete
+
+**OR these are true:**
+
+- no workflow matched the request, including an empty map
+- the brief will be written fresh
+- the workflow check is recorded as complete
 
 ### Match the Request:
 
@@ -146,11 +157,13 @@ Turn the gathered context into a brief for the git-robot agent.
 
 #### Start this step when these are true:
 
-The workflow check has completed and the brief is not yet complete — whether starting fresh or finishing an adopted workflow template.
+- the workflow check has completed
+- the brief is not yet complete, whether starting fresh or finishing an adopted workflow template
 
 #### Step finished when these are true:
 
-The brief is formatted per the template and covers the user's whole request.
+- the brief is formatted per the template
+- the brief covers the user's whole request
 
 #### Step invariants:
 
@@ -184,11 +197,14 @@ Invoke the git-robot agent to execute the brief in the background, and hold the 
 
 #### Start this step when these are true:
 
-A complete brief exists and git-robot has not been invoked with it.
+- a complete brief exists
+- git-robot has not been invoked with the brief
 
 #### Step finished when these are true:
 
-The agent has been invoked, the user informed, and the git-robot report has arrived. An invocation failure is a problem for the `+Help` step.
+- the agent has been invoked
+- the user has been informed
+- the git-robot report has arrived
 
 #### Step invariants:
 
@@ -206,11 +222,13 @@ Relay the git-robot report to the user verbatim.
 
 #### Start this step when these are true:
 
-The git-robot report has arrived and has not yet been presented.
+- the git-robot report has arrived
+- the report has not yet been presented
 
 #### Step finished when these are true:
 
-The report is presented unaltered, and the run's outcome is recorded — full success, success worth saving as a workflow, or a run with failures, errors, or process problems.
+- the report is presented unaltered
+- the run's outcome is recorded — full success, success worth saving as a workflow, or a run with failures, errors, or process problems
 
 #### Suggested next actions:
 
@@ -243,11 +261,14 @@ Save a commonly repeated, successful request as a workflow for consistency and e
 
 #### Start this step when these are true:
 
-The report has been presented, the request succeeded, and it represents a repeatable workflow.
+- the report has been presented
+- the request succeeded
+- the request represents a repeatable workflow
 
 #### Step finished when these are true:
 
-The workflow issue is created. The skill is complete.
+- the workflow issue is created
+- the skill is complete
 
 #### Suggested next actions:
 
@@ -289,11 +310,21 @@ Handle problems from the run with the user — the step for anything the others 
 
 #### Start this step when these are true:
 
-The report contains failures or errors, the skill process itself misbehaved (including a failed agent invocation), or a situation has arisen that no other step covers.
+- the report contains failures or errors
+
+**OR these are true:**
+
+- the skill process itself misbehaved, including a failed agent invocation
+
+**OR these are true:**
+
+- a situation has arisen that no other step covers
 
 #### Step finished when these are true:
 
-The user has been informed and has decided how to continue — fixing together in the main chat, filing an issue, or ending here. The skill is complete.
+- the user has been informed
+- the user has decided how to continue — fixing together in the main chat, filing an issue, or ending here
+- the skill is complete
 
 #### Suggested next actions:
 

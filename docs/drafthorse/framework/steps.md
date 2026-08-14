@@ -2,17 +2,13 @@
 
 A step is an **atomic, bounded, standalone unit of work** that breaks a task or outcome into a piece the agent can complete in one pass. Sized to encompass all the work the agent can manage at once; Steps are listed in a conceptual order, but don't have to be necessarily executed in that order, the steps conditions guide the entry and the exit of the steps.
 
-A step knows nothing about any other step, except where its *Suggested next actions* guidance subtly points. It describes the state it starts from and the state it leaves behind, in plain English and in **state terms, never step terms** ("a report has arrived", not "after the previous step").
-Chaining is emergent: a step releases on its finished condition and the next catches on its start; no interstep routing exists. This keeps steps light — no hand-holding narration — and keeps every routing fact in exactly one home.
+A step knows nothing about any other step, except where its *Suggested next actions* guidance subtly points. It describes the state it starts from and the state it leaves behind, in plain English and in **state terms, never step terms** ("a report has arrived", not "after the previous step"). Chaining is emergent: a step releases on its finished condition and the next catches on its start; no interstep routing exists. This keeps steps light — no hand-holding narration — and keeps every routing fact in exactly one home.
 
-Responsibility is strictly divided: **start conditions carry the routing** (a step set is correct when the start conditions cover the skill's possible states, with an error step claiming the remainder), and **finished conditions carry only their own step's completion criteria**.
-The optional **Suggested next actions** slot is a direction finder for lost agents. A breadcrumbs feature, loosely describing next steps possibilities; it is a pointer, not the mechanism.
+Responsibility is strictly divided: **start conditions carry the routing** (a step set is correct when the start conditions cover the skill's possible states, with an error step claiming the remainder), and **finished conditions carry only their own step's completion criteria**. The optional **Suggested next actions** slot is a direction finder for lost agents. A breadcrumbs feature, loosely describing next steps possibilities; it is a pointer, not the mechanism.
 
 ## In play
 
-A step is **in play** — also known as **active** — from when its start condition activates, until its finished condition is met. As soon as the start condition is met, a step can begin, it doesn't need to wait for others to finish. This means steps can begin, while others have started but not yet completed. (eg an error step catching errors on other steps).
-Multiple steps can also be in play at once: a long-running or supervisory step (a dispatcher looping over items, a step awaiting a background agent) stays open while intermediate steps start and finish inside its span, and its invariants remain in force the whole time.
-Sharply written conditions are what make steps atomic and uniquely scoped.
+A step is **in play** — also known as **active** — from when its start condition activates, until its finished condition is met. As soon as the start condition is met, a step can begin, it doesn't need to wait for others to finish. This means steps can begin, while others have started but not yet completed. (eg an error step catching errors on other steps). Multiple steps can also be in play at once: a long-running or supervisory step (a dispatcher looping over items, a step awaiting a background agent) stays open while intermediate steps start and finish inside its span, and its invariants remain in force the whole time. Sharply written conditions are what make steps atomic and uniquely scoped.
 
 ## The steps preamble
 
@@ -76,9 +72,7 @@ The `+` prefix marks a heading as a step node, distinguishing steps from referen
 
 ## Conditions
 
-Every step ends on its **step finished when these are true** condition. The condition must be **checkable** — the agent can tell done from not-done — and **exhaustive** — it encompasses all the work ("every chosen unit released, declined, or reported nothing-to-release", not "the releases are done").
-A vague condition invites premature completion; because conditions carry the routing, a weak one is the equivalent of a broken edge.
-A finished condition doesn't route. It states when the step is done, nothing more. The agent decides what to do next from other steps' *start* conditions, and the *Suggested next actions* slot.
+Every step ends on its **step finished when these are true** condition. The condition must be **checkable** — the agent can tell done from not-done — and **exhaustive** — it encompasses all the work ("every chosen unit released, declined, or reported nothing-to-release", not "the releases are done"). A vague condition invites premature completion; because conditions carry the routing, a weak one is the equivalent of a broken edge. A finished condition doesn't route. It states when the step is done, nothing more. The agent decides what to do next from other steps' *start* conditions, and the *Suggested next actions* slot.
 
 ## Agent decision
 
@@ -111,7 +105,7 @@ It points; it never restates the destination's conditions — those stay authori
 
 ## User gates
 
-A **gate** is a step whose completion requires the user's approval of an artifact the step produced. Gates are compound (see [Conventions](conventions.md)): the agent writes the artifact's own completion criteria into the step's finished conditions alongside the approval.
+A **gate** is a step whose completion requires the user's approval of an artifact the step produced. Gates are compound: the agent writes the artifact's own completion criteria into the step's finished conditions alongside the approval.
 
 Approval is state, and it is revocable: revising an approved artifact un-approves it and everything downstream of it, so the owning step's start condition holds again. Gate-shaped start conditions ("X is approved and Y has not been approved") depend on this rule.
 
@@ -122,15 +116,24 @@ A skill ends through its **exit steps** — terminal steps whose completion ends
 - A **success exit** whose start condition is "all the work is finished" (stated exhaustively), and whose engagement reports the outcome.
 - An **error step** whose start condition is "something has gone wrong, or a situation has arisen that no other step covers", and whose completion is "the user has been informed and has decided how to continue".
 
-The error step is what makes coverage subtractive rather than enumerative: steps claim their conditions, and the error step claims the remainder, so no state is unhandled by construction. Its engagement should surface what happened, where it arose, what state things are now in (especially anything half-applied), and the options.
+The error step is what makes coverage subtractive rather than enumerative: steps claim their conditions, and the error step claims the remainder, so no state is unhandled by construction. Its engagement should surface what happened, where it arose, what state things are now in, the options available (either manual repair for a clean re-run or finish off the skill manually).
 
 ### Dispositions
 
-The error step's engagement pairs each general error class with its disposition. **Hard exit and repair** is the default posture for destructive errors. The catalogue is open — add dispositions as they are identified.
+The error step's engagement pairs each error class with its disposition. Two dispositions cover every class, and every class names which one it takes. A working step carries no disposition of its own — a step that cannot finish falls here.
 
-- **Half-applied state** — step failed partway and its work is neither undone nor complete. Report the error to the user, exit the skill, advise manual fixing, and suggest an issue to inform the skill repair agent (see the *Dynamic Improvement* convention in [Conventions](conventions.md)). Never re-run the step over its own partial work.
-- **Failed permissions** — a tool call, file, or service the step needs was denied. Report what was denied and what it was needed for, then stop and let the user grant access or end the run; suggest an issue to inform the skill repair agent. Never route around a denial with a different tool or path.
-- **Insufficient references** — a cited reference is missing, unreadable, or doesn't cover the case at hand. Report the gap and exit; suggest an issue to inform the skill repair agent. Never invent the missing content.
+**Hard bail and clean up** — the state is unrecoverable inside the run: work left unfinished, something destructive, or a state the document cannot name. Clean up the mess this run made interactively with the user, after ending the skill — temporary artifacts, unstaged partial work. Report what happened, where it arose, what state things are in now, and the two ways forward: repair the state and re-run for a clean pass, or finish the remaining work by hand. The cleanup never completes the run's own work, and no step re-runs over its own partial work.
+
+**Claim the remainder** — the state is recoverable and the document names it. The error step does what the failing step could not, the run completes, and the report surfaces what went wrong.
+
+Large dispositions can be handled with an issue raised against the skill's repository, so the gap is repaired upstream rather than worked around each run (see the *Dynamic Improvement* convention in [Conventions](conventions.md)).
+
+The class catalogue is open — add classes as they are identified. Each names its disposition and what it must report.
+
+- **Half-applied state** — hard bail. A step failed partway and its work is neither undone nor complete. Report which artifacts were applied and which were not, and the commands that would complete or undo them.
+- **Failed permissions** — hard bail. A tool call, file, or service the step needs was denied. Report what was denied and what it was needed for. Never route around a denial with a different tool or path.
+- **Insufficient references** — hard bail. A cited reference is missing, unreadable, or doesn't cover the case at hand. Report which reference fell short and how. Never invent the missing content.
+- **Named recoverable failure** — claim the remainder. A failure the document describes in advance, which stops the working step but not the run. Report what failed and what the error step did in its place.
 
 ### Exceptions
 
@@ -138,6 +141,9 @@ The error step's engagement pairs each general error class with its disposition.
 
 **Handover exception**: a handover document (see [Handover](handover.md)) requires neither exit step. Its steps run as child steps of the parent step that folded them in: control returns to the parent step when no handover step is left in play, and a failure falls to the parent document's problem step — so a handover needs no success exit that ends a run it does not own, and no error drain the parent already provides.
 
+
+
+<!--
 ## Step usage patterns
 
 These are identified patterns of use that steps allow. The catalogue is open — add patterns as they are identified.
@@ -153,3 +159,4 @@ A step that fires more than once. A loop is not a special structure — it is a 
 ### Dormant
 
 A step that doesn't fire: its start condition never activates in a run, so it is never in play. Dormant steps cover the rare case or the branch that this run didn't take.
+-->
