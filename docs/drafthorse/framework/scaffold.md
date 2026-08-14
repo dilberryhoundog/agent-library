@@ -15,7 +15,7 @@ The scaffold is the fixed frame every DraftHorse document shares: five utilities
 Frontmatter wires the document before any of its prose runs. Four concerns live here:
 
 - **Format stamp** — `harness-format: DraftHorse`, casing exact. Declares the document a DraftHorse document, and is what a reader or auditor searches on to find them. It sits alongside the harness's own fields rather than replacing any of them; **DO NOT** strip it as a foreign key.
-- **Identity** — `name` and `description`. The description is written for the specific audience the document is intended for (see the *invocation-shaped description* convention).
+- **Identity** — `name` and `description`. The description is invocation-shaped, written for whoever actually reads it: a model-invoked document sells its usage and states its trigger conditions to an agent; a user-invoked document carries a short human summary, kept out of agent context; an executor-only document says so and warns off general usage. A description written for the wrong audience reaches the wrong reader.
 - **Permissions** — `allowed-tools`. Grants transfer at the moment of invocation, so a step that calls a child skill or a sub agent delivers permissions where they are needed rather than holding them globally (see [Surfaces](surfaces.md)).
 - **Invocation surface** — `disable-model-invocation` and `user-invocable` decide who is the document's audience: The agent autonomously, the user by chat command, or only a calling agent. This is what enforces an orchestrator/executor split — a front-door document the user enters, executor documents that cannot be called sideways.
 
