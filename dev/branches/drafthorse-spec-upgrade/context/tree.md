@@ -12,11 +12,14 @@ dev/workspace
 │   ├── drafthorse-v2-exploration.md
 │   ├── git-box-plan.md
 │   ├── README.txt
+│   ├── steps-preamble-changes.md
 │   ├── surfaces-draft.md
 │   ├── verb-skills-plan.md
 │   └── versioning-plan.md
 ├── history
-│   └── .keep
+│   ├── .keep
+│   ├── e1ddddcc_versioning-audit-error-conventions.txt
+│   └── efb59ac9_drafthorse-condition-list-spec.txt
 ├── plans
 │   ├── .keep
 │   ├── 00-INDEX.md
@@ -54,7 +57,8 @@ dev/workspace
 │   ├── report-new-concepts.md
 │   ├── report-prose-review.md
 │   ├── report-todos.md
-│   └── todos-discussion.md
+│   ├── todos-discussion.md
+│   └── versioning-drafthorse-fixes.md
 ├── prompts
 │   ├── .keep
 │   ├── discover_prompt.md
@@ -150,6 +154,7 @@ extensions
     ├── drafthorse
     │   ├── assets
     │   │   ├── HANDOVER-template.md
+    │   │   ├── SKILL-template.draft.md
     │   │   └── SKILL-template.md
     │   ├── references
     │   │   ├── collecting-references.md
@@ -247,7 +252,6 @@ plugins
 │   │   │   └── rules
 │   │   │       ├── classroom-signal.md
 │   │   │       └── classroom.md
-│   │   ├── courses
 │   │   ├── students
 │   │   │   └── README.md
 │   │   ├── CLAUDE.md
@@ -268,4 +272,4 @@ plugins
     │   └── versioning -> ../../../extensions/skills/versioning
     └── CHANGELOG.md
 
-78 directories, 186 files
+77 directories, 191 files
