@@ -1,0 +1,1 @@
+../../extensions/output-styles/telegraphic-register.md
