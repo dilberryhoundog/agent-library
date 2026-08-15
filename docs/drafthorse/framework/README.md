@@ -15,9 +15,7 @@ This folder is the **framework**: the normative reference for writing DraftHorse
 
 ## Document variants
 
-<!-- TODO: Drafthorse is often placed in agent body also, so default is not the only "skill" -->
-
-The six layers describe the default document — a skill. One variant reuses them all with a small set of deltas:
+The six layers describe the default DraftHorse document. One variant reuses them all with a small set of deltas:
 
 - **[Handover](handover.md)** — a `harness-format: DraftHorse, Handover` document: a self-contained sub-procedure a parent step folds into the run as child steps, extracting heavy or optional work so it does not bloat the parent. Same scaffold and steps; the parent step owns the logic around it, and the child steps open with the handover-variant preamble.
 
