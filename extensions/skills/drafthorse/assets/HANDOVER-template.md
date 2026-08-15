@@ -26,13 +26,15 @@ harness-format: DraftHorse, Handover
 
 # --- STEPS ---
 
-Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Same step rules apply, plus these. Parent step reads success from the state child steps leave behind. All child steps finished or inactive — return to the parent step and continue. Parent document covers error handling, unless an optional child problem step is present. Global invariants hold across the parent step's span. Step invariants confine to their own child step.
+Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Same step rules apply, plus these. Parent step reads success from the state child steps leave behind. All child steps finished or inactive — return to the parent step and continue. Parent document covers error handling, unless an optional child error step is present. Global invariants hold across the parent step's span. Step invariants confine to their own child step.
 
-<!-- Child steps are standard DraftHorse steps: contract (H4 machinery) above, engagement (H3) below, conditions in state terms. No success exit, no error drain — the parent owns both. The last working step finishes on its own completion state; it never names or returns an outcome. -->
+<!-- Child steps are standard DraftHorse steps: description and optional declared function above the contract (H4 machinery), engagement (H3) below, conditions in state terms. No success exit, no error step — the parent owns both. The last working step finishes on its own completion state; it never names or returns an outcome. -->
 
 ## +<Child Step Name>
 
-<!-- One-line statement of what this step does. -->
+<!-- What this step does and how it behaves, told to the agent reading it. -->
+
+**<Step function>** <!-- — how this step takes that shape. Pick ONE: Looping step / Routing step / Dormant step / Handover step / Support step. Delete the line for an ordinary working step. An error step never appears in a handover. -->
 
 #### Start this step when these are true:
 
@@ -84,15 +86,11 @@ Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Sam
 
 - <condition 1>
 
-#### Suggested next actions:
-
-The handover's work is complete — return to the parent step and continue.
-
 ### <Heading Named for the Work>:
 
 <!-- The engagement. -->
 
-<!-- OPTIONAL: a local problem step is allowed, only to surface something to the user MID-WORK — written as an ordinary step (e.g. `## +Surface a Problem`). It owes the parent no handback and drains no errors; the parent document's problem step does that. -->
+<!-- OPTIONAL: a local step surfacing something to the user MID-WORK is allowed — written as an ordinary step (e.g. `## +Surface a Problem`). It owes the parent no handback and claims no remainder; the parent document's error step does that. -->
 
 # --- TERMS ---
 

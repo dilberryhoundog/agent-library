@@ -32,8 +32,8 @@ The smells that mark a candidate (or a lump of steps) as handover-shaped — no 
 Shaping a handover, hold its deltas from a skill:
 
 - **Frontmatter is the stamp and nothing else** — `harness-format: DraftHorse, Handover`, with no `name`, `description`, `allowed-tools`, or invocation surface. Identity moves into the body: a `# Title (Handover)` heading and one identity paragraph stating what it does and when a parent step folds it in. The reading model is carried by the handover-variant preamble, so the identity paragraph never restates it.
-- **The handover-variant preamble** — a handover opens its steps section with the variant, not the universal preamble, which routes a failed step to an error drain a handover does not have. `assets/HANDOVER-template.md` carries the canonical text.
-- **No required exit steps** — no success exit, no error drain, no handed-back outcome. Control returns to the parent step when no handover step is left in play; a failure falls to the parent document's problem step. The parent step's own finished condition reads success from the state the handover leaves behind.
+- **The handover-variant preamble** — a handover opens its steps section with the variant, not the universal preamble, which routes a failed step to an error step a handover does not have. `assets/HANDOVER-template.md` carries the canonical text.
+- **No required exit steps** — no success exit, no error step, no handed-back outcome. Control returns to the parent step when no handover step is left in play; a failure falls to the parent document's error step. The parent step's own finished condition reads success from the state the handover leaves behind.
 - **Never names its parent** — written to be folded into any step that needs it; it may cite the parent's ambient references by name (never restating them), but the parent never cites the handover's internal references.
 - **Grants come from the parent** — everything the handover's steps do must be covered by the main document's `allowed-tools`.
 - **One level only** — a handover must not fold in another handover; work that deep belongs in its own skill, reached as an external call.
@@ -48,7 +48,7 @@ Shaping a handover, hold its deltas from a skill:
 
 An `#### Agent decision:` block belongs to a step whose **scope or shape** is decided by run state — what the step targets, or how many times it runs. It sits with the step's other H4 machinery, above the engagement heading, because an agent reading the contract to decide whether and how to enter the step needs it in view there: a skill invoked with a named unit computes that one unit's range, while a bare invocation surveys every unit and asks the user which to act on, and the finished condition ("every targeted unit has a range") means different things in each case.
 
-Written as plain prose: what is being decided, between what, and by what signal. Three limits hold it in place — it carries no work (the engagement does that), it carries no routing between steps (start conditions and *suggested next actions* do that), and it resolves to a fact the step's own finished condition depends on. Routing between steps written as an Agent decision is a defect.
+Written as plain prose: what is being decided, between what, and by what signal. Three limits hold it in place — it carries no work (the engagement does that), it carries no routing between steps (start conditions do that), and it resolves to a fact the step's own finished condition depends on. Routing between steps written as an Agent decision is a defect.
 
 A genuine bounded fork inside the work — both forks the step's business, neither changing what the step targets — is not an Agent decision block; it stays in the engagement as plain prose.
 

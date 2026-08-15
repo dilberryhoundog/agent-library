@@ -8,7 +8,7 @@ This folder is the **framework**: the normative reference for writing DraftHorse
 
 1. **[Scaffold](scaffold.md)** — the five utilities every document is built on. The vessel you fill, shown first.
 2. **[Notation](notation.md)** — the small set of markings layered on plain markdown: the invariant form and the structural labels.
-3. **[Steps](steps.md)** — the self-contained unit of work: its anatomy, its start/finished conditions, the exit and error steps, and the universal preamble.
+3. **[Steps](steps.md)** — the self-contained unit of work: its anatomy, its declared function, its start/finished conditions, the exit and error steps, and the universal preamble.
 4. **[References](references.md)** — how steps reach data: internal, external, data-load, external-call.
 5. **[Conventions](conventions.md)** — the bucket of laws and idioms that make a valid document a good one.
 6. **[Surfaces](surfaces.md)** — where a document's work is delivered: skill file, sub agent, child skill, handover. Read once the grammar is in hand.

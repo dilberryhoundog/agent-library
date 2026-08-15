@@ -43,11 +43,13 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
-<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). H4 headings are the step's contract — its conditions, any scope decision, its routing hint and its invariants; the H3 opens the work. A step names another step only in its "Suggested next actions:" slot; conditions are written in state terms, never step terms. -->
+<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). A step opens with its description and optional declared function; H4 headings are its contract — conditions, any scope decision, its invariants; the H3 opens the work. A step names no other step; conditions are written in state terms, never step terms. -->
 
 ## +<Step Name>
 
-<!-- One-line statement of what this step does. -->
+<!-- What this step does and how it behaves, told to the agent reading it. -->
+
+**<Step function>** <!-- — how this step takes that shape. Pick ONE: Error step / Looping step / Routing step / Dormant step / Handover step / Support step. Delete the line for an ordinary working step. -->
 
 #### Start this step when these are true:
 
@@ -78,10 +80,6 @@ Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions
 #### Agent decision:
 
 <!-- Optional: a choice that governs this step's scope or shape — what it targets, how many times it runs — resolved before the work can be performed. Carries no work and no routing, and resolves to a fact the finished condition depends on. Delete the section when the step's scope is fixed. -->
-
-#### Suggested next actions:
-
-<!-- Optional prose: loop back, bail on failure, or skill exit. Points only — never restate the destination's conditions. Omit when the dovetail is obvious. -->
 
 #### Step invariants:
 
@@ -121,9 +119,11 @@ End the skill and return to the user.
 
 ## +Handle a Problem
 
-<!-- The error step — the drain that makes coverage subtractive. Keep the start condition generic. -->
+<!-- The error step — what makes coverage subtractive. Keep the start condition generic. -->
 
 Surface anything the other steps don't cover, and decide with the user how to continue.
+
+**Error step** — claims every state no other step's start condition claims.
 
 #### Start this step when these are true:
 

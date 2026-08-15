@@ -2,9 +2,9 @@
 
 A step is an **atomic, bounded, standalone unit of work** that breaks a task or outcome into a piece the agent can complete in one pass. Sized to encompass all the work the agent can manage at once; Steps are listed in a conceptual order, but don't have to be necessarily executed in that order, the steps conditions guide the entry and the exit of the steps.
 
-A step knows nothing about any other step, except where its *Suggested next actions* guidance subtly points. It describes the state it starts from and the state it leaves behind, in plain English and in **state terms, never step terms** ("a report has arrived", not "after the previous step"). Chaining is emergent: a step releases on its finished condition and the next catches on its start; no interstep routing exists. This keeps steps light — no hand-holding narration — and keeps every routing fact in exactly one home.
+A step knows nothing about any other step. It describes the state it starts from and the state it leaves behind, in plain English and in **state terms, never step terms** ("a report has arrived", not "after the previous step"). Chaining is emergent: a step releases on its finished condition and the next catches on its start; no interstep routing exists. This keeps steps light — no hand-holding narration — and keeps every routing fact in exactly one home.
 
-Responsibility is strictly divided: **start conditions carry the routing** (a step set is correct when the start conditions cover the skill's possible states, with an error step claiming the remainder), and **finished conditions carry only their own step's completion criteria**. The optional **Suggested next actions** slot is a direction finder for lost agents. A breadcrumbs feature, loosely describing next steps possibilities; it is a pointer, not the mechanism.
+Responsibility is strictly divided: **start conditions carry the routing** (a step set is correct when the start conditions cover the skill's possible states, with an error step claiming the remainder), and **finished conditions carry only their own step's completion criteria**.
 
 ## In play
 
@@ -24,12 +24,14 @@ A handover takes the **handover-variant** preamble instead, given in [Handover](
 
 ## Step anatomy
 
-The H4 headings are the framework's machinery — the step's contract, read without engaging. The H3 opens the engagement — the work itself. Contract first, work below.
+A step opens with its head — what it does and how it behaves — then its contract in H4 machinery headings, read without engaging. The H3 opens the engagement — the work itself. Head, contract, work below.
 
 ```markdown
 ## +Step Name
 
-One-line statement of what this step does — the step's identity when scanning.
+What this step does and how it behaves, told to the agent reading it.
+
+**Step function** — describes the shape this step takes. Omit for an ordinary working step.
 
 #### Start this step when these are true:
 
@@ -42,10 +44,6 @@ This step's own completion criteria — checkable and exhaustive.
 #### Agent decision:
 
 Optional. A choice that governs the step's scope or shape, which the agent resolves. Omit when the step's scope is fixed.
-
-#### Suggested next actions:
-
-Optional prose guidance onward: the happy-path pointer, a loop back to an earlier step, a bail on failure, or the skill's exit. Omit when the dovetail is obvious.
 
 #### Step invariants:
 
@@ -62,9 +60,26 @@ Separate the engagement into distinct sections, if necessary, to help the agent 
 
 The `+` prefix marks a heading as a step node, distinguishing steps from reference and term headings. The machinery headings are fixed and self-describing; the engagement heading is the step's own — name it for the work (its generic name is Engagement).
 
+## Step functions
+
+A step declares its **function** on a bolded line under its description, telling a reading agent how the step behaves before it reads a condition. Most steps declare nothing — an undeclared step is an ordinary working step.
+
+The catalogue is six shapes:
+
+- **Error step** — handles recovery and bails.
+- **Looping step** — re-runs, taking a different branch each pass.
+- **Routing step** — chooses between divergent branches.
+- **Dormant step** — activates only when its state arises.
+- **Handover step** — manages the invocation and resolution of a handover document.
+- **Support step** — catches or manages difficulties belonging to other steps.
+
+A step declares **one** function. Several dilute the declaration and describe a step wanting a split.
+
+Two shapes are worth stating plainly, because neither is a structure the document builds. A loop is a start condition that holds again — a per-item step whose start condition reads "an item awaits processing" re-engages for each item, and the success exit's own start condition ends the loop. A dormant step covers the rare case or the branch a run did not take; its start condition simply never activates.
+
 ## Conditions
 
-Every step ends on its **step finished when these are true** condition. The condition must be **checkable** — the agent can tell done from not-done — and **exhaustive** — it encompasses all the work ("every chosen unit released, declined, or reported nothing-to-release", not "the releases are done"). A vague condition invites premature completion; because conditions carry the routing, a weak one is the equivalent of a broken edge. A finished condition doesn't route. It states when the step is done, nothing more. The agent decides what to do next from other steps' *start* conditions, and the *Suggested next actions* slot.
+Every step ends on its **step finished when these are true** condition. The condition must be **checkable** — the agent can tell done from not-done — and **exhaustive** — it encompasses all the work ("every chosen unit released, declined, or reported nothing-to-release", not "the releases are done"). A vague condition invites premature completion; because conditions carry the routing, a weak one is the equivalent of a broken edge. A finished condition doesn't route. It states when the step is done, nothing more. The agent decides what to do next from other steps' *start* conditions, which are the sole routing mechanism.
 
 ## Agent decision
 
@@ -81,19 +96,6 @@ A choice that carries work is engagement prose. A choice that routes is a start 
 An Agent decision must resolve to a **named fact**. "A decision was made" never satisfies a finished condition — name what was decided, and let the finished condition depend on that.
 
 A genuine bounded fork inside the work — both branches the step's own business, neither changing what the step targets — stays in the engagement as plain prose.
-
-## Suggested next actions
-
-The routing-hint slot, and the one sanctioned home for cross-step reference. Written as prose; not always needed — omit when the next step's start condition picks up the completion state unaided.
-
-Use when:
-
-- Handing over control back to a parent step,
-- A loop instruction ("return to the first step for the next item"),
-- The exit of a finishing step ("end the skill and return to the user")
-- A bail that keeps a step from hanging on unmeetable completion conditions ("if errors are present, report them in the problem step; otherwise move on").
-
-It points; it never restates the destination's conditions — those stay authoritative in the destination's own start condition.
 
 ## User gates
 
@@ -129,26 +131,6 @@ The class catalogue is open — add classes as they are identified. Each names i
 
 ### Exceptions
 
-**Executor exception**: an executor document whose reporting step already surfaces failures, refusals, and no-ops may fold the error drain into that step instead of carrying a separate error step — the reporting step's start condition must then claim the remainder explicitly ("…or a failure has ended the run").
+**Executor exception**: an executor document whose reporting step already surfaces failures, refusals, and no-ops may fold the error step's role into that step instead of carrying a separate error step — the reporting step's start condition must then claim the remainder explicitly ("…or a failure has ended the run").
 
-**Handover exception**: a handover document (see [Handover](handover.md)) requires neither exit step. Its steps run as child steps of the parent step that folded them in: control returns to the parent step when no handover step is left in play, and a failure falls to the parent document's problem step — so a handover needs no success exit that ends a run it does not own, and no error drain the parent already provides.
-
-
-
-<!--
-## Step usage patterns
-
-These are identified patterns of use that steps allow. The catalogue is open — add patterns as they are identified.
-
-### Multiple active steps
-
-More than one step in play at once: a supervisory step spanning the steps that run inside it, or an error step catching before its producer finishes.
-
-### Looping back
-
-A step that fires more than once. A loop is not a special structure — it is a start condition that holds again, often inside the span of a supervisory step that stays in play across the iterations. A per-item step whose start condition is "an item awaits processing" simply re-engages for each item; the success exit's start condition ("every item processed") is what ends the loop. Where the loop is worth signposting, the *Suggested next actions* slot carries the instruction.
-
-### Dormant
-
-A step that doesn't fire: its start condition never activates in a run, so it is never in play. Dormant steps cover the rare case or the branch that this run didn't take.
--->
+**Handover exception**: a handover document (see [Handover](handover.md)) requires neither exit step. Its steps run as child steps of the parent step that folded them in: control returns to the parent step when no handover step is left in play, and a failure falls to the parent document's error step — so a handover needs no success exit that ends a run it does not own, and no error step of its own, the parent's claiming the remainder already.

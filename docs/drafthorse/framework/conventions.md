@@ -12,7 +12,7 @@ These conventions are an overlay on the agent harness document. They underpin th
 
 - **Single source of truth, everywhere** — every unit (invariant, step, reference, term) is standalone; no meaning or context is duplicated across units. One fact, one home, so a change is a one-place edit. (Exception: documents that never share context at run time — an orchestrator skill and its sub-agent — repeat what each needs; that duplication is deliberate and load-bearing.)
 
-- **Stepping stones** — Every step watches its own start condition for when it activates. A step then releases on its finished condition, the next step catches the agent using its start condition. There is no need for interstep routing, imagine the agent is stepping across a river on stepping stones. *Suggested next actions* is an optional pointer, showing the agent where to look next if necessary. This mechanism is deliberately open. it means...
+- **Stepping stones** — Every step watches its own start condition for when it activates. A step then releases on its finished condition, the next step catches the agent using its start condition. There is no need for interstep routing, imagine the agent is stepping across a river on stepping stones. This mechanism is deliberately open. it means...
     - An agent can loop back through the skill re-running different branches, as long as the conditions hold.
     - A step can span longer than others. Multiple steps can be in play at once.
     - Steps can be dormant, activating only to handle specific states that might not always be present.
