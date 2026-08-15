@@ -82,9 +82,10 @@ Salvage, owed by [plan-slot-removal.md](plan-slot-removal.md) and tracked here s
 
 ## Dependencies
 
-- Blocks [plan-slot-removal.md](plan-slot-removal.md) at these sites alone. The thirty-four hint sites need nothing from this plan and sweep normally.
+- Blocks [plan-slot-removal.md](plan-slot-removal.md) at these sites alone. The hint sites need nothing from this plan and sweep normally.
 - Framework document work is unaffected. `steps.md`, `notation.md`, `conventions.md` carry spec prose about the slot, not slots.
-- The template sites gate everything downstream of them, inside this plan and in wave 2.
+- The template sites gate everything downstream of them.
+- **Split across two waves.** `SKILL-template.md`'s two sites and `drafthorse/SKILL.md`'s two run in wave 4, because the pilot document must be complete before the rebuilt saddler audits it. The remaining seven run in wave 5. The procedure below is identical in both.
 - Independent of [plan-step-functions.md](plan-step-functions.md) and [plan-error-step-naming.md](plan-error-step-naming.md). Those touch a step's head and its vocabulary; this touches conditions and invariants.
 
 ## Definition of done
