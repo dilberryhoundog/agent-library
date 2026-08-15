@@ -11,10 +11,7 @@ usages:
 
 # Agent Invariants
 
-**DO NOT** rewrite or edit the document under review. Produce findings only; the fix direction in a finding is guidance, never applied text.
-**ALWAYS** cite the specific check a finding violates, by its check name from the References below.
-**ALWAYS** review the whole document set — the named document plus every external reference file it cites. Findings may land on the reference files.
-**DO NOT** audit concerns outside these checks. Agent-agnosticism, prose quality, and factual correctness of the document's domain content are other reviewers' business.
+**DO NOT** rewrite or edit the document under review. Produce findings only; the fix direction in a finding is guidance, never applied text. **ALWAYS** cite the specific check a finding violates, by its check name from the References below. **ALWAYS** review the whole document set — the named document plus every external reference file it cites. Findings may land on the reference files. **DO NOT** audit concerns outside these checks. Agent-agnosticism, prose quality, and factual correctness of the document's domain content are other reviewers' business.
 
 # --- REFERENCES ---
 
@@ -33,7 +30,8 @@ A DraftHorse document has five utilities, always present, always in this order. 
 Mechanical form checks — each is pass/fail by inspection:
 
 - **Step nodes** — every step heading is H2, `+` prefixed, Title Case (`## +Step Name`).
-- **Machinery headings** — `#### Start this step when these are true:` and `#### Step finished when these are true:` present on every step, in that order; `#### Agent decision:`, `#### Suggested next actions:` and `#### Step invariants:` optional, in that order after them. All H4, exact wording.
+- **Machinery headings** — `#### Start this step when these are true:` and `#### Step finished when these are true:` present on every step, in that order; `#### Agent decision:` and `#### Step invariants:` optional, in that order after them. All H4, exact wording. `#### Suggested next actions:` is retired; its presence is a finding.
+- **Declared function** — where a step declares a function, it is a bolded catalogue name on its own line beneath the step's description and above the machinery headings, followed by prose (`**Looping step** — re-engages per unit`). One function per step; a second name on the line is a finding. The catalogue is closed: error, looping, routing, dormant, handover, support. A step declaring nothing is an ordinary working step and is not a finding.
 - **Engagement heading** — one H3 named for the work opens each step's body, below the machinery; the work may structure itself with H4 sub-headings of its own.
 - **Invariant form** — every invariant (global or step-scoped) is a bolded capitalised imperative keyword followed by its rule (`**DO NOT** …`, `**ALWAYS** …`, `**NEVER** …`; the keyword family is open). Nothing that is not a rule may wear the bold-caps form.
 - **Condition block shape** — the conditions to start or finish a step are always a markdown list, one condition per list item. A paragraph or prose-based statement is a finding.
@@ -41,25 +39,15 @@ Mechanical form checks — each is pass/fail by inspection:
 - **Dividers** — exactly `# --- REFERENCES ---`, `# --- STEPS ---`, `# --- TERMS ---`.
 - **Preamble verbatim** — the steps section opens with a preamble copied unchanged. **Two preambles are legitimate**; a document is checked against the one that fits it, and the wrong one is a finding. A skill or agent document takes the universal preamble:
 
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+```markdown
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
+```
 
-A handover takes the handover-variant preamble instead — the universal one routes a failed step to an error drain a handover does not have:
+A handover takes the handover-variant preamble instead — the universal one leaves the child-step reading model unstated:
 
-> Handovers are child steps of a parent step:
->
->- The parent step reads success from the state the handover leaves behind.
->- Invoke a child step any time its *start* conditions are met.
->- If all child steps are *finished* or inactive, return to the parent step and continue.
->- Error handling is covered by the parent document, unless an optional child problem step is present.
->- Global invariants apply across the whole parent step; step invariants are confined to the child step.
+```markdown
+Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Same step rules apply, plus these. Parent step reads success from the state child steps leave behind. All child steps finished or inactive — return to the parent step and continue. Parent document covers error handling, unless an optional child error step is present. Global invariants hold across the parent step's span. Step invariants confine to their own child step.
+```
 
 - **In-block labels** — `=== Mini Heading ===` is a lightweight label, lighter than an H4. It is legal anywhere inside a References entry — labelling a code block, a table, a list, or dividing a long entry into named parts. It is a finding only where it stands in for a document-structural heading: outside a References entry, or in place of a step's machinery or engagement heading.
 - **Terms form** — term entries are bolded list entries with Title Case names (`- **Term** — definition`); the `:` definition prefix is retired and its presence is a finding. References entries are also Title Case.
@@ -89,14 +77,14 @@ A **handover** is a `harness-format: DraftHorse, Handover` document folded into 
 - **Never names its parent** — a handover is written to be folded into any step that needs it, so it names no specific parent. It may lean on the parent's references by name, but pointing at the parent document is a finding. The direction is one-way: a parent document citing a handover's internal reference **before** the fold-in is a finding, because it is not in context yet. **At or after the fold-in moment, in the same step, the parent may name what the handover produced** — telling the agent what to do with it is the parent step's job (see `Parent step owns the logic`). Judge by position relative to the fold-in, not by the mention alone.
 - **Globals are scoped to the parent step** — a handover's `Agent Invariants` are in force across the parent step's span only, and lapse when it does; they do not bind steps that never touch the handover. Compatibility is therefore a **local** question, not a whole-run one: check a handover's globals against the parent document's globals and against the parent step's own invariants. **Two handovers folded in at different steps never meet, so they cannot conflict — do not sweep them against each other.** A handover-specific global is legitimate; one that repeats or contradicts the parent's is the finding.
 - **Grants come from the parent** — a handover carries no `allowed-tools`; sweep its tool use into the parent document's permission check. A handover whose steps need a tool the parent does not grant is a finding on the parent document. Auditing a handover standalone, this cannot be verified — note it.
-- **No required exit steps** — a handover needs neither a success exit nor an error drain: its steps mix in as child steps of the parent step, so exit control and failures belong to the parent document's exit and problem steps. A handover routing its own success exit, or handing back a named outcome for the parent to act on, is a finding; a local problem step that only surfaces something to the user mid-work is allowed.
-- **Parent step owns the logic** — at each handover citation, the parent step reads success from the resulting state (its own finished condition observes what the handover left behind) and lets failure fall to the parent document's problem step; it must not look for an output the handover does not produce. A parent step acting on an outcome token a handover never returns is a finding.
+- **No required exit steps** — a handover needs neither a success exit nor an error step: its steps mix in as child steps of the parent step, so exit control and failures belong to the parent document's exit and error steps. A handover routing its own success exit, or handing back a named outcome for the parent to act on, is a finding; a local step that only surfaces something to the user mid-work is allowed.
+- **Parent step owns the logic** — at each handover citation, the parent step reads success from the resulting state (its own finished condition observes what the handover left behind) and lets failure fall to the parent document's error step; it must not look for an output the handover does not produce. A parent step acting on an outcome token a handover never returns is a finding.
 - **One level only** — a handover must not fold in another handover; work that deep belongs in its own skill, reached as an external call. A nested fold-in is a finding.
 - **Audit mode by entry** — when the reviewed document is a skill citing handovers, audit each cited handover as part of the set under these checks (not as a reference), and run the parent-scoped globals and parent-permission checks. When the reviewed document is a handover itself, audit it standalone: apply the checks it allows and note that parent binding (permissions, globals compatibility) is unverifiable without the parent. Label every finding by the file it lands on.
 
 ## Condition Checks
 
-The conditions carry all the routing a wired graph would; a weak condition is a broken edge. Responsibility is strictly divided: start conditions carry the routing, finished conditions carry only their own step's completion criteria, *suggested next actions* is the only sanctioned cross-step reference — an optional pointer, never the routing mechanism.
+The conditions carry all the routing a wired graph would; a weak condition is a broken edge. Responsibility is strictly divided: start conditions carry the routing, finished conditions carry only their own step's completion criteria, and a step names no other step. Start conditions are the sole routing mechanism — a step routing anywhere else is a finding.
 
 **Steps are universal.** Every step watches its own start condition at all times, so steps need not chain and more than one may be in play at once. A document is not a defect for lacking a chain; a check that assumes sequence is wrong.
 
@@ -117,24 +105,20 @@ The conditions carry all the routing a wired graph would; a weak condition is a 
 - **Own step only** — never mentions another step, narrates where the flow goes, or issues instructions. Routing stated in two homes drifts.
 - **Gates are compound** — a gate's finished conditions state the artifact's own completion criteria alongside the user's approval. Approval alone lets a rubber-stamp launder a defective artifact; presentation alone is engagement work, not completion.
 - **Approval is revocable state** — revising an approved artifact un-approves it and everything downstream, so the owning step's start condition holds again; gate-shaped start conditions ("X approved and Y not approved") depend on this and must not fight it.
-
-=== Suggested next actions ===
-
-- **Point, don't restate** — names the destination or move; never repeats the destination's conditions, which stay authoritative in its own start condition.
-- **Never contradict a start condition** — when the finished condition has failure outcomes, the suggestion covers them or stays silent; a happy-path-only pointer that sends an ended run onward is a defect.
-- **Omit when obvious** — present only for the happy-path highlight, a loop instruction, a finishing step's exit, or a bail off unmeetable conditions.
+- **Every outcome the step can end on** — a step whose work can end in failure, refusal, or a no-op states those outcomes, so the steps claiming them are reachable. A happy-path-only account of completion sends an ended run onward and overrides the refusal its destination would have made.
+- **Terminal steps state their termination** — an exit step's finished conditions say the run is complete. A document whose only statement of "the skill ends here" sits in prose, or nowhere, leaves the run with no stopping point; that is a broken edge and forces `revise`.
 
 ## Step-Shape Checks
 
-- **Standalone** — a step suggests another step only in its *suggested next actions* slot.
-- **Purpose line** — every step opens with a one-line statement of what it does.
+- **Standalone** — a step names no other step. A step naming another, anywhere in its contract or engagement, is a finding.
+- **Self-description** — every step opens with a directive of what it does and how it behaves, addressed to the agent reading it. A bare scanning label that leaves the step's behaviour to be inferred from its conditions is a finding.
 - **Sized to the pass** — a step encompasses all the work the agent can manage at once. Over-splitting smell: consecutive steps whose start conditions are just "the previous step finished". Premature-closing smell: a step that finishes only so the next can start while its concern still applies — the fix is a spanning step left in play, not a merge.
 - **Edges at real boundaries** — a boundary is a user-interaction wait, a loop body, a distinct completion state, a permission or context shift, a judgment shift, or a spanning concern. An edge at none of these is over-splitting.
 - **Spanning steps** — a concern persisting across several pieces of work is its own step, in play while other steps start and finish; its invariants bind for its whole open duration and are not duplicated into other steps also in play.
 - **Agent decisions** — an `#### Agent decision:` block holds a choice that governs the step's scope or shape (what it targets, how many times it runs), resolved before the engagement can be performed. Three limits hold it in place: it carries no work, it carries no routing between steps, and it resolves to a fact the step's own finished condition depends on. Failing any of the three, it is engagement prose or a start condition under the wrong heading. It must resolve to a **named fact** — "a decision was made" never satisfies the finished condition that depends on it. A genuine bounded fork inside the work — neither branch changing what the step targets — stays in the engagement as plain prose. Routing between steps written as an Agent decision is a defect. The block sits with the step's other H4 machinery, above the engagement heading; that placement is correct and is not a finding.
-- **Exit steps present** — a success exit whose start condition is the exhaustive all-done state, and an error step whose start condition claims the remainder (in sense: something has gone wrong, or a situation no other step covers) and whose finish is the user or caller informed and the continuation decided. The wordings here are the required **sense, not required text** — a document that adds concrete examples to its error step's condition is sharper, not divergent. The error step's engagement surfaces what happened, where, the current state, and the options.
+- **Exit steps present** — a success exit whose start condition is the exhaustive all-done state, and an error step whose start condition claims the remainder (in sense: something has gone wrong, or a situation no other step covers) and whose finish is the user or caller informed and the continuation decided. The wordings here are the required **sense, not required text** — a document that adds concrete examples to its error step's condition is sharper, not divergent. The error step's engagement surfaces what happened, where, the current state, and the options. Both exit steps state the run's completion in their own finished conditions — an exit step that never says the skill is complete gives the run nowhere to stop.
 - **Half-applied state bails to the user** — a step that fails partway leaves work neither undone nor complete, and the error step is its single disposition: the engagement accounts for what was applied and what was not, reports it to the user with a recommended fix, and ends the run. Three findings sit here: an error step that surfaces failure without accounting for partial application, a step whose engagement resumes over its own partial work, and a start condition carrying a half-applied exclusion clause — the disposition in the wrong home.
-- **Executor exception** — an executor document may fold the error drain into its reporting step; the reporting step must then claim the remainder explicitly, as an alternative block in its start condition ("a failure has ended the run"). Folding without the explicit claim is a finding.
+- **Executor exception** — an executor document may fold the error step's role into its reporting step; the reporting step must then claim the remainder explicitly, as an alternative block in its start condition ("a failure has ended the run"). Folding without the explicit claim is a finding.
 - **Handover exception** — where a step folds in a handover, the flow must start at the parent step, run the handover's steps as its child steps, and end back at the parent step — the parent step's own start and finished conditions route the agent in and out. A handover whose flow exits anywhere other than back to its parent step is a finding.
 
 ## Reference Checks
@@ -174,21 +158,11 @@ FINDINGS:
    Fix direction: <what would resolve it — direction, not rewritten text>
 ```
 
-**Verdict rule**: any scenario-walk stall or mis-route, or any finding that would cause an executing agent to misexecute (a broken edge, a launderable gate, a destructive re-run, unclaimed state), forces `revise`.
-Borderline findings alone permit `pass`; on a pass, list the borderline items so the requester can judge. Order findings scenario-walk breaks first, then the rest by reviewer judgment.
-The cost of a false pass is an agent silently misexecuting a run; the cost of a false finding is one round of revision. Prefer the finding.
+**Verdict rule**: any scenario-walk stall or mis-route, or any finding that would cause an executing agent to misexecute (a broken edge, a launderable gate, a destructive re-run, unclaimed state), forces `revise`. Borderline findings alone permit `pass`; on a pass, list the borderline items so the requester can judge. Order findings scenario-walk breaks first, then the rest by reviewer judgment. The cost of a false pass is an agent silently misexecuting a run; the cost of a false finding is one round of revision. Prefer the finding.
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
 ## +Assemble the Document Set
 
@@ -209,10 +183,6 @@ Resolve the document under review and gather everything it cites.
 **OR these are true:**
 
 - the run is recorded as unable to proceed (path unresolvable, or the document is not DraftHorse-shaped)
-
-#### Suggested next actions:
-
-A run that cannot proceed moves straight to composing the report.
 
 ### Gather:
 
@@ -274,17 +244,19 @@ Judge every step's contract and shape against the condition and step-shape check
 
 #### Step finished when these are true:
 
-- every test in [Condition Checks](#condition-checks) has been applied to every step, including the exit steps and the error drain
-- every test in [Step-Shape Checks](#step-shape-checks) has been applied to every step, including the exit steps and the error drain
+- every test in [Condition Checks](#condition-checks) has been applied to every step, including the exit steps and the error step
+- every test in [Step-Shape Checks](#step-shape-checks) has been applied to every step, including the exit steps and the error step
 - each failure is recorded as a finding
 
 ### Test Each Step:
 
-Take the steps one at a time: purpose line, start condition (state terms, de-hold), finished condition (checkable, exhaustive, own-step-only, compound if a gate), do-this-next (points without restating, contradicts nothing), invariants (behaviour-changing, correctly scoped), standalone test, sizing smells. Then judge the set as a whole: negative space claimed, exit steps present, half-applied state bailed to the user rather than re-run, error drain whole or explicitly folded, and the [Document-Wide Checks](#document-wide-checks) swept over everything.
+Take the steps one at a time: self-description, declared function where one is claimed, start condition (state terms, de-hold), finished condition (checkable, exhaustive, own-step-only, every outcome stated, compound if a gate), invariants (behaviour-changing, correctly scoped), standalone test, sizing smells. Then judge the set as a whole: negative space claimed, exit steps present and stating their termination, half-applied state bailed to the user rather than re-run, error step whole or explicitly folded, and the [Document-Wide Checks](#document-wide-checks) swept over everything.
 
 ## +Audit the Handovers
 
 Walk every handover in the set against the handover-specific checks and its pairing with the parent step.
+
+**Dormant step** — only activates on a document set that contains a handover.
 
 #### Start this step when these are true:
 
@@ -301,10 +273,6 @@ Walk every handover in the set against the handover-specific checks and its pair
 - each handover's tool use is swept into the parent's permission check
 - each citation's pairing is tested against its parent step's start and finished conditions
 - each failure is recorded as a finding labelled by the file it lands on
-
-#### Suggested next actions:
-
-A set with no handover in it leaves this step dormant; the audit continues at the scenario walk.
 
 ### Audit Each Handover:
 
@@ -342,6 +310,8 @@ Simulate executing the document cold, as an agent with no framework knowledge. A
 
 Present the audit's outcome — the exit for clean runs, defective documents, and unreviewable requests alike.
 
+**Error step** — folded into this reporting step per the executor exception, so its start condition claims the failed run alongside the completed one.
+
 #### Start this step when these are true:
 
 - the scenario-walk is complete
@@ -353,7 +323,8 @@ Present the audit's outcome — the exit for clean runs, defective documents, an
 
 #### Step finished when these are true:
 
-- a report in the [Report Format](#report-format) — verdict, scenario-walk account, every recorded finding with its check name and fix direction, or a plain statement of why the review could not proceed — is returned as the final message
+- a report in the [Report Format](#report-format) — verdict, scenario-walk account, every recorded finding with its check name and fix direction, or a plain statement of why the review could not proceed — is returned as the final message text
+- the review is complete
 
 ### Compose:
 
@@ -366,5 +337,5 @@ Terms used in this checker:
 - **Document Set** — The named document under review plus every external file it cites and every handover in its set — the whole unit findings may land on.
 - **Check** — A single named test from the References above; every finding cites the check it fails.
 - **Finding** — One defect: its check name, its location in the set, the problem, and a fix direction — never rewritten text.
-- **Error Drain** — The step (or fold into a reporting step) whose start condition claims every state no other step covers, making coverage subtractive.
+- **Error Step** — The step (or fold into a reporting step) whose start condition claims every state no other step covers, making coverage subtractive.
 - **In-Play Set** — The steps whose start conditions have held and whose finished conditions have not yet been met, at a given moment of a run.
