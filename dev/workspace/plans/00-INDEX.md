@@ -68,7 +68,3 @@ Wave 5 — releases:
 - Read each file, edit per verified site. Scripts measure only — inventories, counts, proving a set empty. Never the edit.
 - Two preambles answer one grep. The four classroom handovers take the variant; a corpus-wide match offers them the universal text.
 - Report new problems found mid-plan. Never improvise fixes outside a plan's scope.
-
-## House register
-
-All five plans, and every document this refactor writes, use telegraphic register. Framework docs convert as their sites get edited, so mixed prose across `docs/drafthorse/` is expected and marks what has been touched.

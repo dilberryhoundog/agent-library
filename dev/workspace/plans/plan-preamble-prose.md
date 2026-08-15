@@ -9,7 +9,7 @@ Steps preamble drops the quote block and bullet list. Becomes a plain paragraph 
 Universal preamble, final text:
 
 ```markdown
-Steps universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 ```
 
 Handover-variant preamble, final text:
