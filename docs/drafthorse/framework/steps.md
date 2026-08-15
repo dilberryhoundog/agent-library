@@ -15,20 +15,12 @@ A step is **in play** — also known as **active** — from when its start condi
 Every DraftHorse document opens its steps section with a short boilerplate, teaching the reading model to an agent that has never seen the format. A skill, agent (or other compatible) document takes the universal preamble:
 
 ```markdown
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 ```
 
 The preamble is universal in nature, so it can be copied verbatim into any skill or agent document, without needing customisation.
 
-A handover takes the **handover-variant** preamble instead, given in [Handover](handover.md). Its reading model differs — child steps hand flow control back to the parent step, and there is no error drain to fall to — so putting the universal preamble in a handover routes a failed step to a drain that does not exist.
+A handover takes the **handover-variant** preamble instead, given in [Handover](handover.md). The variant points back at these same rules, then adds the facts a child step is read against: control returns to the parent step, the parent document owns error handling, and the handover's globals hold across the parent step's span. The universal preamble in a handover leaves all three unstated.
 
 ## Step anatomy
 

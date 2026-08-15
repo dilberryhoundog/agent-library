@@ -41,15 +41,7 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions, and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
 <!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). H4 headings are the step's contract — its conditions, any scope decision, its routing hint and its invariants; the H3 opens the work. A step names another step only in its "Suggested next actions:" slot; conditions are written in state terms, never step terms. -->
 
