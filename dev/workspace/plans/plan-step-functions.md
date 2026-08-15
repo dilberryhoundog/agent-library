@@ -1,6 +1,6 @@
 # Plan: Declared Step Functions
 
-Status: OPEN — catalogue entries and declaration rules undecided. Source: issue #38, `filebox/steps-preamble-changes.md`.
+Status: DECIDED — catalogue and declaration rules settled, edits outstanding. Source: issue #38, `filebox/steps-preamble-changes.md`.
 
 ## Decision
 
@@ -10,7 +10,7 @@ Two moves on the step's head, above the machinery headings.
 
 **Step declares its function.** Below the description: bolded function name, normal text after. Tells the reading agent how the step behaves before it reads a condition. No declared function means an ordinary working step.
 
-Proposed catalogue, carried from the source proposal, NOT settled:
+Catalogue, SETTLED at six entries. Each description stands as written — it names the step shape well enough for a builder to pick, and no separate discriminating test is authored:
 
 - **Error step** — handles recovery and bails.
 - **Looping step** — re-runs, taking a different branch each pass.
@@ -19,20 +19,24 @@ Proposed catalogue, carried from the source proposal, NOT settled:
 - **Handover step** — manages the invocation and resolution of a handover document.
 - **Support step** — catches or manages difficulties belonging to other steps.
 
+**One function per step.** Several functions dilute the declaration. A handover step handles the handover and nothing else; a looping step is a specialist. A step that appears to carry two functions is a step wanting a split.
+
+**Catalogue home — four sites.** Full definitions in a new `extensions/skills/drafthorse/references/` file. An entry in `docs/drafthorse/framework/steps.md` as the spec's statement of the concept. A light pointer in `assets/SKILL-template.md`, giving a building agent the step shapes to pick from without leaving the file. Instructions in `extensions/skills/drafthorse/SKILL.md` telling a builder to choose.
+
+**Retrofit, sequenced separately.** Framework spec and drafthorse skill land first. The corpus sweep is its own later pass, not part of this plan's execution.
+
 ## Open questions
 
-- **Discriminating tests.** Each entry needs a test separating it from its neighbours, or builders label inconsistently and the checker cannot audit the declaration. Soft boundaries: support against error, routing against an ordinary step carrying two start-condition sets.
-- **One function or several.** A handover step that also loops is plausible. Proposed: several allowed, comma-joined on the one bolded line, capped at two by convention rather than rule.
-- **Catalogue home.** Proposed: normative definitions in `steps.md`, sibling to the disposition catalogue; compact chooser list as a template comment, so a builder picks without leaving the file.
-- **Retrofit or new documents only.** Proposed: retrofit. Half a corpus declaring functions teaches nothing, and mixed dialects are what the single atomic sweep prevents.
+None. Catalogue, multiplicity, home and sequencing all settled.
 
 ## Work
 
-- `docs/drafthorse/framework/steps.md` — anatomy gains the description-and-function head; function catalogue written as a section; the commented-out usage patterns block (multiple active / looping back / dormant) DELETED rather than revived, its three entries now functions.
+- `docs/drafthorse/framework/steps.md` — anatomy gains the description-and-function head; the concept stated as a section, with the six entries; the commented-out usage patterns block (multiple active / looping back / dormant) DELETED rather than revived, its three entries now functions.
 - `docs/drafthorse/framework/notation.md` — bolded function line is a structural marking. Needs an entry.
-- `assets/SKILL-template.md`, `assets/HANDOVER-template.md` — head shape plus chooser list.
-- `extensions/skills/drafthorse/SKILL.md` — instruct the builder to write a weighted description and choose a function.
-- Corpus sweep — every step in `extensions/` gets a rewritten description, plus a function where one applies.
+- New `extensions/skills/drafthorse/references/` file — the full catalogue, one entry per function.
+- `assets/SKILL-template.md`, `assets/HANDOVER-template.md` — head shape plus a light pointer listing the six shapes.
+- `extensions/skills/drafthorse/SKILL.md` — instruct the builder to write a weighted description and choose one function.
+- Corpus sweep — every step in `extensions/` gets a rewritten description, plus a function where one applies. Runs as its own pass after the spec and skill land.
 
 ## Dependencies
 

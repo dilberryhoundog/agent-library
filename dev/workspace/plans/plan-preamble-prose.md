@@ -1,6 +1,6 @@
 # Plan: Preamble as Prose
 
-Status: PART APPLIED. Source: issue #38, `filebox/steps-preamble-changes.md`; draft notation at `assets/SKILL-template.draft.md:45`.
+Status: PART APPLIED. Source: issue #38, `filebox/steps-preamble-changes.md`.
 
 ## Decision
 
@@ -15,7 +15,7 @@ Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions
 Handover-variant preamble, final text:
 
 ```markdown
-Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Same step rules apply, plus these. Parent step reads success from the state child steps leave behind. All child steps finished or inactive — return to the parent step and continue. Parent document covers error handling, unless an optional child problem step is present. Global invariants hold across the parent step's span. Step invariants confine to their own child step.
+Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Same step rules apply, plus these. Parent step reads success from the state child steps leave behind. All child steps finished or inactive — return to the parent step and continue. Parent document covers error handling, unless an optional child error step is present. Global invariants hold across the parent step's span. Step invariants confine to their own child step.
 ```
 
 Settled points:
@@ -33,7 +33,7 @@ Settled points:
 - [x] `docs/drafthorse/framework/steps.md` — canonical copy in `## The steps preamble` replaced; variant paragraph rewritten. Old justification argued the variant exists because the universal preamble routes failures to an error drain — clause now gone, so the argument rests on what the variant adds.
 - [x] `docs/drafthorse/framework/handover.md:58` — same correction, same reason.
 - [ ] Copy-sweep: 16 documents across `extensions/` still carry the retired bullet list. Rides the corpus sweep, never alone.
-- [ ] `assets/SKILL-template.draft.md` — decide whether the file survives now that its draft is spent.
+- [x] `assets/SKILL-template.draft.md` — deleted.
 
 ## Hazards
 

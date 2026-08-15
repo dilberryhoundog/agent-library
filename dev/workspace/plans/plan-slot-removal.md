@@ -1,6 +1,6 @@
 # Plan: Retire Suggested Next Actions
 
-Status: OPEN — rehoming proposed, not settled. Source: issue #38, `filebox/steps-preamble-changes.md`.
+Status: DECIDED — removal confirmed safe, load-bearing sites inventoried. Source: issue #38, `filebox/steps-preamble-changes.md`.
 
 ## Decision
 
@@ -13,9 +13,28 @@ Four sanctioned uses. Each needs a home before the slot goes, or real instructio
 - **Bail off unmeetable conditions** — already covered by the error step claiming the remainder. The bail line compensated for a weak finished condition; sharpen the condition instead.
 - **Handover control return** — stated by the handover-variant preamble, reinforced by the **handover** function declaration.
 
-## Open question
+## Audit result
 
-Does any live document lean on the slot for real routing rather than a hint? Rebuild every such site as conditions BEFORE removal, or routing vanishes silently. Audit the 27 live files carrying the string, step by step, before editing any.
+Audit run and closed. True counts correct the estimate: 21 live files, 63 occurrences, of which **48 are real step slots** and 15 are spec prose naming the slot. A further 12 lowercase prose mentions sit in the authoring guides. Planning documents under `dev/` hold 33 more, excluded.
+
+Of the 48 slots: **34 HINT, 13 LOAD-BEARING, 1 AMBIGUOUS**. Removal is safe at 34 sites with no replacement written.
+
+Amended after `assets/SKILL-template.draft.md` was deleted in wave 2, taking 3 slots with it: **45 slots — 33 HINT, 11 LOAD-BEARING, 1 AMBIGUOUS**.
+
+The 13 load-bearing sites collapse into three gaps:
+
+**Gap 1 — termination stated in the slot, not in an exit step's finished conditions.** Nine sites. `git-box:233` (no success exit at all on the commonest path), `drafthorse/SKILL.md:214`, the three git verb skills' `+Result` steps (`agent-commit:240`, `agent-push:116`, `agent-switch:170`, all carrying the same handback line), and both templates in both revisions (`SKILL-template.md:114`, `.draft.md:121`, `SKILL-template.md:137`, `.draft.md:143`). Fix: `- the skill is complete` written into the exit step's finished conditions. The two shipped template lines seeded this into versioning, classroom and drafthorse — fix the template first and the derivatives become mechanical.
+
+**Gap 2 — versioning's serialisation discipline.** One site, `versioning/SKILL.md:167` (`+Range`): *"Release the chosen units one at a time, in the order chosen."* `+Breaking Changes` starts on a condition simultaneously true for every chosen unit, and the preamble sanctions multiple steps in play. Nothing else stops interleaved releases or fixes the order. Fits none of the four sanctioned uses and has no planned replacement. Fix: a step invariant on `+Range`, since the ordering fact is not condition-shaped.
+
+**Gap 3 — the error step as an abandoned run's only exit.** Two sites, `versioning:383` and `drafthorse/SKILL.md:234`. Both read "Resume the step the user chose, or end the skill"; the resume half is covered by re-holding start conditions, the end half by nothing. `classroom:396` carries the identical sentence and is a HINT — its `+Conclude` claims the user-ended run where versioning's `+Finish` does not. Fix: an alternative start block on the success exit claiming the abandoned run. `drafthorse:234` also carries a second orphan fact — the un-approval cascade, which every gate-shaped start condition in that document silently depends on and which appears nowhere else in the skill. Belongs in a global agent invariant.
+
+Two items needing a call before the sweep:
+
+- **`agent-switch:102` (`+Stash`) is a behaviour question, not a rewrite.** The slot's no-op clause is the only thing stopping a clean-tree stash no-op from continuing into an unstashed switch. `+Result` starts on refusal, failure or conflict — a no-op is none of the three. Either `+Result` claims the no-op, or the no-op should not end the run at all. Decide the behaviour, then write it.
+- **`git-robot:190` (`+Report`) is the one AMBIGUOUS site.** *"Finish your turn."* The finished condition implies the stop without stating it. `doc-reviewer:185` closes the same doubt with "as the final message text". Worth adopting that phrasing whichever way the slot decision lands.
+
+Salvage: `condition-writing.md:44`'s second bullet — a happy-path-only pointer overriding a destination's own refusal — is the only statement of that failure mode in the authoring guides. Rehome it before deleting the section.
 
 ## Work
 
