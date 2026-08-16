@@ -21,6 +21,7 @@ Downstream: the DraftHorse-format skills (`classroom`, `versioning`, `git-box`, 
 - [plan-slot-removal.md](plan-slot-removal.md) — DECIDED. `#### Suggested next actions:` retired, its four sanctioned uses rehomed. Audit closed: 34 of 48 slots removable outright, 13 load-bearing across three gaps.
 - [plan-error-step-naming.md](plan-error-step-naming.md) — DECIDED. **error step** is the noun, `+Handle a Problem` the heading. Sites inventoried, edits outstanding.
 - [plan-load-bearing-slots.md](plan-load-bearing-slots.md) — OPEN, NEW. The 13 slots carrying instruction no condition expresses. Document repair on a per-site approval cycle. Unknown to #38 until the audit ran.
+- [plan-step-shape-examples.md](plan-step-shape-examples.md) — OPEN, queued behind the corpus sweep. Machinery examples per catalogue entry, so a builder selects and adjusts rather than builds. Pairs with pulling the error and success blocks out of the template.
 
 ## Execution waves
 
@@ -52,7 +53,9 @@ Wave 2 — build skill and templates. Same session boundary as wave 1:
 Wave 3 — the checker, rebuilt as part of the spec. `drafthorse-spec-check.md` is spec, not corpus: it condenses the framework into the tests a checker needs, so it follows a framework change immediately rather than trailing the migration (`framework/README.md` states this ordering as the downstream-consumer rule):
 
 - [x] `docs/drafthorse/drafthorse-spec-check.md` — DONE. Machinery-heading check down to four with the slot named as retired; new `Declared function` notation check (closed catalogue, one per step); both preamble texts replaced with the settled prose versions; `Suggested next actions` check group deleted and its surviving fact rehomed as a finished-condition rule; new `Terminal steps state their termination` rule, which is what the load-bearing repair will write; `Purpose line` replaced by `Self-description`; `Standalone` now reads "a step names no other step"; error-step vocabulary throughout, including the `Error Step` term. Its OWN machinery migrated too, so the regenerated saddler conforms: prose preamble, both slots removed (both audited HINT, destinations verified), `**Dormant step**` declared on `+Audit the Handovers`, `**Error step**` on `+Compose the Report` per the executor exception, and that step's finished conditions now state the review is complete.
-- [ ] `extensions/agents/drafthorse-saddler.md` regenerated from it. Never hand-edited; bodies must diff identically. Per the `usages:` field: keep the preamble, replace all remaining sections.
+- [x] `extensions/agents/drafthorse-saddler.md` — DONE. Regenerated per the `usages:` rule: frontmatter and identity paragraph kept, everything from `# Agent Invariants` down replaced from the spec-check. Verified in lockstep — the two bodies diff empty. The only surviving mention of the retired slot is the check that flags it.
+
+**Wave 3 is closed.**
 
 Wave 4 — the pilot. One document migrated whole and put through the rebuilt checker, before the corpus commits to anything:
 
@@ -69,6 +72,10 @@ Wave 6 — corpus sweep, ONE atomic pass:
 
 - [ ] Per step, one edit: new preamble, slot removed, description weighted, function declared, error-step vocabulary. Splitting this leaves mixed dialects. Every document except the two the pilot already migrated.
 - [ ] Saddler run over the swept corpus, now as a genuine gate.
+
+Wave 6b — richer reference, leaner template. Harvest folded into the sweep above, since each document is read once anyway:
+
+- [ ] [plan-step-shape-examples.md](plan-step-shape-examples.md) — machinery example per catalogue entry, lifted from documents as the sweep migrates them. Error and success blocks move out of `SKILL-template.md` into the reference. Template returns to a skeleton.
 
 Wave 7 — releases:
 
