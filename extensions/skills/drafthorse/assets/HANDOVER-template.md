@@ -32,9 +32,9 @@ Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Sam
 
 ## +<Child Step Name>
 
-<!-- What this step does and how it behaves, told to the agent reading it. -->
+<!-- The directive — a single line naming the agent's task on entering this step. -->
 
-**<Step function>** <!-- — how this step takes that shape. Pick ONE: Looping step / Routing step / Dormant step / Handover step / Support step. Delete the line for an ordinary working step. An error step never appears in a handover. -->
+**<Step function>** <!-- — the fixed declaration string, copied from [Step Functions](../references/step-functions.md). Delete the line for an ordinary working step. Error and success steps never appear in a handover; the parent owns both. -->
 
 #### Start this step when these are true:
 

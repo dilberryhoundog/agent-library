@@ -2,6 +2,10 @@
 
 These conventions are an overlay on the agent harness document. They underpin the spec.
 
+- **Supercharged harness documents** — DraftHorse leverages an agent that already works. Purpose: harness documents that do more, hold consistency across runs, and spend fewer tokens on cheaper agents. Structure over competence, never structure replacing it. Most skills in the wild carry no error handling and no success reporting; the agent simply knows what to do. DraftHorse hardens that knowing into something repeatable.
+
+    Bloat is the danger. Every addition pushing the spec toward code — mandatory machinery, guaranteed coverage, a rule per state — steals from that purpose. An error step is a level up, not a requirement. Test any proposed addition: does it make the executing agent do more, more consistently, for less? An addition that only makes the document more complete is bloat.
+
 - **Building is difficult, so execution is easy** — DraftHorse is a builder's spec. It leverages standard markdown notation, but structures and organises it so that document execution is natural and easy for an agent. Careful crafting of a skill or executable document during creation ensures the longevity and efficiency of the tool over its lifetime.
 
 - **Executable without DraftHorse knowledge** — an agent runs the document cold, holding nothing but the document and its own markdown literacy. Four things carry that weight...

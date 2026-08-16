@@ -47,9 +47,9 @@ Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions
 
 ## +<Step Name>
 
-<!-- What this step does and how it behaves, told to the agent reading it. -->
+<!-- The directive — a single line naming the agent's task on entering this step. -->
 
-**<Step function>** <!-- — how this step takes that shape. Pick ONE: Error step / Looping step / Routing step / Dormant step / Handover step / Support step. Delete the line for an ordinary working step. -->
+**<Step function>** <!-- — the fixed declaration string, copied from [Step Functions](../references/step-functions.md). Delete the line for an ordinary working step. -->
 
 #### Start this step when these are true:
 
@@ -123,7 +123,7 @@ End the skill and return to the user.
 
 Surface anything the other steps don't cover, and decide with the user how to continue.
 
-**Error step** — claims every state no other step's start condition claims.
+**Error step** — Handles recovery and bails.
 
 #### Start this step when these are true:
 

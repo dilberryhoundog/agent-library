@@ -31,7 +31,7 @@ Notation is the small set of markings DraftHorse layers on top of plain markdown
 Not executable — these organise and name things.
 
 - `## +Step Name` — a step node: `+` prefix, Title Case, H2. The `+` distinguishes steps from reference and term headings.
-- `**Step function** — the step's function description` — a declared step function: a bolded catalogue name on its own line beneath the step's description, followed by prose. Optional; an undeclared step is an ordinary working step (see [Steps](steps.md)).
+- `**Step function** — the step's function description` — a declared step function: a bolded catalogue name on its own line beneath the step's directive, followed by the catalogue's fixed string. Optional; an undeclared step is an ordinary working step (see [Steps](steps.md)).
 - `#### Start this step when these are true:` / `#### Step finished when these are true:` / `#### Agent decision:` / `#### Step invariants:` — the machinery headings, always H4, in this order (the last two optional): the step's contract, read without engaging (see [Steps](steps.md)).
 - `###` — the engagement heading: one H3 named for the work opens the step's body; the work may structure itself with H4 sub-headings of its own.
 - `# --- REFERENCES --- / # --- STEPS --- / # --- TERMS ---` — the scaffold's dividers (see [Scaffold](scaffold.md)).

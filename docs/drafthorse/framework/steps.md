@@ -29,9 +29,9 @@ A step opens with its head — what it does and how it behaves — then its cont
 ```markdown
 ## +Step Name
 
-What this step does and how it behaves, told to the agent reading it.
+The directive — a single line naming the agent's task on entering this step.
 
-**Step function** — describes the shape this step takes. Omit for an ordinary working step.
+**Step function** — the fixed declaration string for the shape this step takes. Omit for an ordinary working step.
 
 #### Start this step when these are true:
 
@@ -62,20 +62,18 @@ The `+` prefix marks a heading as a step node, distinguishing steps from referen
 
 ## Step functions
 
-A step declares its **function** on a bolded line under its description, telling a reading agent how the step behaves before it reads a condition. Most steps declare nothing — an undeclared step is an ordinary working step.
+A step declares its **function** on a bolded line under its directive, hinting at how the step behaves before it is activated. Most steps declare nothing — an undeclared step is an ordinary working step.
 
 The catalogue is six shapes:
 
 - **Error step** — handles recovery and bails.
+- **Success step** — resolves the run's done state and exits.
 - **Looping step** — re-runs, taking a different branch each pass.
 - **Routing step** — chooses between divergent branches.
-- **Dormant step** — activates only when its state arises.
+- **Dormant step** — skippable, activates only when its state arises.
 - **Handover step** — manages the invocation and resolution of a handover document.
-- **Support step** — catches or manages difficulties belonging to other steps.
 
-A step declares **one** function. Several dilute the declaration and describe a step wanting a split.
-
-Two shapes are worth stating plainly, because neither is a structure the document builds. A loop is a start condition that holds again — a per-item step whose start condition reads "an item awaits processing" re-engages for each item, and the success exit's own start condition ends the loop. A dormant step covers the rare case or the branch a run did not take; its start condition simply never activates.
+Each entry has a fixed declaration string. A step declares **one** function.
 
 ## Conditions
 

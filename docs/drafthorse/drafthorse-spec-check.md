@@ -31,7 +31,7 @@ Mechanical form checks — each is pass/fail by inspection:
 
 - **Step nodes** — every step heading is H2, `+` prefixed, Title Case (`## +Step Name`).
 - **Machinery headings** — `#### Start this step when these are true:` and `#### Step finished when these are true:` present on every step, in that order; `#### Agent decision:` and `#### Step invariants:` optional, in that order after them. All H4, exact wording. `#### Suggested next actions:` is retired; its presence is a finding.
-- **Declared function** — where a step declares a function, it is a bolded catalogue name on its own line beneath the step's description and above the machinery headings, followed by prose (`**Looping step** — re-engages per unit`). One function per step; a second name on the line is a finding. The catalogue is closed: error, looping, routing, dormant, handover, support. A step declaring nothing is an ordinary working step and is not a finding.
+- **Declared function** — a declared function is a bolded catalogue name on its own line beneath the step's directive, above the machinery headings, followed by its catalogue string (`**Looping step** — Re-runnable, taking a different branch each pass.`). One function per step; a second name on the line is a finding. The catalogue is the authority on which names are valid. A step declaring nothing is an ordinary working step and is not a finding; a step performing a catalogued shape without declaring it is caught under [Step Function Checks](#step-function-checks).
 - **Engagement heading** — one H3 named for the work opens each step's body, below the machinery; the work may structure itself with H4 sub-headings of its own.
 - **Invariant form** — every invariant (global or step-scoped) is a bolded capitalised imperative keyword followed by its rule (`**DO NOT** …`, `**ALWAYS** …`, `**NEVER** …`; the keyword family is open). Nothing that is not a rule may wear the bold-caps form.
 - **Condition block shape** — the conditions to start or finish a step are always a markdown list, one condition per list item. A paragraph or prose-based statement is a finding.
@@ -111,15 +111,27 @@ The conditions carry all the routing a wired graph would; a weak condition is a 
 ## Step-Shape Checks
 
 - **Standalone** — a step names no other step. A step naming another, anywhere in its contract or engagement, is a finding.
-- **Self-description** — every step opens with a directive of what it does and how it behaves, addressed to the agent reading it. A bare scanning label that leaves the step's behaviour to be inferred from its conditions is a finding.
+- **Directive** — every step opens with a single-line directive: hinting at the agent's task on entering this step. A general description of the step, rather than a hint to the agent, is a finding.
 - **Sized to the pass** — a step encompasses all the work the agent can manage at once. Over-splitting smell: consecutive steps whose start conditions are just "the previous step finished". Premature-closing smell: a step that finishes only so the next can start while its concern still applies — the fix is a spanning step left in play, not a merge.
 - **Edges at real boundaries** — a boundary is a user-interaction wait, a loop body, a distinct completion state, a permission or context shift, a judgment shift, or a spanning concern. An edge at none of these is over-splitting.
 - **Spanning steps** — a concern persisting across several pieces of work is its own step, in play while other steps start and finish; its invariants bind for its whole open duration and are not duplicated into other steps also in play.
 - **Agent decisions** — an `#### Agent decision:` block holds a choice that governs the step's scope or shape (what it targets, how many times it runs), resolved before the engagement can be performed. Three limits hold it in place: it carries no work, it carries no routing between steps, and it resolves to a fact the step's own finished condition depends on. Failing any of the three, it is engagement prose or a start condition under the wrong heading. It must resolve to a **named fact** — "a decision was made" never satisfies the finished condition that depends on it. A genuine bounded fork inside the work — neither branch changing what the step targets — stays in the engagement as plain prose. Routing between steps written as an Agent decision is a defect. The block sits with the step's other H4 machinery, above the engagement heading; that placement is correct and is not a finding.
-- **Exit steps present** — a success exit whose start condition is the exhaustive all-done state, and an error step whose start condition claims the remainder (in sense: something has gone wrong, or a situation no other step covers) and whose finish is the user or caller informed and the continuation decided. The wordings here are the required **sense, not required text** — a document that adds concrete examples to its error step's condition is sharper, not divergent. The error step's engagement surfaces what happened, where, the current state, and the options. Both exit steps state the run's completion in their own finished conditions — an exit step that never says the skill is complete gives the run nowhere to stop.
-- **Half-applied state bails to the user** — a step that fails partway leaves work neither undone nor complete, and the error step is its single disposition: the engagement accounts for what was applied and what was not, reports it to the user with a recommended fix, and ends the run. Three findings sit here: an error step that surfaces failure without accounting for partial application, a step whose engagement resumes over its own partial work, and a start condition carrying a half-applied exclusion clause — the disposition in the wrong home.
+- **Half-applied state** — work neither undone nor complete. Two findings: a step resuming silently over its own partial work; a start condition carrying a half-applied exclusion clause — a permanent hold no step can lift, and the disposition in the wrong home.
 - **Executor exception** — an executor document may fold the error step's role into its reporting step; the reporting step must then claim the remainder explicitly, as an alternative block in its start condition ("a failure has ended the run"). Folding without the explicit claim is a finding.
 - **Handover exception** — where a step folds in a handover, the flow must start at the parent step, run the handover's steps as its child steps, and end back at the parent step — the parent step's own start and finished conditions route the agent in and out. A handover whose flow exits anywhere other than back to its parent step is a finding.
+
+## Step Function Checks
+
+One test per shape: does the declared function resolve?
+
+- **Undeclared functions** — a step performing a catalogued function without it named in the description. Sweep every step against this catalogue of checks; if it meets a criteria, it should be named by that function.
+- **Multiple functions** — a step performing multiple of the named step check criteria in a single step.
+- **Error step** — remaining errors claimed after each step handles internally, destructive errors handled, half-applied states accounted for.
+- **Routing step** — every branch is resolvable. A branch may leave the document (a sub-skill, an external call).
+- **Looping step** — the start condition re-holds, and something ends the loop.
+- **Dormant step** — a skippable step with transient activation. Not always needed, not never needed.
+- **Handover step** — control returns to it from a handover document; its finished condition reads the state the handover left behind.
+- **Success step** — start conditions handle the done state. Exits successfully, and always.
 
 ## Reference Checks
 
@@ -136,11 +148,12 @@ The conditions carry all the routing a wired graph would; a weak condition is a 
 
 ## Document-Wide Checks
 
+- **The run resolves** — the agent can successfully stop executing the document. Document resolution comes by a naturally understandable directive or specific exit step handling. This is judged during the scenario walk.
 - **Single source of truth** — every unit (invariant, step, reference, term) standalone; no meaning duplicated across units, so a change is a one-place edit. Exception: documents that never share run-time context (an orchestrator and its sub-agent) repeat deliberately — verify the repetition is that case before flagging.
 - **No no-ops** — every line must change behaviour; a line the agent already obeys by default is paid-for noise. Apply to invariants especially: few and hard beats many and soft.
 - **Cold-readable** — the document requires no framework knowledge to execute; the preamble is its only reading lesson. Anything that leans on DraftHorse jargon the document never defines is a finding.
 - **Terms earn their place** — every term is actually leaned on by steps or references; in a multi-document set the terms keep the set speaking one vocabulary.
-- **Sharp prose** — the document instructs the *how* and does not explain the *why*. Four defects, each a finding: **why-prose** (rationale an agent does not need once the guardrails are stated); **unreachable meaning** (a passage resolvable only from context the reader cannot access — a term, name, or decision the document never gives); **negative mirror** (a negative clause restating the positive that already entails it — "write in prose, not bullet points"); **no-op** (a line the agent would obey by default, so its absence changes nothing).
+- **Sharp prose** — the document instructs the *how* and does not explain the *why*. Four defects, each a finding: **why-prose** (rationale an agent does not need once the guardrails are stated); **unreachable meaning** (a passage resolvable only from context the reader cannot access — a term, decision or statement, the document never gives); **negative mirror** (a negative clause restating the positive that already entails it — "write in prose, not bullet points"); **no-op** (a line the agent would obey by default, so its absence changes nothing).
 - **Naming, not explaining** — headings are link targets. Every heading is a short, unique name — unique within its document — because an explaining heading makes an unlinkable anchor and a duplicated heading an ambiguous one. The explanation belongs in a short line directly under the heading.
 
 ## Report Format
@@ -246,6 +259,7 @@ Judge every step's contract and shape against the condition and step-shape check
 
 - every test in [Condition Checks](#condition-checks) has been applied to every step, including the exit steps and the error step
 - every test in [Step-Shape Checks](#step-shape-checks) has been applied to every step, including the exit steps and the error step
+- every test in [Step Function Checks](#step-function-checks) has been applied to every declared function, and every step has been swept for an undeclared one
 - each failure is recorded as a finding
 
 ### Test Each Step:

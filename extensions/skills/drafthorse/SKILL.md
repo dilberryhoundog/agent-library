@@ -14,9 +14,7 @@ Build a DraftHorse document: a SKILL.md (or kindred agent document) whose work i
 
 # Agent Invariants
 
-**ALWAYS** write the document agent-agnostic: resolvable by any agent in any future session, no session-specific context, no pointers to files that will not exist where the skill is installed.
-**NEVER** proceed past a gate without the user's approval of that phase's artifact.
-**DO NOT** invent requirements or source material — what the user has not provided, ask for.
+**ALWAYS** write the document agent-agnostic: resolvable by any agent in any future session, no session-specific context, no pointers to files that will not exist where the skill is installed. **NEVER** proceed past a gate without the user's approval of that phase's artifact. **DO NOT** invent requirements or source material — what the user has not provided, ask for.
 
 # --- REFERENCES ---
 
@@ -42,9 +40,9 @@ The tests a finished document must pass:
 
 - **Checkable and exhaustive conditions** — could the agent claim a condition is met while work remains? If yes, sharpen it.
 - **Steps are standalone** — a step names no other step; conditions are written in state terms, never step terms; finished conditions carry only their own step's completion criteria.
-- **Every step describes itself** — a weighted one-line description of what the step does and how it behaves, and a declared function where the step takes one of the catalogue shapes.
+- **Every step opens with a directive** — one line naming the agent's task on entering the step, and the fixed declaration string where the step takes one of the catalogue shapes.
 - **Gates are compound** — approval *and* the artifact's own substantive conditions, never approval alone; a rubber-stamp must not launder a defective artifact.
-- **The error step claims the remainder** — one step whose start condition is "no other step covers this", so every state the document can reach is handled by construction (executor documents may fold the error step's role into their reporting step, stated in its start condition). It catches what the other steps could not know about in advance and hands control back to the user with the agent's recommendation — including half-applied state, where it reports what was and was not applied and ends the run. That is what keeps the rest of the document lean.
+- **The run resolves** — every path ends somewhere stated, prefer an exit and success step, rather than the agent's own handling. The prebuilt error step handles unresolvable errors, destructive and half-applied states, include the default step in your build or make slight changes.
 - **References carry data, steps carry work** — conceptual guidance, not hard law; ordered actions or branching inside a reference is work asking to be a step.
 - **Cite references at the moment of use** — inside the sentence that needs them, not as a list at the top of a step.
 - **Inline vs external references** — compact and always-relevant context inline; expansive and sometimes-relevant context external.
@@ -179,7 +177,8 @@ The draft is written to the destination with every template placeholder resolved
 
 ### Write:
 
-Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. Write every step's conditions per [Condition Writing](references/condition-writing.md). Give each step a weighted description of what it does and how it behaves, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — one function, or none for an ordinary working step. Keep the steps preamble verbatim; keep the error step. Write each handover doc the map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps — and cite it from its parent step in the handover citation form, `[Name — Handover](name-handover.md)`.
+Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. Write every step's conditions per [Condition Writing](references/condition-writing.md). Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Keep the steps preamble verbatim; keep the error step. Write each handover doc the map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps —
+and cite it from its parent step in the handover citation form, `[Name — Handover](name-handover.md)`.
 
 ## +Review
 
