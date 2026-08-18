@@ -86,7 +86,7 @@ These overviews show _what_ changed and how much — enough to plan the grouping
 
 Use `<emoji> <type>: <description>`:
 
-- Conventional type (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `revert`), paired with the matching emoji from the `Emoji map` above.
+- Conventional type (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `revert`), paired with the matching emoji from the [Emoji Map](#emoji-map) above.
 - Imperative mood, present tense — "add feature", not "added feature".
 - First line under 72 characters. Add a body only when the change needs explaining beyond its subject.
 - No literal shell syntax anywhere in the message — dollar-parenthesis substitution, backticks, or glob/parenthesis patterns (e.g. a permission pattern like "Bash(git commit ...)"). The permission checker reads the whole command line and treats such text as live shell syntax, forcing a prompt. Describe the syntax in words instead ("the git commit permission grant").
@@ -109,40 +109,34 @@ Keep changes together when they form one cohesive feature, depend on each other 
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
 ## +Read Procedure
 
 Load the current COMMIT procedure and the real diffs it covers.
 
+**Looping step** — Re-runnable, taking a different branch each pass.
+
 #### Start this step when these are true:
 
-A `COMMIT` procedure from the `Brief` awaits processing, and no earlier no-op or refusal has ended the run.
+- a `COMMIT` procedure from the `Brief` awaits processing
+- no earlier no-op or refusal has ended the run
 
 #### Step finished when these are true:
 
-The procedure's directive and its expanded diffs are read, and the action to run is decided — a `new` action, an `amend` action, or a no-op (nothing in the procedure's scope to commit — clean tree, or every changed file outside the directive's scope; or an `amend` that follows a `new`, or a second `amend`, in the same brief). Never invent or force an empty commit.
-
-#### Suggested next actions:
-
-A decided `new` action moves to creating new commits; a decided `amend` action moves to amending; a no-op moves to reporting the result.
+- the procedure's directive is read
+- the expanded diffs are read
+- the action to run is decided — a `new` action, an `amend` action, or a no-op (nothing in the procedure's scope to commit — clean tree, or every changed file outside the directive's scope; or an `amend` that follows a `new`, or a second `amend`, in the same brief)
 
 #### Step invariants:
 
 **ALWAYS** use the `Expanded Diffs` to write the commit message. Do not guess from filenames or procedure details.
 **NEVER** use extra flags or commands (like `git -C` or `cd`) . trust the working directory is the right place.
+**NEVER** invent or force an empty commit.
 
 ### Review Against the Tree:
 
-From the `Brief` read the current `COMMIT` procedure. Review it against the `Current Git State`.
+From the `Brief` read the current `COMMIT` procedure. Review it against the [Current Git State](#current-git-state).
 
 #### Expanded Diffs:
 
@@ -162,27 +156,24 @@ Create one or more new commits from the working tree, grouped per the procedure'
 
 #### Start this step when these are true:
 
-The current procedure is `COMMIT(new)` and its commits have not been made.
+- the current procedure is `COMMIT(new)`
 
 #### Step finished when these are true:
 
-Every commit for the current procedure is made and recorded.
-
-#### Suggested next actions:
-
-When further `COMMIT` procedures remain in the `Brief`, return to reading the next one; otherwise move to reporting the result.
+- every commit for the current procedure is made
+- every commit is recorded
 
 ### Commit Splitting:
 
-Map the procedure's directive onto the real changes from the `Expanded Diffs`. A directive may name a count ("3 commits"), a scope filter ("housekeeping, leave the rest"), or a free description. When unclear on how to manage the diff, fall back to the `Splitting heuristics`. Prefer fewer, cohesive commits — 1–4 per logical unit — and commit dependencies first so history stays bisectable. Your goal is a logical grouping of changes across every file in the procedure.
+Map the procedure's directive onto the real changes from the `Expanded Diffs`. A directive may name a count ("3 commits"), a scope filter ("housekeeping, leave the rest"), or a free description. When unclear on how to manage the diff, fall back to the [Splitting Heuristics](#splitting-heuristics). Prefer fewer, cohesive commits — 1–4 per logical unit — and commit dependencies first so history stays bisectable. Your goal is a logical grouping of changes across every file in the procedure.
 
 #### Commit:
 
 - Check `git diff --cached --name-only` for pre-staged files outside the current group; unstage each with `git restore --staged <file>` — the change itself is preserved for a later group or procedure. Note every unstaged path for the `Result`.
 - Stage each file in the group with `git add <file>` (re-stage if already staged)
 - Confirm with `git status --short` that the staged column (the first character of each line) lists exactly the group's files. Out-of-scope changes remaining as unstaged (` M`) or untracked (`??`) are the expected result of the unstage bullet — leave them as they are.
-- Run the `Breaking changes` check
-- Commit the changes with `git commit -m <message>` (write the message per `Commit message format`)
+- Run the [Breaking Changes](#breaking-changes) check
+- Commit the changes with `git commit -m <message>` (write the message per [Commit Message Format](#commit-message-format))
 
 Move to the next grouping, following the same procedure, until all the required files are committed. Remember each commit's short hash and subject as a `Result` to fold into the final report.
 
@@ -192,15 +183,17 @@ Fold the in-scope changes into the previous commit, or reword its message, per t
 
 #### Start this step when these are true:
 
-The current procedure is `COMMIT(amend)` and the amend has not been made.
+- the current procedure is `COMMIT(amend)`
 
 #### Step finished when these are true:
 
-The amend is complete and recorded, or refused and the refusal recorded.
+- the amend is complete
+- the amend is recorded
 
-#### Suggested next actions:
+**OR these are true:**
 
-A completed amend with further `COMMIT` procedures remaining returns to reading the next one; a refusal, or no procedures remaining, moves to reporting the result.
+- the amend is refused
+- the refusal is recorded
 
 ### Check for Push:
 
@@ -222,24 +215,27 @@ Two conditions refuse the amend: the directive suggests changes to more than one
 - Check `git diff --cached --name-only` for pre-staged files outside the current group; unstage each with `git restore --staged <file>` — the change itself is preserved for a later group or procedure. Note every unstaged path for the `Result`.
 - Stage each file in the group with `git add <file>` (re-stage if already staged)
 - Confirm with `git status --short` that the staged column (the first character of each line) lists exactly the group's files. Out-of-scope changes remaining as unstaged (` M`) or untracked (`??`) are the expected result of the unstage bullet — leave them as they are.
-- Amend with `git commit --amend`, rewriting the message to stay within `Commit message format`
-- Run the `Breaking changes` check, against the combined change.
+- Amend with `git commit --amend`, rewriting the message to stay within [Commit Message Format](#commit-message-format)
+- Run the [Breaking Changes](#breaking-changes) check, against the combined change.
 
 ## +Result
 
 Emit the outcome back to git-robot so it can render the `COMMIT` Output Directive in its report.
 
+**Error step** — folded into this reporting step per the executor exception, so its start condition claims the ended run alongside the completed one.
+
 #### Start this step when these are true:
 
-Every `COMMIT` procedure in the `Brief` has been processed, or a no-op or refusal has ended the run.
+- every `COMMIT` procedure in the `Brief` has been processed
+
+**OR these are true:**
+
+- a no-op or refusal has ended the run
 
 #### Step finished when these are true:
 
-The result lines are emitted.
-
-#### Suggested next actions:
-
-The skill is over, hand control back to git-robot.
+- the result lines are emitted as the final message text
+- the skill is complete
 
 #### Step invariants:
 

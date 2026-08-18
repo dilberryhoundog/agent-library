@@ -19,13 +19,7 @@ Grade a learner's completed or annotated work for a unit and produce a saved rev
 
 # --- STEPS ---
 
-> Handovers are child steps of a parent step:
->
->- The parent step reads success from the state the handover leaves behind.
->- Invoke a child step any time its *start* conditions are met.
->- If all child steps are *finished* or inactive, return to the parent step and continue.
->- Error handling is covered by the parent document, unless an optional child problem step is present.
->- Global invariants apply across the whole parent step; step invariants are confined to the child step.
+Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Same step rules apply, plus these. Parent step reads success from the state child steps leave behind. All child steps finished or inactive — return to the parent step and continue. Parent document covers error handling, unless an optional child error step is present. Global invariants hold across the parent step's span. Step invariants confine to their own child step.
 
 ## +Assess the Work
 
@@ -34,7 +28,6 @@ Read the learner's work against the unit and grade it strand by strand.
 #### Start this step when these are true:
 
 - the user has supplied a learner's completed or annotated work for a unit
-- it has not yet been assessed
 
 #### Step finished when these are true:
 
@@ -53,13 +46,12 @@ Render the assessment into the review document and save it.
 #### Start this step when these are true:
 
 - the unit has been assessed strand by strand
-- no review document has been produced from that assessment
 
 #### Step finished when these are true:
 
-- the `Review Document Template` shell has been filled with the assessment
+- the [Review Document Template](#review-document-template) shell has been filled with the assessment
 - it has been delivered as a saved document per the `Document Pipeline`
 
 ### Fill and Save:
 
-Copy the `Review Document Template` shell and fill every bracketed field from the assessment — per-strand gradings and evidence, strengths, and next-step recommendations, repeating strand rows as needed. Then deliver it per the `Document Pipeline`, saving to a suitable project working location.
+Copy the [Review Document Template](#review-document-template) shell and fill every bracketed field from the assessment — per-strand gradings and evidence, strengths, and next-step recommendations, repeating strand rows as needed. Then deliver it per the `Document Pipeline`, saving to a suitable project working location.

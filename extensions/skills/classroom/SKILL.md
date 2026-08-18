@@ -71,24 +71,17 @@ Lexend body font, A4, colour-coded annotation margin, dotted write-lines, clean 
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
 ## +Confirm Classroom Context
 
 Make sure a classroom project is set up here before building anything.
 
+**Handover step** — Manages the invocation and resolution of a handover document.
+
 #### Start this step when these are true:
 
 - classroom work has been requested
-- no classroom context is confirmed for the current working directory
 
 #### Step finished when these are true:
 
@@ -102,10 +95,6 @@ Make sure a classroom project is set up here before building anything.
 
 - the user has chosen not to set one up
 - nothing has been written
-
-#### Suggested next actions:
-
-With a classroom confirmed, establish who the work is for; where the user declined to set one up, conclude the run.
 
 #### Step invariants:
 
@@ -126,9 +115,6 @@ Identify the learner, load their configuration and course state, and settle what
 #### Start this step when these are true:
 
 - a classroom context is confirmed
-- the learner is not yet established
-- the learner's configuration is not yet established
-- the run's intent is not yet established
 
 #### Step finished when these are true:
 
@@ -138,10 +124,6 @@ Identify the learner, load their configuration and course state, and settle what
 - any prior course state in `CLAUDE.md` has been read
 - the run's intent — a new build, continuing a course, or marking completed work — is settled with the user
 
-#### Suggested next actions:
-
-For a mark-work intent, mark the completed work; for a build, gather the subject matter.
-
 ### Establish Who and What:
 
 Read the [Storage Model](#storage-model) for where each piece lives. Identify the learner and read the relevant file(s) in the project's `students/`, the project's `global-requirements.md`, and the prior status notes in `CLAUDE.md`; search the earlier conversation for an existing course. Do not ask for anything already held in those files or the conversation. If the learner has no file yet, offer to create one under the project's `students/` using the field definitions in [Template](references/students/_template.md) (with [Example Learner](references/students/example-learner.md) as a worked example of a filled profile). Settle with the user what the run is for — a new build, continuing a course, or marking completed work — so the right work follows.
@@ -150,19 +132,16 @@ Read the [Storage Model](#storage-model) for where each piece lives. Identify th
 
 Grade completed work the user has supplied and get a review delivered.
 
+**Handover step** — Manages the invocation and resolution of a handover document.
+
 #### Start this step when these are true:
 
 - the run's intent is to mark completed work the user has supplied
-- no review has yet been delivered for it
 
 #### Step finished when these are true:
 
 - a review has been produced for the supplied work
 - its saved location is known
-
-#### Suggested next actions:
-
-Record and present the delivered review.
 
 ### Mark the Work:
 
@@ -175,7 +154,6 @@ Gather the source material the build will draw on and save it as a durable cours
 #### Start this step when these are true:
 
 - the run is a build
-- its subject matter has not been gathered
 
 #### Step finished when these are true:
 
@@ -194,7 +172,6 @@ Agree the structure with the user before producing any documents.
 #### Start this step when these are true:
 
 - the subject matter is in hand
-- the build's structure has not been aligned with the user
 
 #### Step finished when these are true:
 
@@ -212,7 +189,6 @@ Pick the course and lesson shapes by enumerating what actually exists.
 #### Start this step when these are true:
 
 - the build is aligned
-- the course and lesson shapes have not been chosen
 
 #### Step finished when these are true:
 
@@ -228,7 +204,9 @@ Confirm with the user which shape governs which part and how any wrapper applies
 
 ## +Assemble a Unit's Documents
 
-Produce one unit's documents to the governing format — the shared assembly worker, entered whenever any unit needs building.
+Produce one unit's documents to the governing format.
+
+**Looping step** — Re-runnable, taking a different branch each pass.
 
 #### Start this step when these are true:
 
@@ -250,11 +228,13 @@ Produce one unit's documents to the governing format — the shared assembly wor
 ### Assemble the Documents:
 
 List [Documents](templates/documents/) and copy the shells the deliverable calls for, filling them to the [House Style](#house-style) and inserting components from [Blocks](templates/blocks/) where the lesson shape calls for them, sizing each page's content to the usable content box the conversion report states rather than by trial and error. Apply the [Pedagogy](references/pedagogy/) file matching the learner's profile, and the learner's specifics, throughout. When a lesson includes video or other media, follow [Media Processing — Handover](media-processing-handover.md) to source verified media links, then place them and its `Standing Note for a Media Library Page` into the documents.
-Produce each document per the `Document Pipeline`. When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before it moves on.
+Produce each document per the [Document Pipeline](#document-pipeline). When updating or correcting an existing document, edit its file in `source/` and re-convert rather than rebuilding from the shell. Check the unit against the invariants before it moves on.
 
 ## +Deliver Without the Renderer
 
 Deliver a finished document as a print-ready file when the PDF renderer cannot run on this host.
+
+**Handover step** — Manages the invocation and resolution of a handover document.
 
 #### Start this step when these are true:
 
@@ -266,10 +246,6 @@ Deliver a finished document as a print-ready file when the PDF renderer cannot r
 - a print-ready standalone reflecting the current `source/` HTML has been delivered, with the injected geometry inlined into a delivery copy
 - the `source/` HTML is left untouched
 - the user has been told how to produce the A4 PDF from it
-
-#### Suggested next actions:
-
-With the document delivered by hand, carry on with the remaining documents, or record what the response produced.
 
 ### Deliver by Hand:
 
@@ -283,16 +259,11 @@ Produce a sample and get its format approved before mass production.
 
 - the shapes are chosen
 - the build is larger than a single lesson
-- no current sample format is approved
 
 #### Step finished when these are true:
 
 - the scope-and-sequence and one complete sample unit are built, each conversion report matching intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected, no unresolved layout flags)
 - the user has explicitly approved the format
-
-#### Suggested next actions:
-
-With the format approved, build the remaining units.
 
 ### Build the Sample:
 
@@ -304,16 +275,13 @@ Build the rest of the course to the approved format.
 
 #### Start this step when these are true:
 
-- a sample format has been approved and has not since been revised
+- a sample format has been approved
+- the approved format has not since been revised
 - units remain unbuilt
 
 #### Step finished when these are true:
 
 - every remaining unit has been built to the approved format
-
-#### Suggested next actions:
-
-Present and record what each response produced.
 
 #### Step invariants:
 
@@ -326,6 +294,8 @@ Get each remaining unit built, matching the approved sample exactly. A full cour
 ## +Present and Record State
 
 Save what a response produced, update the project's status, and report honestly.
+
+**Looping step** — Re-runnable, taking a different branch each pass.
 
 #### Start this step when these are true:
 
@@ -351,6 +321,8 @@ Save the finished files to the working-outputs location recorded in `CLAUDE.md`,
 
 Report the run's outcome and end the skill.
 
+**Success step** — Resolves the run's done state and exits.
+
 #### Start this step when these are true:
 
 - the run's intent is fully satisfied — a build built and recorded, work marked and presented, or a setup-only request completed
@@ -366,10 +338,6 @@ Report the run's outcome and end the skill.
 - a closing summary has been given
 - the skill is complete
 
-#### Suggested next actions:
-
-End the skill and return to the user.
-
 ### Report the Outcome:
 
 Summarise what the run produced — the documents, where they were saved, the format decisions and any judgment calls made — and what a next session would pick up.
@@ -377,6 +345,8 @@ Summarise what the run produced — the documents, where they were saved, the fo
 ## +Handle a Problem
 
 Surface anything the other steps don't cover, and decide with the user how to continue.
+
+**Error step** — Handles recovery and bails.
 
 #### Start this step when these are true:
 
@@ -393,10 +363,6 @@ Either case covers a missing or corrupt `global-requirements.md`, a failed PDF c
 - the user has been informed of what happened and what state the build is in
 - the user has decided how to continue
 
-#### Suggested next actions:
-
-Resume the step the user chose, or end the skill.
-
 ### Surface the Problem:
 
 Tell the user plainly what happened, which step it arose in, what state the build is in (especially any half-written documents or a partial course), and what the options are.
@@ -406,6 +372,6 @@ Tell the user plainly what happened, which step it arose in, what state the buil
 - **Matter** — A course's saved source material, held at `<course>/matter/` — what the user supplied and any grounding research, kept as a permanent record the build reads.
 - **Shape** — A course structure or lesson structure chosen from the `templates/course-structures/` and `templates/lesson-structures/` folders; more than one may govern a single build.
 - **Page Geometry** — The CSS print geometry the `html_to_pdf` tool injects from `print-base.css`. The base every document inherits unless it declares its own `@page` to override it.
-- **Handover Doc** — A standalone document in this skill's root folder, its name ending `-handover` and its frontmatter the single line `harness-format: DraftHorse, Handover`, whose steps a parent step folds into the run as child steps, its references and invariants coming into play for a self-contained portion of the work — lean extraction of heavy, optional, or side-branching work that would otherwise bloat this skill. The parent step owns the logic around it: it reads success from the resulting state and lets any failure fall to the problem step. Cited as `[Name — Handover](name-handover.md)`.
+- **Handover Doc** — A standalone document in this skill's root folder, its name ending `-handover` and its frontmatter the single line `harness-format: DraftHorse, Handover`, whose steps a parent step folds into the run as child steps, its references and invariants coming into play for a self-contained portion of the work — lean extraction of heavy, optional, or side-branching work that would otherwise bloat this skill. The parent step owns the logic around it: it reads success from the resulting state and lets any failure fall to the error step. Cited as `[Name — Handover](name-handover.md)`.
 - **Sample** — The scope-and-sequence plus one complete unit, approved for format before the rest of the course is mass-produced.
 - **Strand** — A learning area a unit covers — one of its subject or skill areas (literacy, science), enumerated from the unit's scope-and-sequence entry and lesson documents. A build may run a different lesson shape per strand, and a review grades the work strand by strand.

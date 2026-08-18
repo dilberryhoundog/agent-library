@@ -80,31 +80,24 @@ These are the directives you return based upon the procedure call. Each procedur
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
 ## +Dispatch
 
 Route the first (or next) uncompleted procedure to its verb skill.
 
+**Looping step** — Re-runnable, taking a different branch each pass.
+
 #### Start this step when these are true:
 
-A brief has arrived, and an uncompleted procedure remains — and no blocking failure has stopped the run.
+- a brief has arrived
+- an uncompleted procedure remains
+- no blocking failure has stopped the run
 
 #### Step finished when these are true:
 
-The procedure's skill equivalent is loaded and its blocking status noted.
-
-#### Suggested next actions:
-
-A loaded procedure moves to executing it; a run that can go no further moves to composing the report.
+- the procedure's skill equivalent is loaded
+- the procedure's blocking status is noted
 
 #### Step invariants:
 
@@ -112,7 +105,7 @@ A loaded procedure moves to executing it; a run that can go no further moves to 
 
 ### Load the Skill Equivalent:
 
-Load the /<skill> equivalent of the first (or next) uncompleted procedure, per the `Procedure Translations` reference.
+Load the /<skill> equivalent of the first (or next) uncompleted procedure, per the [Procedure Translations](#procedure-translations) reference.
 
 **As you dispatch each procedure**, use your base git knowledge to decide if it would block later procedures upon failure:
 
@@ -150,17 +143,17 @@ Each `COMMIT` procedure can be completed under the original skill equivalent inv
 
 Complete the loaded procedure through its verb skill.
 
+**Looping step** — Re-runnable, taking a different branch each pass.
+
 #### Start this step when these are true:
 
-A procedure's skill equivalent is loaded and the procedure's actions are not yet completed.
+- a procedure's skill equivalent is loaded
+- the procedure's actions are not yet completed
 
 #### Step finished when these are true:
 
-The procedure has executed and its `Output Directive` is recorded — success, or a failure noted with its blocking status.
-
-#### Suggested next actions:
-
-When uncompleted procedures remain and no blocking failure occurred, return to dispatching the next procedure; a blocking failure moves to composing the report.
+- the procedure has executed
+- its `Output Directive` is recorded — success, or a failure noted with its blocking status
 
 #### Step invariants:
 
@@ -179,17 +172,20 @@ The called skill equivalent will autoload context and instructions. For the proc
 
 Present the run's outcome to the invoking agent — the exit for successes, failures, and difficulties alike.
 
+**Error step** — folded into this reporting step per the executor exception, so its start condition claims the blocked or unprocessable run alongside the completed one.
+
 #### Start this step when these are true:
 
-Every procedure has been completed or attempted, or a blocking failure or unprocessable brief means no further procedure can run.
+- every procedure has been completed or attempted
+
+**OR these are true:**
+
+- a blocking failure or unprocessable brief means no further procedure can run
 
 #### Step finished when these are true:
 
-The report covers every completed and attempted procedure and is presented to the invoking agent.
-
-#### Suggested next actions:
-
-Finish your turn.
+- the report covers every completed and attempted procedure
+- the report is presented to the invoking agent as the final message text
 
 #### Step invariants:
 

@@ -26,7 +26,7 @@ You review cold: you were not present for the conversation with the family, and 
 
 - **Unit candidates** — the complete candidate unit list, in a sensible teaching order. Each entry: the unit's name, a one-line scope, and the material found for it (referencing the free/purchased entries below), or an explicit *no ready-made material found* note when a search turned up nothing usable.
 - **Free material candidates** — verified video and free course/resource links, each with the unit(s) it serves and its durable form (channel or search-by-title preferred over a bare `watch?v=`).
-- **Purchased material candidates** — verified paid options worth the spend (see `Purchased Options Menu`), each with its cost and one line on what it adds, so the family can weigh it.
+- **Purchased material candidates** — verified paid options worth the spend (see [Purchased Options Menu](#purchased-options-menu)), each with its cost and one line on what it adds, so the family can weigh it.
 
 ## Purchased Options Menu
 
@@ -42,15 +42,7 @@ c. A hardcoded `watch?v=` or product-id link — only when verified and from a l
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
 ## +Map the Unit Picture
 
@@ -58,11 +50,16 @@ Draw a complete candidate unit list for the subject from every source at hand.
 
 #### Start this step when these are true:
 
-The parent has handed over a subject and learner context, and no candidate unit list has been mapped yet.
+- the parent has handed over a subject
+- the parent has handed over the learner's context
 
 #### Step finished when these are true:
 
-A complete candidate unit list exists in a sensible teaching order, each unit with a name and a one-line scope, drawn from the agent's own subject knowledge together with a broad live search of the field — with no unit invented past what the subject warrants.
+- a complete candidate unit list exists
+- the list is in a sensible teaching order
+- every unit has a name and a one-line scope
+- the list is drawn from the agent's own subject knowledge together with a broad live search of the field
+- no unit is invented past what the subject warrants
 
 ### Blend the Sources:
 
@@ -74,47 +71,54 @@ For each candidate unit, find real free and purchased material and prove each li
 
 #### Start this step when these are true:
 
-A candidate unit list has been mapped and its units do not yet have sourced, verified material.
+- a candidate unit list has been mapped
 
 #### Step finished when these are true:
 
-Every unit either has its free and purchased material found and each link live-verified, or is marked *no ready-made material found* after a genuine search — with no unverified or invented link anywhere in the set.
+- every unit has its free and purchased material found and each link live-verified, or is marked *no ready-made material found* after a genuine search
+- no unverified or invented link remains anywhere in the set
 
 ### Source and Prove:
 
-For each unit, search for free material (video, free courses and resources) and sweep the `Purchased Options Menu` for paid options worth the spend, favouring the `Durable Link Forms` order. Surface what genuinely fits rather than one of each by rote, and weigh every paid option against the family's cost rule and locale from the inputs — a field trip is only a candidate if it is actually reachable. Verify every candidate link with a real search or fetch and drop any that fail. Record each purchased option's cost and what it adds. If a unit turns up nothing usable after a genuine search, mark it *no ready-made material found* rather than forcing a weak or invented link — the parent decides with the family how a thin unit is handled.
+For each unit, search for free material (video, free courses and resources) and sweep the [Purchased Options Menu](#purchased-options-menu) for paid options worth the spend, favouring the [Durable Link Forms](#durable-link-forms) order. Surface what genuinely fits rather than one of each by rote, and weigh every paid option against the family's cost rule and locale from the inputs — a field trip is only a candidate if it is actually reachable. Verify every candidate link with a real search or fetch and drop any that fail. Record each purchased option's cost and what it adds. If a unit turns up nothing usable after a genuine search, mark it *no ready-made material found* rather than forcing a weak or invented link — the parent decides with the family how a thin unit is handled.
 
 ## +Return the Candidate Set
 
 Assemble the findings into the return shape and hand them to the parent.
 
+**Success step** — Resolves the run's done state and exits.
+
 #### Start this step when these are true:
 
-Every unit has its material sourced and verified or marked as having none found.
+- every unit has its material sourced and verified, or is marked as having none found
 
 #### Step finished when these are true:
 
-The candidate set — unit candidates, free material candidates, and purchased material candidates — has been assembled to the `Return Shape` and returned as this subagent's final message to the parent.
-
-#### Suggested next actions:
-
-Return to the parent; it presents the candidates, the user chooses, and the parent records the choice to the course's `matter/`.
+- the candidate set — unit candidates, free material candidates, and purchased material candidates — is assembled to the [Return Shape](#return-shape)
+- the candidate set is returned as this subagent's final message to the parent
 
 ### Assemble and Return:
 
-Assemble the verified findings into the `Return Shape` and return it as your final message. Return the structured set only — no file writes, no questions to the user; the parent renders it into a chooser and takes it from there.
+Assemble the verified findings into the [Return Shape](#return-shape) and return it as your final message. Return the structured set only — no file writes, no questions to the user; the parent renders it into a chooser and takes it from there.
 
 ## +Handle a Problem
 
 Surface anything the other steps cannot cover, and return a clean failure to the parent.
 
+**Error step** — Handles recovery and bails.
+
 #### Start this step when these are true:
 
-Something has gone wrong, or a situation has arisen that no other step covers — live search or fetch is unavailable, so no link can be verified, or the handed-over inputs are missing what the research needs.
+- something has gone wrong
+
+**OR these are true:**
+
+- a situation has arisen that no other step covers — live search or fetch is unavailable, so no link can be verified, or the handed-over inputs are missing what the research needs
 
 #### Step finished when these are true:
 
-The problem, the state reached, and any partial findings already gathered have been returned to the parent as this subagent's final message.
+- the return names the problem, the state reached, and any partial findings already gathered
+- the return is this subagent's final message to the parent
 
 ### Surface the Problem:
 
