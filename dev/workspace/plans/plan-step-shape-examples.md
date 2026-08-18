@@ -1,6 +1,17 @@
 # Plan: Step Shape Examples
 
-Status: OPEN — queued behind the corpus sweep. Source: the TODO comment at the head of `extensions/skills/drafthorse/references/step-functions.md`.
+Status: OPEN — queued behind the corpus sweep. Source: a TODO comment formerly at the head of `extensions/skills/drafthorse/references/step-functions.md`, lifted here and deleted from that file before the `agent-tools` release. It shipped inside a reference a building agent loads, so it read as an instruction to improve the guide rather than as guidance.
+
+Original note, verbatim:
+
+> Improve this reference by including an example of the step machinery, that a step of a particular shape might have. This will take more of the guess work out of the agents process as DraftHorse steps are built.
+>
+> 2 examples of this might be...
+>
+> - Routing step example displays the "Agent decision" machinery with placeholder text
+> - Error step is prebuilt, these are mostly the same across all instances.
+>
+> A good strategy to complete this todo would be to search the corpus for instances of steps taking these shapes and reverse engineer their machinery examples.
 
 ## Decision
 
