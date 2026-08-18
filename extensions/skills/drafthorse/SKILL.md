@@ -42,7 +42,7 @@ The tests a finished document must pass:
 - **Steps are standalone** — a step names no other step; conditions are written in state terms, never step terms; finished conditions carry only their own step's completion criteria.
 - **Every step opens with a directive** — one line naming the agent's task on entering the step, and the fixed declaration string where the step takes one of the catalogue shapes.
 - **Gates are compound** — approval *and* the artifact's own substantive conditions, never approval alone; a rubber-stamp must not launder a defective artifact.
-- **The run resolves** — every path ends somewhere stated, prefer an exit and success step, rather than the agent's own handling. The prebuilt error step handles unresolvable errors, destructive and half-applied states, include the default step in your build or make slight changes.
+- **The run resolves** — every path ends somewhere stated, by an exit step or by the agent's own handling. The error step claims unresolvable errors, destructive actions and half-applied state.
 - **References carry data, steps carry work** — conceptual guidance, not hard law; ordered actions or branching inside a reference is work asking to be a step.
 - **Cite references at the moment of use** — inside the sentence that needs them, not as a list at the top of a step.
 - **Inline vs external references** — compact and always-relevant context inline; expansive and sometimes-relevant context external.
@@ -62,15 +62,7 @@ Phase-specific judgment, loaded by the step that needs it:
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
 ## +Gather Requirements
 
@@ -97,7 +89,7 @@ Work out with the user, from `$ARGUMENTS` and the conversation:
 
 ## +Collect References
 
-Harvest and classify the data the steps will operate on, and mine it for hidden work.
+Harvest and classify the source material, and mine it for hidden work.
 
 #### Start this step when these are true:
 
@@ -117,7 +109,7 @@ Present the classified reference set and the step candidates to the user. This i
 
 ## +Fill Reference Gaps
 
-Produce the references that do not exist yet, so the steps have a complete set to operate on.
+Produce the references that do not exist yet.
 
 #### Start this step when these are true:
 
