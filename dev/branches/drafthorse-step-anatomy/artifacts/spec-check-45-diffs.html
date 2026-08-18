@@ -1,0 +1,487 @@
+<title>Spec-check Catch-up</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root {
+  --paper: #F4F6F6;
+  --surface: #FFFFFF;
+  --surface-sunk: #ECF0EF;
+  --ink: #14191A;
+  --ink-soft: #4E5B5C;
+  --ink-faint: #78878A;
+  --rule: #D6DEDD;
+  --accent: #0D6B64;
+  --accent-soft: #E2EFED;
+  --warn: #8A5B00;
+  --warn-soft: #F6EBD6;
+  --stop: #93332A;
+  --stop-soft: #F7E5E2;
+  --add-bg: #E4F1E9;
+  --add-ink: #17603E;
+  --del-bg: #FAE8E5;
+  --del-ink: #8E332A;
+  --shadow: 0 1px 2px rgba(20,25,26,.05), 0 8px 24px rgba(20,25,26,.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1313;
+    --surface: #161C1C;
+    --surface-sunk: #1D2525;
+    --ink: #E7EDEC;
+    --ink-soft: #A9B6B5;
+    --ink-faint: #7D8B8A;
+    --rule: #293333;
+    --accent: #59C5B9;
+    --accent-soft: #16302E;
+    --warn: #D9A44F;
+    --warn-soft: #2E2617;
+    --stop: #E08277;
+    --stop-soft: #331C19;
+    --add-bg: #13291F;
+    --add-ink: #7FCFA3;
+    --del-bg: #2C1A18;
+    --del-ink: #E29288;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1313;
+  --surface: #161C1C;
+  --surface-sunk: #1D2525;
+  --ink: #E7EDEC;
+  --ink-soft: #A9B6B5;
+  --ink-faint: #7D8B8A;
+  --rule: #293333;
+  --accent: #59C5B9;
+  --accent-soft: #16302E;
+  --warn: #D9A44F;
+  --warn-soft: #2E2617;
+  --stop: #E08277;
+  --stop-soft: #331C19;
+  --add-bg: #13291F;
+  --add-ink: #7FCFA3;
+  --del-bg: #2C1A18;
+  --del-ink: #E29288;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: "Source Serif 4", Georgia, serif; font-size: 17px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: Bitter, "Source Serif 4", Georgia, serif; text-wrap: balance; }
+code, .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+a { color: var(--accent); }
+
+.shell { max-width: 900px; margin: 0 auto; padding: 0 20px 96px; }
+
+.masthead { border-bottom: 1px solid var(--rule); padding: 40px 0 26px; margin-bottom: 32px; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace; font-size: 12px;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint);
+  display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+}
+h1 { font-size: clamp(30px, 4.4vw, 44px); line-height: 1.1; font-weight: 600; margin: 16px 0 10px; letter-spacing: -.015em; }
+.standfirst { max-width: 62ch; color: var(--ink-soft); font-size: 19px; margin: 0; }
+.masthead-meta { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 22px; font-size: 14px; color: var(--ink-soft); }
+.masthead-meta b { color: var(--ink); font-weight: 600; }
+
+.notice {
+  border: 1px solid var(--warn);
+  background: var(--warn-soft);
+  color: var(--ink);
+  border-radius: 3px;
+  padding: 16px 20px;
+  margin-bottom: 34px;
+}
+.notice h3 { margin: 0 0 6px; font-size: 17px; color: var(--warn); }
+.notice p { margin: 0 0 10px; max-width: 68ch; font-size: 16px; }
+.notice p:last-child { margin-bottom: 0; }
+
+.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin: 0 0 10px; }
+.sec-head h2 { font-size: 24px; margin: 0; font-weight: 600; }
+.sec-head .count { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+.sec-intro { color: var(--ink-soft); max-width: 68ch; margin: 14px 0 28px; }
+section { margin-bottom: 56px; }
+
+.hunk {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 3px;
+  box-shadow: var(--shadow); margin-bottom: 24px; overflow: hidden;
+}
+.hunk-head {
+  display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline;
+  padding: 12px 18px; border-bottom: 1px solid var(--rule); background: var(--surface-sunk);
+}
+.hunk-head .loc { font-family: "JetBrains Mono", monospace; font-size: 12.5px; color: var(--ink); }
+.hunk-head .sec { font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: var(--ink-faint); }
+.hunk-head .tag {
+  margin-left: auto; font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 2px; background: var(--accent-soft); color: var(--accent); white-space: nowrap;
+}
+.hunk-head .tag.opt { background: var(--warn-soft); color: var(--warn); }
+.hunk-head .tag.later { background: var(--stop-soft); color: var(--stop); }
+
+.hunk-body { padding: 16px 18px 18px; }
+.hunk-body h3 { font-size: 17.5px; margin: 0 0 6px; font-weight: 600; }
+.hunk-body p { margin: 0 0 12px; max-width: 68ch; font-size: 16px; }
+.hunk-body p.why { color: var(--ink-soft); }
+
+.diff {
+  font-family: "JetBrains Mono", monospace; font-size: 12.5px; line-height: 1.65;
+  border: 1px solid var(--rule); border-radius: 2px; overflow-x: auto;
+  margin: 4px 0 14px; background: var(--surface-sunk);
+}
+.diff div { padding: 3px 12px; white-space: pre-wrap; word-break: break-word; }
+.diff .ctx { color: var(--ink-faint); }
+.diff .del { background: var(--del-bg); color: var(--del-ink); }
+.diff .add { background: var(--add-bg); color: var(--add-ink); }
+.diff .gap { color: var(--ink-faint); background: transparent; opacity: .7; }
+
+.respond { border-top: 1px dashed var(--rule); padding-top: 14px; }
+.verdicts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.verdicts label {
+  font-family: "JetBrains Mono", monospace; font-size: 11px;
+  letter-spacing: .06em; text-transform: uppercase;
+  border: 1px solid var(--rule); border-radius: 2px;
+  padding: 4px 10px; cursor: pointer; color: var(--ink-soft); user-select: none;
+}
+.verdicts input { position: absolute; opacity: 0; width: 0; height: 0; }
+.verdicts label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.verdicts label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+textarea {
+  width: 100%; min-height: 64px; resize: vertical;
+  background: var(--surface-sunk); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 2px; padding: 10px 12px;
+  font-family: "Source Serif 4", Georgia, serif; font-size: 15.5px; line-height: 1.5;
+}
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+
+.clear {
+  background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+  border-radius: 3px; padding: 14px 18px; margin-bottom: 16px;
+}
+.clear h3 { margin: 0 0 4px; font-size: 16.5px; }
+.clear p { margin: 0; max-width: 68ch; font-size: 15.5px; color: var(--ink-soft); }
+
+.actions {
+  position: sticky; bottom: 0;
+  background: linear-gradient(to top, var(--paper) 62%, transparent);
+  padding: 22px 0 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; z-index: 5;
+}
+button {
+  font-family: "JetBrains Mono", monospace; font-size: 12px;
+  letter-spacing: .07em; text-transform: uppercase; padding: 10px 16px; border-radius: 2px;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--paper); cursor: pointer;
+}
+button.ghost { background: transparent; color: var(--accent); }
+button:hover { filter: brightness(1.08); }
+button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.status { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-soft); }
+#out { width: 100%; min-height: 300px; font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin-top: 12px; }
+#outwrap[hidden] { display: none; }
+
+footer { border-top: 1px solid var(--rule); padding-top: 18px; color: var(--ink-faint); font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <div class="eyebrow">
+      <span>DraftHorse · checker catch-up</span>
+      <span>·</span>
+      <a href="https://github.com/dilberryhoundog/agent-library/issues/45">Issue #45</a>
+      <span>·</span>
+      <span>branch <code>drafthorse-step-anatomy</code></span>
+      <span>·</span>
+      <span><code>drafthorse-spec-check.md</code></span>
+    </div>
+    <h1>Spec-check Catch-up</h1>
+    <p class="standfirst">#45's spec changes, translated into the checker as it stands after the step-anatomy rewrite. Three edits carry the change. Two more sharpen rules that survive it. Saddler regenerates after.</p>
+    <div class="masthead-meta">
+      <span><b>Required</b> 3 hunks</span>
+      <span><b>Optional</b> 2 hunks</span>
+      <span><b>Then</b> regenerate saddler</span>
+      <span><b>Applied</b> none</span>
+    </div>
+  </header>
+
+  <div class="notice">
+    <h3>Sequencing — the checker will lead its source</h3>
+    <p>#45's framework edits are committed on <code>drafthorse-condition-precedence</code> (<code>6a09cba</code>), not here. Until that reaches this branch through <code>main</code>, this branch's <code>steps.md</code> and <code>condition-writing.md</code> still teach <b>De-hold</b> while the checker no longer enforces it.</p>
+    <p>Harmless in that direction — a deleted check finds nothing — and it inverts the risk you called out: a checker still holding a retired rule reports findings against correct documents. Worth knowing the window exists.</p>
+  </div>
+
+  <section>
+    <div class="sec-head"><h2>Required</h2><span class="count">3 hunks</span></div>
+    <p class="sec-intro">The rule is gone from the spec; these are the places the checker still enforces it.</p>
+
+    <article class="hunk" id="h1">
+      <div class="hunk-head">
+        <span class="loc">L96</span>
+        <span class="sec">§ Condition Checks · Start conditions</span>
+        <span class="tag">delete</span>
+      </div>
+      <div class="hunk-body">
+        <h3>1 · The De-hold check</h3>
+        <p class="why">Mirror of the bullet deleted from <code>condition-writing.md</code>. Left standing, it fails every document the sweep is about to correct.</p>
+        <div class="diff">
+          <div class="ctx">- **State terms, never step terms** — "a report has arrived", not "after the previous step"…</div>
+          <div class="del">- - **De-hold** — the condition must stop holding once the step's work is done, or the step re-admits itself forever. Even a first step needs its closing clause ("…and requirements are not yet established").</div>
+          <div class="ctx">- **Negative space claimed** — across all steps the start conditions cover every state the document can be in…</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H1 — delete De-hold check">
+            <label><input type="radio" name="v-h1" value="approve">Approve</label>
+            <label><input type="radio" name="v-h1" value="revise">Revise</label>
+            <label><input type="radio" name="v-h1" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H1 — delete De-hold check" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h2">
+      <div class="hunk-head">
+        <span class="loc">L107</span>
+        <span class="sec">§ Condition Checks · Finished conditions</span>
+        <span class="tag">delete</span>
+      </div>
+      <div class="hunk-body">
+        <h3>2 · Approval is revocable state</h3>
+        <p class="why">The cascade paragraph deleted from <code>steps.md § User gates</code>, restated as a check — and its second clause actively demands the de-hold shape ("X approved and Y not approved"). Both halves go with the rule.</p>
+        <div class="diff">
+          <div class="ctx">- **Gates are compound** — a gate's finished conditions state the artifact's own completion criteria alongside the user's approval…</div>
+          <div class="del">- - **Approval is revocable state** — revising an approved artifact un-approves it and everything downstream, so the owning step's start condition holds again; gate-shaped start conditions ("X approved and Y not approved") depend on this and must not fight it.</div>
+          <div class="ctx">- **Every outcome the step can end on** — a step whose work can end in failure, refusal, or a no-op states those outcomes…</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H2 — delete revocable-state check">
+            <label><input type="radio" name="v-h2" value="approve">Approve</label>
+            <label><input type="radio" name="v-h2" value="revise">Revise</label>
+            <label><input type="radio" name="v-h2" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H2 — delete revocable-state check" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h3">
+      <div class="hunk-head">
+        <span class="loc">L267</span>
+        <span class="sec">+Audit the Steps · Test Each Step</span>
+        <span class="tag">reword</span>
+      </div>
+      <div class="hunk-body">
+        <h3>3 · The step walk, where a deleted check comes back</h3>
+        <p class="why">This line is what the auditing agent performs. A rule deleted from the References but named here is reinstated in full — already recorded as happening once in this repo's own audit history.</p>
+        <div class="diff">
+          <div class="del">- Take the steps one at a time: self-description, declared function where one is claimed, start condition (state terms, de-hold), finished condition (checkable, exhaustive, own-step-only, every outcome stated, compound if a gate), invariants…</div>
+          <div class="add">+ Take the steps one at a time: self-description, declared function where one is claimed, start condition (state terms), finished condition (checkable, exhaustive, own-step-only, every outcome stated, compound if a gate), invariants…</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H3 — step walk parenthetical">
+            <label><input type="radio" name="v-h3" value="approve">Approve</label>
+            <label><input type="radio" name="v-h3" value="revise">Revise</label>
+            <label><input type="radio" name="v-h3" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H3 — step walk parenthetical" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Optional</h2><span class="count">2 hunks</span></div>
+    <p class="sec-intro">Rules that survive #45 but now have a sharper answer available. Neither is required for the checker to be correct.</p>
+
+    <article class="hunk" id="h4">
+      <div class="hunk-head">
+        <span class="loc">L98</span>
+        <span class="sec">§ Condition Checks · Start conditions</span>
+        <span class="tag opt">optional</span>
+      </div>
+      <div class="hunk-body">
+        <h3>4 · Loops: name the terminator</h3>
+        <p class="why">Matches the wording now in <code>condition-writing.md</code>. With de-hold gone, what ends a loop is worth stating where the loop check lives.</p>
+        <div class="diff">
+          <div class="del">- - **Loops are re-holding conditions** — a per-item step's condition simply holds again for the next item; no loop syntax exists. A loop expressed any other way is a finding.</div>
+          <div class="add">+ - **Loops are re-holding conditions** — a per-item step's condition simply holds again for the next item, and the step's finished condition is what ends the loop; no loop syntax exists. A loop expressed any other way is a finding.</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H4 — loops terminator">
+            <label><input type="radio" name="v-h4" value="approve">Approve</label>
+            <label><input type="radio" name="v-h4" value="revise">Revise</label>
+            <label><input type="radio" name="v-h4" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H4 — loops terminator" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h5">
+      <div class="hunk-head">
+        <span class="loc">L131</span>
+        <span class="sec">§ Step Function Checks</span>
+        <span class="tag opt">optional</span>
+      </div>
+      <div class="hunk-body">
+        <h3>5 · "Something ends the loop" now has a name</h3>
+        <p class="why">The check already asks the right question; the answer used to be either the start condition ceasing to hold or a separate exit. Only one answer is left.</p>
+        <div class="diff">
+          <div class="del">- - **Looping step** — the start condition re-holds, and something ends the loop.</div>
+          <div class="add">+ - **Looping step** — the start condition re-holds, and the step's finished condition ends the loop.</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H5 — looping function check">
+            <label><input type="radio" name="v-h5" value="approve">Approve</label>
+            <label><input type="radio" name="v-h5" value="revise">Revise</label>
+            <label><input type="radio" name="v-h5" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H5 — looping function check" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h6">
+      <div class="hunk-head">
+        <span class="loc">L129</span>
+        <span class="sec">§ Step Function Checks · Error step</span>
+        <span class="tag opt">your call</span>
+      </div>
+      <div class="hunk-body">
+        <h3>6 · Should the checker know about the new class?</h3>
+        <p class="why">#45 added <b>User approval problem</b> to the disposition catalogue in <code>steps.md</code>. The checker condenses that catalogue into one line, and currently names three concerns. Adding a fourth makes a gated document answer for where a withdrawn approval lands.</p>
+        <div class="diff">
+          <div class="del">- - **Error step** — remaining errors claimed after each step handles internally, destructive errors handled, half-applied states accounted for.</div>
+          <div class="add">+ - **Error step** — remaining errors claimed after each step handles internally, destructive errors handled, half-applied states accounted for, and in a document with gates, a withdrawn approval dispositioned.</div>
+        </div>
+        <p>Argument against: the class catalogue is open, the checker names concerns rather than enumerating classes, and a document without gates would be answering a question that does not apply to it. Argument for: gates are near-universal in this corpus, and the disposition is exactly what went missing when the slot was retired.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="H6 — error step function check">
+            <label><input type="radio" name="v-h6" value="approve">Add it</label>
+            <label><input type="radio" name="v-h6" value="revise">Revise</label>
+            <label><input type="radio" name="v-h6" value="drop">Leave it</label>
+          </div>
+          <textarea data-item="H6 — error step function check" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Checked and clear</h2><span class="count">no edit</span></div>
+    <p class="sec-intro">Swept for de-hold dependence and found sound. Listed so the sweep is auditable.</p>
+
+    <div class="clear">
+      <h3>§ Condition Checks preamble — "sole routing mechanism"</h3>
+      <p>Precedence was rejected, so start conditions remain the only routing mechanism. Unchanged.</p>
+    </div>
+    <div class="clear">
+      <h3>§ Step-Shape Checks — Half-applied state</h3>
+      <p>Already calls a half-applied exclusion clause on a start condition a finding — "a permanent hold no step can lift, and the disposition in the wrong home". It was arguing against de-hold before #45 did.</p>
+    </div>
+    <div class="clear">
+      <h3>+Walk the Document — the cold-run simulation</h3>
+      <p>Already pushes on "a gate rejected twice, a revision after approval". Those paths now resolve through the error step. The instruction needs no change; its answer changed underneath it.</p>
+    </div>
+    <div class="clear">
+      <h3>Preamble verbatim, notation, scaffold, handover checks</h3>
+      <p>Untouched by #45. The preamble line belongs to the step-anatomy work.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>After</h2><span class="count">1 step</span></div>
+    <article class="hunk" id="h7">
+      <div class="hunk-head">
+        <span class="loc">extensions/agents/drafthorse-saddler.md</span>
+        <span class="sec">whole document</span>
+        <span class="tag later">regenerate</span>
+      </div>
+      <div class="hunk-body">
+        <h3>7 · Regenerate saddler</h3>
+        <p>No diff — generated from this file, preamble kept, remaining sections replaced. Doing it once these hunks land also carries the step-anatomy rewrite across in the same pass.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="H7 — regenerate saddler">
+            <label><input type="radio" name="v-h7" value="now">After these land</label>
+            <label><input type="radio" name="v-h7" value="wait">Wait longer</label>
+          </div>
+          <textarea data-item="H7 — regenerate saddler" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Anything else</h2></div>
+    <textarea data-item="General" placeholder="Notes on the catch-up as a whole…"></textarea>
+  </section>
+
+  <div class="actions">
+    <button id="copy">Copy comments</button>
+    <button id="show" class="ghost">Show as text</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div id="outwrap" hidden>
+    <textarea id="out" readonly aria-label="Comments as plain text"></textarea>
+  </div>
+
+  <footer>
+    Line numbers against <code>docs/drafthorse/drafthorse-spec-check.md</code> on <code>drafthorse-step-anatomy</code>. Nothing applied.
+  </footer>
+</div>
+
+<script>
+function collect() {
+  const lines = ["## Spec-check catch-up — comments", ""];
+  document.querySelectorAll("article.hunk, section > textarea").forEach(node => {
+    if (node.tagName === "TEXTAREA") {
+      if (node.value.trim()) { lines.push("**General**", "- " + node.value.trim().replace(/\n+/g, " "), ""); }
+      return;
+    }
+    const title = node.querySelector("h3")?.textContent.trim() || "";
+    const picked = node.querySelector(".verdicts input:checked");
+    const notes = [...node.querySelectorAll(".respond textarea")].filter(t => t.value.trim());
+    if (!picked && !notes.length) return;
+    lines.push("**" + title + "**");
+    if (picked) lines.push("- Verdict: " + picked.value);
+    notes.forEach(t => lines.push("- " + t.value.trim().replace(/\n+/g, " ")));
+    lines.push("");
+  });
+  if (lines.length === 2) lines.push("_No comments entered._");
+  return lines.join("\n").trim();
+}
+
+const status = document.getElementById("status");
+const outwrap = document.getElementById("outwrap");
+const out = document.getElementById("out");
+
+document.getElementById("copy").addEventListener("click", async () => {
+  const text = collect();
+  try {
+    await navigator.clipboard.writeText(text);
+    status.textContent = "Copied — paste into the chat.";
+  } catch (e) {
+    out.value = text;
+    outwrap.hidden = false;
+    out.select();
+    status.textContent = "Clipboard blocked — select the text below and copy.";
+  }
+});
+
+document.getElementById("show").addEventListener("click", () => {
+  out.value = collect();
+  outwrap.hidden = !outwrap.hidden;
+  status.textContent = outwrap.hidden ? "" : "Select all and copy.";
+  if (!outwrap.hidden) out.focus();
+});
+</script>
