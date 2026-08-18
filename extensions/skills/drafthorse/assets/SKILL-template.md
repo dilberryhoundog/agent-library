@@ -43,7 +43,7 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
-<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). A step opens with its description and optional declared function; H4 headings are its contract — conditions, any scope decision, its invariants; the H3 opens the work. A step names no other step; conditions are written in state terms, never step terms. -->
+<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). A step opens with its directive and optional declared function; H4 headings are its contract — conditions, any scope decision, its invariants; the H3 opens the work. A step names no other step; conditions are written in state terms, never step terms. -->
 
 ## +<Step Name>
 

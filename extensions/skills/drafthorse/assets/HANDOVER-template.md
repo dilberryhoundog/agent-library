@@ -28,7 +28,7 @@ harness-format: DraftHorse, Handover
 
 Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Same step rules apply, plus these. Parent step reads success from the state child steps leave behind. All child steps finished or inactive — return to the parent step and continue. Parent document covers error handling, unless an optional child error step is present. Global invariants hold across the parent step's span. Step invariants confine to their own child step.
 
-<!-- Child steps are standard DraftHorse steps: description and optional declared function above the contract (H4 machinery), engagement (H3) below, conditions in state terms. No success exit, no error step — the parent owns both. The last working step finishes on its own completion state; it never names or returns an outcome. -->
+<!-- Child steps are standard DraftHorse steps: directive and optional declared function above the contract (H4 machinery), engagement (H3) below, conditions in state terms. No success exit, no error step — the parent owns both. The last working step finishes on its own completion state; it never names or returns an outcome. -->
 
 ## +<Child Step Name>
 

@@ -70,11 +70,16 @@ Establish what is being built, for whom, and from what.
 
 #### Start this step when these are true:
 
-The skill has been invoked.
+- the skill has been invoked
 
 #### Step finished when these are true:
 
-Purpose, mode, invocation surface, scope, destination, and the locations of all source material are established with the user — asked for, not assumed.
+- the purpose is established with the user
+- the mode is established — a new build, or a conversion of a named document
+- the invocation surface is established — model-invoked, user-invoked, or executor-only
+- the scope is established, including what the skill refuses
+- the destination is established
+- every piece of source material is located
 
 ### Establish:
 
@@ -93,11 +98,15 @@ Harvest and classify the source material, and mine it for hidden work.
 
 #### Start this step when these are true:
 
-Requirements are established.
+- the requirements are established
 
 #### Step finished when these are true:
 
-The user has approved the reference set and step-candidate list — and the set stands on its own merits: every piece of source material harvested and classified, every needed-but-missing reference recorded as a gap, every extracted candidate naming its source, and nothing procedural left unaudited inside a reference.
+- every piece of source material is harvested and classified
+- every needed-but-missing reference is recorded as a gap
+- every extracted step candidate names its source
+- no reference holds unaudited procedural content
+- the user has approved the reference set and the step-candidate list
 
 ### Harvest and Audit:
 
@@ -111,13 +120,18 @@ Present the classified reference set and the step candidates to the user. This i
 
 Produce the references that do not exist yet.
 
+**Dormant step** — Skippable, activates only when its state arises.
+
 #### Start this step when these are true:
 
-The reference set is approved, and a reference the document needs is recorded as an unfilled gap.
+- the reference set is approved
+- a reference the document needs is recorded as an unfilled gap
 
 #### Step finished when these are true:
 
-Every recorded gap exists in usable form and the reference set is complete and approved by the user.
+- every recorded gap has been accounted for and handled
+- the reference set is complete
+- the user has approved the completed reference set
 
 ### Produce:
 
@@ -129,11 +143,16 @@ Shape the steps from the candidates, the requirements, and the references in vie
 
 #### Start this step when these are true:
 
-The reference set is approved with no unfilled gaps.
+- the reference set is complete
 
 #### Step finished when these are true:
 
-The user has approved the step map — and the map holds up on its own: every step candidate accounted for, every step atomic with one purpose, edges only at real boundaries (no over-splitting), every reference placed at a moment of use, and the success exit and error step present.
+- every step candidate is accounted for
+- every step is atomic, with one purpose
+- every edge sits at a real boundary
+- every reference is placed at a moment of use
+- the success exit and the error step are present
+- the user has approved the step map
 
 ### Shape the Map:
 
@@ -145,15 +164,18 @@ Bound the document — safety floors global, step-bound rules local.
 
 #### Start this step when these are true:
 
-The step map is approved.
+- the step map is complete
 
 #### Step finished when these are true:
 
-The user has approved the invariant set — and every invariant in it changes behaviour, sits at its correct scope, and covers each destructive or out-of-scope action the map exposes.
+- every invariant changes behaviour
+- every invariant sits at its correct scope
+- every destructive or out-of-scope action the map exposes is covered
+- the user has approved the invariant set
 
 ### Derive:
 
-From the scope, the references, and the map: rules that must never lapse anywhere (destructive-action floors, permission walls, scope refusals) become global Agent Invariants; rules that bind only inside one step attach to that step. Prefer few and hard over many and soft — each invariant must change behaviour (`Conventions Digest`: remove no-ops). Present the set — global and per-step — to the user.
+From the scope, the references, and the map: rules that must never lapse anywhere (destructive-action floors, permission walls, scope refusals) become global Agent Invariants; rules that bind only inside one step attach to that step. Prefer few and hard over many and soft — each invariant must change behaviour ([Conventions Digest](#conventions-digest): remove no-ops). Present the set — global and per-step — to the user.
 
 ## +Draft the Skill
 
@@ -161,11 +183,13 @@ Write the document from the approved parts.
 
 #### Start this step when these are true:
 
-Invariants are approved.
+- the invariant set is complete
 
 #### Step finished when these are true:
 
-The draft is written to the destination with every template placeholder resolved — no comment scaffolding remaining.
+- the draft is written to the destination
+- every template placeholder is resolved
+- no comment scaffolding remains
 
 ### Write:
 
@@ -178,15 +202,17 @@ Walk the draft as a cold reader before the user sees it.
 
 #### Start this step when these are true:
 
-A complete draft exists.
+- a complete draft exists
 
 #### Step finished when these are true:
 
-Every scenario routes cleanly, every digest test passes, and the fixes are folded into the draft.
+- every scenario routes cleanly
+- every Conventions Digest test passes
+- any approved fix the scenario-walk found is folded into the draft
 
 ### Scenario-Walk:
 
-Walk every realistic run of the drafted skill — the happy path, each decision branch, each loop iteration, each failure entry. At every point, check that the set of in-play steps is exactly the intended one — every state claimed by a step (or the error step), no unintended overlap. Then sweep the `Conventions Digest` tests over the whole document. Fix what the walk finds and walk again.
+Walk every realistic run of the drafted skill — the happy path, each decision branch, each loop iteration, each failure entry. At every point, check that the set of in-play steps is exactly the intended one — every state claimed by a step (or the error step), no unintended overlap. Then sweep the [Conventions Digest](#conventions-digest) tests over the whole document. Fix what the walk finds and walk again.
 
 #### Independent Review:
 
@@ -200,11 +226,13 @@ Present the reviewed draft for the final gate and hand it over.
 
 #### Start this step when these are true:
 
-The draft has passed the scenario-walk.
+- the draft has passed the scenario-walk
 
 #### Step finished when these are true:
 
-The user accepts the document — it still passes the scenario-walk with their edits folded in (re-walk anything an edit touched) — and the build is complete.
+- the user accepts the document
+- the document still passes the scenario-walk with the user's edits folded in
+- the build is complete
 
 ### Present:
 
@@ -218,11 +246,16 @@ Surface anything the other steps don't cover, and decide with the user how to co
 
 #### Start this step when these are true:
 
-Something has gone wrong, or a situation has arisen that no other step covers — unusable source material, requirements that contradict the framework, a scenario-walk that cannot converge.
+- something has failed or errored
+
+**OR these are true:**
+
+- a situation has arisen that no other step covers
 
 #### Step finished when these are true:
 
-The user has been informed and has decided how to continue.
+- the user has been informed of what happened and what state the build is in
+- the user has decided how to continue
 
 ### Surface the Problem:
 

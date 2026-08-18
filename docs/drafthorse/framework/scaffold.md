@@ -31,7 +31,7 @@ References hold context the steps deliver to the agent — constants, maps, form
 
 ## Steps
 
-The working body; where the document's work lives. The section opens with the steps preamble (the reading model, stated once for cold readers) — the universal one in a skill or agent document, the handover variant in a handover (see [Handover](handover.md)) — followed by the steps in the usual execution order. Each step is a standalone unit — its description and optional declared function above its contract (start condition, finished condition, optional agent decision and step invariants), its engagement below — knowing nothing of the other steps; multiple steps can be in play at once, and the set closes with its exit steps: a success exit and an error step. The anatomy, the conditions, in-play semantics, gates, and the exit/error steps are catalogued in [Steps](steps.md).
+The working body; where the document's work lives. The section opens with the steps preamble (the reading model, stated once for cold readers) — the universal one in a skill or agent document, the handover variant in a handover (see [Handover](handover.md)) — followed by the steps in the usual execution order. Each step is a standalone unit — its directive and optional declared function above its contract (start condition, finished condition, optional agent decision and step invariants), its engagement below — knowing nothing of the other steps; multiple steps can be in play at once, and the set closes with its exit steps: a success exit and an error step. The anatomy, the conditions, in-play semantics, gates, and the exit/error steps are catalogued in [Steps](steps.md).
 
 ## Terms
 
