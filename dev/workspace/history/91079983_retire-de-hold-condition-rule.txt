@@ -1,0 +1,1222 @@
+Session: 91079983-07d2-4e6d-a639-b49e1e1f1448
+Date: 2026-08-18 10:50
+Branch: drafthorse-step-anatomy
+CWD: ~/Projects/agent-library
+
+============================================================
+[SUMMARY]
+>>>
+DraftHorse issue #45 was researched, reversed, and implemented. The issue proposed replacing the De-hold rule with a precedence rule and a scoping rule; review found precedence blocks the very backtrack it was meant to protect and fails the anti-bloat convention, so De-hold was retired with nothing added in its place.
+A withdrawn user approval is instead a claimed remainder at the error step, and the existing start conditions already collapse the right dependency subtree when an approval is withdrawn — a new "User approval problem" class was added to the disposition catalogue in steps.md.
+Landed: 6a09cba (framework, condition-writing, drafthorse SKILL) merged to main; 1389a6a (spec-check) and 3b98394 (saddler regenerated) on drafthorse-step-anatomy. De-hold no longer appears in docs/ or extensions/.
+Three review artifacts with comment-and-copy interfaces were published to dev/workspace/artifacts/. Issue #45 closed as completed; #37 annotated with the inherited corpus sweep — roughly 31 de-hold-shaped start conditions across ~44 steps, judgment calls rather than a pattern delete.
+Remaining: the #37 corpus sweep, and #38's step-anatomy work still unmerged.
+
+<<<
+------------------------------------------------------------
+
+[USER]    💭: none
+lets open issue #45 on a new branch. research the issue and see if any other factors are relevant. Output a html with a review section and proposed changes section. allow me to comment and copy to text so I can post my comments back here.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: gh issue view 45 --json number,title,body,labels,state,comments,createdAt,url 2>&1 | head -200
+Description: View issue 45
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git status --short && git branch --show-current && dev-workspace new --check 2>&1 | head -30
+Description: Check repo state
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cat dev/workspace/workspace-config.yml && echo "=== WORKSPACE.md ===" && head -60 dev/workspace/WORKSPACE.md && echo "=== log ===" && git log --oneline main..HEAD | head -20
+Description: Workspace config and branch log
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: gh issue view 38 --json number,title,body,state,url 2>&1 | head -60 && echo "=== OPEN ISSUES ===" && gh issue list --state open --limit 30
+Description: View issue 38 and open issues
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cat extensions/skills/drafthorse/references/condition-writing.md
+Description: Read condition-writing reference
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cat docs/drafthorse/framework/steps.md
+Description: Read steps framework doc
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -rn -i "de-hold\|dehold" --include="*.md" . | grep -v "^./dev/branches" ; echo "=== preamble copies ==="; grep -rln "Step completes only when its finished conditions match" --include="*.md" .
+Description: Grep de-hold and preamble copies
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; sed -n '1,80p' docs/drafthorse/drafthorse-spec-check.md
+Description: Read spec-check head
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; sed -n '80,140p' docs/drafthorse/drafthorse-spec-check.md
+Description: Read spec-check condition checks
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -rn "harness-format" --include="*.md" extensions docs | grep -v branches; echo "=== SKILL.md start/finish blocks ==="; awk '/^## \+|^#### Start this step|^#### Step finished/{print FILENAME": "NR": "$0}' extensions/skills/drafthorse/SKILL.md | head -60
+Description: Corpus of DraftHorse docs
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; sed -n '60,240p' extensions/skills/drafthorse/SKILL.md
+Description: Read SKILL steps
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git show --stat 4a87a56 && git show 4a87a56 -- extensions/skills/drafthorse/assets/SKILL-template.md | head -120
+Description: Inspect last commit
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git show 4a87a56 -- extensions/skills/drafthorse/SKILL.md
+Description: Diff SKILL.md last commit
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+What would you like to clarify?
+
+Context behind the question: the current branch `drafthorse-step-anatomy` already contains commit `4a87a56`, which stripped the de-hold clauses out of `drafthorse/SKILL.md` — the pilot #45 asks for. That branch is 14 commits ahead of `main` and unmerged, so a branch cut from `main` would describe a shape its own base lacks.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Is this work step-anatomy or more spec based? "finished takes precedence" to me it is somewhat unrelated to that branch changes. can we branch from main, fix on dedicated branch. push to main and then update this branch from main?
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; for f in docs/drafthorse/framework/steps.md extensions/skills/drafthorse/references/condition-writing.md docs/drafthorse/drafthorse-spec-check.md extensions/agents/drafthorse-saddler.md extensions/skills/drafthorse/SKILL.md; do echo "== $f"; git diff --stat main..HEAD -- $f | tail -1; done; echo "== de-hold on main =="; git grep -n "De-hold" main -- docs extensions | cat
+Description: Divergence of target files main vs branch
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Answer: spec-based, not step-anatomy. #45 changes condition *semantics* (when a step is eligible to run); #38 changes step *anatomy* (slots, directive, function declaration). Separable concerns.
+
+The catch is files, not concepts. Every file #45 names has already been rewritten on this branch — `steps.md` (26+/54-), `spec-check` and `saddler` (49+/64- each), `condition-writing.md`, `SKILL.md`. Editing them on main means editing superseded text, then hand-resolving the same regions when this branch syncs. Doc-only conflicts, resolvable, but real.
+
+Your route stands. Creating the branch from main now.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git switch main && dev-workspace new drafthorse-condition-precedence 2>&1 | tail -30
+Description: Create branch from main
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; SP=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/91079983-07d2-4e6d-a639-b49e1e1f1448/scratchpad; mv dev/workspace/artifacts $SP/artifacts-stash && git status --short && dev-workspace new drafthorse-condition-precedence 2>&1 | tail -20
+Description: Stash artifacts and create branch
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; SP=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/91079983-07d2-4e6d-a639-b49e1e1f1448/scratchpad; mv $SP/artifacts-stash dev/workspace/artifacts; sed -n '88,130p' docs/drafthorse/drafthorse-spec-check.md; echo "=== steps.md gates/tail ==="; sed -n '106,165p' docs/drafthorse/framework/steps.md
+Description: Read main-branch spec-check and steps tail
+
+------------------------------------------------------------
+
+[SKILL TOOL]
+Skill: artifact-design
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Research done, branch `drafthorse-condition-precedence` created off main. Building the review page.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -n "de-hold\|De-hold\|Audit the Steps" docs/drafthorse/drafthorse-spec-check.md | head; echo "---"; grep -n "start condition (state terms" docs/drafthorse/drafthorse-spec-check.md; echo "--- handover preamble ---"; grep -n "finished" docs/drafthorse/framework/handover.md | head -20
+Description: Locate main-branch check lines
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -n -A12 "handover-variant\|## The steps preamble" docs/drafthorse/framework/handover.md | head -40
+Description: Handover preamble text on main
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -n -B2 -A12 "Handover holds child steps\|Steps are universal" extensions/skills/drafthorse/assets/HANDOVER-template.md extensions/skills/drafthorse/assets/SKILL-template.md | head -50
+Description: Template preambles on main
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/artifacts/issue-45-review.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; python3 - <<'EOF'
+p='dev/workspace/artifacts/issue-45-review.html'
+s=open(p).read()
+s=s.replace("    --warn: #D6A council;\n","")
+s=s.replace(".chip.gap { background: var(--warn-soft); color: var(--warn); }",".chip.gap, .chip.warn { background: var(--warn-soft); color: var(--warn); }")
+open(p,'w').write(s)
+EOF
+grep -n "council" dev/workspace/artifacts/issue-45-review.html; grep -c "" dev/workspace/artifacts/issue-45-review.html
+Description: Repair stray CSS
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Publishing.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+**https://claude.ai/code/artifact/8fdec17c-e3ad-4d95-971c-641008b43730**
+
+Branch `drafthorse-condition-precedence` created off `main`. Nothing edited in the repo yet.
+
+Headline findings:
+
+- **The argument holds.** `steps.md § In play` already defines a step as a span ending at its finished condition; the Looping function and the checkable requirement both presuppose it. De-hold is the outlier.
+- **The pilot already landed** — commit `4a87a56` on `drafthorse-step-anatomy` stripped all eight de-hold clauses from `drafthorse/SKILL.md` an hour after you filed the issue. Proposal holds it back from this branch.
+- **Precedence alone buys nothing.** The cascade the issue wants — revision invalidating downstream approvals — comes from the *scoping* rule, not precedence. Precedence governs one step against its own two conditions. Recommend promoting scoping to a framework rule in `steps.md`.
+- **A real hole:** event-shaped finished conditions bar re-entry. `+Handle a Problem` finishes on "the user has been informed" — met once, and the error step is locked out of the rest of the run. Needs occurrence scoping stated explicitly.
+- **Four dependents the issue misses**, all written in de-hold shape: `steps.md § User gates`, the spec-check's `Approval is revocable state`, the "sole routing mechanism" claim in two homes, and the gate worked example.
+- **Merge cost, accepted:** `main` is pre-#38, so all four target files conflict when `drafthorse-step-anatomy` syncs. Docs only.
+
+Four open questions carry answer fields on the page. Comment, hit **Copy comments**, paste back.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+# Condition diff comments — drafthorse/SKILL.md
+
+## 2 · +Collect References
+
+"against the established requirements"
+
+## 4 · +Map the Steps
+
+"against the approved reference set"
+
+## 5 · +Set Invariants
+
+"against the approved step map"
+
+## 6 · +Draft the Skill
+
+"from the approved references"
+
+## 7 · +Review
+
+"in the draft as it now stands"
+
+## 9 · +Handle a Problem
+
+" — resuming the build, or ending it with the state of the partial work reported." why is this needed?
+
+## General
+
+Can you justify why there is a need to refer back to the previous step when outlining user approval? for me, these mostly hold without the additional throw back.
+
+
+------------------------------------------------------------
+
+[USER]    💭: none
+## Issue #45 — review comments
+
+**Precedence alone does not deliver the cascade the issue wants**
+- Verdict: revise
+- before have to define exactly how these work like a code file. I expected downstream approval to be negated automaticaly. it could even be negated by "- user approved this and previous steps" but we are doing gymnastics again try to act like this is code.
+
+**Event-shaped finished conditions bar their own step forever**
+- Verdict: revise
+- when first creating this system and not thinking of this framework like code. i expected that once finished this step could "re-open" again.
+
+**Four rules are written in De-hold shape and the issue lists none of them**
+- Verdict: revise
+- Claude wrote this into my spec and I don't really know how to deal with it. It seems convoluted. I just want an agent to open a step when start hits and close it when finished hits.  push back on this... do normally written skills (99.9% of skills in the wild) handle deholding and need "revokable" state?  I don't think deholding or the "rebound" to abolishing it is pudent either. this has gotten out of hand. very small chance that revoked approval goes back multiple steps.
+
+**De-hold's homes, and one that regenerates**
+- Verdict: agree
+- Yes none of these changes have propogated to the checker yet as the specs are not settled yet
+
+**The corpus sweep is a rewrite, not a deletion**
+- Verdict: revise
+- not spec related. the corpus needs a whole bunch of work to meet new specs.
+
+**This branch edits regions drafthorse-step-anatomy has already rewritten**
+- aware of this. not much we can do about it at the moment, except minimise blast radius. but once done the spec and the skill.md changes will be aligned.
+
+**State the evaluation rule and the scoping rule as framework**
+- Verdict: revise
+- needs to be discussed in depth if precedence is even needed, before approving this.
+
+**Delete De-hold, teach scoping in its place**
+- Verdict: revise
+- same as A
+
+**Retire one check, add two, and repair the step walk**
+- Verdict: revise
+- Same as A
+
+**Propagate the preamble line to both variants**
+- Verdict: revise
+- Needs finalisation of preamble first.
+
+**Out of scope for this branch**
+- Verdict: drop
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; for f in $(grep -rl "harness-format: DraftHorse" --include="*.md" extensions | sort); do tot=$(grep -c "^## +" $f); dh=$(grep -A6 "^#### Start this step" $f | grep -ci "has not\|not yet\|no .* approved\|unapproved"); echo "$dh/$tot  $f"; done
+Description: Count de-hold clauses across corpus
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Pushing back, as asked.
+
+## No, skills in the wild carry none of this
+
+Skills in the wild are prose procedures. No start conditions, no finished conditions, no eligibility rules. An agent reads them and uses judgment. DraftHorse's conditions are already far more machinery than the field runs — de-hold, precedence and scoping are machinery on top of machinery.
+
+The failure de-hold guards against — a step re-admitting itself forever — is a state-machine failure, not an agent failure. A state machine re-evaluates a predicate with no memory of what it just did. An agent has the transcript. It does not re-gather requirements because "the skill has been invoked" still reads true; it knows it just gathered them.
+
+Evidence from your own corpus: 31 de-hold clauses across ~84 steps. The rule is mandatory and two-thirds of the corpus ignores it. `drafthorse/SKILL.md` ran nine steps with zero de-holds for a whole commit and nothing looped.
+
+## #45's own rule fights what you want
+
+You said in F4 you expected a finished step to re-open. #45's precedence rule says the opposite — *finish met, the step does not run*. That is de-hold's mirror image: de-hold blocks re-entry through the start condition, precedence blocks it through the finished condition. Same lock, different door. Scoping then exists only to unlock it again.
+
+Three rules, all cancelling each other, all serving a problem the agent does not have.
+
+## What I recommend instead
+
+Delete, do not replace.
+
+- **Retire de-hold.** No precedence rule. No scoping rule.
+- **One sentence of framework**, in `steps.md § Conditions`: a step opens when its start conditions hold, closes when its finished conditions hold, and opens again if its start conditions hold again. That is what you said you wanted, and it is already what the preamble says.
+- **Gates**: keep "approval is revocable" as a plain line. Drop "and everything downstream of it" — a cascade past one step is rare, and where a skill genuinely needs it the builder writes it into that one condition, exactly as you put it: *"the user approved this and the previous steps."* One skill's problem, solved in that skill.
+- **Destructive re-runs** stay covered where they already are — the half-applied-state disposition at the error step, not a clause on every start condition.
+
+Four files, all deletions bar one sentence: `steps.md`, `condition-writing.md`, `drafthorse-spec-check.md`, regenerate `drafthorse-saddler.md`. No preamble edit — that line is #38's, and it already reads correctly. Corpus stays out; it is #37's problem.
+
+Say the word and I rewrite the artifact around this minimal shape, and rewrite #45's body to match.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+before you rewrite the artifact. we should also ask "can the agent as the runtime, easily navigate this", you are an agent, the dehold removals are on this branch. could you navigate the skill if i dissaproved a step and wanted to go back to earlier steps (actually i can build a better case for drafthorse handling this but will inform you after this turn), but as a cold reader without this discussion preceding.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git show drafthorse-step-anatomy:extensions/skills/drafthorse/SKILL.md | grep -A3 "^#### Start this step\|^#### Step finished" | grep -v "^--" | sed 's/^/  /' | head -60
+Description: Extract de-hold-free conditions
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Ran the walk against the de-hold-free conditions on `drafthorse-step-anatomy`. Caveat first: I am not a cold reader — this discussion is in my context. Read it as a walkthrough, not as evidence. A genuine cold read needs a fresh session.
+
+## Scenario — at `+Deliver`, you reject the step map
+
+**What is eligible, read literally:**
+
+- `+Collect References` — "Requirements are established." ✅ still true
+- `+Map the Steps` — "The reference set is approved with no unfilled gaps." ✅ still true
+- `+Set Invariants` — "The step map is approved." ✅ still true
+- `+Draft the Skill` — "Invariants are approved." ✅ still true
+- `+Review` — "A complete draft exists." ✅ still true
+- `+Deliver` — "The draft has passed the scenario-walk." ✅ still true
+
+Six eligible. I re-enter `+Map the Steps` without friction, and the conceptual listing order tells me where to resume from. The backtrack works — every start condition is a **durable state**, so it is still true when I come back to it.
+
+## Both alternatives break this walk
+
+**De-hold**: `+Draft the Skill` read "Invariants are approved **and no complete draft exists**." After a map change, a complete draft *does* exist. The step is barred. I have re-mapped and now cannot redraft — the exact backtrack you are asking about is blocked by the rule meant to protect it.
+
+**Precedence**: worse. `+Draft the Skill` finished on "the draft is written to the destination" — met, permanently. Barred forever, with no clause I can re-read my way out of.
+
+The de-hold-free version is the only one of the three I can navigate. That is not a small result: the removal already on that branch **fixes** backtracking rather than risking it.
+
+## The one place I could go wrong
+
+Nothing in the document says re-approving the map makes the existing draft stale. After re-mapping, `+Deliver` still reads eligible — "the draft has passed the scenario-walk" is literally true of the *old* walk. A careless agent could hand you the stale draft.
+
+In practice I would not: I just changed the map, I can see the draft no longer matches, and `+Deliver`'s finished condition already demands "it still passes the scenario-walk with their edits folded in". But that is judgment plus one lucky clause, not a stated rule.
+
+**The cheap fix** is one clause in one step, not a framework rule:
+
+> `+Deliver` — Start: "The draft has passed the scenario-walk **in its current form**."
+
+That is your own instinct from the comments — put the cascade in the condition that needs it. One step, one skill, no new machinery.
+
+## Verdict
+
+Navigable. The removal improves it. The residual risk is stale-state skipping at the exit gate, and it costs three words to close.
+
+Waiting on the better case you said you'd make for how DraftHorse handles this before I rewrite anything.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+the error step would probably be invoked as the user sais something like "arggg we stuffed up, can we redo this?" the agent goes "sure lets restart from our draft, will this help" if user sais "yes" what have we done?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+We backtracked with zero new machinery, and we did it through a step that already exists.
+
+## What that exchange actually did
+
+The user's "can we redo this?" is a situation no working step claims — so `+Handle a Problem` catches it by construction. Its engagement surfaces state, its finished condition is "the user has decided how to continue." That decision **is** the state change.
+
+"Yes, restart from the draft" withdraws approval. And then the existing conditions do the cascade by themselves:
+
+- `The step map is approved` → now false → `+Set Invariants` goes ineligible, and everything reading forward from it stops.
+- `The reference set is approved with no unfilled gaps` → still true → `+Map the Steps` is eligible.
+- Re-approve the map → `+Set Invariants` eligible again → the run re-grows forward in order.
+
+The dependency graph was already written — every start condition names the approval it depends on. Withdrawing one approval collapses exactly the right subtree and no other. That is the cascade #45 wants to buy with a scoping rule, and it is already paid for.
+
+**So: precedence unnecessary. Scoping unnecessary. Downstream-cascade rule unnecessary.** The error step is the re-entry door, the user is the invalidator, and the conditions are the graph.
+
+## The real gap — and it is small
+
+This mechanism was *stated* in the corpus until an hour ago. Commit `4a87a56` deleted `+Handle a Problem`'s retired slot, and this went with it:
+
+> Resume the phase the user chose — revising an approved artifact un-approves it and everything downstream of it, so that phase's start condition holds again — or end the build.
+
+The rule left with the slot that carried it. That is the hole #45 should be filling: **the framework never says the error step is the backtrack door.** Its two dispositions are *hard bail* and *claim the remainder* — a user-directed restart is neither.
+
+## Minimal change set
+
+1. **`steps.md § Dispositions`** — third disposition, **Hand back**: the user withdraws an approval or asks to restart; the error step records the withdrawal and the run resumes from the step whose approval is now missing. Distinguish it from *hard bail* explicitly, since that one says "no step re-runs over its own partial work" — a withdrawn approval is a complete artifact rejected, not partial work resumed.
+2. **`steps.md § User gates`** — replace the cascade sentence with what actually happens: approval is state the user can withdraw, and withdrawing it turns every start condition naming that approval false.
+3. **`condition-writing.md`** — delete **De-hold**. Nothing added.
+4. **`drafthorse-spec-check.md`** — delete the De-hold check and its mention in the step walk; add the false-positive guard. Regenerate saddler.
+
+Two sentences added, one rule deleted, four files.
+
+#45's title stops being true under this — it is no longer "finished conditions take precedence" but "retire de-hold; the error step carries the backtrack." Say the word and I rewrite the artifact and the issue body around this shape.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+so here is a convention i think it exists already. keep ordinary steps lean and simple. let them handle their job only. this keeps start and finish conditions as sharp as possible so they can be complete and comprehensive. the handle a problem step is a multipurpose support step. it is the one handling problems like revoked approval. its default is to bail and start again or repair state manually. if the skill needs you can write customised instructions in there. like how to handle an approval cascade.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; sed -n '1,80p' docs/drafthorse/framework/conventions.md
+Description: Read conventions
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Mostly exists. Three pieces of it are already load-bearing, one is missing, and one name is fighting you.
+
+## Already there
+
+- **Stepping stones**, `conventions.md`: *"A step can support others (eg activating to catch a failure another step cannot resolve), leaving that step to focus on its jobs instead of handling every state it might produce."* That is your lean-steps convention, stated as a mechanism.
+- **The error step**, same file: coverage subtractive, two dispositions.
+- **Supercharged harness documents**, same file, and it settles #45 on its own terms:
+
+> Every addition pushing the spec toward code — mandatory machinery, guaranteed coverage, a rule per state — steals from that purpose… An addition that only makes the document more complete is bloat.
+
+De-hold, precedence and scoping each fail that test. The convention that kills them was written before the issue was.
+
+## Missing
+
+**The step's scope.** Every description of it says *error*, *failure*, *unrecoverable*, *problem state*. A withdrawn approval is none of those — nothing went wrong, the user changed their mind. As written, a cold agent hitting "arggg can we redo this?" does not obviously land there.
+
+**That it is customisable.** The catalogue is open for *error classes*, but nothing says a skill writes its own bespoke procedures into that engagement. Approval-cascade instructions have no stated home today.
+
+## And the name is the problem
+
+*Error step*, *error drain*, *problem step*, `+Handle a Problem` — #38 already flagged four names for one thing. Every one of them says **error**. If the step is a multipurpose support step, the name is what stops a builder writing an approval cascade into it and stops a runtime agent looking there.
+
+Related: the step-function catalogue on `drafthorse-step-anatomy` carries six — Error, Success, Looping, Routing, Dormant, Handover. **Support** was in #38's original list and got dropped. It is now the concept doing the work.
+
+## Proposed write-up
+
+1. **`conventions.md`** — the lean-steps convention stated plainly: an ordinary step handles its own job only; states it produces but does not own fall to the support step. That is what keeps its conditions sharp enough to be complete.
+2. **`steps.md`** — the support step's scope widened past error: unrecoverable failure, recoverable remainder, **and user-directed change of course** (withdrawn approval, restart, redo). Default disposition stays bail-and-repair. Plus one line: a skill may write custom handling into that engagement — an approval cascade being the worked example.
+3. **`condition-writing.md`** — delete De-hold. Nothing added.
+4. **`drafthorse-spec-check.md`** — delete the De-hold check and its step-walk mention; add the false-positive guard. Regenerate saddler.
+5. **Feed to #38** — the name, and whether **Support** returns to the function catalogue.
+
+No precedence. No scoping. One rule deleted, one convention stated, one step's scope widened.
+
+Rewrite the artifact and #45's body around this?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+yes, rewrite the artifact, but im happy to not introduce the new convention. as it is already mainly there. also "claim the remainder" seems rather like what we are chasing here. "can guide the agent on how to resolve the skill if no other step handles the recoverable state. The remainder needs to be actively described to distinguish it from the Hard bail."
+
+------------------------------------------------------------
+
+[USER]    💭: none
+yes, rewrite the artifact, but im happy to not introduce the new convention. as it is already mainly there. also "claim the remainder" seems rather like what we are chasing here. "can guide the agent on how to resolve the skill if no other step handles the recoverable state. The remainder needs to be actively described to distinguish it from the Hard bail."
+don't rewrite #45 yet
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Rewriting around the settled position — convention dropped, "claim the remainder" carrying it.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/artifacts/issue-45-review.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Rev 2 published — same URL: **https://claude.ai/code/artifact/8fdec17c-e3ad-4d95-971c-641008b43730**
+
+What changed from rev 1:
+
+- **Thesis inverted.** Title is now *Retiring De-hold*. Verdict: one rule out, nothing in. Precedence and scoping are rejected findings, not proposals.
+- **`conventions.md` does the arguing.** The anti-bloat test — "an addition that only makes the document more complete is bloat" — kills all three rules on the framework's own terms, written before the issue was.
+- **The runtime walk is a finding**, with the eligibility table and the two ways de-hold and precedence each block the backtrack they were meant to protect.
+- **Claim the remainder is the resolution.** Finding 4 traces the withdrawal cascading through conditions that already exist; finding 6 narrows the gap to vocabulary — the disposition covers it in substance, the surrounding prose reads as failure-handling and hides it.
+- **No new convention.** Listed under *Not doing*, with the Stepping stones line that already says it.
+- **Proposals cut to 3 files.** One worked class added to the catalogue, one bullet deleted, one check deleted, saddler regenerated.
+- **Name and the Support function** handed to #38 rather than settled here.
+
+Four open questions, all narrower than last time: new class vs worked line, how far to trim `§ User gates`, what to do with #45's now-wrong title, and merge order.
+
+#45 untouched, repo untouched.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+## Issue #45 — review comments (rev 2)
+
+**De-hold is unearned, and the corpus already voted**
+- Verdict: agree
+
+**Precedence and scoping fail a test the framework already wrote**
+- Verdict: agree
+
+**The support step already carries revoked approval**
+- Verdict: revise
+- it is actually not described in `+handle a problem`. This was showing that we didn't need to expand the definition. it was already defined in the spec.
+
+**The mechanism was stated, and left with a retired slot**
+- Verdict: agree
+- This is the 04 confirmation. this should be slightly adjusted and placed directly inside the +handle a problem step as a "claim the remainder" guidance.
+
+**Vocabulary, not mechanism**
+- Verdict: reject
+- disagree, the original writing agent chose to put its "claim the remainder" into a now defunct "next steps" machinery heading. The wording did not hunt the agent off. it just got the location wrong.
+
+**Four homes to clear, one of them generated**
+- Verdict: revise
+- we always settle the spec first before regenerating the spec-check file.
+
+**This branch edits regions #38 has already rewritten**
+- Verdict: agree
+
+**Widen Claim the remainder by example, not by rule**
+- Verdict: revise
+- could you sharpen it to 'user approval problem' and make the disposition more generalised. "claim the remainder. steps requiring user approval may have their approval revoked or similar. this can be handled by restarting the skill from the appropriate step and revoking all subsequent approval."
+
+**Delete De-hold. Add nothing.**
+- Verdict: revise
+- remind that finish conditions end the loop.
+
+**Delete the check, repair the step walk, guard the false positive**
+- Verdict: revise
+- produce a html page with diffs for all these changes proposed, comment and copy funtionality also
+
+**Two things this review surfaced that belong to the step-anatomy refactor**
+- Verdict: drop
+- not necessary
+
+**Deliberately out**
+- Verdict: approve
+
+**Open questions**
+- Q1 — new class or worked line: where? in conventions or steps?
+- Q2 — user gates trim or delete: probably remove alltogether. your thoughts?
+- Q3 — issue rewrite or reopen: nothing yet, but when we do it is a comment of our pivot.
+- Q4 — merge order: what is best? maybe we wait?
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; echo "=== SKILL.md +Handle a Problem ==="; awk '/^## \+Handle a Problem/,0' extensions/skills/drafthorse/SKILL.md | head -30; echo; echo "=== spec-check 118 ==="; sed -n '118p' docs/drafthorse/drafthorse-spec-check.md; echo "=== steps.md dispositions block ==="; grep -n "Half-applied state\*\* — hard bail\|Named recoverable failure" docs/drafthorse/framework/steps.md
+Description: Exact text for diff sites
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git branch --show-current; git log --oneline -1; git status --short; grep -n "Approval is revocable" docs/drafthorse/drafthorse-spec-check.md; grep -n "De-hold" docs/drafthorse/drafthorse-spec-check.md
+Description: Verify branch state
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git branch --list 'drafthorse*'; SP=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/91079983-07d2-4e6d-a639-b49e1e1f1448/scratchpad; mv dev/workspace/artifacts $SP/artifacts-stash && git switch drafthorse-condition-precedence && mv $SP/artifacts-stash dev/workspace/artifacts; git log --oneline -1
+Description: Return to the issue-45 branch
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git branch --show-current; echo "--- steps.md dispositions ---"; grep -n "Half-applied state\*\*\|Failed permissions\*\*\|Insufficient references\*\*\|Named recoverable failure\*\*\|^## User gates\|^Approval is state" docs/drafthorse/framework/steps.md; echo "--- spec-check ---"; grep -n "De-hold\|Approval is revocable\|state terms, de-hold\|Loops are re-holding" docs/drafthorse/drafthorse-spec-check.md; echo "--- condition-writing ---"; grep -n "De-hold\|Loops are re-holding\|Entry after a gate" extensions/skills/drafthorse/references/condition-writing.md; echo "--- SKILL +Handle a Problem ---"; awk '/^## \+Handle a Problem/,/^# --- TERMS/' extensions/skills/drafthorse/SKILL.md
+Description: Exact diff sites on the precedence branch
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Correct branch restored (a stray switch had put me back on `drafthorse-step-anatomy`; the reads above are from `drafthorse-condition-precedence`). Building the diffs page.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/artifacts/issue-45-diffs.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+**https://claude.ai/code/artifact/60ee663a-aeb3-4d1f-a4d7-024b5d6c9d2b**
+
+Ten hunks, diffed against the working tree. Nothing applied.
+
+Corrections taken:
+
+- **F4 overstated** — the mechanism is in the spec, not in `+Handle a Problem`. That was your point, and it strengthens the case rather than needing an expansion.
+- **F6 withdrawn.** You are right — the original agent put its claim-the-remainder guidance in a routing slot. Location, not vocabulary. No wording change to the dispositions on those grounds.
+- **Checker deferred.** Hunks 7–10 sit behind the spec settling, saddler regenerated once for both this and #38.
+- **D dropped.**
+
+Your answers to the open questions:
+
+- **Q1 — `steps.md`.** `conventions.md` holds the two dispositions; the class catalogue that maps states onto them lives in `steps.md § Dispositions`, declared open. The class goes with the other four.
+- **Q2 — delete the paragraph, keep the section.** The revocability paragraph is the de-hold rule in prose. The paragraph above it defines what a gate is and why its finished conditions are compound — nothing else states that.
+- **Q4 — wait on the checker, not the docs.** Hunks 1–5 land and merge; `drafthorse-step-anatomy` resolves on sync; the spec-check pass happens once, after #38 settles.
+
+One thing needs your call rather than a verdict — **hunk 6**. Your instruction to put the deleted prose back inside `+Handle a Problem` is right, but on this branch the prose still lives in the `Suggested next actions` slot, so applying it here means deleting a slot #38 also deletes. Handing the one added sentence to `drafthorse-step-anatomy` instead gives a clean single-line edit and no conflict. Recommended, but it is a branch-discipline decision, not mine.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+## De-hold patch — comments
+
+**1 · A claimable class for withdrawn approval**
+- Verdict: approve
+
+**2 · The revocability cascade goes**
+- Verdict: approve
+
+**3 · De-hold, deleted whole**
+- Verdict: approve
+
+**4 · Loops: say what ends them**
+- Verdict: approve
+
+**5 · The gate example loses its de-hold tail**
+- Verdict: revise
+- it feels like it should be more like... "(the previous steps) result has been succesfull" (implying user approval) possible not needed at all.
+
+**6 · Move the guidance into the engagement**
+- Verdict: here
+- 38 is for removing the machinery heading. Claude "squeezed" this in the wrong place. we are just putting it back in the right place. carry on.
+
+**7 · Condition Checks: one deletion, one reword, one deletion**
+- Verdict: approve
+
+**8 · The step walk, where a deleted check comes back to life**
+- Verdict: approve
+
+**9 · Guard the false positive**
+- Verdict: drop
+
+**10 · Regenerate, do not edit**
+- Verdict: approve
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Applying the approved hunks. On 5 — one push-back before I write it.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/steps.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/references/condition-writing.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/steps.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/framework/steps.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/references/condition-writing.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/references/condition-writing.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/references/condition-writing.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/SKILL.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/SKILL.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git diff --stat; echo "==="; git diff
+Description: Show applied diff
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Applied — hunks 1, 2, 3, 4, 5, 6. Nine lines out, five in, across three files. Hunk 9 dropped. Hunks 7, 8, 10 stay staged for the checker pass.
+
+## Push-back on hunk 5
+
+Your alternative — *"the previous step's result has been successful"* — is the exact shape the bullet three lines above it forbids:
+
+> **Name the state, not the predecessor** — "a unit has commits in range but no verdict recorded", not "after the range step". Position-phrasing breaks the moment a loop or repair path arrives from elsewhere.
+
+"The previous step" is the predecessor. And it hides the very thing the example exists to show — that a user approval is observable state an agent can read. So I applied the trim rather than the rewrite.
+
+Your other option, dropping it entirely, is defensible: it is the file's only gate example, and `Gates are compound` under Finished conditions already covers gates from the other side. Say the word and it goes.
+
+## Left behind
+
+Two references to `*suggested next actions*` still sit in `condition-writing.md` — line 41 and the terminal-steps worked example. They belong to #38's slot retirement, not to this patch, so I left them. Same for the `## Suggested next actions` section itself.
+
+Working tree carries the change on `drafthorse-condition-precedence`; nothing committed or pushed.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+wrong. "a complete draft exists" implies user approval and successful completion of previous step, the create draft step. if it said "+create draft step has been completed" then that is forbidden. the whole skill would be a fail without that distinction.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Correct — I conflated your phrasing with step-naming. "A complete draft exists" is artifact state; `+Draft the Skill has completed` is the forbidden form. Your version was the state one.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/references/condition-writing.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Applied:
+
+```
+- Entry after a gate: "a complete draft exists" — name the artifact's state; the approval that produced it is implied.
+```
+
+The distinction you drew is doing real work and is stated nowhere: an artifact state legitimately *implies* the approval and completion behind it, which is why de-hold was never needed — `"a complete draft exists"` already carries what `"…and has not passed the scenario-walk"` was bolted on to say.
+
+Worth one clause on the **Name the state, not the predecessor** bullet? Something like:
+
+> …Position-phrasing breaks the moment a loop or repair path arrives from elsewhere. An artifact's state carries the approval and the work that produced it.
+
+Say yes and I add it. Otherwise the patch stands as applied: three files, hunks 1–6, checker deferred.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+yes add that clause
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/skills/drafthorse/references/condition-writing.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git diff --stat; sed -n '25,34p;50,58p' extensions/skills/drafthorse/references/condition-writing.md
+Description: Confirm final condition-writing state
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Clause added. The rule and its worked example now agree.
+
+Patch as it stands on `drafthorse-condition-precedence`, uncommitted:
+
+- `steps.md` — revocability cascade deleted; **User approval problem** added to the disposition class catalogue.
+- `condition-writing.md` — **De-hold** deleted; Loops names its terminator; the state-carries-approval clause added; gate example rewritten as artifact state.
+- `drafthorse/SKILL.md` — the guidance moved out of the retired slot into `+Handle a Problem`'s engagement.
+
+Ten lines out, six in. Deferred: the three spec-check hunks and saddler's regeneration, until #38 settles.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+commit this
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git reset -q; git add docs/drafthorse/framework/steps.md extensions/skills/drafthorse/references/condition-writing.md extensions/skills/drafthorse/SKILL.md && git status --short
+Description: Stage the three files only
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git commit -F- <<'EOF'
+📝 docs(drafthorse): retire de-hold, claim withdrawn approval at the error step
+
+A start condition no longer carries a negated copy of its own finished
+condition. The state de-hold was guarding — a user withdrawing approval —
+is a claimable remainder at the error step, and the existing start
+conditions already collapse the right subtree when an approval goes away.
+
+- steps.md: revocability cascade deleted from User gates; new
+  "User approval problem" class in the disposition catalogue.
+- condition-writing.md: De-hold deleted; loops name their terminator;
+  an artifact's state carries the approval that produced it; gate
+  worked example rewritten as artifact state.
+- drafthorse/SKILL.md: the resume guidance moves from the routing slot
+  into +Handle a Problem's engagement, where it reads as claim-the-remainder.
+
+Spec-check and saddler deferred until the step-anatomy work settles.
+
+Refs #45
+EOF
+git log --oneline -1
+Description: Commit the patch
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Committed — `6a09cba` on `drafthorse-condition-precedence`, three files, nothing else staged.
+
+Unpushed. Next moves when you want them: `dev-workspace push` to put the branch on origin, then merge to `main` so `drafthorse-step-anatomy` can sync and resolve. The spec-check and saddler pass waits on #38.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+lets comment on issue #45. with all our decisions and resulting directional changes, then a seperate sign off, with next steps. (the things we defered).
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git branch --show-current; git log --oneline -2; echo "--- commit exists on precedence branch? ---"; git log --oneline -2 drafthorse-condition-precedence; git status --short
+Description: Check branch state and commit
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git diff extensions/skills/drafthorse/SKILL.md
+Description: Inspect uncommitted change on step-anatomy
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Commit `6a09cba` is safe on `drafthorse-condition-precedence`. The checkout has flipped back to `drafthorse-step-anatomy` again — the uncommitted SKILL.md preamble swap there is your work, untouched.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Both posted.
+
+- **Decisions and direction** — https://github.com/dilberryhoundog/agent-library/issues/45#issuecomment-5329096039
+- **Sign-off and next steps** — https://github.com/dilberryhoundog/agent-library/issues/45#issuecomment-5329098833
+
+The first carries the reversal with its evidence: the bloat test from `conventions.md`, the corpus count, the backtrack walk showing precedence blocking what it meant to protect, the cascade falling out of conditions already written, and the rule that left with the retired slot. Landed changes listed against `6a09cba`. Body untouched — the comment is the pivot record, as you asked.
+
+The second holds the deferrals in order: three spec-check hunks plus saddler's regeneration behind #38, the corpus reshaping to #37, the three-step branch order, and the guard we dropped. Issue left open, closeable after the checker pass.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+hey we now on branch step-anatomy. and our spec-check needs updating with #45's spec changes only. can you look into this. propose your changes in html diff, give me comment and copy.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git branch --show-current; git status --short; echo "=== condition checks block ==="; sed -n '86,120p' docs/drafthorse/drafthorse-spec-check.md
+Description: Read spec-check condition checks on step-anatomy
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -n "de-hold\|De-hold\|revocable\|Loops\|approval\|Approval" docs/drafthorse/drafthorse-spec-check.md
+Description: Locate all affected lines
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -n "disposition\|Hard bail\|hard bail\|claim the remainder\|Claim the remainder\|Error step —\|error class" docs/drafthorse/drafthorse-spec-check.md; echo "=== 255-275 ==="; sed -n '255,272p' docs/drafthorse/drafthorse-spec-check.md
+Description: Find disposition checks and step walk context
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -n -A9 "^## Step Function Checks" docs/drafthorse/drafthorse-spec-check.md
+Description: Read step function checks
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Three live edits, two optional sharpenings, one sequencing caveat. Building the page.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/artifacts/spec-check-45-diffs.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+**https://claude.ai/code/artifact/f1566b45-55be-4098-87bc-e0cfb320b46f**
+
+Seven hunks against this branch's `drafthorse-spec-check.md`. Nothing applied.
+
+**Required — three.** L96 deletes the De-hold check. L107 deletes *Approval is revocable state*, whose second clause actively demands the de-hold shape. L267 drops `de-hold` from the step-walk instruction — the line the auditing agent actually performs, and the one that reinstates a deleted rule if missed.
+
+**Optional — three.** L98 and L131 name the loop's terminator, matching the wording now in `condition-writing.md`. L129 is a genuine question rather than a tidy-up: whether the checker should ask a gated document where a withdrawn approval lands, now that the framework carries a **User approval problem** class. Arguments both ways on the card.
+
+**Swept clear, no edit needed** — the "sole routing mechanism" preamble (precedence was rejected, so it still holds), the half-applied check (it was already arguing against de-hold), and the cold-run walk, which already pushes on "a revision after approval" and simply gets a different answer now.
+
+One thing to know: #45's framework edits are on `drafthorse-condition-precedence` at `6a09cba`, not here. Applying these puts the checker ahead of this branch's own `steps.md` until that merges through `main` — harmless in that direction, since a deleted check finds nothing, and it avoids the reverse case you flagged, where a checker enforces a retired rule against corrected documents.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+## Spec-check catch-up — comments
+
+**1 · The De-hold check**
+- Verdict: approve
+
+**2 · Approval is revocable state**
+- Verdict: approve
+
+**3 · The step walk, where a deleted check comes back**
+- Verdict: approve
+
+**4 · Loops: name the terminator**
+- Verdict: approve
+
+**5 · "Something ends the loop" now has a name**
+- Verdict: approve
+
+**6 · Should the checker know about the new class?**
+- Verdict: revise
+- + - **Error step** — errors claimed after each step handles internally, destructive errors handled, half-applied states accounted for. If named; recoverable errors or remaining state not handled by other steps, is managed adequately.
+
+**General**
+- changes where merged here from `drafthorse-condition-precedence`
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git branch --show-current; git log --oneline -3; grep -n "De-hold" docs/drafthorse/framework/steps.md extensions/skills/drafthorse/references/condition-writing.md docs/drafthorse/drafthorse-spec-check.md; echo "--- merged? ---"; grep -n "User approval problem" docs/drafthorse/framework/steps.md; git status --short
+Description: Confirm merge landed on this branch
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Merge confirmed — De-hold now survives only in the checker. Applying.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/drafthorse-spec-check.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/drafthorse-spec-check.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/drafthorse-spec-check.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/drafthorse-spec-check.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/drafthorse-spec-check.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/drafthorse-spec-check.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/drafthorse-spec-check.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git diff docs/drafthorse/drafthorse-spec-check.md; echo "=== residual de-hold anywhere ==="; grep -rn -i "de-hold" docs extensions | grep -v dev/branches
+Description: Show spec-check diff and sweep for residue
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+All six applied. `drafthorse-spec-check.md` is clean of de-hold; the only remaining copies are in `drafthorse-saddler.md`, which regenerates from it.
+
+Your revised wording went in verbatim. One thing you may want to look at when the regeneration happens — the punctuation reads oddly against its neighbours:
+
+> If named; recoverable errors or remaining state not handled by other steps, is managed adequately.
+
+Tighter, same test: *"Where named, recoverable errors and remaining state no other step handles are managed adequately."* Your call — say the word or leave it.
+
+Uncommitted on `drafthorse-step-anatomy`: the spec-check edits, plus your own in-flight `00-INDEX.md` and `plan-load-bearing-slots.md`. Saddler regeneration is the next step whenever you want it — the step-anatomy rewrite and this change would cross in the same pass.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+yes tighten that wording, then regenerate saddler
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/docs/drafthorse/drafthorse-spec-check.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; sed -n '1,20p' extensions/agents/drafthorse-saddler.md; echo "=== diff saddler vs spec-check ==="; diff <(sed -n '1,20p' docs/drafthorse/drafthorse-spec-check.md) <(sed -n '1,20p' extensions/agents/drafthorse-saddler.md)
+Description: Inspect saddler head and its relation to spec-check
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; SC=docs/drafthorse/drafthorse-spec-check.md; SD=extensions/agents/drafthorse-saddler.md; echo "spec-check invariants line: $(grep -n '^# Agent Invariants' $SC)"; echo "saddler invariants line: $(grep -n '^# Agent Invariants' $SD)"; echo "--- drift between current bodies (should be only our 6 edits) ---"; diff <(tail -n +11 $SC) <(tail -n +12 $SD) | head -40
+Description: Check body alignment before regeneration
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; SC=docs/drafthorse/drafthorse-spec-check.md; SD=extensions/agents/drafthorse-saddler.md; head -11 $SD > /tmp/sd.new && tail -n +12 $SC >> /tmp/sd.new && mv /tmp/sd.new $SD; echo "--- verify: body identical, head preserved ---"; diff <(tail -n +12 $SC) <(tail -n +12 $SD) && echo "bodies identical"; head -10 $SD | tail -3; echo "--- de-hold residue ---"; grep -rn -i "de-hold" docs extensions | grep -v dev/branches || echo "none"
+Description: Regenerate saddler from spec-check
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git diff --stat; echo "=== saddler frontmatter intact ==="; head -8 extensions/agents/drafthorse-saddler.md
+Description: Confirm regeneration result
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Wording tightened, saddler regenerated.
+
+> **Error step** — errors claimed after each step handles internally, destructive errors handled, half-applied states accounted for. Where named, recoverable errors and remaining state no other step handles are managed adequately.
+
+Regeneration was mechanical: saddler's own head kept (frontmatter, identity paragraph), everything from `# Agent Invariants` down replaced from the spec-check. Bodies now verify identical, and the two files had no drift beyond these six edits before the swap — so nothing else moved.
+
+De-hold is gone from `docs/` and `extensions/` entirely. Remaining mentions live only in `dev/branches/` archives, which are historical records.
+
+Uncommitted on `drafthorse-step-anatomy`: `drafthorse-spec-check.md`, `drafthorse-saddler.md`, plus your `00-INDEX.md` and `plan-load-bearing-slots.md`. Want the two checker files committed on their own?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+yes, commit those two files separately
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git reset -q; git add docs/drafthorse/drafthorse-spec-check.md && git status --short && git commit -F- <<'EOF'
+📝 docs(drafthorse): carry the de-hold retirement into the spec-check
+
+The framework no longer asks a start condition to negate its own finished
+condition (#45), so the checks enforcing that come out.
+
+- De-hold check deleted.
+- Approval is revocable state deleted — its example demanded the de-hold shape.
+- Step walk drops de-hold from the start-condition parenthetical, where a
+  deleted check would otherwise be reinstated at run time.
+- Loops and the Looping function check now name the finished condition as
+  what ends a loop.
+- Error step function check covers recoverable errors and remaining state
+  no other step handles.
+
+Refs #45
+EOF
+git log --oneline -1
+Description: Commit the spec-check edits
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git add extensions/agents/drafthorse-saddler.md && git status --short && git commit -F- <<'EOF'
+🤖 chore(saddler): regenerate from the spec-check
+
+Head kept, every section below Agent Invariants replaced from
+docs/drafthorse/drafthorse-spec-check.md. Carries the de-hold retirement.
+
+Refs #45
+EOF
+git log --oneline -2
+Description: Commit the saddler regeneration
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Two commits on `drafthorse-step-anatomy`:
+
+- `1389a6a` — spec-check edits
+- `3b98394` — saddler regenerated from it
+
+Your workspace plans stayed unstaged, as did the artifacts directory.
+
+#45's chain is now complete across both branches: framework and guides at `6a09cba`, checker and its generated agent here. What remains from the sign-off comment is the corpus sweep under #37 — reshaping the ~31 de-hold clauses in the stamped documents, once this branch merges.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+branch is merged lets tidy up
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git branch --show-current; git status --short; echo "=== merged into main? ==="; git branch --merged main | cat; echo "=== push status ==="; dev-workspace push --check 2>&1 | tail -15
+Description: Survey repo state after merge
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; echo "=== remote branches ==="; git branch -r | cat; echo "=== precedence branch state ==="; git log --oneline -1 drafthorse-condition-precedence; git log --oneline -1 main; echo "=== archives ==="; ls dev/branches/ 2>/dev/null; echo "=== main vs origin ==="; dev-workspace latest --check 2>&1 | tail -12
+Description: Gather tidy-up facts
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Facts before I delete anything:
+
+- `drafthorse-condition-precedence` — merged into `main` at `94f0eba`, archived at `dev/branches/`, local and remote copies still present.
+- `main` in sync with origin.
+- Also merged and archived, still lingering: `drafthorse-spec-upgrade`, `shorthand`.
+- `drafthorse-step-anatomy` is **not** merged into `main` yet, and has uncommitted work in it (`SKILL.md`, both templates, `scaffold.md`, a plan) — untouched.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+What would you like to clarify?
+
+For context, "tidy up" could mean a few different things here, and I only assumed the branch-deletion reading:
+
+- Deleting the merged `drafthorse-condition-precedence` (local, remote, or both).
+- The same for the two older merged branches, `drafthorse-spec-upgrade` and `shorthand`.
+- Workspace housekeeping instead — committing workspace files, refreshing archives, syncing `drafthorse-step-anatomy` from `main`.
+- Or tidying the artifacts I left in `dev/workspace/artifacts/`.
+
+Tell me which you meant and I'll go.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+more closing issues etc. branch can stay alive for the moment. i will kill the html files, when ready im going to harvest them first.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git log --oneline main -6 | cat; echo "=== #45 chain ==="; git log --oneline --all --grep="45" -8 | cat
+Description: Confirm #45 commit chain
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+#45 closed as completed, with the chain recorded.
+
+Two neighbours worth a note while I'm here — say the word and I'll post:
+
+- **#37** (spec alignment sweep) has silently inherited the de-hold reshaping: ~31 clauses across the stamped documents, each a judgment call about what state the condition should name instead. It is not recorded there yet.
+- **#38** stays open — the step-anatomy work is still uncommitted on its branch and unmerged.
+
+Anything else you want closed or annotated?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+yes, post the note on #37
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; for f in $(grep -rl "harness-format: DraftHorse" --include="*.md" extensions | sort); do tot=$(grep -c "^## +" $f); dh=$(grep -A6 "^#### Start this step" $f | grep -ci "has not\|not yet\|no .* approved\|unapproved"); [ "$dh" != "0" ] && echo "  $dh/$tot  $f"; done
+Description: Recount de-hold clauses for the note
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Posted — https://github.com/dilberryhoundog/agent-library/issues/37#issuecomment-5330755778
+
+It carries the per-file count (~31 clauses over ~44 steps, worst offenders named), the reason it is judgment rather than a pattern delete with three worked rewrites, the pointer to `drafthorse/SKILL.md` as the clean reference, and one cross-check for the sweep to run while it is already in each file — gated documents whose error step says nothing about a withdrawn approval.
+
+Also noted that saddler's two clauses get fixed in the spec-check, not in the agent file.
+
+State now: #45 closed, #37 annotated, #38 open with its branch alive and your uncommitted work untouched. HTML files left in `dev/workspace/artifacts/` for you to harvest.
+
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/dev-workspace:conversation-capture unknown
+
+------------------------------------------------------------
