@@ -78,7 +78,7 @@ Establish what is being built, for whom, and from what.
 
 #### Start this step when these are true:
 
-The skill has been invoked and the requirements are not yet established.
+The skill has been invoked.
 
 #### Step finished when these are true:
 
@@ -101,7 +101,7 @@ Harvest and classify the data the steps will operate on, and mine it for hidden 
 
 #### Start this step when these are true:
 
-Requirements are established and the reference set has not been approved.
+Requirements are established.
 
 #### Step finished when these are true:
 
@@ -121,7 +121,7 @@ Produce the references that do not exist yet, so the steps have a complete set t
 
 #### Start this step when these are true:
 
-The reference set is approved, and a reference the document needs is recorded as an unfilled gap — however late it surfaced.
+The reference set is approved, and a reference the document needs is recorded as an unfilled gap.
 
 #### Step finished when these are true:
 
@@ -137,7 +137,7 @@ Shape the steps from the candidates, the requirements, and the references in vie
 
 #### Start this step when these are true:
 
-The reference set is approved with no unfilled gaps, and no step map has been approved.
+The reference set is approved with no unfilled gaps.
 
 #### Step finished when these are true:
 
@@ -153,7 +153,7 @@ Bound the document — safety floors global, step-bound rules local.
 
 #### Start this step when these are true:
 
-The step map is approved and no invariant set has been approved.
+The step map is approved.
 
 #### Step finished when these are true:
 
@@ -169,7 +169,7 @@ Write the document from the approved parts.
 
 #### Start this step when these are true:
 
-Invariants are approved and no complete draft exists.
+Invariants are approved.
 
 #### Step finished when these are true:
 
@@ -186,7 +186,7 @@ Walk the draft as a cold reader before the user sees it.
 
 #### Start this step when these are true:
 
-A complete draft exists and has not passed the scenario-walk.
+A complete draft exists.
 
 #### Step finished when these are true:
 
@@ -204,17 +204,15 @@ Once the walk converges — nothing left to fix — offer the user an independen
 
 Present the reviewed draft for the final gate and hand it over.
 
+**Success step** — Resolves the run's done state and exits.
+
 #### Start this step when these are true:
 
-The draft has passed the scenario-walk and the user has not yet accepted it.
+The draft has passed the scenario-walk.
 
 #### Step finished when these are true:
 
-The user accepts the document — and it still passes the scenario-walk with their edits folded in (re-walk anything an edit touched).
-
-#### Suggested next actions:
-
-End the skill and return to the user.
+The user accepts the document — it still passes the scenario-walk with their edits folded in (re-walk anything an edit touched) — and the build is complete.
 
 ### Present:
 
@@ -224,6 +222,8 @@ Show the user the draft with a short summary — the steps, the reference placem
 
 Surface anything the other steps don't cover, and decide with the user how to continue.
 
+**Error step** — Handles recovery and bails.
+
 #### Start this step when these are true:
 
 Something has gone wrong, or a situation has arisen that no other step covers — unusable source material, requirements that contradict the framework, a scenario-walk that cannot converge.
@@ -231,10 +231,6 @@ Something has gone wrong, or a situation has arisen that no other step covers �
 #### Step finished when these are true:
 
 The user has been informed and has decided how to continue.
-
-#### Suggested next actions:
-
-Resume the phase the user chose — revising an approved artifact un-approves it and everything downstream of it, so that phase's start condition holds again — or end the build.
 
 ### Surface the Problem:
 

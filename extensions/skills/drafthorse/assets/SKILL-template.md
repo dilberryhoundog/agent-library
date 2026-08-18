@@ -95,7 +95,9 @@ Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions
 
 ## +<Success Exit Step Name>
 
-<!-- Reports the outcome and ends the skill. -->
+<!-- The directive — reports the outcome and ends the skill. -->
+
+**Success step** — Resolves the run's done state and exits.
 
 #### Start this step when these are true:
 
@@ -105,13 +107,10 @@ Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions
 
 #### Step finished when these are true:
 
-<!-- The summary is presented. -->
+<!-- The summary is presented, and the run is stated complete. -->
 
 - <condition 1>
-
-#### Suggested next actions:
-
-End the skill and return to the user.
+- the skill is complete
 
 ### <Report>:
 
@@ -133,10 +132,6 @@ Surface anything the other steps don't cover, and decide with the user how to co
 
 - the user has been informed of what happened and what state things are now in
 - the user has decided how to continue
-
-#### Suggested next actions:
-
-Resume the step the user chose, or end the skill.
 
 ### Surface the Problem:
 
