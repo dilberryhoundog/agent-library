@@ -93,9 +93,8 @@ The conditions carry all the routing a wired graph would; a weak condition is a 
 === Start conditions ===
 
 - **State terms, never step terms** — "a report has arrived", not "after the previous step". Position-phrasing breaks when a loop or repair path arrives from elsewhere.
-- **De-hold** — the condition must stop holding once the step's work is done, or the step re-admits itself forever. Even a first step needs its closing clause ("…and requirements are not yet established").
 - **Negative space claimed** — across all steps the start conditions cover every state the document can be in; whatever no step claims must fall to the error step's remainder.
-- **Loops are re-holding conditions** — a per-item step's condition simply holds again for the next item; no loop syntax exists. A loop expressed any other way is a finding.
+- **Loops are re-holding conditions** — a per-item step's condition simply holds again for the next item, and the step's finished condition is what ends the loop; no loop syntax exists. A loop expressed any other way is a finding.
 - **In-play overlap deliberate or absent** — sharp conditions make concurrent in-play steps intended (a supervisory span, a background wait); accidental overlap is a defect.
 
 === Finished conditions ===
@@ -104,7 +103,6 @@ The conditions carry all the routing a wired graph would; a weak condition is a 
 - **Exhaustive** — encompasses all the work ("every unit released, declined, or reported nothing-to-release", not "the releases are done"). The test: could the agent claim this is met while work remains?
 - **Own step only** — never mentions another step, narrates where the flow goes, or issues instructions. Routing stated in two homes drifts.
 - **Gates are compound** — a gate's finished conditions state the artifact's own completion criteria alongside the user's approval. Approval alone lets a rubber-stamp launder a defective artifact; presentation alone is engagement work, not completion.
-- **Approval is revocable state** — revising an approved artifact un-approves it and everything downstream, so the owning step's start condition holds again; gate-shaped start conditions ("X approved and Y not approved") depend on this and must not fight it.
 - **Every outcome the step can end on** — a step whose work can end in failure, refusal, or a no-op states those outcomes, so the steps claiming them are reachable. A happy-path-only account of completion sends an ended run onward and overrides the refusal its destination would have made.
 - **Terminal steps state their termination** — an exit step's finished conditions say the run is complete. A document whose only statement of "the skill ends here" sits in prose, or nowhere, leaves the run with no stopping point; that is a broken edge and forces `revise`.
 
@@ -126,9 +124,9 @@ One test per shape: does the declared function resolve?
 
 - **Undeclared functions** — a step performing a catalogued function without it named in the description. Sweep every step against this catalogue of checks; if it meets a criteria, it should be named by that function.
 - **Multiple functions** — a step performing multiple of the named step check criteria in a single step.
-- **Error step** — remaining errors claimed after each step handles internally, destructive errors handled, half-applied states accounted for.
+- **Error step** — errors claimed after each step handles internally, destructive errors handled, half-applied states accounted for. Where named, recoverable errors and remaining state no other step handles are managed adequately.
 - **Routing step** — every branch is resolvable. A branch may leave the document (a sub-skill, an external call).
-- **Looping step** — the start condition re-holds, and something ends the loop.
+- **Looping step** — the start condition re-holds, and the step's finished condition ends the loop.
 - **Dormant step** — a skippable step with transient activation. Not always needed, not never needed.
 - **Handover step** — control returns to it from a handover document; its finished condition reads the state the handover left behind.
 - **Success step** — start conditions handle the done state. Exits successfully, and always.
@@ -264,7 +262,7 @@ Judge every step's contract and shape against the condition and step-shape check
 
 ### Test Each Step:
 
-Take the steps one at a time: self-description, declared function where one is claimed, start condition (state terms, de-hold), finished condition (checkable, exhaustive, own-step-only, every outcome stated, compound if a gate), invariants (behaviour-changing, correctly scoped), standalone test, sizing smells. Then judge the set as a whole: negative space claimed, exit steps present and stating their termination, half-applied state bailed to the user rather than re-run, error step whole or explicitly folded, and the [Document-Wide Checks](#document-wide-checks) swept over everything.
+Take the steps one at a time: self-description, declared function where one is claimed, start condition (state terms), finished condition (checkable, exhaustive, own-step-only, every outcome stated, compound if a gate), invariants (behaviour-changing, correctly scoped), standalone test, sizing smells. Then judge the set as a whole: negative space claimed, exit steps present and stating their termination, half-applied state bailed to the user rather than re-run, error step whole or explicitly folded, and the [Document-Wide Checks](#document-wide-checks) swept over everything.
 
 ## +Audit the Handovers
 
