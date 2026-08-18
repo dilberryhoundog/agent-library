@@ -228,6 +228,8 @@ The user has been informed and has decided how to continue.
 
 Tell the user plainly what happened, which phase it arose in, what state the build is in, and what the options are.
 
+Where the problem is a withdrawn approval, claim the remainder: restart from the phase the user chose and revoke every approval after it. Otherwise end the build.
+
 # --- TERMS ---
 
 Terms used in this skill:

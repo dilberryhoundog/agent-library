@@ -1,0 +1,588 @@
+<title>The De-hold Patch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root {
+  --paper: #F4F6F6;
+  --surface: #FFFFFF;
+  --surface-sunk: #ECF0EF;
+  --ink: #14191A;
+  --ink-soft: #4E5B5C;
+  --ink-faint: #78878A;
+  --rule: #D6DEDD;
+  --accent: #0D6B64;
+  --accent-soft: #E2EFED;
+  --warn: #8A5B00;
+  --warn-soft: #F6EBD6;
+  --stop: #93332A;
+  --stop-soft: #F7E5E2;
+  --add-bg: #E4F1E9;
+  --add-ink: #17603E;
+  --del-bg: #FAE8E5;
+  --del-ink: #8E332A;
+  --shadow: 0 1px 2px rgba(20,25,26,.05), 0 8px 24px rgba(20,25,26,.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1313;
+    --surface: #161C1C;
+    --surface-sunk: #1D2525;
+    --ink: #E7EDEC;
+    --ink-soft: #A9B6B5;
+    --ink-faint: #7D8B8A;
+    --rule: #293333;
+    --accent: #59C5B9;
+    --accent-soft: #16302E;
+    --warn: #D9A44F;
+    --warn-soft: #2E2617;
+    --stop: #E08277;
+    --stop-soft: #331C19;
+    --add-bg: #13291F;
+    --add-ink: #7FCFA3;
+    --del-bg: #2C1A18;
+    --del-ink: #E29288;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1313;
+  --surface: #161C1C;
+  --surface-sunk: #1D2525;
+  --ink: #E7EDEC;
+  --ink-soft: #A9B6B5;
+  --ink-faint: #7D8B8A;
+  --rule: #293333;
+  --accent: #59C5B9;
+  --accent-soft: #16302E;
+  --warn: #D9A44F;
+  --warn-soft: #2E2617;
+  --stop: #E08277;
+  --stop-soft: #331C19;
+  --add-bg: #13291F;
+  --add-ink: #7FCFA3;
+  --del-bg: #2C1A18;
+  --del-ink: #E29288;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: Bitter, "Source Serif 4", Georgia, serif; text-wrap: balance; }
+code, .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+a { color: var(--accent); }
+
+.shell { max-width: 900px; margin: 0 auto; padding: 0 20px 96px; }
+
+.masthead { border-bottom: 1px solid var(--rule); padding: 40px 0 26px; margin-bottom: 36px; }
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-faint);
+  display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+}
+h1 { font-size: clamp(30px, 4.4vw, 44px); line-height: 1.1; font-weight: 600; margin: 16px 0 10px; letter-spacing: -.015em; }
+.standfirst { max-width: 62ch; color: var(--ink-soft); font-size: 19px; margin: 0; }
+.masthead-meta { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 22px; font-size: 14px; color: var(--ink-soft); }
+.masthead-meta b { color: var(--ink); font-weight: 600; }
+
+.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin: 0 0 10px; }
+.sec-head h2 { font-size: 24px; margin: 0; font-weight: 600; }
+.sec-head .count { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+.sec-intro { color: var(--ink-soft); max-width: 68ch; margin: 14px 0 28px; }
+section { margin-bottom: 60px; }
+
+.hunk {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.hunk-head {
+  display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface-sunk);
+}
+.hunk-head .path { font-family: "JetBrains Mono", monospace; font-size: 12.5px; color: var(--ink); word-break: break-all; }
+.hunk-head .loc { font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: var(--ink-faint); }
+.hunk-head .tag {
+  margin-left: auto;
+  font-family: "JetBrains Mono", monospace; font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 2px;
+  background: var(--accent-soft); color: var(--accent); white-space: nowrap;
+}
+.hunk-head .tag.defer { background: var(--warn-soft); color: var(--warn); }
+.hunk-head .tag.ask { background: var(--stop-soft); color: var(--stop); }
+
+.hunk-body { padding: 16px 18px 18px; }
+.hunk-body h3 { font-size: 17.5px; margin: 0 0 6px; font-weight: 600; }
+.hunk-body p { margin: 0 0 12px; max-width: 68ch; font-size: 16px; }
+.hunk-body p.why { color: var(--ink-soft); }
+
+.diff {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  overflow-x: auto;
+  margin: 4px 0 14px;
+  background: var(--surface-sunk);
+}
+.diff div { padding: 3px 12px; white-space: pre-wrap; word-break: break-word; }
+.diff .ctx { color: var(--ink-faint); }
+.diff .del { background: var(--del-bg); color: var(--del-ink); }
+.diff .add { background: var(--add-bg); color: var(--add-ink); }
+.diff .gap { color: var(--ink-faint); background: transparent; opacity: .7; }
+
+.respond { border-top: 1px dashed var(--rule); padding-top: 14px; }
+.verdicts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.verdicts label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  border: 1px solid var(--rule); border-radius: 2px;
+  padding: 4px 10px; cursor: pointer; color: var(--ink-soft); user-select: none;
+}
+.verdicts input { position: absolute; opacity: 0; width: 0; height: 0; }
+.verdicts label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.verdicts label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+textarea {
+  width: 100%; min-height: 64px; resize: vertical;
+  background: var(--surface-sunk); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 2px;
+  padding: 10px 12px;
+  font-family: "Source Serif 4", Georgia, serif; font-size: 15.5px; line-height: 1.5;
+}
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+
+.answered {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 3px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+}
+.answered h3 { font-size: 16.5px; margin: 0 0 6px; }
+.answered p { margin: 0 0 10px; max-width: 68ch; font-size: 16px; }
+.answered p:last-of-type { margin-bottom: 0; }
+.answered .q { color: var(--ink-faint); font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .09em; text-transform: uppercase; }
+
+.actions {
+  position: sticky; bottom: 0;
+  background: linear-gradient(to top, var(--paper) 62%, transparent);
+  padding: 22px 0 20px;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center; z-index: 5;
+}
+button {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px; letter-spacing: .07em; text-transform: uppercase;
+  padding: 10px 16px; border-radius: 2px;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--paper); cursor: pointer;
+}
+button.ghost { background: transparent; color: var(--accent); }
+button:hover { filter: brightness(1.08); }
+button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.status { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-soft); }
+#out { width: 100%; min-height: 300px; font-family: "JetBrains Mono", monospace; font-size: 12.5px; margin-top: 12px; }
+#outwrap[hidden] { display: none; }
+
+footer { border-top: 1px solid var(--rule); padding-top: 18px; color: var(--ink-faint); font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <div class="eyebrow">
+      <span>DraftHorse · patch review</span>
+      <span>·</span>
+      <a href="https://github.com/dilberryhoundog/agent-library/issues/45">Issue #45</a>
+      <span>·</span>
+      <span>branch <code>drafthorse-condition-precedence</code></span>
+      <span>·</span>
+      <span>base <code>6eb22e4</code></span>
+    </div>
+    <h1>The De-hold Patch</h1>
+    <p class="standfirst">Every proposed edit, as a diff against the working tree. Six hunks live, four deferred behind the spec settling, one waiting on a branch decision. Nothing applied.</p>
+    <div class="masthead-meta">
+      <span><b>Live now</b> 2 files, 5 hunks</span>
+      <span><b>Deferred</b> spec-check + saddler</span>
+      <span><b>Net</b> −4 rules, +1 class</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="sec-head"><h2>Settled from rev 2</h2><span class="count">4 answers</span></div>
+    <p class="sec-intro">Your calls, folded in. Two open ones get my recommendation and a box.</p>
+
+    <div class="answered">
+      <p class="q">Q1 — where does the class live</p>
+      <h3>steps.md, not conventions.md</h3>
+      <p><code>conventions.md</code> carries the two dispositions only — hard bail, claim the remainder. The <b>class catalogue</b> that maps states onto them lives in <code>steps.md § Dispositions</code>, and it is declared open: "add classes as they are identified." The new class goes where the other four already are. Applied in hunk 1.</p>
+    </div>
+
+    <div class="answered">
+      <p class="q">Q2 — User gates: trim or delete</p>
+      <h3>Delete the paragraph, keep the section</h3>
+      <p>The revocability paragraph is the whole de-hold rule in prose, worked example included — it goes. The paragraph above it defines what a gate <i>is</i> and why its finished conditions are compound, which nothing else in the framework states. Deleting the section would take a live definition with a dead rule. Hunk 2 deletes one paragraph.</p>
+    </div>
+
+    <div class="answered">
+      <p class="q">Q4 — merge order</p>
+      <h3>Land the two doc edits, hold the checker</h3>
+      <p>Your rule — settle the spec, then regenerate — sequences it. Hunks 1–5 land here and merge to <code>main</code>; <code>drafthorse-step-anatomy</code> syncs and resolves. The spec-check hunks wait until #38's rewrite is also settled, then <b>one</b> regeneration of saddler covers both changes instead of two passes over the same 64 lines.</p>
+      <p>So: waiting is right for the checker, not for the docs.</p>
+    </div>
+
+    <div class="answered">
+      <p class="q">Q3 — the issue</p>
+      <h3>Untouched, as asked</h3>
+      <p>#45 stays as filed. When it moves, the pivot goes on as a comment rather than a body rewrite, so the reasoning that produced the smaller change stays readable.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Live hunks</h2><span class="count">2 files · 5 hunks</span></div>
+    <p class="sec-intro">Applicable to this branch now.</p>
+
+    <article class="hunk" id="h1">
+      <div class="hunk-head">
+        <span class="path">docs/drafthorse/framework/steps.md</span>
+        <span class="loc">§ Dispositions · after L136</span>
+        <span class="tag">add class</span>
+      </div>
+      <div class="hunk-body">
+        <h3>1 · A claimable class for withdrawn approval</h3>
+        <p class="why">Your wording, sharpened to a class name. Generalised so it covers the neighbouring cases — a revoked sign-off, a changed mind, a user-directed restart — without enumerating them.</p>
+        <div class="diff">
+          <div class="ctx">- **Insufficient references** — hard bail. A cited reference is missing, unreadable…</div>
+          <div class="ctx">- **Named recoverable failure** — claim the remainder. A failure the document describes in advance, which stops the working step but not the run. Report what failed and what the error step did in its place.</div>
+          <div class="add">+ - **User approval problem** — claim the remainder. A step requiring user approval may have that approval revoked, or similar. Restart the skill from the appropriate step, revoking every approval after it.</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H1 — steps.md new class">
+            <label><input type="radio" name="v-h1" value="approve">Approve</label>
+            <label><input type="radio" name="v-h1" value="revise">Revise</label>
+            <label><input type="radio" name="v-h1" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H1 — steps.md new class" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h2">
+      <div class="hunk-head">
+        <span class="path">docs/drafthorse/framework/steps.md</span>
+        <span class="loc">§ User gates · L110</span>
+        <span class="tag">delete</span>
+      </div>
+      <div class="hunk-body">
+        <h3>2 · The revocability cascade goes</h3>
+        <p class="why">Both halves are dead: the cascade is what the existing start conditions already do, and the parenthetical is a de-hold worked example teaching the shape being retired. The paragraph above it stays.</p>
+        <div class="diff">
+          <div class="ctx">A **gate** is a step whose completion requires the user's approval of an artifact the step produced. Gates are compound: the agent writes the artifact's own completion criteria into the step's finished conditions alongside the approval.</div>
+          <div class="gap">&nbsp;</div>
+          <div class="del">- Approval is state, and it is revocable: revising an approved artifact un-approves it and everything downstream of it, so the owning step's start condition holds again. Gate-shaped start conditions ("X is approved and Y has not been approved") depend on this rule.</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H2 — steps.md user gates">
+            <label><input type="radio" name="v-h2" value="approve">Approve</label>
+            <label><input type="radio" name="v-h2" value="revise">Revise</label>
+            <label><input type="radio" name="v-h2" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H2 — steps.md user gates" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h3">
+      <div class="hunk-head">
+        <span class="path">extensions/skills/drafthorse/references/condition-writing.md</span>
+        <span class="loc">§ Start conditions · L30</span>
+        <span class="tag">delete</span>
+      </div>
+      <div class="hunk-body">
+        <h3>3 · De-hold, deleted whole</h3>
+        <p class="why">The rule itself. No replacement bullet.</p>
+        <div class="diff">
+          <div class="ctx">- **Name the state, not the predecessor** — "a unit has commits in range but no verdict recorded", not "after the range step"…</div>
+          <div class="del">- - **De-hold** — the condition must stop holding once the step's work is done, or the step re-admits itself forever. Even a first step needs its closing clause ("the skill has been invoked *and requirements are not yet established*").</div>
+          <div class="ctx">- **Claim the negative space deliberately** — the conditions across all steps should cover every state the skill can be in…</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H3 — condition-writing de-hold">
+            <label><input type="radio" name="v-h3" value="approve">Approve</label>
+            <label><input type="radio" name="v-h3" value="revise">Revise</label>
+            <label><input type="radio" name="v-h3" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H3 — condition-writing de-hold" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h4">
+      <div class="hunk-head">
+        <span class="path">extensions/skills/drafthorse/references/condition-writing.md</span>
+        <span class="loc">§ Start conditions · L32</span>
+        <span class="tag">reword</span>
+      </div>
+      <div class="hunk-body">
+        <h3>4 · Loops: say what ends them</h3>
+        <p class="why">Your note. With de-hold gone the loop needs its terminator named, and it is the step's own finished condition — the same fact that ends any step, so no new rule.</p>
+        <div class="diff">
+          <div class="del">- - **Loops are re-holding conditions** — a per-item step's condition simply holds again for the next item ("an action not yet run, and no refusal has ended the run"). No loop syntax exists or is needed.</div>
+          <div class="add">+ - **Loops are re-holding conditions** — a per-item step's condition simply holds again for the next item ("an action not yet run, and no refusal has ended the run"). No loop syntax exists or is needed, and the step's finished condition is what ends the loop.</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H4 — condition-writing loops">
+            <label><input type="radio" name="v-h4" value="approve">Approve</label>
+            <label><input type="radio" name="v-h4" value="revise">Revise</label>
+            <label><input type="radio" name="v-h4" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H4 — condition-writing loops" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h5">
+      <div class="hunk-head">
+        <span class="path">extensions/skills/drafthorse/references/condition-writing.md</span>
+        <span class="loc">§ Worked examples · L56</span>
+        <span class="tag">reword</span>
+      </div>
+      <div class="hunk-body">
+        <h3>5 · The gate example loses its de-hold tail</h3>
+        <p class="why">The trailing "and …" is the ellipsis a builder fills with the negated finish. Without it the example says only what it means to say: the approval is the state.</p>
+        <div class="diff">
+          <div class="del">- - Entry after a gate: "The user has approved X (with any edits applied), and …" — the approval is the state.</div>
+          <div class="add">+ - Entry after a gate: "The user has approved X (with any edits applied)" — the approval is the state.</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H5 — condition-writing worked example">
+            <label><input type="radio" name="v-h5" value="approve">Approve</label>
+            <label><input type="radio" name="v-h5" value="revise">Revise</label>
+            <label><input type="radio" name="v-h5" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H5 — condition-writing worked example" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Needs a branch decision</h2><span class="count">1 hunk</span></div>
+    <p class="sec-intro">Your rev-2 note: the deleted prose should go back, adjusted, inside <code>+Handle a Problem</code> as claim-the-remainder guidance. Agreed — but the slot it currently sits in is the one #38 retires, so where the edit lands is a branch question.</p>
+
+    <article class="hunk" id="h6">
+      <div class="hunk-head">
+        <span class="path">extensions/skills/drafthorse/SKILL.md</span>
+        <span class="loc">+Handle a Problem</span>
+        <span class="tag ask">which branch?</span>
+      </div>
+      <div class="hunk-body">
+        <h3>6 · Move the guidance into the engagement</h3>
+        <p class="why">The rule is not in the step today — it is in a machinery slot that routes, which is why it vanished with the slot on the other branch. As engagement prose it survives the refactor and reads where an agent already is.</p>
+        <div class="diff">
+          <div class="del">- #### Suggested next actions:</div>
+          <div class="del">-</div>
+          <div class="del">- Resume the phase the user chose — revising an approved artifact un-approves it and everything downstream of it, so that phase's start condition holds again — or end the build.</div>
+          <div class="del">-</div>
+          <div class="ctx">### Surface the Problem:</div>
+          <div class="gap">&nbsp;</div>
+          <div class="ctx">Tell the user plainly what happened, which phase it arose in, what state the build is in, and what the options are.</div>
+          <div class="add">+</div>
+          <div class="add">+ Where the problem is a withdrawn approval, claim the remainder: restart from the phase the user chose and revoke every approval after it. Otherwise end the build.</div>
+        </div>
+        <p><b>Two routes.</b> Apply here and the slot deletion collides with #38's own removal of it. Or hand the added sentence to <code>drafthorse-step-anatomy</code>, where the slot is already gone and only the addition is needed — one clean line, no conflict. Second route recommended.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="H6 — SKILL.md handle a problem">
+            <label><input type="radio" name="v-h6" value="here">Apply here</label>
+            <label><input type="radio" name="v-h6" value="other">Hand to #38 branch</label>
+            <label><input type="radio" name="v-h6" value="revise">Revise wording</label>
+          </div>
+          <textarea data-item="H6 — SKILL.md handle a problem" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Deferred — checker</h2><span class="count">4 hunks + regeneration</span></div>
+    <p class="sec-intro">Held until the spec settles, per your rule. Shown so the shape is agreed now and the pass is mechanical later.</p>
+
+    <article class="hunk" id="h7">
+      <div class="hunk-head">
+        <span class="path">docs/drafthorse/drafthorse-spec-check.md</span>
+        <span class="loc">L108 · L110 · L119</span>
+        <span class="tag defer">deferred</span>
+      </div>
+      <div class="hunk-body">
+        <h3>7 · Condition Checks: one deletion, one reword, one deletion</h3>
+        <div class="diff">
+          <div class="del">- - **De-hold** — the condition must stop holding once the step's work is done, or the step re-admits itself forever. Even a first step needs its closing clause ("…and requirements are not yet established").</div>
+          <div class="gap">&nbsp;</div>
+          <div class="del">- - **Loops are re-holding conditions** — a per-item step's condition simply holds again for the next item; no loop syntax exists. A loop expressed any other way is a finding.</div>
+          <div class="add">+ - **Loops are re-holding conditions** — a per-item step's condition simply holds again for the next item, and the step's finished condition ends the loop; no loop syntax exists. A loop expressed any other way is a finding.</div>
+          <div class="gap">&nbsp;</div>
+          <div class="del">- - **Approval is revocable state** — revising an approved artifact un-approves it and everything downstream, so the owning step's start condition holds again; gate-shaped start conditions ("X approved and Y not approved") depend on this and must not fight it.</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H7 — spec-check condition checks">
+            <label><input type="radio" name="v-h7" value="approve">Approve</label>
+            <label><input type="radio" name="v-h7" value="revise">Revise</label>
+            <label><input type="radio" name="v-h7" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H7 — spec-check condition checks" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h8">
+      <div class="hunk-head">
+        <span class="path">docs/drafthorse/drafthorse-spec-check.md</span>
+        <span class="loc">+Audit the Steps · L283</span>
+        <span class="tag defer">deferred</span>
+      </div>
+      <div class="hunk-body">
+        <h3>8 · The step walk, where a deleted check comes back to life</h3>
+        <p class="why">This line is what the auditing agent performs. Leaving <code>de-hold</code> in it reinstates the rule regardless of the References — already on record as happening once in this repo.</p>
+        <div class="diff">
+          <div class="del">- Take the steps one at a time: purpose line, start condition (state terms, de-hold), finished condition…</div>
+          <div class="add">+ Take the steps one at a time: purpose line, start condition (state terms), finished condition…</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H8 — spec-check step walk">
+            <label><input type="radio" name="v-h8" value="approve">Approve</label>
+            <label><input type="radio" name="v-h8" value="revise">Revise</label>
+            <label><input type="radio" name="v-h8" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H8 — spec-check step walk" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h9">
+      <div class="hunk-head">
+        <span class="path">docs/drafthorse/drafthorse-spec-check.md</span>
+        <span class="loc">§ Condition Checks · new bullet</span>
+        <span class="tag defer">deferred</span>
+      </div>
+      <div class="hunk-body">
+        <h3>9 · Guard the false positive</h3>
+        <p class="why">Auditors trained on de-hold will read a bare start condition as incomplete. One line stops the finding.</p>
+        <div class="diff">
+          <div class="add">+ - **No closing clause required** — a start condition states the situation and stops. It carries no negated copy of the step's own finished condition; demanding one is a false positive.</div>
+        </div>
+        <div class="respond">
+          <div class="verdicts" data-item="H9 — spec-check false positive guard">
+            <label><input type="radio" name="v-h9" value="approve">Approve</label>
+            <label><input type="radio" name="v-h9" value="revise">Revise</label>
+            <label><input type="radio" name="v-h9" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H9 — spec-check false positive guard" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+
+    <article class="hunk" id="h10">
+      <div class="hunk-head">
+        <span class="path">extensions/agents/drafthorse-saddler.md</span>
+        <span class="loc">whole document</span>
+        <span class="tag defer">deferred</span>
+      </div>
+      <div class="hunk-body">
+        <h3>10 · Regenerate, do not edit</h3>
+        <p>No diff. Saddler is generated from the spec-check — preamble kept, remaining sections replaced — after #38 and this change are both settled, in one pass.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="H10 — saddler regeneration">
+            <label><input type="radio" name="v-h10" value="approve">Approve</label>
+            <label><input type="radio" name="v-h10" value="revise">Revise</label>
+            <label><input type="radio" name="v-h10" value="drop">Drop</label>
+          </div>
+          <textarea data-item="H10 — saddler regeneration" placeholder="Comment…"></textarea>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Anything else</h2></div>
+    <textarea data-item="General" placeholder="Notes on the patch as a whole…"></textarea>
+  </section>
+
+  <div class="actions">
+    <button id="copy">Copy comments</button>
+    <button id="show" class="ghost">Show as text</button>
+    <span class="status" id="status"></span>
+  </div>
+
+  <div id="outwrap" hidden>
+    <textarea id="out" readonly aria-label="Comments as plain text"></textarea>
+  </div>
+
+  <footer>
+    Diffs taken against <code>drafthorse-condition-precedence</code> at <code>6eb22e4</code>. Nothing applied — the working tree is clean.
+  </footer>
+</div>
+
+<script>
+function collect() {
+  const lines = ["## De-hold patch — comments", ""];
+  document.querySelectorAll("article.hunk, section > textarea").forEach(node => {
+    if (node.tagName === "TEXTAREA") {
+      if (node.value.trim()) { lines.push("**General**", "- " + node.value.trim().replace(/\n+/g, " "), ""); }
+      return;
+    }
+    const title = node.querySelector("h3")?.textContent.trim() || "";
+    const picked = node.querySelector(".verdicts input:checked");
+    const notes = [...node.querySelectorAll(".respond textarea")].filter(t => t.value.trim());
+    if (!picked && !notes.length) return;
+    lines.push("**" + title + "**");
+    if (picked) lines.push("- Verdict: " + picked.value);
+    notes.forEach(t => lines.push("- " + t.value.trim().replace(/\n+/g, " ")));
+    lines.push("");
+  });
+  if (lines.length === 2) lines.push("_No comments entered._");
+  return lines.join("\n").trim();
+}
+
+const status = document.getElementById("status");
+const outwrap = document.getElementById("outwrap");
+const out = document.getElementById("out");
+
+document.getElementById("copy").addEventListener("click", async () => {
+  const text = collect();
+  try {
+    await navigator.clipboard.writeText(text);
+    status.textContent = "Copied — paste into the chat.";
+  } catch (e) {
+    out.value = text;
+    outwrap.hidden = false;
+    out.select();
+    status.textContent = "Clipboard blocked — select the text below and copy.";
+  }
+});
+
+document.getElementById("show").addEventListener("click", () => {
+  out.value = collect();
+  outwrap.hidden = !outwrap.hidden;
+  status.textContent = outwrap.hidden ? "" : "Select all and copy.";
+  if (!outwrap.hidden) out.focus();
+});
+</script>
