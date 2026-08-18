@@ -6,28 +6,28 @@ Branch workspace context for Claude and humans. Not read by the dev-workspace sc
 
 ## Branch
 
-**Name:**
-**Started:**
+**Name:** drafthorse-corpus-sweep
+**Started:** 2026-08-19
 **Status:**
 
-- [ ] In Progress
+- [x] In Progress
 - [ ] Discard (workspace and branch abandoned)
 - [ ] Complete (ready to merge)
 
 ## Purpose
 
-%% Claude: write a brief purpose statement when creating the workspace %%
+The atomic corpus sweep the DraftHorse spec upgrade left outstanding (waves 5, 5b, 6, 6b of `dev/branches/drafthorse-step-anatomy/plans/00-INDEX.md`). Per step across every stamped document: new preamble, slot removed, directive, declared function, error-step vocabulary, de-hold start conditions reshaped per #45, condition blocks to lists, load-bearing slot repairs, plus #40's versioning fixes, #42's conversion-mode items, and #39's set-level checker reporting. Findings presented in a single HTML review artifact for per-site approval.
 
 ## Workflow
 
 - [ ] Quick (direct implementation)
 - [ ] Single plan (plan once, execute)
-- [ ] Multi-stage plan (iterative planning)
+- [x] Multi-stage plan (iterative planning)
 
 ## Track Issues
 
-- [ ] Track GitHub issues
-    - <!-- Add issue numbers: #123, #456 -->
+- [x] Track GitHub issues
+    - #38, #37, #40, #42, #39 (decisions of record also in closed #45)
 
 ## Testing
 
