@@ -87,9 +87,9 @@ Work out with the user, from `$ARGUMENTS` and the conversation:
 
 - **Purpose** — the one- or two-line statement of what the document is for.
 - **Mode** — a new build, or a conversion of an existing document (the path to it).
-- **Invocation surface** — model-invoked, user-invoked, or executor-only; this shapes the description and frontmatter.
+- **Invocation surface** — model-invoked, user-invoked, or executor-only (an executor document: invoked only by another agent as part of a fixed pipeline); this shapes the description and frontmatter.
 - **Scope** — what the skill covers and what it deliberately refuses.
-- **Destination** — where the finished document lives.
+- **Destination** — where the finished document lives. In conversion mode, capture the source path and the output path separately where they differ (the common case: they are the same path).
 - **Source material** — the reference terrain: existing documents, commands, formats, examples, live state the steps will need.
 
 ## +Collect References
@@ -193,7 +193,7 @@ Write the document from the approved parts.
 
 ### Write:
 
-Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. Write every step's conditions per [Condition Writing](references/condition-writing.md). Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Keep the steps preamble verbatim; keep the error step. Write each handover doc the map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps —
+Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. In conversion mode the copy target is the sibling draft path (`<destination>.draft.md`) — never overwrite the source before acceptance; it stays intact as source material until the build completes. Write every step's conditions per [Condition Writing](references/condition-writing.md). Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Keep the steps preamble verbatim; keep the error step. Write each handover doc the map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps —
 and cite it from its parent step in the handover citation form, `[Name — Handover](name-handover.md)`.
 
 ## +Review
@@ -232,11 +232,12 @@ Present the reviewed draft for the final gate and hand it over.
 
 - the user accepts the document
 - the document still passes the scenario-walk with the user's edits folded in
+- in conversion mode, the accepted document stands at the destination and no sibling draft remains
 - the build is complete
 
 ### Present:
 
-Show the user the draft with a short summary — the steps, the reference placements, the invariants, and any judgment calls made along the way. Iterate their edits directly into the document.
+Show the user the draft with a short summary — the steps, the reference placements, the invariants, and any judgment calls made along the way. Iterate their edits directly into the document. In conversion mode, on acceptance the draft replaces the original at the destination and the sibling draft file is removed.
 
 ## +Handle a Problem
 
@@ -270,5 +271,6 @@ Terms used in this skill:
 - **Step Candidate** — A piece of work extracted from the reference terrain or the requirements — ordered actions, conditionals, anything the agent does — awaiting shaping into a step.
 - **Gap** — A reference the document needs but that does not exist yet — named and classified during collection, produced in `+Fill Reference Gaps`.
 - **Mode** — Whether the build creates a new document or converts an existing one.
+- **Executor Document** — A document invoked only by another agent as part of a fixed pipeline (`user-invocable: false`); its description warns off general usage, and its reporting step may fold in the error step's role per the executor exception.
 - **Handover Doc** — A `harness-format: DraftHorse, Handover` document in the skill's root folder, its name ending `-handover`, whose steps a parent step in the main document folds into the run as child steps — the extraction target for heavy, optional, or side-branching work.
 - **Parent Step** — The step in the main document that folds a handover doc in, owns the logic around it, and reads success from the state the handover leaves behind.
