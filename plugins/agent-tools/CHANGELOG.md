@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-08-19
+
+### Added
+
+- Step functions — a catalogue of six step shapes (error, success, looping, routing, dormant, handover), each with a fixed declaration string a step copies verbatim. Declared on a bolded line beneath the step's directive, it tells a reading agent how the step behaves before it reads the conditions. The catalogue ships as `references/step-functions.md` and is cited at the moment steps are written.
+- `drafthorse-saddler` gains a Step Function Checks group — one test per shape, opening with a sweep for steps performing a catalogued shape without declaring it.
+
+### Changed
+
+- A step opens with a **directive** naming the agent's task on entering it, rather than a description of the step. Both templates and the checker follow; a general description is now a finding.
+- The steps preamble is telegraphic prose rather than a blockquote list. Documents built at earlier versions no longer match it verbatim and will report a preamble finding until updated.
+- Exit steps are no longer mandatory. `The run resolves` replaces presence with resolution, judged on the scenario walk — an exit step and the agent's own handling are both legitimate.
+- Terminology settles on **error step**. *error drain* and *problem step* are retired throughout the skill, the templates and the checker.
+- A start condition names an artifact's state and lets the approval behind it be implied ("a complete draft exists" carries both the gate and the work). Naming another step remains forbidden.
+- Condition guidance gains a rule that a finished condition covers every outcome the step can end on, so the destinations claiming a failure stay reachable.
+
+### Removed
+
+- `#### Suggested next actions:` is retired; its presence is now a finding. Its work is rehomed — termination into an exit step's finished conditions via the Success declaration, the loop instruction into the loops rule, and the bail into the error step's claimed remainder.
+- The **De-hold** rule is retired. A start condition no longer carries a negated copy of its own finished condition, which was one meaning in two homes and blocked an upstream revision from re-opening the work below it.
+
 ## [0.5.2] - 2026-08-02
 
 ### Changed
