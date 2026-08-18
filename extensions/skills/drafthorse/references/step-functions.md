@@ -1,13 +1,3 @@
-<!--
-TODO: Improve this reference by including an example of the step machinery, that a step of a particular shape might have. 
-This will take more of the guess work out of the agents process as DraftHorse steps are built. 
-2 examples of this might be...
-- Routing step example displays the "Agent decision" machinery with placeholder text
-- Error step is prebuilt, these are mostly the same across all instances.
-
-A good strategy to complete this todo would be to search the corpus for instances of steps taking these shapes and reverse engineer their machinery examples.
--->
-
 # Step Functions
 
 The catalogue of step shapes. A step declares its function on a bolded line beneath its directive, so a reading agent knows how to interact with the step, before it reads the conditions.
