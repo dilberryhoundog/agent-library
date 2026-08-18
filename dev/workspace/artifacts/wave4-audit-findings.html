@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wave 4 Audit — Findings</title>
+<style>
+:root { --bg:#fbfaf8; --panel:#fff; --ink:#1c1b19; --muted:#6b6862; --line:#e2ded7;
+  --del-bg:#fdecec; --del-ink:#8a1f1f; --add-bg:#e9f6ec; --add-ink:#14622c;
+  --accent:#7a5c2e; --warn:#8a1f1f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6; --line:#33313c;
+  --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab;
+  --accent:#d5b27a; --warn:#ff9c9c; } }
+:root[data-theme="dark"] { --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6;
+  --line:#33313c; --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab;
+  --accent:#d5b27a; --warn:#ff9c9c; }
+* { box-sizing:border-box; }
+body { margin:0; padding:2rem 1.25rem 7rem; background:var(--bg); color:var(--ink);
+  font:16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width:64rem; margin:0 auto; }
+header { border-bottom:2px solid var(--line); padding-bottom:1.25rem; margin-bottom:1.5rem; }
+h1 { font-size:1.5rem; margin:0 0 .4rem; letter-spacing:-.01em; }
+.sub { color:var(--muted); font-size:.9rem; margin:0; }
+.verdict { display:inline-block; font-size:.72rem; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--warn); border:1px solid var(--warn); border-radius:3px; padding:.15rem .5rem; margin-left:.5rem; }
+h2.sec { font-size:.8rem; letter-spacing:.09em; text-transform:uppercase; color:var(--accent);
+  margin:2.5rem 0 1rem; padding-bottom:.4rem; border-bottom:1px solid var(--line);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+.note { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
+  padding:.9rem 1.1rem; margin:1.25rem 0 1.5rem; font-size:.9rem; }
+.note b { color:var(--accent); }
+.note ul { margin:.5rem 0 0; padding-left:1.2rem; }
+article { background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:1.1rem 1.25rem 1.25rem; margin-bottom:1.25rem; }
+h3 { font-size:1rem; margin:0 0 .3rem; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+.check { display:inline-block; font-size:.68rem; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--muted); border:1px solid var(--line); border-radius:3px; padding:.1rem .4rem;
+  margin-left:.4rem; vertical-align:middle; }
+.why { color:var(--muted); font-size:.875rem; margin:.35rem 0 .9rem; }
+.field { font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted);
+  margin:.9rem 0 .3rem; }
+.diff { border:1px solid var(--line); border-radius:4px; overflow-x:auto;
+  font:13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.diff div { padding:.3rem .7rem; white-space:pre-wrap; word-break:break-word; }
+.del { background:var(--del-bg); color:var(--del-ink); }
+.add { background:var(--add-bg); color:var(--add-ink); }
+.controls { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:1rem;
+  padding-top:.9rem; border-top:1px solid var(--line); }
+.controls label { font-size:.85rem; display:inline-flex; align-items:center; gap:.3rem; cursor:pointer; }
+label.cmt { display:block; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--muted); margin:.9rem 0 .35rem; }
+textarea { width:100%; min-height:3.5rem; resize:vertical; padding:.6rem .7rem; background:var(--bg);
+  color:var(--ink); border:1px solid var(--line); border-radius:4px;
+  font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+textarea:focus { outline:2px solid var(--accent); outline-offset:-1px; }
+.bar { position:sticky; bottom:0; background:var(--panel); border-top:1px solid var(--line);
+  padding:.9rem 1.25rem; margin:2rem -1.25rem -7rem; display:flex; gap:.75rem;
+  align-items:center; flex-wrap:wrap; }
+button { font:inherit; font-size:.9rem; padding:.5rem 1rem; border-radius:4px; cursor:pointer;
+  border:1px solid var(--accent); background:var(--accent); color:var(--panel); }
+button.ghost { background:transparent; color:var(--accent); }
+#status { color:var(--muted); font-size:.85rem; }
+#out { width:100%; min-height:14rem; margin-top:1rem; display:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Wave 4 audit — findings and proposed fixes<span class="verdict">revise</span></h1>
+  <p class="sub">Document under review: <code>extensions/skills/drafthorse/SKILL.md</code>, audited by hand against <code>docs/drafthorse/drafthorse-spec-check.md</code>. Approve, reject or flag each fix; nothing is applied yet.</p>
+</header>
+
+<div class="note">
+  <b>Scenario-walk passed</b>
+  <p style="margin:.5rem 0 0">Nine steps, every start condition naming durable artifact state, no de-hold. Walked the happy path, a late gap after approval, a withdrawn map approval, and entry to the error step. The withdrawal case behaves as #45 predicted — the subtree below the withdrawn approval goes ineligible, the owning step stays eligible, the run re-grows in order. <code>+Deliver</code> terminates. No unclaimed state.</p>
+  <p style="margin:.6rem 0 0">Every finding lands on the document. None on the checker, none on the framework.</p>
+</div>
+
+<h2 class="sec">F1 — Condition block shape · all nine steps</h2>
+
+<div class="note">
+  <b>The check</b> — "the conditions to start or finish a step are always a markdown list, one condition per list item. A paragraph or prose-based statement is a finding."
+  <p style="margin:.5rem 0 0">Every block in this document is prose. Eighteen of them. Converting also settles <b>One condition per item</b>, since several sentences carry three to six separate observations. Each step is proposed separately below because the splits are judgment, not mechanics.</p>
+</div>
+
+<article>
+  <h3>C1 &nbsp;+Gather Requirements</h3>
+  <p class="why">Six observations in one sentence. "Asked for, not assumed" is an instruction, so it stays in the engagement, which already says "work out with the user" — the conditions carry it as "with the user".</p>
+  <div class="field">Start</div>
+  <div class="diff">
+    <div class="del">- The skill has been invoked.</div>
+    <div class="add">+ - the skill has been invoked</div>
+  </div>
+  <div class="field">Finished</div>
+  <div class="diff">
+    <div class="del">- Purpose, mode, invocation surface, scope, destination, and the locations of all source material are established with the user — asked for, not assumed.</div>
+    <div class="add">+ - the purpose is established with the user</div>
+    <div class="add">+ - the mode is established — a new build, or a conversion of a named document</div>
+    <div class="add">+ - the invocation surface is established — model-invoked, user-invoked, or executor-only</div>
+    <div class="add">+ - the scope is established, including what the skill refuses</div>
+    <div class="add">+ - the destination is established</div>
+    <div class="add">+ - every piece of source material is located</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="C1" value="approved" checked> Approve</label>
+    <label><input type="radio" name="C1" value="rejected"> Reject</label>
+    <label><input type="radio" name="C1" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="c1">Comments</label>
+  <textarea id="c1" data-label="C1 · +Gather Requirements" data-radio="C1"></textarea>
+</article>
+
+<article>
+  <h3>C2 &nbsp;+Collect References</h3>
+  <p class="why">Gate. Approval sits last, after the substantive conditions it must not launder.</p>
+  <div class="field">Start</div>
+  <div class="diff">
+    <div class="del">- Requirements are established.</div>
+    <div class="add">+ - the requirements are established</div>
+  </div>
+  <div class="field">Finished</div>
+  <div class="diff">
+    <div class="del">- The user has approved the reference set and step-candidate list — and the set stands on its own merits: every piece of source material harvested and classified, every needed-but-missing reference recorded as a gap, every extracted candidate naming its source, and nothing procedural left unaudited inside a reference.</div>
+    <div class="add">+ - every piece of source material is harvested and classified</div>
+    <div class="add">+ - every needed-but-missing reference is recorded as a gap</div>
+    <div class="add">+ - every extracted step candidate names its source</div>
+    <div class="add">+ - no reference holds unaudited procedural content</div>
+    <div class="add">+ - the user has approved the reference set and the step-candidate list</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="C2" value="approved" checked> Approve</label>
+    <label><input type="radio" name="C2" value="rejected"> Reject</label>
+    <label><input type="radio" name="C2" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="c2">Comments</label>
+  <textarea id="c2" data-label="C2 · +Collect References" data-radio="C2"></textarea>
+</article>
+
+<article>
+  <h3>C3 &nbsp;+Fill Reference Gaps</h3>
+  <p class="why">Start splits into two looks. Finished drops "complete" as redundant — every gap existing is what complete means.</p>
+  <div class="field">Start</div>
+  <div class="diff">
+    <div class="del">- The reference set is approved, and a reference the document needs is recorded as an unfilled gap.</div>
+    <div class="add">+ - the reference set is approved</div>
+    <div class="add">+ - a reference the document needs is recorded as an unfilled gap</div>
+  </div>
+  <div class="field">Finished</div>
+  <div class="diff">
+    <div class="del">- Every recorded gap exists in usable form and the reference set is complete and approved by the user.</div>
+    <div class="add">+ - every recorded gap exists in usable form</div>
+    <div class="add">+ - the user has approved the completed reference set</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="C3" value="approved" checked> Approve</label>
+    <label><input type="radio" name="C3" value="rejected"> Reject</label>
+    <label><input type="radio" name="C3" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="c3">Comments</label>
+  <textarea id="c3" data-label="C3 · +Fill Reference Gaps" data-radio="C3"></textarea>
+</article>
+
+<article>
+  <h3>C4 &nbsp;+Map the Steps</h3>
+  <div class="field">Start</div>
+  <div class="diff">
+    <div class="del">- The reference set is approved with no unfilled gaps.</div>
+    <div class="add">+ - the reference set is approved</div>
+    <div class="add">+ - no gap is left unfilled</div>
+  </div>
+  <div class="field">Finished</div>
+  <div class="diff">
+    <div class="del">- The user has approved the step map — and the map holds up on its own: every step candidate accounted for, every step atomic with one purpose, edges only at real boundaries (no over-splitting), every reference placed at a moment of use, and the success exit and error step present.</div>
+    <div class="add">+ - every step candidate is accounted for</div>
+    <div class="add">+ - every step is atomic, with one purpose</div>
+    <div class="add">+ - every edge sits at a real boundary</div>
+    <div class="add">+ - every reference is placed at a moment of use</div>
+    <div class="add">+ - the success exit and the error step are present</div>
+    <div class="add">+ - the user has approved the step map</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="C4" value="approved" checked> Approve</label>
+    <label><input type="radio" name="C4" value="rejected"> Reject</label>
+    <label><input type="radio" name="C4" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="c4">Comments</label>
+  <textarea id="c4" data-label="C4 · +Map the Steps" data-radio="C4"></textarea>
+</article>
+
+<article>
+  <h3>C5 &nbsp;+Set Invariants</h3>
+  <div class="field">Start</div>
+  <div class="diff">
+    <div class="del">- The step map is approved.</div>
+    <div class="add">+ - the step map is approved</div>
+  </div>
+  <div class="field">Finished</div>
+  <div class="diff">
+    <div class="del">- The user has approved the invariant set — and every invariant in it changes behaviour, sits at its correct scope, and covers each destructive or out-of-scope action the map exposes.</div>
+    <div class="add">+ - every invariant changes behaviour</div>
+    <div class="add">+ - every invariant sits at its correct scope</div>
+    <div class="add">+ - every destructive or out-of-scope action the map exposes is covered</div>
+    <div class="add">+ - the user has approved the invariant set</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="C5" value="approved" checked> Approve</label>
+    <label><input type="radio" name="C5" value="rejected"> Reject</label>
+    <label><input type="radio" name="C5" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="c5">Comments</label>
+  <textarea id="c5" data-label="C5 · +Set Invariants" data-radio="C5"></textarea>
+</article>
+
+<article>
+  <h3>C6 &nbsp;+Draft the Skill</h3>
+  <div class="field">Start</div>
+  <div class="diff">
+    <div class="del">- Invariants are approved.</div>
+    <div class="add">+ - the invariant set is approved</div>
+  </div>
+  <div class="field">Finished</div>
+  <div class="diff">
+    <div class="del">- The draft is written to the destination with every template placeholder resolved — no comment scaffolding remaining.</div>
+    <div class="add">+ - the draft is written to the destination</div>
+    <div class="add">+ - every template placeholder is resolved</div>
+    <div class="add">+ - no comment scaffolding remains</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="C6" value="approved" checked> Approve</label>
+    <label><input type="radio" name="C6" value="rejected"> Reject</label>
+    <label><input type="radio" name="C6" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="c6">Comments</label>
+  <textarea id="c6" data-label="C6 · +Draft the Skill" data-radio="C6"></textarea>
+</article>
+
+<article>
+  <h3>C7 &nbsp;+Review</h3>
+  <p class="why">"Every digest test passes" names the Conventions Digest — worth saying so, since F5 makes that a linked citation.</p>
+  <div class="field">Start</div>
+  <div class="diff">
+    <div class="del">- A complete draft exists.</div>
+    <div class="add">+ - a complete draft exists</div>
+  </div>
+  <div class="field">Finished</div>
+  <div class="diff">
+    <div class="del">- Every scenario routes cleanly, every digest test passes, and the fixes are folded into the draft.</div>
+    <div class="add">+ - every scenario routes cleanly</div>
+    <div class="add">+ - every Conventions Digest test passes</div>
+    <div class="add">+ - every fix the walk found is folded into the draft</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="C7" value="approved" checked> Approve</label>
+    <label><input type="radio" name="C7" value="rejected"> Reject</label>
+    <label><input type="radio" name="C7" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="c7">Comments</label>
+  <textarea id="c7" data-label="C7 · +Review" data-radio="C7"></textarea>
+</article>
+
+<article>
+  <h3>C8 &nbsp;+Deliver</h3>
+  <div class="field">Start</div>
+  <div class="diff">
+    <div class="del">- The draft has passed the scenario-walk.</div>
+    <div class="add">+ - the draft has passed the scenario-walk</div>
+  </div>
+  <div class="field">Finished</div>
+  <div class="diff">
+    <div class="del">- The user accepts the document — it still passes the scenario-walk with their edits folded in (re-walk anything an edit touched) — and the build is complete.</div>
+    <div class="add">+ - the user accepts the document</div>
+    <div class="add">+ - the document still passes the scenario-walk with the user's edits folded in</div>
+    <div class="add">+ - the build is complete</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="C8" value="approved" checked> Approve</label>
+    <label><input type="radio" name="C8" value="rejected"> Reject</label>
+    <label><input type="radio" name="C8" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="c8">Comments</label>
+  <textarea id="c8" data-label="C8 · +Deliver" data-radio="C8"></textarea>
+</article>
+
+<article>
+  <h3>C9 &nbsp;+Handle a Problem</h3>
+  <p class="why">Two genuinely alternative entry states, so the <code>OR</code> separator applies. The examples leave the condition and follow it as a sentence — the shape <code>classroom/SKILL.md</code> already uses.</p>
+  <div class="field">Start</div>
+  <div class="diff">
+    <div class="del">- Something has gone wrong, or a situation has arisen that no other step covers — unusable source material, requirements that contradict the framework, a scenario-walk that cannot converge.</div>
+    <div class="add">+ - something has gone wrong</div>
+    <div class="add">+</div>
+    <div class="add">+ **OR these are true:**</div>
+    <div class="add">+</div>
+    <div class="add">+ - a situation has arisen that no other step covers</div>
+    <div class="add">+</div>
+    <div class="add">+ Either case covers unusable source material, requirements that contradict the framework, or a scenario-walk that cannot converge.</div>
+  </div>
+  <div class="field">Finished</div>
+  <div class="diff">
+    <div class="del">- The user has been informed and has decided how to continue.</div>
+    <div class="add">+ - the user has been informed of what happened and what state the build is in</div>
+    <div class="add">+ - the user has decided how to continue</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="C9" value="approved" checked> Approve</label>
+    <label><input type="radio" name="C9" value="rejected"> Reject</label>
+    <label><input type="radio" name="C9" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="c9">Comments</label>
+  <textarea id="c9" data-label="C9 · +Handle a Problem" data-radio="C9"></textarea>
+</article>
+
+<h2 class="sec">F2 to F5 — the rest</h2>
+
+<article>
+  <h3>F2 &nbsp;Undeclared function · +Fill Reference Gaps<span class="check">step function checks</span></h3>
+  <p class="why">Skippable, activates only when a gap is recorded, and most runs never enter it — that is Dormant. It also reads as Looping, since a late gap re-holds the start condition. Two candidates fitting is itself the multiple-functions smell, so this is a judgment call, not a lookup. Dormant is the better fit: the step processes all recorded gaps in one pass, and its finished condition is exhaustive over them rather than per-item.</p>
+  <div class="diff">
+    <div class="add">+ **Dormant step** — Skippable, activates only when its state arises.</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="F2" value="approved" checked> Approve Dormant</label>
+    <label><input type="radio" name="F2" value="looping"> Use Looping instead</label>
+    <label><input type="radio" name="F2" value="rejected"> Leave undeclared</label>
+  </div>
+  <label class="cmt" for="f2">Comments</label>
+  <textarea id="f2" data-label="F2 · +Fill Reference Gaps function" data-radio="F2"></textarea>
+</article>
+
+<article>
+  <h3>F3 &nbsp;Undeclared function · +Review<span class="check">step function checks</span></h3>
+  <p class="why">Borderline, filed for your call. Its start condition re-holds whenever the draft changes, which is Looping-shaped. Against: the walk-and-walk-again loop lives inside the engagement, not in step re-entry, and the step's own finished condition ends it. My read is that this does not need declaring — filed because the sweep for undeclared shapes is meant to surface it either way.</p>
+  <div class="diff">
+    <div class="add">+ **Looping step** — Re-runnable, taking a different branch each pass.</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="F3" value="rejected" checked> Leave undeclared (recommended)</label>
+    <label><input type="radio" name="F3" value="approved"> Declare Looping</label>
+    <label><input type="radio" name="F3" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="f3">Comments</label>
+  <textarea id="f3" data-label="F3 · +Review function" data-radio="F3"></textarea>
+</article>
+
+<article>
+  <h3>F4 &nbsp;Reference citations are links · two sites<span class="check">notation checks</span></h3>
+  <p class="why">A heading citation takes markdown link notation, downcased and dash-separated. Lines 156 and 189.</p>
+  <div class="diff">
+    <div class="del">- each invariant must change behaviour (`Conventions Digest`: remove no-ops)</div>
+    <div class="add">+ each invariant must change behaviour ([Conventions Digest](#conventions-digest): remove no-ops)</div>
+    <div class="del">- Then sweep the `Conventions Digest` tests over the whole document.</div>
+    <div class="add">+ Then sweep the [Conventions Digest](#conventions-digest) tests over the whole document.</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="F4" value="approved" checked> Approve</label>
+    <label><input type="radio" name="F4" value="rejected"> Reject</label>
+    <label><input type="radio" name="F4" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="f4">Comments</label>
+  <textarea id="f4" data-label="F4 · Conventions Digest citations" data-radio="F4"></textarea>
+</article>
+
+<article>
+  <h3>F5 &nbsp;No dead weight · references/README.md<span class="check">reference checks</span></h3>
+  <p class="why">Present in the reference folder, cited by no step. The check flags both directions — an unused reference and a step citing none. Two defensible dispositions.</p>
+  <div class="diff">
+    <div class="add">+ Option A — cite the folder from +Draft the Skill, which discharges the obligation for every file it resolves to.</div>
+    <div class="add">+ Option B — accept it as a folder-level orientation file for a human or agent browsing the directory, and record the decision so the next audit does not re-file it.</div>
+  </div>
+  <div class="controls">
+    <label><input type="radio" name="F5" value="cite" checked> Option A — cite the folder</label>
+    <label><input type="radio" name="F5" value="accept"> Option B — accept and record</label>
+    <label><input type="radio" name="F5" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="f5">Comments</label>
+  <textarea id="f5" data-label="F5 · references/README.md" data-radio="F5"></textarea>
+</article>
+
+<h2 class="sec">Filed, not findings</h2>
+
+<div class="note">
+  <ul>
+    <li><b>Global invariants on one line</b> — the form check demands a bold-caps keyword and its rule, and says nothing about line breaks. Borderline, not filed.</li>
+    <li><b>HANDOVER-template.md</b> — an asset whose frontmatter is commented scaffolding, not a stamped handover. The <code>*-handover.md</code> glob returns nothing, so the handover set is empty and agrees.</li>
+  </ul>
+</div>
+
+<h2 class="sec">Scope consequence — wave 6</h2>
+
+<div class="note">
+  <b>Prose conditions are corpus-wide, and the sweep does not currently carry them.</b>
+  <ul>
+    <li><code>versioning/SKILL.md</code> — 20 blocks</li>
+    <li><code>drafthorse/SKILL.md</code> — 18</li>
+    <li><code>agent-switch</code> — 10, <code>agent-commit</code> — 8, <code>agent-push</code> — 6</li>
+    <li><code>course-researcher</code>, <code>doc-reviewer</code> — 8 each</li>
+    <li><code>breaking-change-detector</code>, <code>git-robot</code> — 6 each</li>
+  </ul>
+  <p style="margin:.6rem 0 0">Ninety blocks across nine documents. Not mechanical: each prose block splits into several conditions, and every split is a judgment about what counts as one look.</p>
+  <div class="controls">
+    <label><input type="radio" name="F6" value="approved" checked> Add to wave 6</label>
+    <label><input type="radio" name="F6" value="own-wave"> Give it its own wave</label>
+    <label><input type="radio" name="F6" value="discuss"> Discuss</label>
+  </div>
+  <label class="cmt" for="f6">Comments</label>
+  <textarea id="f6" data-label="Wave 6 scope" data-radio="F6"></textarea>
+</div>
+
+<div class="bar">
+  <button id="copy">Copy decisions</button>
+  <button class="ghost" id="show">Show as text</button>
+  <button class="ghost" id="allyes">Approve all</button>
+  <span id="status"></span>
+</div>
+
+<textarea id="out" readonly></textarea>
+
+</div>
+<script>
+function assemble() {
+  var boxes = document.querySelectorAll('textarea[data-label]');
+  var lines = ['# Wave 4 audit — decisions', ''];
+  boxes.forEach(function (b) {
+    var name = b.dataset.radio;
+    var picked = document.querySelector('input[name="' + name + '"]:checked');
+    var verdict = picked ? picked.value.toUpperCase() : 'NO ANSWER';
+    var v = b.value.trim();
+    lines.push('## ' + b.dataset.label + ' — ' + verdict);
+    lines.push('');
+    if (v) { lines.push(v, ''); }
+  });
+  return lines.join('\n');
+}
+document.getElementById('copy').addEventListener('click', function () {
+  var text = assemble(), status = document.getElementById('status');
+  navigator.clipboard.writeText(text).then(function () {
+    status.textContent = 'Copied. Paste it back into the session.';
+  }).catch(function () {
+    var out = document.getElementById('out');
+    out.value = text; out.style.display = 'block'; out.select();
+    status.textContent = 'Clipboard blocked — select the text below and copy manually.';
+  });
+});
+document.getElementById('show').addEventListener('click', function () {
+  var out = document.getElementById('out');
+  out.value = assemble();
+  out.style.display = out.style.display === 'block' ? 'none' : 'block';
+  document.getElementById('status').textContent = '';
+});
+document.getElementById('allyes').addEventListener('click', function () {
+  document.querySelectorAll('article, .note').forEach(function (a) {
+    var first = a.querySelector('input[type="radio"]');
+    if (first) first.checked = true;
+  });
+  document.getElementById('status').textContent = 'All set to the first option.';
+});
+</script>
+</body>
+</html>
