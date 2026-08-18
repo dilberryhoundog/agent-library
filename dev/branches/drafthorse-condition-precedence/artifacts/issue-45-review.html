@@ -1,0 +1,762 @@
+<title>Retiring De-hold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root {
+  --paper: #F4F6F6;
+  --surface: #FFFFFF;
+  --surface-sunk: #ECF0EF;
+  --ink: #14191A;
+  --ink-soft: #4E5B5C;
+  --ink-faint: #78878A;
+  --rule: #D6DEDD;
+  --accent: #0D6B64;
+  --accent-soft: #E2EFED;
+  --warn: #8A5B00;
+  --warn-soft: #F6EBD6;
+  --stop: #93332A;
+  --stop-soft: #F7E5E2;
+  --shadow: 0 1px 2px rgba(20,25,26,.05), 0 8px 24px rgba(20,25,26,.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1313;
+    --surface: #161C1C;
+    --surface-sunk: #1D2525;
+    --ink: #E7EDEC;
+    --ink-soft: #A9B6B5;
+    --ink-faint: #7D8B8A;
+    --rule: #293333;
+    --accent: #59C5B9;
+    --accent-soft: #16302E;
+    --warn: #D9A44F;
+    --warn-soft: #2E2617;
+    --stop: #E08277;
+    --stop-soft: #331C19;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1313;
+  --surface: #161C1C;
+  --surface-sunk: #1D2525;
+  --ink: #E7EDEC;
+  --ink-soft: #A9B6B5;
+  --ink-faint: #7D8B8A;
+  --rule: #293333;
+  --accent: #59C5B9;
+  --accent-soft: #16302E;
+  --warn: #D9A44F;
+  --warn-soft: #2E2617;
+  --stop: #E08277;
+  --stop-soft: #331C19;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .disp { font-family: Bitter, "Source Serif 4", Georgia, serif; text-wrap: balance; }
+code, .mono, kbd { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+a { color: var(--accent); }
+
+.shell {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 20px 96px;
+}
+@media (min-width: 1040px) {
+  .shell { grid-template-columns: 232px minmax(0, 1fr); gap: 56px; padding-right: 32px; }
+}
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  grid-column: 1 / -1;
+  border-bottom: 1px solid var(--rule);
+  padding: 40px 0 26px;
+  margin-bottom: 40px;
+}
+.eyebrow {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: center;
+}
+.eyebrow a { text-decoration: none; border-bottom: 1px solid var(--rule); }
+h1 {
+  font-size: clamp(30px, 4.4vw, 46px);
+  line-height: 1.1;
+  font-weight: 600;
+  margin: 16px 0 10px;
+  letter-spacing: -.015em;
+}
+.standfirst {
+  max-width: 62ch;
+  color: var(--ink-soft);
+  font-size: 19px;
+  margin: 0;
+}
+.masthead-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  margin-top: 22px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+.masthead-meta b { color: var(--ink); font-weight: 600; }
+
+/* ---------- rail ---------- */
+
+.rail { display: none; }
+@media (min-width: 1040px) {
+  .rail {
+    display: block;
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding-bottom: 20px;
+  }
+}
+.rail h4 {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 22px 0 10px;
+  font-weight: 500;
+}
+.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.rail a {
+  text-decoration: none;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 1.35;
+  display: block;
+  border-left: 2px solid var(--rule);
+  padding-left: 10px;
+}
+.rail a:hover, .rail a:focus-visible { color: var(--accent); border-left-color: var(--accent); }
+
+/* ---------- main ---------- */
+
+main { min-width: 0; }
+section { margin-bottom: 64px; }
+
+.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 10px; }
+.sec-head h2 { font-size: 25px; margin: 0; font-weight: 600; letter-spacing: -.01em; }
+.sec-head .count { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+.sec-intro { color: var(--ink-soft); max-width: 68ch; margin: 14px 0 30px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  box-shadow: var(--shadow);
+  padding: 22px 24px;
+  margin-bottom: 22px;
+}
+.card > *:first-child { margin-top: 0; }
+.card h3 { font-size: 19.5px; margin: 0 0 6px; font-weight: 600; line-height: 1.3; }
+.card p { max-width: 68ch; }
+.card p:last-of-type { margin-bottom: 0; }
+.card ul, .card ol.walk { max-width: 68ch; padding-left: 20px; }
+.card li { margin-bottom: 6px; }
+
+.verdict-strip {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  padding: 18px 22px;
+  margin-bottom: 34px;
+}
+.verdict-strip h3 { font-size: 18px; margin: 0 0 8px; color: var(--accent); }
+.verdict-strip p { margin: 0; max-width: 68ch; }
+
+.chiprow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+.chip {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+  background: var(--surface-sunk);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.chip.confirm { background: var(--accent-soft); color: var(--accent); }
+.chip.gap, .chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.risk { background: var(--stop-soft); color: var(--stop); }
+.chip.id { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); }
+
+.src {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  background: var(--surface-sunk);
+  border-left: 2px solid var(--rule);
+  padding: 7px 10px;
+  margin: 12px 0;
+  overflow-x: auto;
+  white-space: pre;
+}
+blockquote {
+  margin: 12px 0;
+  padding: 4px 0 4px 16px;
+  border-left: 2px solid var(--accent);
+  color: var(--ink-soft);
+  font-style: italic;
+  max-width: 66ch;
+}
+blockquote code { font-style: normal; }
+code { font-size: .88em; background: var(--surface-sunk); padding: 1px 5px; border-radius: 2px; }
+
+/* condition ledger */
+
+.ledger { margin: 14px 0; overflow-x: auto; }
+.ledger table { border-collapse: collapse; font-size: 14.5px; min-width: 100%; }
+.ledger th, .ledger td { text-align: left; padding: 7px 14px 7px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.ledger th {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 500;
+}
+.ledger td.step { font-family: "JetBrains Mono", monospace; font-size: 13px; white-space: nowrap; }
+.ledger td.state b { font-weight: 600; }
+.state-yes { color: var(--accent); }
+.state-no { color: var(--stop); }
+
+.delta { display: grid; gap: 10px; margin: 14px 0; }
+@media (min-width: 720px) { .delta { grid-template-columns: 1fr 1fr; } }
+.delta div { border: 1px solid var(--rule); border-radius: 2px; padding: 12px 14px; background: var(--surface-sunk); }
+.delta h5 {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+  font-weight: 500;
+  color: var(--ink-faint);
+}
+.delta .now { border-left: 2px solid var(--stop); }
+.delta .next { border-left: 2px solid var(--accent); }
+.delta p { margin: 0; font-size: 15px; }
+
+/* ---------- comment surface ---------- */
+
+.respond {
+  margin-top: 18px;
+  border-top: 1px dashed var(--rule);
+  padding-top: 14px;
+}
+.verdicts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.verdicts label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 4px 10px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  user-select: none;
+}
+.verdicts input { position: absolute; opacity: 0; width: 0; height: 0; }
+.verdicts label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.verdicts label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+textarea {
+  width: 100%;
+  min-height: 72px;
+  resize: vertical;
+  background: var(--surface-sunk);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 10px 12px;
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: 15.5px;
+  line-height: 1.5;
+}
+textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+
+/* ---------- actions ---------- */
+
+.actions {
+  position: sticky;
+  bottom: 0;
+  background: linear-gradient(to top, var(--paper) 62%, transparent);
+  padding: 22px 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  z-index: 5;
+}
+button {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  border-radius: 2px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--paper);
+  cursor: pointer;
+}
+button.ghost { background: transparent; color: var(--accent); }
+button:hover { filter: brightness(1.08); }
+button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.status { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--ink-soft); }
+
+#out {
+  width: 100%;
+  min-height: 320px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-top: 12px;
+}
+#outwrap[hidden] { display: none; }
+
+footer {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--rule);
+  padding-top: 18px;
+  color: var(--ink-faint);
+  font-size: 14px;
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <div class="eyebrow">
+      <span>DraftHorse spec review · rev 2</span>
+      <span>·</span>
+      <a href="https://github.com/dilberryhoundog/agent-library/issues/45">Issue #45</a>
+      <span>·</span>
+      <span>branch <code>drafthorse-condition-precedence</code></span>
+      <span>·</span>
+      <span>base <code>main</code></span>
+    </div>
+    <h1>Retiring De-hold</h1>
+    <p class="standfirst">The issue's diagnosis stands and its remedy does not. De-hold goes. Precedence and scoping do not replace it — the support step already carries the case they were built for, and the framework already forbids the machinery.</p>
+    <div class="masthead-meta">
+      <span><b>Verdict</b> Retire, do not replace</span>
+      <span><b>Rules deleted</b> 1</span>
+      <span><b>Rules added</b> 0</span>
+      <span><b>Files</b> 3 + regeneration</span>
+    </div>
+  </header>
+
+  <nav class="rail" aria-label="Contents">
+    <h4>Review</h4>
+    <ol>
+      <li><a href="#f1">1 · De-hold is unearned</a></li>
+      <li><a href="#f2">2 · Precedence fails the bloat test</a></li>
+      <li><a href="#f3">3 · The runtime walk</a></li>
+      <li><a href="#f4">4 · The support step is the mechanism</a></li>
+      <li><a href="#f5">5 · The rule lost its only home</a></li>
+      <li><a href="#f6">6 · Vocabulary is the whole gap</a></li>
+      <li><a href="#f7">7 · Four homes to clear</a></li>
+      <li><a href="#f8">8 · Collision with #38</a></li>
+    </ol>
+    <h4>Proposed</h4>
+    <ol>
+      <li><a href="#c1">A · steps.md</a></li>
+      <li><a href="#c2">B · condition-writing.md</a></li>
+      <li><a href="#c3">C · spec-check + saddler</a></li>
+      <li><a href="#c4">D · Feeds #38</a></li>
+      <li><a href="#c5">E · Not doing</a></li>
+      <li><a href="#c6">Open questions</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <section id="review">
+      <div class="sec-head">
+        <h2>Review</h2>
+        <span class="count">8 findings</span>
+      </div>
+
+      <div class="verdict-strip">
+        <h3>Where it landed</h3>
+        <p>De-hold retires — the framework contradicts it and two-thirds of the corpus already ignores it. Precedence and scoping are rejected: precedence blocks the backtrack it was meant to protect, and scoping exists only to unlock what precedence locks. The state they were chasing — a user withdrawing approval — is a <b>claimed remainder</b> at the support step, which the conventions already sanction. One rule out, nothing in, one vocabulary fix.</p>
+      </div>
+
+      <article class="card" id="f1">
+        <div class="chiprow"><span class="chip id">01</span><span class="chip confirm">Confirmed</span></div>
+        <h3>De-hold is unearned, and the corpus already voted</h3>
+        <p><b>In play</b> defines a step as a span with an end — "from when its start condition activates, until its finished condition is met". A span that ends at the finished condition needs no negated copy of it in the start condition to stop. The <b>Looping</b> function and the mandatory <b>checkable</b> test say the same thing from two other directions.</p>
+        <p>Practice agrees. De-hold is mandatory and the corpus carries it on roughly a third of its steps:</p>
+        <div class="src">de-hold-shaped start conditions / total steps
+  drafthorse/SKILL.md      0 / 9      git-box/SKILL.md      5 / 7
+  classroom/SKILL.md      10 / 13     versioning/SKILL.md   5 / 10
+  agent-push/SKILL.md      0 / 3      git-robot.md          1 / 3
+  ≈31 across ≈84 steps — and nothing has looped</div>
+        <p>The failure it guards against is a state-machine failure. A state machine re-evaluates a predicate with no memory. An agent has the transcript, and does not re-gather requirements because "the skill has been invoked" still reads true.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="F1 — de-hold unearned">
+            <label><input type="radio" name="v-f1" value="agree">Agree</label>
+            <label><input type="radio" name="v-f1" value="revise">Revise</label>
+            <label><input type="radio" name="v-f1" value="reject">Reject</label>
+          </div>
+          <textarea data-item="F1 — de-hold unearned" placeholder="Comment on finding 1…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="f2">
+        <div class="chiprow"><span class="chip id">02</span><span class="chip risk">Rejected</span><span class="chip">#45's remedy</span></div>
+        <h3>Precedence and scoping fail a test the framework already wrote</h3>
+        <p><code>conventions.md</code>, first bullet, settles this without needing the argument:</p>
+        <blockquote>Every addition pushing the spec toward code — mandatory machinery, guaranteed coverage, a rule per state — steals from that purpose… An addition that only makes the document more complete is bloat.</blockquote>
+        <p>Precedence is a rule per state. Scoping is a clause per condition. Neither makes the executing agent do more, more consistently, for less.</p>
+        <p>Worse, they cancel each other. De-hold blocks re-entry through the start condition; precedence blocks it through the finished condition — the same lock on a different door. Scoping then exists to unlock it. Three rules, one imaginary problem.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="F2 — precedence rejected">
+            <label><input type="radio" name="v-f2" value="agree">Agree</label>
+            <label><input type="radio" name="v-f2" value="revise">Revise</label>
+            <label><input type="radio" name="v-f2" value="reject">Reject</label>
+          </div>
+          <textarea data-item="F2 — precedence rejected" placeholder="Comment on finding 2…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="f3">
+        <div class="chiprow"><span class="chip id">03</span><span class="chip confirm">Walked</span><span class="chip">runtime navigability</span></div>
+        <h3>The runtime walk: de-hold removal <i>fixes</i> the backtrack</h3>
+        <p>Scenario — at <code>+Deliver</code>, the user rejects the step map. Eligibility against the de-hold-free conditions on <code>drafthorse-step-anatomy</code>:</p>
+        <div class="ledger">
+          <table>
+            <thead><tr><th>Step</th><th>Start condition</th><th>Eligible</th></tr></thead>
+            <tbody>
+              <tr><td class="step">+Collect References</td><td>Requirements are established</td><td class="state"><b class="state-yes">yes</b></td></tr>
+              <tr><td class="step">+Map the Steps</td><td>Reference set approved, no unfilled gaps</td><td class="state"><b class="state-yes">yes</b></td></tr>
+              <tr><td class="step">+Set Invariants</td><td>The step map is approved</td><td class="state"><b class="state-yes">yes</b></td></tr>
+              <tr><td class="step">+Draft the Skill</td><td>Invariants are approved</td><td class="state"><b class="state-yes">yes</b></td></tr>
+              <tr><td class="step">+Review</td><td>A complete draft exists</td><td class="state"><b class="state-yes">yes</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Every start condition is a <b>durable state</b>, so it is still true when the agent comes back to it. Re-entry into <code>+Map the Steps</code> is unobstructed, and the conceptual listing order says where to resume.</p>
+        <p>Both alternatives break this exact walk:</p>
+        <div class="delta">
+          <div class="now"><h5>Under de-hold</h5><p><code>+Draft the Skill</code> read "Invariants are approved <b>and no complete draft exists</b>". After a map change a draft <i>does</i> exist — the step is barred. Re-mapped, and unable to redraft.</p></div>
+          <div class="now"><h5>Under precedence</h5><p><code>+Draft the Skill</code> finished on "the draft is written to the destination" — met, so barred permanently, with no clause to re-read a way out of.</p></div>
+        </div>
+        <p>Caveat: this walk was made with the discussion in context. A true cold read needs a fresh session.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="F3 — runtime walk">
+            <label><input type="radio" name="v-f3" value="agree">Agree</label>
+            <label><input type="radio" name="v-f3" value="revise">Revise</label>
+            <label><input type="radio" name="v-f3" value="reject">Reject</label>
+          </div>
+          <textarea data-item="F3 — runtime walk" placeholder="Comment on finding 3…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="f4">
+        <div class="chiprow"><span class="chip id">04</span><span class="chip confirm">Resolved</span><span class="chip">claim the remainder</span></div>
+        <h3>The support step already carries revoked approval</h3>
+        <p>"Arggg we stuffed up, can we redo this?" is a state no working step claims, so <code>+Handle a Problem</code> catches it by construction. Its finished condition is "the user has decided how to continue" — and that decision <b>is</b> the state change.</p>
+        <p>The withdrawal then cascades through conditions that were already written:</p>
+        <ol class="walk">
+          <li><code>The step map is approved</code> → false → <code>+Set Invariants</code> and everything reading forward from it go ineligible.</li>
+          <li><code>Reference set approved, no unfilled gaps</code> → still true → <code>+Map the Steps</code> is eligible.</li>
+          <li>Map re-approved → <code>+Set Invariants</code> eligible again → the run re-grows forward, in order.</li>
+        </ol>
+        <p>The dependency graph was already there: every start condition names the approval it depends on. Withdrawing one approval collapses exactly the right subtree and no other. That is the cascade #45 wanted to buy with a scoping rule, already paid for.</p>
+        <p>And the skill-specific handling has a sanctioned home — <code>conventions.md</code>, <b>Claim the remainder</b>: "can guide the agent on how to resolve the skill if no other step handles the recoverable state. The remainder needs to be actively described." An approval cascade is a recoverable state, actively described, in that step's engagement.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="F4 — support step carries it">
+            <label><input type="radio" name="v-f4" value="agree">Agree</label>
+            <label><input type="radio" name="v-f4" value="revise">Revise</label>
+            <label><input type="radio" name="v-f4" value="reject">Reject</label>
+          </div>
+          <textarea data-item="F4 — support step carries it" placeholder="Comment on finding 4…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="f5">
+        <div class="chiprow"><span class="chip id">05</span><span class="chip gap">Regression</span></div>
+        <h3>The mechanism was stated, and left with a retired slot</h3>
+        <p>Commit <code>4a87a56</code> removed <code>+Handle a Problem</code>'s <i>Suggested next actions</i>. This went with it — the corpus's only statement of the backtrack:</p>
+        <div class="src">- Resume the phase the user chose — revising an approved artifact
+  un-approves it and everything downstream of it, so that phase's
+  start condition holds again — or end the build.</div>
+        <p>The rule was carried by the slot #38 retires. It needs a home in the framework, not a rebuild as machinery.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="F5 — mechanism lost its home">
+            <label><input type="radio" name="v-f5" value="agree">Agree</label>
+            <label><input type="radio" name="v-f5" value="revise">Revise</label>
+            <label><input type="radio" name="v-f5" value="reject">Reject</label>
+          </div>
+          <textarea data-item="F5 — mechanism lost its home" placeholder="Comment on finding 5…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="f6">
+        <div class="chiprow"><span class="chip id">06</span><span class="chip gap">The whole gap</span></div>
+        <h3>Vocabulary, not mechanism</h3>
+        <p>Every description of the step says <i>error</i>, <i>failure</i>, <i>unrecoverable</i>, <i>problem state</i>. A withdrawn approval is none of those — nothing went wrong, the user changed their mind. <b>Claim the remainder</b> covers it in substance and excludes it in wording:</p>
+        <blockquote>The error step can guide the agent on how to resolve the skill if no other step handles the <b>recoverable state</b>.</blockquote>
+        <p>Recoverable state is broad enough. The surrounding prose is not — it reads as failure handling throughout, so a builder does not think to write an approval cascade there, and a runtime agent does not think to look. One worked example inside that disposition closes it.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="F6 — vocabulary gap">
+            <label><input type="radio" name="v-f6" value="agree">Agree</label>
+            <label><input type="radio" name="v-f6" value="revise">Revise</label>
+            <label><input type="radio" name="v-f6" value="reject">Reject</label>
+          </div>
+          <textarea data-item="F6 — vocabulary gap" placeholder="Comment on finding 6…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="f7">
+        <div class="chiprow"><span class="chip id">07</span><span class="chip">inventory</span></div>
+        <h3>Four homes to clear, one of them generated</h3>
+        <div class="src">condition-writing.md:30        - **De-hold** — the condition must stop holding…
+drafthorse-spec-check.md:108   - **De-hold** — (same text, as a check)
+drafthorse-spec-check.md:283   +Audit the Steps → "start condition (state terms, de-hold)"
+drafthorse-saddler.md          both, as generated copies</div>
+        <p>Line 283 matters most — it is what the auditing agent performs. A check deleted from the References but left in the step walk returns as a finding; that failure is already on record in this repo's audit history. Saddler regenerates from the spec-check and is never hand-edited.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="F7 — four homes">
+            <label><input type="radio" name="v-f7" value="agree">Agree</label>
+            <label><input type="radio" name="v-f7" value="revise">Revise</label>
+            <label><input type="radio" name="v-f7" value="reject">Reject</label>
+          </div>
+          <textarea data-item="F7 — four homes" placeholder="Comment on finding 7…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="f8">
+        <div class="chiprow"><span class="chip id">08</span><span class="chip warn">Accepted cost</span></div>
+        <h3>This branch edits regions #38 has already rewritten</h3>
+        <div class="src">docs/drafthorse/framework/steps.md          26+ / 54-
+docs/drafthorse/drafthorse-spec-check.md    49+ / 64-
+extensions/agents/drafthorse-saddler.md     49+ / 64-
+condition-writing.md                         4+ / 11-</div>
+        <p>Base <code>main</code> is pre-#38, so these files still carry <i>Suggested next actions</i>, the "error drain" name and the blockquote preamble. Conflicts on sync are certain and hand-resolvable; the cost is taken deliberately to keep the concerns apart. Mitigation: change the <b>rule</b> only, never the wording around it that #38 is already rewriting.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="F8 — collision with #38">
+            <label><input type="radio" name="v-f8" value="agree">Agree</label>
+            <label><input type="radio" name="v-f8" value="revise">Revise</label>
+            <label><input type="radio" name="v-f8" value="reject">Reject</label>
+          </div>
+          <textarea data-item="F8 — collision with #38" placeholder="Comment on finding 8…"></textarea>
+        </div>
+      </article>
+    </section>
+
+    <section id="proposed">
+      <div class="sec-head">
+        <h2>Proposed changes</h2>
+        <span class="count">3 files + regeneration</span>
+      </div>
+      <p class="sec-intro">Written against <code>main</code>. One rule deleted, one worked example added, nothing else. No new convention — <b>Stepping stones</b> and <b>Claim the remainder</b> already carry it.</p>
+
+      <article class="card" id="c1">
+        <div class="chiprow"><span class="chip id">A</span><span class="chip mono">docs/drafthorse/framework/steps.md</span></div>
+        <h3>Widen <b>Claim the remainder</b> by example, not by rule</h3>
+        <p>The disposition stands as written. It gains one worked case, so a withdrawn approval reads as claimable rather than as an error:</p>
+        <div class="delta">
+          <div class="now"><h5>Now — the class catalogue</h5><p>Half-applied state · Failed permissions · Insufficient references · Named recoverable failure. Four classes, all failures.</p></div>
+          <div class="next"><h5>Proposed — one class added</h5><p><b>Withdrawn approval</b> — claim the remainder. The user rejects an approved artifact and asks to go back. Record the withdrawal; the steps depending on that approval go ineligible and the owning step is eligible again. A skill needing a specific cascade describes it here.</p></div>
+        </div>
+        <p><b>§ User gates</b> loses its cascade sentence — "un-approves it and everything downstream of it, so the owning step's start condition holds again" — and keeps the plain fact: approval is state the user can withdraw. The downstream effect is what the existing conditions already do, not a rule.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="A — steps.md">
+            <label><input type="radio" name="v-c1" value="approve">Approve</label>
+            <label><input type="radio" name="v-c1" value="revise">Revise</label>
+            <label><input type="radio" name="v-c1" value="drop">Drop</label>
+          </div>
+          <textarea data-item="A — steps.md" placeholder="Comment on proposal A…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="c2">
+        <div class="chiprow"><span class="chip id">B</span><span class="chip mono">references/condition-writing.md</span></div>
+        <h3>Delete De-hold. Add nothing.</h3>
+        <ul>
+          <li><b>Start conditions</b> — the <code>De-hold</code> bullet deleted whole.</li>
+          <li><b>Loops are re-holding conditions</b> — trimmed of its de-hold clause; the start condition simply holds again for the next item.</li>
+          <li><b>Worked examples</b> — the gate-entry example loses its trailing de-hold ellipsis.</li>
+        </ul>
+        <p>No precedence bullet. No scoping bullet. The file gets shorter.</p>
+        <div class="respond">
+          <div class="verdicts" data-item="B — condition-writing.md">
+            <label><input type="radio" name="v-c2" value="approve">Approve</label>
+            <label><input type="radio" name="v-c2" value="revise">Revise</label>
+            <label><input type="radio" name="v-c2" value="drop">Drop</label>
+          </div>
+          <textarea data-item="B — condition-writing.md" placeholder="Comment on proposal B…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="c3">
+        <div class="chiprow"><span class="chip id">C</span><span class="chip mono">drafthorse-spec-check.md → drafthorse-saddler.md</span></div>
+        <h3>Delete the check, repair the step walk, guard the false positive</h3>
+        <ul>
+          <li><b>Deleted</b> — the <code>De-hold</code> check (line 108).</li>
+          <li><b>Step walk (line 283)</b> — <code>start condition (state terms, de-hold)</code> → <code>start condition (state terms)</code>.</li>
+          <li><b>Guard</b> — a start condition with no closing clause is correct under the new rule; reporting one is a false positive. Stated, because the auditor has re-derived deleted rules before.</li>
+          <li><b>Approval is revocable state</b> — trimmed to match §&nbsp;User gates.</li>
+          <li><b>Regenerate</b> <code>drafthorse-saddler.md</code>: preamble kept, remaining sections replaced.</li>
+        </ul>
+        <div class="respond">
+          <div class="verdicts" data-item="C — spec-check + saddler">
+            <label><input type="radio" name="v-c3" value="approve">Approve</label>
+            <label><input type="radio" name="v-c3" value="revise">Revise</label>
+            <label><input type="radio" name="v-c3" value="drop">Drop</label>
+          </div>
+          <textarea data-item="C — spec-check + saddler" placeholder="Comment on proposal C…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="c4">
+        <div class="chiprow"><span class="chip id">D</span><span class="chip">hand to #38</span></div>
+        <h3>Two things this review surfaced that belong to the step-anatomy refactor</h3>
+        <ul>
+          <li><b>The name.</b> <i>Error step</i>, <i>error drain</i>, <i>problem step</i>, <code>+Handle a Problem</code> — every one says <b>error</b>. If the step also carries withdrawn approvals and user-directed restarts, the name is what stops a builder writing them there and a runtime agent looking there. #38 already owns settling the four names into one.</li>
+          <li><b>The <i>Support</i> function.</b> #38's original catalogue listed it; the six that shipped are Error, Success, Looping, Routing, Dormant, Handover. The support concept is now doing real work in this review — worth deciding deliberately rather than by omission.</li>
+        </ul>
+        <div class="respond">
+          <div class="verdicts" data-item="D — feeds #38">
+            <label><input type="radio" name="v-c4" value="approve">Approve</label>
+            <label><input type="radio" name="v-c4" value="revise">Revise</label>
+            <label><input type="radio" name="v-c4" value="drop">Drop</label>
+          </div>
+          <textarea data-item="D — feeds #38" placeholder="Comment on proposal D…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="c5">
+        <div class="chiprow"><span class="chip id">E</span><span class="chip gap">Not doing</span></div>
+        <h3>Deliberately out</h3>
+        <ul>
+          <li><b>A new lean-steps convention</b> — already in <b>Stepping stones</b>: "a step can support others… leaving that step to focus on its jobs instead of handling every state it might produce."</li>
+          <li><b>The SKILL.md pilot</b> — committed on <code>drafthorse-step-anatomy</code> at <code>4a87a56</code>. Redoing it here buys nothing and costs a conflict.</li>
+          <li><b>The preamble line</b> — reads correctly already, and that line is #38's.</li>
+          <li><b>The corpus sweep</b> — #37's atomic pass, once this and #38 are both on <code>main</code>.</li>
+        </ul>
+        <div class="respond">
+          <div class="verdicts" data-item="E — not doing">
+            <label><input type="radio" name="v-c5" value="approve">Approve</label>
+            <label><input type="radio" name="v-c5" value="revise">Revise</label>
+            <label><input type="radio" name="v-c5" value="drop">Drop</label>
+          </div>
+          <textarea data-item="E — not doing" placeholder="Comment on proposal E…"></textarea>
+        </div>
+      </article>
+
+      <article class="card" id="c6">
+        <div class="chiprow"><span class="chip warn">Needs your call</span></div>
+        <h3>Open questions</h3>
+        <p><b>1.</b> Does <b>Claim the remainder</b> get the new <i>Withdrawn approval</i> class, or is a worked line inside the existing prose enough?</p>
+        <textarea data-item="Q1 — new class or worked line" placeholder="Answer…"></textarea>
+        <p style="margin-top:16px"><b>2.</b> <code>steps.md § User gates</code> — trim the cascade sentence, or delete the paragraph outright?</p>
+        <textarea data-item="Q2 — user gates trim or delete" placeholder="Answer…"></textarea>
+        <p style="margin-top:16px"><b>3.</b> The issue title no longer describes the work. Rewrite #45 as "retire de-hold", or close it and open a smaller one?</p>
+        <textarea data-item="Q3 — issue rewrite or reopen" placeholder="Answer…"></textarea>
+        <p style="margin-top:16px"><b>4.</b> Merge order — this branch to <code>main</code> first and let <code>drafthorse-step-anatomy</code> resolve on sync, or hold until #38 lands?</p>
+        <textarea data-item="Q4 — merge order" placeholder="Answer…"></textarea>
+      </article>
+    </section>
+
+    <div class="actions">
+      <button id="copy">Copy comments</button>
+      <button id="show" class="ghost">Show as text</button>
+      <span class="status" id="status"></span>
+    </div>
+
+    <div id="outwrap" hidden>
+      <textarea id="out" readonly aria-label="Comments as plain text"></textarea>
+    </div>
+
+  </main>
+
+  <footer>
+    Rev 2, after discussion. Sources: <code>docs/drafthorse/framework/</code>, <code>conventions.md</code>, <code>drafthorse-spec-check.md</code>, and the de-hold-free conditions at <code>drafthorse-step-anatomy:4a87a56</code>. Nothing in the repository has been changed.
+  </footer>
+</div>
+
+<script>
+function collect() {
+  const lines = ["## Issue #45 — review comments (rev 2)", ""];
+  document.querySelectorAll("article.card").forEach(card => {
+    const title = card.querySelector("h3")?.textContent.trim() || "";
+    const verdictBox = card.querySelector(".verdicts");
+    const picked = verdictBox?.querySelector("input:checked");
+    const notes = [...card.querySelectorAll("textarea")].filter(t => t.value.trim());
+    if (!picked && !notes.length) return;
+    lines.push("**" + title + "**");
+    if (picked) lines.push("- Verdict: " + picked.value);
+    notes.forEach(t => {
+      const label = t.dataset.item || "";
+      const body = t.value.trim().replace(/\n+/g, " ");
+      lines.push("- " + (label.startsWith("Q") ? label + ": " : "") + body);
+    });
+    lines.push("");
+  });
+  if (lines.length === 2) lines.push("_No comments entered._");
+  return lines.join("\n").trim();
+}
+
+const status = document.getElementById("status");
+const outwrap = document.getElementById("outwrap");
+const out = document.getElementById("out");
+
+document.getElementById("copy").addEventListener("click", async () => {
+  const text = collect();
+  try {
+    await navigator.clipboard.writeText(text);
+    status.textContent = "Copied — paste into the chat.";
+  } catch (e) {
+    out.value = text;
+    outwrap.hidden = false;
+    out.select();
+    status.textContent = "Clipboard blocked — select the text below and copy.";
+  }
+});
+
+document.getElementById("show").addEventListener("click", () => {
+  out.value = collect();
+  outwrap.hidden = !outwrap.hidden;
+  status.textContent = outwrap.hidden ? "" : "Select all and copy.";
+  if (!outwrap.hidden) out.focus();
+});
+</script>
