@@ -231,13 +231,11 @@ Something has gone wrong, or a situation has arisen that no other step covers �
 
 The user has been informed and has decided how to continue.
 
-#### Suggested next actions:
-
-Resume the phase the user chose — revising an approved artifact un-approves it and everything downstream of it, so that phase's start condition holds again — or end the build.
-
 ### Surface the Problem:
 
 Tell the user plainly what happened, which phase it arose in, what state the build is in, and what the options are.
+
+Where the problem is a withdrawn approval, claim the remainder: restart from the phase the user chose and revoke every approval after it. Otherwise end the build.
 
 # --- TERMS ---
 

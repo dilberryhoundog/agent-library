@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Condition Diffs — drafthorse/SKILL.md</title>
+<style>
+:root {
+  --bg: #fbfaf8; --panel: #ffffff; --ink: #1c1b19; --muted: #6b6862;
+  --line: #e2ded7; --del-bg: #fdecec; --del-ink: #8a1f1f;
+  --add-bg: #e9f6ec; --add-ink: #14622c; --accent: #7a5c2e;
+}
+:root:not([data-theme="light"]) { }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16151a; --panel: #1e1d23; --ink: #eceaf2; --muted: #9c98a6;
+    --line: #33313c; --del-bg: #3a1e21; --del-ink: #ff9c9c;
+    --add-bg: #1a3324; --add-ink: #8fe3ab; --accent: #d5b27a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #16151a; --panel: #1e1d23; --ink: #eceaf2; --muted: #9c98a6;
+  --line: #33313c; --del-bg: #3a1e21; --del-ink: #ff9c9c;
+  --add-bg: #1a3324; --add-ink: #8fe3ab; --accent: #d5b27a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 2rem 1.25rem 6rem; background: var(--bg); color: var(--ink);
+  font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.wrap { max-width: 60rem; margin: 0 auto; }
+header { border-bottom: 2px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+h1 { font-size: 1.5rem; margin: 0 0 .4rem; letter-spacing: -.01em; }
+.sub { color: var(--muted); font-size: .9rem; margin: 0; }
+.rule { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  padding: .9rem 1.1rem; margin: 1.5rem 0 2rem; font-size: .9rem; }
+.rule b { color: var(--accent); }
+.rule ol { margin: .5rem 0 0; padding-left: 1.2rem; }
+article { background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+  padding: 1.1rem 1.25rem 1.25rem; margin-bottom: 1.5rem; }
+h2 { font-size: 1.05rem; margin: 0 0 .15rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.tag { display: inline-block; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: .1rem .4rem; margin-left: .4rem;
+  vertical-align: middle; }
+.why { color: var(--muted); font-size: .875rem; margin: .35rem 0 .9rem; }
+.field { font-size: .75rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted);
+  margin: 1rem 0 .35rem; }
+.diff { border: 1px solid var(--line); border-radius: 4px; overflow-x: auto;
+  font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.diff div { padding: .35rem .7rem; white-space: pre-wrap; word-break: break-word; }
+.del { background: var(--del-bg); color: var(--del-ink); }
+.add { background: var(--add-bg); color: var(--add-ink); }
+label.cmt { display: block; font-size: .75rem; letter-spacing: .05em; text-transform: uppercase;
+  color: var(--muted); margin: 1.1rem 0 .35rem; }
+textarea { width: 100%; min-height: 4.5rem; resize: vertical; padding: .6rem .7rem;
+  background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px;
+  font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.bar { position: sticky; bottom: 0; background: var(--panel); border-top: 1px solid var(--line);
+  padding: .9rem 1.25rem; margin: 2rem -1.25rem -6rem; display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+button { font: inherit; font-size: .9rem; padding: .5rem 1rem; border-radius: 4px; cursor: pointer;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--panel); }
+button.ghost { background: transparent; color: var(--accent); }
+#status { color: var(--muted); font-size: .85rem; }
+#out { width: 100%; min-height: 12rem; margin-top: 1rem; display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Condition updates — <code>extensions/skills/drafthorse/SKILL.md</code></h1>
+  <p class="sub">Nine diffs. Proposed only — nothing applied to the file. Issue #45.</p>
+</header>
+
+<div class="rule">
+  <b>Rule being applied</b>
+  <ol>
+    <li>Start not met — the step does not run.</li>
+    <li>Start met, finish not met — the step runs.</li>
+    <li>Finish met — the step does not run.</li>
+  </ol>
+  <p style="margin:.6rem 0 0">Start conditions lose their de-hold clause. Gate finished conditions gain a scoping phrase naming what the result was approved against, so a revised upstream artifact unsticks everything below it.</p>
+</div>
+
+<article>
+  <h2>1 &nbsp;+Gather Requirements<span class="tag">start</span></h2>
+  <p class="why">De-hold clause removed. Nothing upstream can change, so the finish needs no scoping.</p>
+  <div class="field">Start this step when these are true</div>
+  <div class="diff">
+    <div class="del">- The skill has been invoked and the requirements are not yet established.</div>
+    <div class="add">+ The skill has been invoked.</div>
+  </div>
+  <label class="cmt" for="c1">Comments</label>
+  <textarea id="c1" data-label="1 · +Gather Requirements"></textarea>
+</article>
+
+<article>
+  <h2>2 &nbsp;+Collect References<span class="tag">start + finish</span></h2>
+  <p class="why">De-hold removed. Gate scoped to the requirements, so revised requirements re-open the harvest.</p>
+  <div class="field">Start this step when these are true</div>
+  <div class="diff">
+    <div class="del">- Requirements are established and the reference set has not been approved.</div>
+    <div class="add">+ Requirements are established.</div>
+  </div>
+  <div class="field">Step finished when these are true</div>
+  <div class="diff">
+    <div class="del">- The user has approved the reference set and step-candidate list — and the set stands on its own merits: every piece of source material harvested and classified, every needed-but-missing reference recorded as a gap, every extracted candidate naming its source, and nothing procedural left unaudited inside a reference.</div>
+    <div class="add">+ The user has approved the reference set and step-candidate list against the established requirements — and the set stands on its own merits: every piece of source material harvested and classified, every needed-but-missing reference recorded as a gap, every extracted candidate naming its source, and nothing procedural left unaudited inside a reference.</div>
+  </div>
+  <label class="cmt" for="c2">Comments</label>
+  <textarea id="c2" data-label="2 · +Collect References"></textarea>
+</article>
+
+<article>
+  <h2>3 &nbsp;+Fill Reference Gaps<span class="tag">start</span></h2>
+  <p class="why">The gap clause is genuine entry state, not de-hold — it stays. "However late it surfaced" was compensating for the old ordering; the finished condition now unsticks itself the moment a new gap is recorded, so the phrase no longer earns its place. Optional trim.</p>
+  <div class="field">Start this step when these are true</div>
+  <div class="diff">
+    <div class="del">- The reference set is approved, and a reference the document needs is recorded as an unfilled gap — however late it surfaced.</div>
+    <div class="add">+ The reference set is approved, and a reference the document needs is recorded as an unfilled gap.</div>
+  </div>
+  <label class="cmt" for="c3">Comments</label>
+  <textarea id="c3" data-label="3 · +Fill Reference Gaps"></textarea>
+</article>
+
+<article>
+  <h2>4 &nbsp;+Map the Steps<span class="tag">start + finish</span></h2>
+  <p class="why">De-hold removed. Gate scoped to the reference set — this is the pair that jammed before.</p>
+  <div class="field">Start this step when these are true</div>
+  <div class="diff">
+    <div class="del">- The reference set is approved with no unfilled gaps, and no step map has been approved.</div>
+    <div class="add">+ The reference set is approved with no unfilled gaps.</div>
+  </div>
+  <div class="field">Step finished when these are true</div>
+  <div class="diff">
+    <div class="del">- The user has approved the step map — and the map holds up on its own: every step candidate accounted for, every step atomic with one purpose, edges only at real boundaries (no over-splitting), every reference placed at a moment of use, and the success exit and error step present.</div>
+    <div class="add">+ The user has approved the step map against the approved reference set — and the map holds up on its own: every step candidate accounted for, every step atomic with one purpose, edges only at real boundaries (no over-splitting), every reference placed at a moment of use, and the success exit and error step present.</div>
+  </div>
+  <label class="cmt" for="c4">Comments</label>
+  <textarea id="c4" data-label="4 · +Map the Steps"></textarea>
+</article>
+
+<article>
+  <h2>5 &nbsp;+Set Invariants<span class="tag">start + finish</span></h2>
+  <p class="why">De-hold removed. Gate scoped to the map.</p>
+  <div class="field">Start this step when these are true</div>
+  <div class="diff">
+    <div class="del">- The step map is approved and no invariant set has been approved.</div>
+    <div class="add">+ The step map is approved.</div>
+  </div>
+  <div class="field">Step finished when these are true</div>
+  <div class="diff">
+    <div class="del">- The user has approved the invariant set — and every invariant in it changes behaviour, sits at its correct scope, and covers each destructive or out-of-scope action the map exposes.</div>
+    <div class="add">+ The user has approved the invariant set against the approved step map — and every invariant in it changes behaviour, sits at its correct scope, and covers each destructive or out-of-scope action the map exposes.</div>
+  </div>
+  <label class="cmt" for="c5">Comments</label>
+  <textarea id="c5" data-label="5 · +Set Invariants"></textarea>
+</article>
+
+<article>
+  <h2>6 &nbsp;+Draft the Skill<span class="tag">start + finish</span></h2>
+  <p class="why">De-hold removed. The draft is scoped to all three approved inputs, so revising any of them re-opens the write.</p>
+  <div class="field">Start this step when these are true</div>
+  <div class="diff">
+    <div class="del">- Invariants are approved and no complete draft exists.</div>
+    <div class="add">+ Invariants are approved.</div>
+  </div>
+  <div class="field">Step finished when these are true</div>
+  <div class="diff">
+    <div class="del">- The draft is written to the destination with every template placeholder resolved — no comment scaffolding remaining.</div>
+    <div class="add">+ The draft is written to the destination from the approved references, step map and invariants, with every template placeholder resolved — no comment scaffolding remaining.</div>
+  </div>
+  <label class="cmt" for="c6">Comments</label>
+  <textarea id="c6" data-label="6 · +Draft the Skill"></textarea>
+</article>
+
+<article>
+  <h2>7 &nbsp;+Review<span class="tag">start + finish</span></h2>
+  <p class="why">The step that showed the defect. Start drops the negated copy of its own finish; the finish is scoped to the draft as it currently stands, so any edit re-opens the walk.</p>
+  <div class="field">Start this step when these are true</div>
+  <div class="diff">
+    <div class="del">- A complete draft exists and has not passed the scenario-walk.</div>
+    <div class="add">+ A complete draft exists.</div>
+  </div>
+  <div class="field">Step finished when these are true</div>
+  <div class="diff">
+    <div class="del">- Every scenario routes cleanly, every digest test passes, and the fixes are folded into the draft.</div>
+    <div class="add">+ Every scenario in the draft as it now stands routes cleanly, every digest test passes, and the fixes are folded in.</div>
+  </div>
+  <label class="cmt" for="c7">Comments</label>
+  <textarea id="c7" data-label="7 · +Review"></textarea>
+</article>
+
+<article>
+  <h2>8 &nbsp;+Deliver<span class="tag">start</span></h2>
+  <p class="why">De-hold removed. The finished condition already carries acceptance, the re-walk and the build's completion — agreed earlier, shown here unchanged for context.</p>
+  <div class="field">Start this step when these are true</div>
+  <div class="diff">
+    <div class="del">- The draft has passed the scenario-walk and the user has not yet accepted it.</div>
+    <div class="add">+ The draft has passed the scenario-walk.</div>
+  </div>
+  <label class="cmt" for="c8">Comments</label>
+  <textarea id="c8" data-label="8 · +Deliver"></textarea>
+</article>
+
+<article>
+  <h2>9 &nbsp;+Handle a Problem<span class="tag">finish + slot</span></h2>
+  <p class="why">Start condition unchanged — it is the generic remainder. The slot goes whole: its resume half is covered by start conditions re-holding, and its un-approval cascade half is now carried by the scoping phrases in diffs 2, 4, 5 and 6. Nothing left to rehome. The finished condition gains the abandoned-build exit, and the step declares its function.</p>
+  <div class="field">Directive line</div>
+  <div class="diff">
+    <div class="add">+ **Error step** — Handles recovery and bails.</div>
+  </div>
+  <div class="field">Step finished when these are true</div>
+  <div class="diff">
+    <div class="del">- The user has been informed and has decided how to continue.</div>
+    <div class="add">+ The user has been informed and has decided how to continue — resuming the build, or ending it with the state of the partial work reported.</div>
+  </div>
+  <div class="field">Suggested next actions (deleted)</div>
+  <div class="diff">
+    <div class="del">- #### Suggested next actions:</div>
+    <div class="del">- Resume the phase the user chose — revising an approved artifact un-approves it and everything downstream of it, so that phase's start condition holds again — or end the build.</div>
+  </div>
+  <label class="cmt" for="c9">Comments</label>
+  <textarea id="c9" data-label="9 · +Handle a Problem"></textarea>
+</article>
+
+<article>
+  <h2>General</h2>
+  <p class="why">Anything spanning several diffs, or a change of approach.</p>
+  <label class="cmt" for="c0">Comments</label>
+  <textarea id="c0" data-label="General"></textarea>
+</article>
+
+<div class="bar">
+  <button id="copy">Copy comments</button>
+  <button class="ghost" id="show">Show as text</button>
+  <span id="status"></span>
+</div>
+
+<textarea id="out" readonly></textarea>
+
+</div>
+<script>
+function assemble() {
+  var boxes = document.querySelectorAll('textarea[data-label]');
+  var lines = ['# Condition diff comments — drafthorse/SKILL.md', ''];
+  var any = false;
+  boxes.forEach(function (b) {
+    var v = b.value.trim();
+    if (!v) return;
+    any = true;
+    lines.push('## ' + b.dataset.label, '', v, '');
+  });
+  if (!any) lines.push('_No comments entered — all nine diffs accepted as written._', '');
+  return lines.join('\n');
+}
+document.getElementById('copy').addEventListener('click', function () {
+  var text = assemble();
+  var status = document.getElementById('status');
+  navigator.clipboard.writeText(text).then(function () {
+    status.textContent = 'Copied. Paste it back into the session.';
+  }).catch(function () {
+    var out = document.getElementById('out');
+    out.value = text;
+    out.style.display = 'block';
+    out.select();
+    status.textContent = 'Clipboard blocked — select the text below and copy manually.';
+  });
+});
+document.getElementById('show').addEventListener('click', function () {
+  var out = document.getElementById('out');
+  out.value = assemble();
+  out.style.display = out.style.display === 'block' ? 'none' : 'block';
+  document.getElementById('status').textContent = '';
+});
+</script>
+</body>
+</html>

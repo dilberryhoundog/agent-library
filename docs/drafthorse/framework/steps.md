@@ -107,8 +107,6 @@ It points; it never restates the destination's conditions — those stay authori
 
 A **gate** is a step whose completion requires the user's approval of an artifact the step produced. Gates are compound: the agent writes the artifact's own completion criteria into the step's finished conditions alongside the approval.
 
-Approval is state, and it is revocable: revising an approved artifact un-approves it and everything downstream of it, so the owning step's start condition holds again. Gate-shaped start conditions ("X is approved and Y has not been approved") depend on this rule.
-
 ## Exit steps and the error step
 
 A skill ends through its **exit steps** — terminal steps whose completion ends the run. A document typically carries two:
@@ -134,6 +132,7 @@ The class catalogue is open — add classes as they are identified. Each names i
 - **Failed permissions** — hard bail. A tool call, file, or service the step needs was denied. Report what was denied and what it was needed for. Never route around a denial with a different tool or path.
 - **Insufficient references** — hard bail. A cited reference is missing, unreadable, or doesn't cover the case at hand. Report which reference fell short and how. Never invent the missing content.
 - **Named recoverable failure** — claim the remainder. A failure the document describes in advance, which stops the working step but not the run. Report what failed and what the error step did in its place.
+- **User approval problem** — claim the remainder. A step requiring user approval may have that approval revoked, or similar. Restart the skill from the appropriate step, revoking every approval after it.
 
 ### Exceptions
 

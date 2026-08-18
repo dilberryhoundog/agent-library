@@ -26,10 +26,9 @@ Reach for the separator sparingly. Two alternative entry states often mean two s
 
 State the situation that makes this step the right work, in terms of observable state — never in step terms.
 
-- **Name the state, not the predecessor** — "a unit has commits in range but no verdict recorded", not "after the range step". Position-phrasing breaks the moment a loop or repair path arrives from elsewhere.
-- **De-hold** — the condition must stop holding once the step's work is done, or the step re-admits itself forever. Even a first step needs its closing clause ("the skill has been invoked *and requirements are not yet established*").
+- **Name the state, not the predecessor** — "a unit has commits in range but no verdict recorded", not "after the range step". Position-phrasing breaks the moment a loop or repair path arrives from elsewhere. An artifact's state carries the approval and the work that produced it.
 - **Claim the negative space deliberately** — the conditions across all steps should cover every state the skill can be in; whatever no step claims belongs to the error step's "no other step covers this".
-- **Loops are re-holding conditions** — a per-item step's condition simply holds again for the next item ("an action not yet run, and no refusal has ended the run"). No loop syntax exists or is needed.
+- **Loops are re-holding conditions** — a per-item step's condition simply holds again for the next item ("an action not yet run, and no refusal has ended the run"). No loop syntax exists or is needed, and the step's finished condition is what ends the loop.
 - **In-play overlap is deliberate or absent** — multiple steps may be in play at once (a supervisory step spanning its inner steps, a background wait spanning the conversation). Sharp conditions make the overlap intended; accidental overlap is a defect.
 
 ## Finished conditions (`Step finished when these are true:`)
@@ -53,7 +52,7 @@ Optional prose guidance onward — the one sanctioned cross-step reference. Omit
 
 Illustrations from example skills — the step names belong to those skills, not to a required naming scheme.
 
-- Entry after a gate: "The user has approved X (with any edits applied), and …" — the approval is the state.
+- Entry after a gate: "a complete draft exists" — name the artifact's state; the approval that produced it is implied.
 - No-op and refusal routing: the detecting step's finished condition records the no-op as its own outcome ("…or the refusal is recorded"); the result/error step's start condition claims the ended run ("…or a refusal has ended the run"). Two conditions dovetail; neither names the other.
 - Terminal steps: the success exit starts on the exhaustive all-done state; the error step starts on the generic remainder; both finish by informing the user (or caller), with *suggested next actions* carrying the "end the skill" instruction.
 - Half-applied state: a step that fails partway hands its partial work to the error step, which reports what was and was not applied, recommends a fix, and ends the run.
