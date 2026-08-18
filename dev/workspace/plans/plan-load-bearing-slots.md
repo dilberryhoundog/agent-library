@@ -1,6 +1,11 @@
 # Plan: Load-Bearing Slot Sites
 
-Status: OPEN — sites inventoried by audit, none verified, none approved. Source: the slot audit recorded in [plan-slot-removal.md](plan-slot-removal.md).
+Status: PART APPLIED — four sites closed in wave 4, seven open for wave 5. Source: the slot audit recorded in [plan-slot-removal.md](plan-slot-removal.md).
+
+Wave 4 closed both `SKILL-template.md` sites and both `drafthorse/SKILL.md` sites. All four were verified as real gaps before repair. Two lessons carry to the remaining seven:
+
+- **Termination is a declared function, not invented text.** A success exit declares `**Success step**` from the catalogue, whose definition already reads "its finished conditions say the run is complete". The repair is to state that fact in the contract, not to compose a new sentence per site.
+- **An error step needs no explicit abandoned-run exit.** "The user has decided how to continue" covers deciding to stop, and a finished step with no start condition holding is a stopped run. Such a block was written into the template and reverted. Do not write one at the remaining sites.
 
 ## Why this plan exists
 
@@ -12,19 +17,19 @@ Two sites carry a second, worse property: the slot is the only exit an abandoned
 
 ## Scope
 
-Eleven load-bearing sites plus one ambiguous site. Nothing else. The hint sites belong to [plan-slot-removal.md](plan-slot-removal.md) and the corpus sweep.
+Eleven load-bearing sites plus one ambiguous site, of which four are closed and seven remain. Nothing else. The hint sites belong to [plan-slot-removal.md](plan-slot-removal.md) and the corpus sweep.
 
 ### Gap 1 — termination lives in the slot
 
 Seven sites. The exit step's finished conditions never say the run is over; the slot says it instead.
 
 - `extensions/skills/git-box/SKILL.md:233` — `+Present Report`. Sharpest case: git-box has no success exit at all. On a full success not worth saving as a workflow, no start condition holds and no finished condition ends the run.
-- `extensions/skills/drafthorse/SKILL.md:214` — `+Deliver`. Finished condition covers user acceptance, never completion. No later step exists.
+- ~~`extensions/skills/drafthorse/SKILL.md:214` — `+Deliver`~~ CLOSED in wave 4. Declares `**Success step**`; its finished condition now ends "— and the build is complete".
 - `extensions/skills/git/agent-commit/SKILL.md:240` — `+Result`. Handback to git-robot stated only in the slot.
 - `extensions/skills/git/agent-push/SKILL.md:116` — `+Result`. Same line, same gap.
 - `extensions/skills/git/agent-switch/SKILL.md:170` — `+Result`. Same line, same gap.
-- `extensions/skills/drafthorse/assets/SKILL-template.md:114` — success exit, shipped as real text.
-- `extensions/skills/drafthorse/assets/SKILL-template.md:137` — error step, shipped as real text.
+- ~~`extensions/skills/drafthorse/assets/SKILL-template.md:114` — success exit~~ CLOSED in wave 4. Declares `**Success step**`; `- the skill is complete` ships as real text in its finished conditions.
+- ~~`extensions/skills/drafthorse/assets/SKILL-template.md:137` — error step~~ CLOSED in wave 4. Slot deleted, nothing rehomed.
 
 The two shipped template lines are the origin. Every document generated from the template inherited an exit whose termination fact sits in the slot. Repair the template first; the derivative sites then follow one pattern.
 
@@ -41,7 +46,7 @@ Fits none of the four sanctioned uses. No planned replacement exists.
 Two sites, both reading "Resume the step the user chose, or end the skill."
 
 - `extensions/skills/versioning/SKILL.md:383` — `+Handle a Problem`. Resume is covered by re-holding start conditions. `+Finish` starts on every requested unit being released, declined, or reported empty; a run abandoned mid-release satisfies none.
-- `extensions/skills/drafthorse/SKILL.md:234` — `+Handle a Problem`. Same termination gap, plus a second orphan fact: the un-approval cascade, which every gate-shaped start condition in that skill silently depends on and which the document states nowhere else. The framework carries it, but a skill must be cold-readable.
+- ~~`extensions/skills/drafthorse/SKILL.md:234` — `+Handle a Problem`~~ CLOSED in wave 4, and the resolution is not what this plan expected. The termination half needed nothing. The un-approval cascade was tried as a global invariant, a Terms entry, a dormant step and a routing step, all rejected; issue [#45](https://github.com/dilberryhoundog/agent-library/issues/45) then removed the de-hold clauses the cascade existed to unstick. The fact survives as one line of engagement prose: "Where the problem is a withdrawn approval, claim the remainder: restart from the phase the user chose and revoke every approval after it. Otherwise end the build." Right rule, wrong home — it was always claim-the-remainder guidance, not routing. `steps.md` now carries the matching disposition class, **User approval problem**.
 
 `extensions/skills/classroom/SKILL.md:396` carries the identical sentence and is safe. Its `+Conclude` claims the user-ended run explicitly. The difference is real and worth reading before writing versioning's and drafthorse's replacements — classroom already models the fix.
 
@@ -71,10 +76,9 @@ Four stages. A site does not advance until its current stage closes.
 
 ## Work
 
-- `extensions/skills/drafthorse/assets/SKILL-template.md` — first, before any derivative site. Wave 2 held its two slots out deliberately; they are this plan's opening work.
+- ~~`extensions/skills/drafthorse/assets/SKILL-template.md`~~ and ~~`extensions/skills/drafthorse/SKILL.md`~~ — CLOSED in wave 4.
 - `extensions/skills/git-box/SKILL.md` — either a terminating finished block on `+Present Report`, or a success exit step the skill currently lacks. Structural, not a one-line fix.
 - `extensions/skills/versioning/SKILL.md` — two sites, `+Range` and `+Handle a Problem`. Different shapes: one invariant, one alternative start block on `+Finish`.
-- `extensions/skills/drafthorse/SKILL.md` — two sites, `+Deliver` and `+Handle a Problem`. The second also rehomes the un-approval cascade as a global agent invariant.
 - `extensions/skills/git/agent-commit/SKILL.md`, `agent-push/SKILL.md`, `agent-switch/SKILL.md` — the three parallel `+Result` handbacks take one wording. `agent-switch` additionally carries the `+Stash` behaviour call.
 - `extensions/agents/git-robot.md` — the ambiguous `+Report` phrasing.
 
@@ -91,6 +95,8 @@ Salvage, owed by [plan-slot-removal.md](plan-slot-removal.md) and tracked here s
 ## Definition of done
 
 Every one of the eleven sites verified, recommended, approved, applied, and its document proven to terminate without the slot. The ambiguous site settled. The salvage bullet rehomed.
+
+Four are done. The seven open sites are git-box's `+Present Report`, versioning's `+Range` and `+Handle a Problem`, the three git verb skills' `+Result` handbacks, and git-robot's ambiguous `+Report` — plus agent-switch's `+Stash` behaviour call, which is a decision rather than a repair.
 
 Until that holds, the corpus sweep may not delete a slot at any site named here. Deleting one early is the exact failure this plan exists to prevent.
 
