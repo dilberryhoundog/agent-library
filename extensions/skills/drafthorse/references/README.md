@@ -8,3 +8,5 @@ They are deliberately kept as **references**, not reshaped into steps or handove
 - **They are a trilogy, one per authoring phase.** Keeping them as a matched set of sibling files — same shape, same role — is clearer than folding each into its step or promoting each to a handover doc. The parallel structure is the point.
 
 A spec-checker (drafthorse-saddler) may flag these under the *data, not work* reference check; that is a known, accepted call recorded here, not an unaddressed defect.
+
+`step-functions.md` sits alongside them as a plain data reference — the catalogue of step shapes a builder picks from — and is no part of the trilogy.

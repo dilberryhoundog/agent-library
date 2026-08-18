@@ -2,6 +2,10 @@
 
 These conventions are an overlay on the agent harness document. They underpin the spec.
 
+- **Supercharged harness documents** — DraftHorse leverages an agent that already works. Purpose: harness documents that do more, hold consistency across runs, and spend fewer tokens on cheaper agents. Structure over competence, never structure replacing it. Most skills in the wild carry no error handling and no success reporting; the agent simply knows what to do. DraftHorse hardens that knowing into something repeatable.
+
+    Bloat is the danger. Every addition pushing the spec toward code — mandatory machinery, guaranteed coverage, a rule per state — steals from that purpose. An error step is a level up, not a requirement. Test any proposed addition: does it make the executing agent do more, more consistently, for less? An addition that only makes the document more complete is bloat.
+
 - **Building is difficult, so execution is easy** — DraftHorse is a builder's spec. It leverages standard markdown notation, but structures and organises it so that document execution is natural and easy for an agent. Careful crafting of a skill or executable document during creation ensures the longevity and efficiency of the tool over its lifetime.
 
 - **Executable without DraftHorse knowledge** — an agent runs the document cold, holding nothing but the document and its own markdown literacy. Four things carry that weight...
@@ -12,7 +16,7 @@ These conventions are an overlay on the agent harness document. They underpin th
 
 - **Single source of truth, everywhere** — every unit (invariant, step, reference, term) is standalone; no meaning or context is duplicated across units. One fact, one home, so a change is a one-place edit. (Exception: documents that never share context at run time — an orchestrator skill and its sub-agent — repeat what each needs; that duplication is deliberate and load-bearing.)
 
-- **Stepping stones** — Every step watches its own start condition for when it activates. A step then releases on its finished condition, the next step catches the agent using its start condition. There is no need for interstep routing, imagine the agent is stepping across a river on stepping stones. *Suggested next actions* is an optional pointer, showing the agent where to look next if necessary. This mechanism is deliberately open. it means...
+- **Stepping stones** — Every step watches its own start condition for when it activates. A step then releases on its finished condition, the next step catches the agent using its start condition. There is no need for interstep routing, imagine the agent is stepping across a river on stepping stones. This mechanism is deliberately open. it means...
     - An agent can loop back through the skill re-running different branches, as long as the conditions hold.
     - A step can span longer than others. Multiple steps can be in play at once.
     - Steps can be dormant, activating only to handle specific states that might not always be present.

@@ -41,21 +41,15 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions, and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
-<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). H4 headings are the step's contract — its conditions, any scope decision, its routing hint and its invariants; the H3 opens the work. A step names another step only in its "Suggested next actions:" slot; conditions are written in state terms, never step terms. -->
+<!-- Steps are standalone units listed in the usual execution order (a reading aid, not a boundary). A step opens with its directive and optional declared function; H4 headings are its contract — conditions, any scope decision, its invariants; the H3 opens the work. A step names no other step; conditions are written in state terms, never step terms. -->
 
 ## +<Step Name>
 
-<!-- One-line statement of what this step does. -->
+<!-- The directive — a single line naming the agent's task on entering this step. -->
+
+**<Step function>** <!-- — the fixed declaration string, copied from [Step Functions](../references/step-functions.md). Delete the line for an ordinary working step. -->
 
 #### Start this step when these are true:
 
@@ -87,10 +81,6 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 <!-- Optional: a choice that governs this step's scope or shape — what it targets, how many times it runs — resolved before the work can be performed. Carries no work and no routing, and resolves to a fact the finished condition depends on. Delete the section when the step's scope is fixed. -->
 
-#### Suggested next actions:
-
-<!-- Optional prose: loop back, bail on failure, or skill exit. Points only — never restate the destination's conditions. Omit when the dovetail is obvious. -->
-
 #### Step invariants:
 
 <!-- Rules in force while the step is in play. Delete the section if none. -->
@@ -105,7 +95,9 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 ## +<Success Exit Step Name>
 
-<!-- Reports the outcome and ends the skill. -->
+<!-- The directive — reports the outcome and ends the skill. -->
+
+**Success step** — Resolves the run's done state and exits.
 
 #### Start this step when these are true:
 
@@ -115,13 +107,10 @@ description: model-invoked; agent-facing, sells usage + trigger conditions. user
 
 #### Step finished when these are true:
 
-<!-- The summary is presented. -->
+<!-- The summary is presented, and the run is stated complete. -->
 
 - <condition 1>
-
-#### Suggested next actions:
-
-End the skill and return to the user.
+- the skill is complete
 
 ### <Report>:
 
@@ -129,9 +118,11 @@ End the skill and return to the user.
 
 ## +Handle a Problem
 
-<!-- The error step — the drain that makes coverage subtractive. Keep the start condition generic. -->
+<!-- The error step — what makes coverage subtractive. Keep the start condition generic. -->
 
 Surface anything the other steps don't cover, and decide with the user how to continue.
+
+**Error step** — Handles recovery and bails.
 
 #### Start this step when these are true:
 
@@ -141,10 +132,6 @@ Surface anything the other steps don't cover, and decide with the user how to co
 
 - the user has been informed of what happened and what state things are now in
 - the user has decided how to continue
-
-#### Suggested next actions:
-
-Resume the step the user chose, or end the skill.
 
 ### Surface the Problem:
 

@@ -8,16 +8,14 @@ This folder is the **framework**: the normative reference for writing DraftHorse
 
 1. **[Scaffold](scaffold.md)** — the five utilities every document is built on. The vessel you fill, shown first.
 2. **[Notation](notation.md)** — the small set of markings layered on plain markdown: the invariant form and the structural labels.
-3. **[Steps](steps.md)** — the self-contained unit of work: its anatomy, its start/finished conditions, the exit and error steps, and the universal preamble.
+3. **[Steps](steps.md)** — the self-contained unit of work: its anatomy, its declared function, its start/finished conditions, the exit and error steps, and the universal preamble.
 4. **[References](references.md)** — how steps reach data: internal, external, data-load, external-call.
 5. **[Conventions](conventions.md)** — the bucket of laws and idioms that make a valid document a good one.
 6. **[Surfaces](surfaces.md)** — where a document's work is delivered: skill file, sub agent, child skill, handover. Read once the grammar is in hand.
 
 ## Document variants
 
-<!-- TODO: Drafthorse is often placed in agent body also, so default is not the only "skill" -->
-
-The six layers describe the default document — a skill. One variant reuses them all with a small set of deltas:
+The six layers describe the default DraftHorse document. One variant reuses them all with a small set of deltas:
 
 - **[Handover](handover.md)** — a `harness-format: DraftHorse, Handover` document: a self-contained sub-procedure a parent step folds into the run as child steps, extracting heavy or optional work so it does not bloat the parent. Same scaffold and steps; the parent step owns the logic around it, and the child steps open with the handover-variant preamble.
 

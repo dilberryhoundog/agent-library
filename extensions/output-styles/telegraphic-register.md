@@ -12,3 +12,7 @@ Verbs stay strong. Keep modals.
 ## Writing
 
 When writing with Telegraphic Register use condensed sentences, representing a single claim each.
+
+## Scope
+
+Register covers all text the agent produces — chat responses, Markdown and text files. One register throughout. When editing text adjacent to other styles and registers, use this register.

@@ -14,9 +14,7 @@ Build a DraftHorse document: a SKILL.md (or kindred agent document) whose work i
 
 # Agent Invariants
 
-**ALWAYS** write the document agent-agnostic: resolvable by any agent in any future session, no session-specific context, no pointers to files that will not exist where the skill is installed.
-**NEVER** proceed past a gate without the user's approval of that phase's artifact.
-**DO NOT** invent requirements or source material — what the user has not provided, ask for.
+**ALWAYS** write the document agent-agnostic: resolvable by any agent in any future session, no session-specific context, no pointers to files that will not exist where the skill is installed. **NEVER** proceed past a gate without the user's approval of that phase's artifact. **DO NOT** invent requirements or source material — what the user has not provided, ask for.
 
 # --- REFERENCES ---
 
@@ -41,9 +39,10 @@ One variant reuses the whole scaffold: a **handover doc** — a file in the skil
 The tests a finished document must pass:
 
 - **Checkable and exhaustive conditions** — could the agent claim a condition is met while work remains? If yes, sharpen it.
-- **Steps are standalone** — a step suggests another step only in its *suggested next actions* slot; conditions are written in state terms, never step terms; finished conditions carry only their own step's completion criteria.
+- **Steps are standalone** — a step names no other step; conditions are written in state terms, never step terms; finished conditions carry only their own step's completion criteria.
+- **Every step opens with a directive** — one line naming the agent's task on entering the step, and the fixed declaration string where the step takes one of the catalogue shapes.
 - **Gates are compound** — approval *and* the artifact's own substantive conditions, never approval alone; a rubber-stamp must not launder a defective artifact.
-- **The error step claims the remainder** — one step whose start condition is "no other step covers this", so every state the document can reach is handled by construction (executor documents may fold the drain into their reporting step, stated in its start condition). It catches what the other steps could not know about in advance and hands control back to the user with the agent's recommendation — including half-applied state, where it reports what was and was not applied and ends the run. That is what keeps the rest of the document lean.
+- **The run resolves** — every path ends somewhere stated, by an exit step or by the agent's own handling. The error step claims unresolvable errors, destructive actions and half-applied state.
 - **References carry data, steps carry work** — conceptual guidance, not hard law; ordered actions or branching inside a reference is work asking to be a step.
 - **Cite references at the moment of use** — inside the sentence that needs them, not as a list at the top of a step.
 - **Inline vs external references** — compact and always-relevant context inline; expansive and sometimes-relevant context external.
@@ -58,19 +57,12 @@ Phase-specific judgment, loaded by the step that needs it:
 
 - [Collecting References](references/collecting-references.md) — harvesting sources, classifying them, and auditing for embedded work.
 - [Step Splitting](references/step-splitting.md) — finding the step edges in a lump of work.
-- [Condition Writing](references/condition-writing.md) — writing conditions and *suggested next actions* guidance that carry the routing.
+- [Condition Writing](references/condition-writing.md) — writing the conditions that carry the routing.
+- [Step Functions](references/step-functions.md) — the catalogue of step shapes, and how a step declares one.
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
 ## +Gather Requirements
 
@@ -78,11 +70,16 @@ Establish what is being built, for whom, and from what.
 
 #### Start this step when these are true:
 
-The skill has been invoked and the requirements are not yet established.
+- the skill has been invoked
 
 #### Step finished when these are true:
 
-Purpose, mode, invocation surface, scope, destination, and the locations of all source material are established with the user — asked for, not assumed.
+- the purpose is established with the user
+- the mode is established — a new build, or a conversion of a named document
+- the invocation surface is established — model-invoked, user-invoked, or executor-only
+- the scope is established, including what the skill refuses
+- the destination is established
+- every piece of source material is located
 
 ### Establish:
 
@@ -97,15 +94,19 @@ Work out with the user, from `$ARGUMENTS` and the conversation:
 
 ## +Collect References
 
-Harvest and classify the data the steps will operate on, and mine it for hidden work.
+Harvest and classify the source material, and mine it for hidden work.
 
 #### Start this step when these are true:
 
-Requirements are established and the reference set has not been approved.
+- the requirements are established
 
 #### Step finished when these are true:
 
-The user has approved the reference set and step-candidate list — and the set stands on its own merits: every piece of source material harvested and classified, every needed-but-missing reference recorded as a gap, every extracted candidate naming its source, and nothing procedural left unaudited inside a reference.
+- every piece of source material is harvested and classified
+- every needed-but-missing reference is recorded as a gap
+- every extracted step candidate names its source
+- no reference holds unaudited procedural content
+- the user has approved the reference set and the step-candidate list
 
 ### Harvest and Audit:
 
@@ -117,15 +118,20 @@ Present the classified reference set and the step candidates to the user. This i
 
 ## +Fill Reference Gaps
 
-Produce the references that do not exist yet, so the steps have a complete set to operate on.
+Produce the references that do not exist yet.
+
+**Dormant step** — Skippable, activates only when its state arises.
 
 #### Start this step when these are true:
 
-The reference set is approved, and a reference the document needs is recorded as an unfilled gap — however late it surfaced.
+- the reference set is approved
+- a reference the document needs is recorded as an unfilled gap
 
 #### Step finished when these are true:
 
-Every recorded gap exists in usable form and the reference set is complete and approved by the user.
+- every recorded gap has been accounted for and handled
+- the reference set is complete
+- the user has approved the completed reference set
 
 ### Produce:
 
@@ -137,11 +143,16 @@ Shape the steps from the candidates, the requirements, and the references in vie
 
 #### Start this step when these are true:
 
-The reference set is approved with no unfilled gaps, and no step map has been approved.
+- the reference set is complete
 
 #### Step finished when these are true:
 
-The user has approved the step map — and the map holds up on its own: every step candidate accounted for, every step atomic with one purpose, edges only at real boundaries (no over-splitting), every reference placed at a moment of use, and the success exit and error step present.
+- every step candidate is accounted for
+- every step is atomic, with one purpose
+- every edge sits at a real boundary
+- every reference is placed at a moment of use
+- the success exit and the error step are present
+- the user has approved the step map
 
 ### Shape the Map:
 
@@ -153,15 +164,18 @@ Bound the document — safety floors global, step-bound rules local.
 
 #### Start this step when these are true:
 
-The step map is approved and no invariant set has been approved.
+- the step map is complete
 
 #### Step finished when these are true:
 
-The user has approved the invariant set — and every invariant in it changes behaviour, sits at its correct scope, and covers each destructive or out-of-scope action the map exposes.
+- every invariant changes behaviour
+- every invariant sits at its correct scope
+- every destructive or out-of-scope action the map exposes is covered
+- the user has approved the invariant set
 
 ### Derive:
 
-From the scope, the references, and the map: rules that must never lapse anywhere (destructive-action floors, permission walls, scope refusals) become global Agent Invariants; rules that bind only inside one step attach to that step. Prefer few and hard over many and soft — each invariant must change behaviour (`Conventions Digest`: remove no-ops). Present the set — global and per-step — to the user.
+From the scope, the references, and the map: rules that must never lapse anywhere (destructive-action floors, permission walls, scope refusals) become global Agent Invariants; rules that bind only inside one step attach to that step. Prefer few and hard over many and soft — each invariant must change behaviour ([Conventions Digest](#conventions-digest): remove no-ops). Present the set — global and per-step — to the user.
 
 ## +Draft the Skill
 
@@ -169,15 +183,18 @@ Write the document from the approved parts.
 
 #### Start this step when these are true:
 
-Invariants are approved and no complete draft exists.
+- the invariant set is complete
 
 #### Step finished when these are true:
 
-The draft is written to the destination with every template placeholder resolved — no comment scaffolding remaining.
+- the draft is written to the destination
+- every template placeholder is resolved
+- no comment scaffolding remains
 
 ### Write:
 
-Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. Write every step's conditions and *suggested next actions* guidance per [Condition Writing](references/condition-writing.md). Keep the steps preamble verbatim; keep the error step. Write each handover doc the map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps — and cite it from its parent step in the handover citation form, `[Name — Handover](name-handover.md)`.
+Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. Write every step's conditions per [Condition Writing](references/condition-writing.md). Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Keep the steps preamble verbatim; keep the error step. Write each handover doc the map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps —
+and cite it from its parent step in the handover citation form, `[Name — Handover](name-handover.md)`.
 
 ## +Review
 
@@ -185,15 +202,17 @@ Walk the draft as a cold reader before the user sees it.
 
 #### Start this step when these are true:
 
-A complete draft exists and has not passed the scenario-walk.
+- a complete draft exists
 
 #### Step finished when these are true:
 
-Every scenario routes cleanly, every digest test passes, and the fixes are folded into the draft.
+- every scenario routes cleanly
+- every Conventions Digest test passes
+- any approved fix the scenario-walk found is folded into the draft
 
 ### Scenario-Walk:
 
-Walk every realistic run of the drafted skill — the happy path, each decision branch, each loop iteration, each failure entry. At every point, check that the set of in-play steps is exactly the intended one — every state claimed by a step (or the error drain), no unintended overlap. Then sweep the `Conventions Digest` tests over the whole document. Fix what the walk finds and walk again.
+Walk every realistic run of the drafted skill — the happy path, each decision branch, each loop iteration, each failure entry. At every point, check that the set of in-play steps is exactly the intended one — every state claimed by a step (or the error step), no unintended overlap. Then sweep the [Conventions Digest](#conventions-digest) tests over the whole document. Fix what the walk finds and walk again.
 
 #### Independent Review:
 
@@ -203,17 +222,17 @@ Once the walk converges — nothing left to fix — offer the user an independen
 
 Present the reviewed draft for the final gate and hand it over.
 
+**Success step** — Resolves the run's done state and exits.
+
 #### Start this step when these are true:
 
-The draft has passed the scenario-walk and the user has not yet accepted it.
+- the draft has passed the scenario-walk
 
 #### Step finished when these are true:
 
-The user accepts the document — and it still passes the scenario-walk with their edits folded in (re-walk anything an edit touched).
-
-#### Suggested next actions:
-
-End the skill and return to the user.
+- the user accepts the document
+- the document still passes the scenario-walk with the user's edits folded in
+- the build is complete
 
 ### Present:
 
@@ -223,13 +242,20 @@ Show the user the draft with a short summary — the steps, the reference placem
 
 Surface anything the other steps don't cover, and decide with the user how to continue.
 
+**Error step** — Handles recovery and bails.
+
 #### Start this step when these are true:
 
-Something has gone wrong, or a situation has arisen that no other step covers — unusable source material, requirements that contradict the framework, a scenario-walk that cannot converge.
+- something has failed or errored
+
+**OR these are true:**
+
+- a situation has arisen that no other step covers
 
 #### Step finished when these are true:
 
-The user has been informed and has decided how to continue.
+- the user has been informed of what happened and what state the build is in
+- the user has decided how to continue
 
 ### Surface the Problem:
 
