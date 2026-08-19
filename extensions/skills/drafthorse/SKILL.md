@@ -32,7 +32,7 @@ One variant reuses the whole scaffold: a **handover doc** — a file in the skil
 
 ## The Template
 
-[SKILL Template](assets/SKILL-template.md) is the fill-in skeleton for the draft — the scaffold with every part annotated, the steps preamble baked in verbatim, and the error step shipped as real text.
+[SKILL Template](assets/SKILL-template.md) is the fill-in skeleton for the draft — the scaffold with every part annotated and the steps preamble baked in verbatim; the prebuilt error and success blocks live in [Step Functions](references/step-functions.md).
 
 ## Conventions Digest
 
@@ -193,7 +193,7 @@ Write the document from the approved parts.
 
 ### Write:
 
-Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. In conversion mode the copy target is the sibling draft path (`<destination>.draft.md`) — never overwrite the source before acceptance; it stays intact as source material until the build completes. Write every step's conditions per [Condition Writing](references/condition-writing.md). Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Keep the steps preamble verbatim; keep the error step. Write each handover doc the map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps —
+Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. In conversion mode the copy target is the sibling draft path (`<destination>.draft.md`) — never overwrite the source before acceptance; it stays intact as source material until the build completes. Write every step's conditions per [Condition Writing](references/condition-writing.md). Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Copy the prebuilt error and success blocks from that same reference into the draft — the error step whole and mandatory, the success exit adjusted to the map. Keep the steps preamble verbatim. Write each handover doc the map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps —
 and cite it from its parent step in the handover citation form, `[Name — Handover](name-handover.md)`.
 
 ## +Review
