@@ -1,0 +1,1381 @@
+{
+  "summary": "Wave 6b harvest, then independent spec-check audits over the migrated corpus",
+  "agentCount": 12,
+  "logs": [
+    "Starting 6b harvest and 10 corpus audits in parallel",
+    "6b harvest done — auditing the drafthorse skill set against the post-harvest state",
+    "Audits done: 11 sets, 9 with verdict revise"
+  ],
+  "result": {
+    "harvest": {
+      "changes": [
+        {
+          "site": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/references/step-functions.md — Error step entry",
+          "kind": "example-added (block moved from template)",
+          "summary": "Shipped the full prebuilt +Handle a Problem block, copy-paste complete (directive, declaration, generic start condition, two finished items, Surface the Problem engagement), copied whole from the template's error step.",
+          "judgment": "The template comment's unique guidance ('keep the start condition generic' / coverage-subtractive) is carried into the example's opening line, so it is not orphaned by the template removal."
+        },
+        {
+          "site": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/references/step-functions.md — Error step entry, folded variant",
+          "kind": "example-added (corpus specimen)",
+          "summary": "Added the executor-exception variant beneath the prebuilt block, clearly subordinate: adapted declaration tail, ended-run OR claim in the start condition, final-message termination — specimen from agent-switch's +Result.",
+          "before": "Emit the outcome/s back to git-robot so it can render the `SWITCH` Output Directive in its report.",
+          "after": "Emit the run's outcomes back to the invoking agent.",
+          "judgment": "Generalised only the directive — 'git-robot' and 'SWITCH Output Directive' are corpus-specific terms that would confuse; all conditions kept verbatim. The intro line defines the executor exception so the term is reachable in this file."
+        },
+        {
+          "site": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/references/step-functions.md — Looping step entry",
+          "kind": "example-added (corpus specimen)",
+          "summary": "Added the versioning +Breaking Changes specimen verbatim as given in the brief; opening line names the per-item discriminator ('no verdict recorded for it') as the re-holding condition that is the loop, with the finished condition ending it per item."
+        },
+        {
+          "site": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/references/step-functions.md — Routing step entry",
+          "kind": "example-added (composed placeholder)",
+          "summary": "Composed a placeholder example (no corpus specimen exists): work-is-the-choice directive, an #### Agent decision: resolving to a named fact, and a finished condition depending on that fact; opening line states the shape is rare — divergence usually lives in start conditions.",
+          "judgment": "Machinery order follows the template/spec (Start, Finished, Agent decision); the named-fact warning ('a decision was made satisfies no finished condition') is folded into the placeholder text."
+        },
+        {
+          "site": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/references/step-functions.md — Dormant step entry",
+          "kind": "example-added (corpus specimen)",
+          "summary": "Added versioning's +Setup trimmed to head + start conditions; opening line states the start condition simply never activates on most runs and names the OR block's second activating state as the bonus teaching point."
+        },
+        {
+          "site": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/references/step-functions.md — Handover step entry",
+          "kind": "example-added (corpus specimen)",
+          "summary": "Added the classroom +Mark Completed Work specimen verbatim as given in the brief; opening line carries the teaching point — the finished condition reads the state the handover leaves behind, never a handed-back outcome."
+        },
+        {
+          "site": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/references/step-functions.md — Success step entry",
+          "kind": "example-added (template block enriched by corpus specimen)",
+          "summary": "Shipped the prebuilt success exit as the +Conclude specimen; the template's exhaustive-done guidance ('every item processed, declined, or reported empty') and the fixed '- the skill is complete' line are carried in the opening line, plus a note that the engagement (not shown) summarises the run's outcome for the user.",
+          "judgment": "Per the brief, engagement appears only where it is the point (the error step), so the success block ships without an H3; the intro line carries the template's Report guidance instead, so a builder adjusting the block per the map knows to add the report engagement."
+        },
+        {
+          "site": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/assets/SKILL-template.md — steps section",
+          "kind": "blocks-removed",
+          "summary": "Removed the ## +<Success Exit Step Name> and ## +Handle a Problem sections whole (44 lines); the template keeps scaffold, dividers, verbatim preamble, the generic ## +<Step Name> block with all placeholders and comments, the function-chooser pointer, and Terms. No copy of either block remains — single source of truth is step-functions.md.",
+          "judgment": "Both unique comment-carried guidances (generic start condition; exhaustive done state) were relocated with the blocks; the other removed comments (Report summary, success directive) are represented in the success example's intro line and specimen directive."
+        },
+        {
+          "site": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/SKILL.md — +Draft the Skill, ### Write:",
+          "kind": "sentence-rewritten",
+          "summary": "One inserted sentence directs the builder to copy the prebuilt blocks from the reference; 'keep the error step' dropped as the template no longer ships it. Step structure untouched.",
+          "before": "Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Keep the steps preamble verbatim; keep the error step.",
+          "after": "Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Copy the prebuilt error and success blocks from that same reference into the draft — the error step whole and mandatory, the success exit adjusted to the map. Keep the steps preamble verbatim."
+        },
+        {
+          "site": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/SKILL.md — ## The Template (References)",
+          "kind": "line-corrected",
+          "summary": "Corrected the now-false description and pointed at the blocks' new home.",
+          "before": "[SKILL Template](assets/SKILL-template.md) is the fill-in skeleton for the draft — the scaffold with every part annotated, the steps preamble baked in verbatim, and the error step shipped as real text.",
+          "after": "[SKILL Template](assets/SKILL-template.md) is the fill-in skeleton for the draft — the scaffold with every part annotated and the steps preamble baked in verbatim; the prebuilt error and success blocks live in [Step Functions](references/step-functions.md)."
+        }
+      ],
+      "file": "/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/references/step-functions.md, /Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/assets/SKILL-template.md, /Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/SKILL.md",
+      "flags": [
+        "No TODO comment existed at the head of step-functions.md — the brief anticipated one; there was nothing to delete (noted per the brief's instruction).",
+        "No example contradicts a spec check: the folded-variant's adapted declaration tail matches the shape the spec-check itself uses in its own +Compose the Report step, and the routing example's machinery order and named-fact rule match the Agent-decisions check.",
+        "The template now ships no exit steps at all; the SKILL.md +Draft the Skill citation is the sole path to the prebuilt blocks, as the brief prescribes — a template copied without following that instruction would lack exit steps by design.",
+        "The success prebuilt block ships without an H3 engagement (per the brief's engagement-only-where-it-is-the-point rule); its intro line states the engagement summarises the run's outcome, carrying the template's Report guidance."
+      ],
+      "verification": "git status --porcelain shows exactly the three target files modified and nothing else; diff stat: SKILL.md 2 lines changed, SKILL-template.md 44 deletions, step-functions.md 147 insertions. grep over the template for 'Handle a Problem', 'Success Exit', and 'the skill is complete' returns no matches — no copy of either block remains. step-functions.md carries 8 markdown fences (1 pre-existing head example + 7 new: error prebuilt, folded variant, looping, routing, dormant, handover, success), one under each of the six catalogue entries with the folded variant subordinate under Error step. Corpus specimens verified against their sources (versioning +Breaking Changes/+Setup/+Finish, agent-switch +Result) — all already in the migrated dialect. Nothing committed."
+    },
+    "audits": [
+      {
+        "findings": [
+          {
+            "check": "In-play overlap deliberate or absent",
+            "location": "extensions/skills/versioning/SKILL.md — +Setup start conditions (second OR list) vs +Handle a Problem start conditions",
+            "problem": "The state 'a unit path fails to resolve' is claimed by two steps with contradictory dispositions: +Setup's OR-list claims 'the requested unit's definition is wrong — its paths no longer resolve, or are not tracked by git' (repair the config with the user and continue), while the error step's enumeration claims 'an unresolvable unit path' (surface the problem and end the skill). When Range's `git ls-files --error-unmatch` rejects a path, both start conditions hold and the agent must choose between repairing and bailing — a mis-route either way.",
+            "fix_direction": "Give the state one owner: drop 'an unresolvable unit path' from the error step's enumeration (letting its remainder clause catch only what Setup cannot repair), or scope the two claims apart — e.g. Setup claims a path failure before any release work, the error step claims one arising mid-release."
+          },
+          {
+            "check": "Terminal steps state their termination / The run resolves",
+            "location": "extensions/skills/versioning/SKILL.md — +Handle a Problem engagement ('End the skill.') vs +Finish start OR-branch and engagement",
+            "problem": "Failure-path termination has two homes that contradict. The error step's engagement instructs 'End the skill.' — but its finished conditions never state the run ends, so its termination lives only in prose. Meanwhile +Finish's OR-branch claims the post-error state ('the user has ended the run at the error step') and its engagement carries a post-error summary. On one reading the error step terminates and Finish's OR-branch plus its post-error summary are unreachable; on the other the agent disobeys 'End the skill' to reach Finish. Two readings of where a failed run stops.",
+            "fix_direction": "Pick one exit owner. Either the error step is terminal — its finished conditions state the run is complete and Finish's OR-branch and post-error summary content are removed — or Finish is the sole exit: the error step stops instructing 'End the skill', its finished condition records the user's decision to stop as state, and Finish claims that state and delivers the summary."
+          },
+          {
+            "check": "Checkable / State terms, never step terms",
+            "location": "extensions/skills/versioning/SKILL.md — +Breaking Changes start ('no breaking-change verdict is recorded for it') and finished conditions vs +Propose start ('a breaking-change verdict is recorded for it')",
+            "problem": "The routing token 'breaking-change verdict' does not cover the outcomes the step's own finished conditions produce: they give a 'verdict' only to a scan that ran, while a skipped or failed scan gets 'that outcome and its reason recorded in place of a floor'. On that reading, a skipped scan (first release, non-contract files, already-major — all common paths) leaves 'no verdict recorded' permanently true: +Breaking Changes perpetually re-holds and +Propose never starts. Only a charitable reading of 'verdict' as 'any recorded resolution' lets the run proceed — two readings, one of which stalls.",
+            "fix_direction": "Use one term for the recorded resolution across both steps' conditions — e.g. both steps key on 'a scan outcome (verdict, skip, or failure) is recorded for the unit' — so the skip/fail records satisfy the same fact the routing tests."
+          },
+          {
+            "check": "Every outcome the step can end on",
+            "location": "extensions/skills/versioning/SKILL.md — +Dispatch finished conditions and its step invariant ('DO NOT read any file other than the versioning config, and run no commands')",
+            "problem": "Dispatch's finished conditions are happy-path only (config read, units identified); the no-config and unit-not-defined outcomes have no exit, so on those paths Dispatch stays in play for the whole Setup span. An in-play step's invariants bind for its open duration, so Dispatch's DO-NOT (read no other file, run no commands) is in force exactly while Setup's engagement instructs the agent to 'interview the repository' — reading manifests and discovering units. A literal agent is blocked or must silently break the invariant.",
+            "fix_direction": "Add finished outcomes that close Dispatch when the config is absent or the requested unit is missing/invalid (recording that state for Setup to claim); Dispatch's start condition still holds, so it re-activates and identifies units once Setup has put an approved config on disk. Alternatively scope the invariant's wording to the config-reading work itself."
+          },
+          {
+            "check": "State terms, never step terms / Standalone",
+            "location": "extensions/skills/versioning/SKILL.md — +Finish start OR-branch ('the user has ended the run at the error step') and engagement ('After a run ended at the error step…')",
+            "problem": "A start condition and engagement sentence name another step ('the error step') and phrase the claim by position rather than state; a step names no other step, and position-phrasing breaks when the claimed state arrives another way.",
+            "fix_direction": "Phrase the claimed state without the step name — e.g. 'a failure has ended the run and the user has chosen to stop' — mirroring the executor-exception phrasing the spec sanctions."
+          },
+          {
+            "check": "Single source of truth",
+            "location": "extensions/skills/versioning/SKILL.md — Agent Invariants block vs +Execute step invariants vs +Handle a Problem engagement",
+            "problem": "Two rules live in multiple homes. Tag immutability: global 'NEVER move or overwrite an existing tag', Execute's 'NEVER re-apply an artifact that already exists' (tags included), and the error step's 'never retry by re-tagging' — three statements. Failed-run protocol: global 'NEVER resume a failed run. Report what happened and what state the repository is in, end the skill, and let the user repair and re-invoke' is restated nearly verbatim by the error step's engagement ('Tell the user plainly what happened… End the skill. The user repairs the state, then re-runs for a clean pass'). A change to either rule is now a multi-place edit.",
+            "fix_direction": "Keep each rule in one home — the global invariants — and strip the restatements; Execute's invariant can keep only what the global does not entail (non-tag durable artifacts), and the error step's engagement can carry only the reporting work the invariant does not."
+          },
+          {
+            "check": "Naming, not explaining",
+            "location": "extensions/skills/versioning/SKILL.md — '#### First release' in +Range and again in +Propose; '## Preflight' (reference) vs '## +Preflight' (step)",
+            "problem": "'First release' is a duplicated heading (appears in two steps), making an ambiguous anchor. The reference 'Preflight' and the step '+Preflight' also reduce to colliding slugs ('+' is stripped in anchor generation), so the document's five '[Preflight](#preflight)' citations depend on the reference winning slug priority by document order.",
+            "fix_direction": "Rename one of each pair distinctively — e.g. the +Propose sub-heading to reflect its proposal-side content, and either the reference entry or the step to a name that slugs uniquely."
+          },
+          {
+            "check": "Sharp prose (why-prose)",
+            "location": "extensions/skills/versioning/SKILL.md — invariant tails: global path-variable invariant ('A variable expands unsplit in zsh…'), +Dispatch invariant ('— the Preflight reference above already holds the live git state'), +Execute invariants ('— they are blocked in some sandboxed shells', '— that would dirty the tree and fail verification'); also +Range line 'Record it with the range — later steps bump from it, and the breaking-change scan is briefed with it'",
+            "problem": "Rationale clauses trail several invariants and instructions, explaining the why after the guardrail is already stated; the +Range tail additionally leans toward naming other steps' work. Borderline — some tails carry diagnostic value.",
+            "fix_direction": "Trim the rationale tails to the bare rule; where a tail carries operational content (where the state lives, what to use instead), keep only that operative clause."
+          },
+          {
+            "check": "Permissions",
+            "location": "extensions/skills/versioning/SKILL.md — frontmatter allowed-tools vs +Range command block (git tag -l '<pattern>' --sort=-version:refname | head -1)",
+            "problem": "The Range step's tag-resolution pipeline pipes into `head -1`, but no grant covers `head`; each pipeline segment is matched separately, so the run prompts (or is blocked in a sandboxed context) mid-Range. Borderline — a prompt, not a misexecution.",
+            "fix_direction": "Add a grant covering the pipe's tail, or drop the pipe and instruct taking the first line of the tag listing's output."
+          }
+        ],
+        "scenario_walk": "Eleven runs walked. Held: named-unit happy path end to end (dispatch → preflight → range → scan → propose → execute → verify → finish); bare invocation with a multi-unit survey, subset choice, and per-unit release loop (ordering carried by the one-at-a-time global; unchosen units recorded and reported); nothing-to-release; decline at Propose; edits and withdrawn approval ('neither an approval nor a decline stands' correctly re-holds Propose); mid-Execute push failure (the half-applied inventory and NEVER-re-apply invariants guard against destructive re-runs, run bails cleanly to the error step). Broke: (1) unit-path verification failure in Range — the state is double-claimed by +Setup (repair and continue) and the error step ('an unresolvable unit path' — surface and end), contradictory dispositions with no owner; (2) every failure entry (dirty tree, verification mismatch, mid-release failure) reaches the termination contradiction — the error step's engagement says 'End the skill.' while +Finish's OR-branch claims the post-error state for a summary, so either the summary branch is dead or the instruction is disobeyed; (3) skipped/failed scan (first release, non-contract changes) — 'breaking-change verdict' as the routing token doesn't cover the skip/fail records the step's own finished conditions produce, so on the literal reading +Breaking Changes perpetually re-holds and +Propose never starts; (4) no-config path — Dispatch cannot finish, stays open through Setup, and its DO-NOT invariant (read nothing but the config, run no commands) collides with Setup's repository interview.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "pass — the error step's OR-remainder ('a situation… no other step covers') makes coverage subtractive and closes every unclaimed state; the defect found is a double claim, not a gap"
+          },
+          {
+            "check": "Exit steps present and stating their termination",
+            "verdict": "fail — +Finish's finished conditions state 'the skill is complete', but the error path's termination lives only in engagement prose ('End the skill.') and in a contradictory second home (+Finish's OR-branch); finding 2"
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "pass — Execute's NEVER-re-apply invariant, the global NEVER-resume rule, and the error step's half-applied-release inventory bail rather than resume; no start condition carries a half-applied exclusion clause"
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "pass — a standalone whole error step (+Handle a Problem) with an explicit remainder clause"
+          },
+          {
+            "check": "The run resolves",
+            "verdict": "fail on the failure path — two readings of where a failed run stops (finding 2); resolves cleanly on the success path via +Finish"
+          },
+          {
+            "check": "Single source of truth",
+            "verdict": "fail — tag immutability stated in three homes and the failed-run protocol in two; finding 6"
+          },
+          {
+            "check": "No no-ops",
+            "verdict": "pass — every invariant changes behaviour (annotated-tag, literal-pathspec, one-at-a-time, no-resume are all non-default)"
+          },
+          {
+            "check": "Cold-readable",
+            "verdict": "pass — no undefined framework jargon; 'chosen' and 'surveyed' are given meaning by Range's engagement; Terms cover the coined vocabulary"
+          },
+          {
+            "check": "Terms earn their place",
+            "verdict": "pass — Versioned Unit, Range, and Bump are each leaned on by steps and references"
+          },
+          {
+            "check": "Sharp prose",
+            "verdict": "borderline fail — why-prose rationale tails on several invariants and one near-step-naming tail in +Range; finding 8"
+          },
+          {
+            "check": "Naming, not explaining",
+            "verdict": "fail — '#### First release' duplicated across +Range and +Propose; 'Preflight' reference and '+Preflight' step slugs collide; finding 7"
+          }
+        ],
+        "target": "extensions/skills/versioning/SKILL.md (document set: SKILL.md + references/config-template.md + assets/CHANGELOG-template.md; no handovers — glob and citations agree on an empty set)",
+        "verdict": "revise"
+      },
+      {
+        "target": "extensions/skills/classroom/SKILL.md — with setup-handover.md, mark-review-handover.md, media-processing-handover.md, deliver-without-renderer-handover.md, references/ (curriculum-spines, vetted-video-channels, pedagogy/dyslexia-kinetic, students/_template, students/example-learner) and templates/ (course-structures, lesson-structures, documents, blocks)",
+        "verdict": "revise",
+        "scenario_walk": "Nine runs walked cold. (1) No signal, user declines setup: +Confirm Classroom Context finishes on its third OR block, +Conclude's second OR block (\"declined setup\") claims it — held. (2) No signal, user consents: +Confirm folds in Classroom Setup — Handover; child steps Copy → Configure → (dormant) Warm run and control returns; parent finishes on \"a classroom has just been bootstrapped here\" — held, but +Establish Learner and Intent then activates on \"a classroom context is confirmed\" and cannot finish, because its intent list admits only new build / continuing / marking while +Conclude explicitly claims \"a setup-only request completed\". Stall, two readings. (3) New build, learner file present: Collect → Align → Choose Shapes → Build and Approve the Sample (gate compound: artifacts built plus explicit approval) → Assemble a Unit's Documents (loop) → Present and Record → Build Remaining Units → Conclude — held. Revocation path also held: revising an approved format drops +Build Remaining Units on \"the approved format has not since been revised\" while +Build and Approve the Sample re-holds on \"the shapes are chosen\", so re-approval is reachable. (4) New build, learner has no students/ file and declines to create one: +Establish's finished condition \"the learner's `students/` file has been read\" is unsatisfiable — stall. (5) Single-lesson build: +Build and Approve the Sample correctly stays out (\"the build is larger than a single lesson\"), but +Assemble a Unit's Documents starts on \"a unit — the sample or a subsequent one\", which resolves to neither case here; the state falls through to +Handle a Problem, so a valid small build is reported as a problem. Mis-route. (6) Continuation run in a fresh session: intent settles as \"continuing a course\", no start condition names that state, so +Collect Subject Matter (\"the run is a build\"), +Align the Build and +Choose Course and Lesson Shapes all re-hold and re-ask settled questions alongside +Build Remaining Units — unintended in-play set. (7) Renderer unavailable: +Deliver Without the Renderer starts per document, folds in its handover whose looping child step re-holds per changed source, and returns; +Assemble's finished condition admits the standalone delivery — held. (8) Media build: +Assemble folds in Media Processing — Handover, the parent's finished condition reads \"verified or marked no-suitable-media\", exactly the state the child step leaves; the parent naming the handover's Standing Note sits after the fold-in in the same step — held. (9) Failed conversion mid-loop and mark-and-review runs: +Handle a Problem claims the remainder, +Conclude reachable through \"the user has chosen to stop\" — held. Handover discovery agreed both ways (four glob hits, four citations, all in `[Name — Handover](name-handover.md)` form); no nested fold-in; no handover routes its own exit.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "pass — +Handle a Problem claims the subtractive remainder; noted that two legitimate states (single-lesson build, continuation) reach it or reach steps that cannot close, filed as findings"
+          },
+          {
+            "check": "Exit steps present and stating termination",
+            "verdict": "pass — +Conclude is a declared Success step and its finished conditions say \"the skill is complete\"; the error step routes back to it via \"the user has chosen to stop\""
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "fail — setup-handover's +Copy the Init Payload can re-run `cp -a` over an already-configured root, guarded only for CLAUDE.md (finding 4); the assemble loop's resumption is adequately handled by its edit-in-source instruction"
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "pass — +Handle a Problem is a whole declared error step claiming both \"something has gone wrong\" and \"no other step covers\"; its condition block carries stray prose (finding 11) and names no dispositions"
+          },
+          {
+            "check": "The run resolves",
+            "verdict": "fail — resolves on the build, mark, decline and failure paths; stalls on the setup-only run and on a learner with no student file (finding 1)"
+          },
+          {
+            "check": "Single source of truth",
+            "verdict": "fail — workbook shell restates and contradicts the global spelling/page-size invariant (finding 7); delivery-intent criteria written out in two steps' finished conditions (finding 8)"
+          },
+          {
+            "check": "No no-ops",
+            "verdict": "pass — both globals and all four step-invariant blocks change behaviour"
+          },
+          {
+            "check": "Cold-readable",
+            "verdict": "fail — six template files point at numbered \"Agent Invariant 2/4/5\" that no document in the set defines (finding 6)"
+          },
+          {
+            "check": "Terms earn their place",
+            "verdict": "pass — Matter, Shape, Page Geometry, Handover Doc, Sample and Strand are each leaned on by a step or a handover"
+          },
+          {
+            "check": "Sharp prose",
+            "verdict": "fail — unreachable meaning in the Agent Invariant N pointers (finding 6); why-prose in the Handover Doc term (finding 14)"
+          },
+          {
+            "check": "Naming, not explaining",
+            "verdict": "fail — setup-handover.md carries two headings that slug to the same anchor (finding 9)"
+          },
+          {
+            "check": "Handover discovery and set agreement",
+            "verdict": "pass — glob and citations both yield the same four handovers, all cited in the em-dash form"
+          },
+          {
+            "check": "Handover three agreeing signals",
+            "verdict": "pass — all four carry the Handover subtype, a -handover filename, and sit at the skill root; none in references/"
+          },
+          {
+            "check": "Handover bare frontmatter and identity paragraph",
+            "verdict": "pass — each is the single stamp line with a `# Title (Handover)` heading and an identity paragraph that names the work and the fold-in moment without restating the preamble"
+          },
+          {
+            "check": "Handover globals scoped to the parent step",
+            "verdict": "pass — only mark-review carries a global, and it neither repeats nor contradicts the parent's two or the parent step's invariants"
+          },
+          {
+            "check": "Grants come from the parent",
+            "verdict": "pass — Task, Glob, WebSearch/WebFetch, Bash(cp:*), Bash(bash:*) and html_to_pdf all cover handover and step tool use; no grant is unused"
+          },
+          {
+            "check": "Handover no required exit steps / parent step owns the logic",
+            "verdict": "pass — no handover routes a success exit or hands back an outcome token, and each parent step's finished condition reads state the handover actually leaves"
+          },
+          {
+            "check": "One level only",
+            "verdict": "pass — no handover folds in another"
+          },
+          {
+            "check": "Preamble verbatim and dividers",
+            "verdict": "pass — SKILL.md carries the universal preamble byte-for-byte, all four handovers the handover variant; dividers exact, TERMS present only where terms are coined"
+          },
+          {
+            "check": "No dead weight / invoked, not just named",
+            "verdict": "pass — every reference, template folder and handover is invoked from a step at its moment; the folder citations discharge the conditionally reached files"
+          },
+          {
+            "check": "Installable citations",
+            "verdict": "pass — every cited path resolves in the installed plugin, including `${CLAUDE_PLUGIN_ROOT}/templates/`, `mcp/print-base.css` and `scripts/install-deps.sh`"
+          },
+          {
+            "check": "Data, not work / authoring guides",
+            "verdict": "pass — no reference or template carries a step contract; the pedagogy, spine and structure files are authoring guides, and the students template's fill instructions are template prose, not steps"
+          }
+        ],
+        "findings": [
+          {
+            "check": "Every outcome the step can end on",
+            "location": "extensions/skills/classroom/SKILL.md — `## +Establish Learner and Intent`, \"#### Step finished when these are true:\"",
+            "problem": "The finished conditions state only the happy path: they require the learner's `students/` file to have been read and the intent to be one of new build, continuing a course, or marking work. A learner with no file whose user declines to create one leaves the step unable to close, and a setup-only run — an outcome +Conclude explicitly claims (\"a setup-only request completed\") — has no intent this step can settle on, so the step stays in play against a run that is already finished.",
+            "fix_direction": "Add the outcomes the step can genuinely end on — no student file exists and the user declined one, and the run is setup-only with nothing to build — so the condition is satisfiable on every path +Conclude claims."
+          },
+          {
+            "check": "Negative space claimed",
+            "location": "extensions/skills/classroom/SKILL.md — `## +Assemble a Unit's Documents`, start condition \"a unit — the sample or a subsequent one — needs its documents\"",
+            "problem": "+Build and Approve the Sample deliberately stays out when \"the build is larger than a single lesson\" is false, but the assemble step's start condition enumerates only the sample and units subsequent to it. A single-lesson build therefore matches no build step and drops to +Handle a Problem, which surfaces a valid request as a fault; a second reading, in which the lone lesson is treated as \"the sample\", is equally available.",
+            "fix_direction": "Have the assemble step's start condition claim any unit needing documents regardless of whether a sample gate applies, so the small-build path is claimed by the working step rather than by the error step."
+          },
+          {
+            "check": "In-play overlap deliberate or absent",
+            "location": "extensions/skills/classroom/SKILL.md — `## +Collect Subject Matter`, `## +Align the Build`, `## +Choose Course and Lesson Shapes` start conditions",
+            "problem": "The run's intent may be settled as \"continuing a course\", but no start condition names that state; a continuation is simply \"the run is a build\", so subject-matter collection, alignment and shape choice all re-hold in a fresh session and re-ask what a prior session already settled and recorded in `CLAUDE.md`, while +Build Remaining Units is in play beside them. The overlap is accidental rather than a supervisory span.",
+            "fix_direction": "Distinguish the continuation state in the start conditions of the three setup-side build steps — for example by conditioning them on the absence of a recorded structure, shapes, or saved matter — so a continuation run enters only the steps that still have work."
+          },
+          {
+            "check": "Half-applied state",
+            "location": "extensions/skills/classroom/setup-handover.md — `## +Copy the Init Payload` step invariant and the `## Copy the Payload` command (`cp -a \"${CLAUDE_PLUGIN_ROOT}/templates/.\" .`)",
+            "problem": "The copy is guarded for `CLAUDE.md` alone, but `cp -a` writes the whole payload over whatever is at the root. A re-bootstrap, or a project whose signal rule was removed while its config survived, silently overwrites a filled `global-requirements.md` and the `students/` payload contents with starter placeholders — a destructive re-run over the family's own state, with no step accounting for it afterwards.",
+            "fix_direction": "Extend the preservation rule to every pre-existing config file the payload would land on (copy only what is absent, merge what exists), or make the step's start condition exclude a root that already carries filled classroom config and route that case to the parent's error step."
+          },
+          {
+            "check": "Relative paths resolve from the citing file",
+            "location": "extensions/skills/classroom/templates/lesson-structures/*.md, templates/course-structures/spine-plus-companion.md, templates/blocks/video-library-page.html, references/curriculum-spines.md",
+            "problem": "Nested files write skill-root-relative paths: `templates/blocks/craft-activity.html` and `references/vetted-video-channels.md` from inside `templates/lesson-structures/`, `references/vetted-video-channels.md` from inside `templates/blocks/`, `references/curriculum-spines.md` from inside `templates/course-structures/`, and `templates/course-structures/spine-plus-companion.md` from inside `references/`. A reader following any of them from the citing file lands nowhere.",
+            "fix_direction": "Rewrite each target as the path a reader of that file must follow (reaching back with `../` as needed), and put them in Markdown link notation with the name-derived link text."
+          },
+          {
+            "check": "Sharp prose (unreachable meaning)",
+            "location": "extensions/skills/classroom/templates/lesson-structures/early-learner-multisensory.md, explore-investigate.md, studio-practice.md, watch-concept-notes-practice-reflect.md; templates/documents/answer-key-a4.html; templates/documents/scope-and-sequence.html — \"(Agent Invariant 5)\", \"(Agent Invariant 2)\", \"(Agent Invariant 4: sample-first gate)\"",
+            "problem": "Six files cite numbered agent invariants, but SKILL.md carries two unnumbered globals and the numbered scheme exists nowhere in the set. A reader cannot resolve which rule is meant, and the rule being pointed at (keep the approved step order; answers stay out of the workbook; approve the sample first) actually lives as step invariants under different steps.",
+            "fix_direction": "State the rule inline where the template needs it, or point at the step that owns it by its rule text, and remove the numbering scheme the set no longer has."
+          },
+          {
+            "check": "Single source of truth",
+            "location": "extensions/skills/classroom/templates/documents/workbook-a4.html — header comment \"INVARIANTS: A4 only; Australian English; answers live in the SEPARATE answer-key template, never here\"",
+            "problem": "The shell hardcodes a page size and a spelling convention that SKILL.md's first global invariant says must be read from `global-requirements.md` or a student-file override, giving the same rule a second home that can contradict the family's configuration; the answer-key rule likewise duplicates the +Assemble a Unit's Documents step invariant.",
+            "fix_direction": "Have the shell's header point at the configured source for spelling and page size rather than naming values, and drop the restated answer-key rule so it lives only in the step invariant."
+          },
+          {
+            "check": "Single source of truth",
+            "location": "extensions/skills/classroom/SKILL.md — finished conditions of `## +Assemble a Unit's Documents` and `## +Build and Approve the Sample`",
+            "problem": "The delivery-acceptance standard — sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected, no unresolved layout flags — is spelled out in full in both steps, while the `Document Pipeline` reference already defines what the conversion report's fields mean. A change to the standard is a three-place edit.",
+            "fix_direction": "Keep the acceptance criteria in the `Document Pipeline` reference and have both finished conditions bind to it by citation."
+          },
+          {
+            "check": "Naming, not explaining",
+            "location": "extensions/skills/classroom/setup-handover.md — `## Warm the PDF Engine` (References entry) and `## +Warm the PDF Engine` (step)",
+            "problem": "Two headings in one document reduce to the same anchor, so the step's own citation `[Warm the PDF Engine](#warm-the-pdf-engine)` is ambiguous — it can resolve to the step that contains it rather than to the command block it means.",
+            "fix_direction": "Rename one of the two so each heading is a unique link target, and repoint the citation at the command entry."
+          },
+          {
+            "check": "Moment-of-use citation",
+            "location": "extensions/skills/classroom/SKILL.md — `## Classroom Signal` (\"emitted into the loaded context by `.claude/rules/classroom.md`\") and the same claim in `## Storage Model`",
+            "problem": "The cited file is not the one that holds the signal: in the installed payload `**CLASSROOM SKILL COMPATIBLE**` is emitted by `.claude/rules/classroom-signal.md`, while `.claude/rules/classroom.md` is the project guidance rule. An agent verifying or repairing the signal opens the wrong file.",
+            "fix_direction": "Point the signal reference at the rule file that actually emits the marker, and let the Storage Model entry list both rule files by their real jobs."
+          },
+          {
+            "check": "Condition block shape",
+            "location": "extensions/skills/classroom/SKILL.md — `## +Handle a Problem`, the sentence \"Either case covers a missing or corrupt `global-requirements.md`, a failed PDF conversion, …\" between the OR block and the finished conditions",
+            "problem": "A prose paragraph sits inside the start-condition block, where the notation admits only list items; the error classes it names also arrive with no disposition attached, which is the engagement's job.",
+            "fix_direction": "Remove the paragraph from the condition block and carry the error classes in the engagement, each paired with the disposition it takes."
+          },
+          {
+            "check": "Multiple functions",
+            "location": "extensions/skills/classroom/SKILL.md — `## +Assemble a Unit's Documents`, declared \"**Looping step**\"",
+            "problem": "The step re-holds per unit as a loop, and it also folds in Media Processing — Handover and reads the state that handover leaves behind in its finished condition (\"every concept's media is verified or marked no-suitable-media\") — the handover-step shape, undeclared. One step is carrying two catalogued functions.",
+            "fix_direction": "Either lift the media fold-in into its own handover step whose finished condition reads the media state, or settle which single function this step declares and move the other shape out."
+          },
+          {
+            "check": "One condition per item",
+            "location": "extensions/skills/classroom/SKILL.md — `## +Build and Approve the Sample`, finished item \"the scope-and-sequence and one complete sample unit are built, each conversion report matching intent (sheet count …, print mode …, no unresolved layout flags)\"",
+            "problem": "One list item asks the agent to observe two separate artifacts and three separate properties of each of their reports; it cannot be settled with one look, and a partially satisfied item reads as satisfied. The same shape recurs in the assemble step's delivery item.",
+            "fix_direction": "Split the item so each artifact's completion and each report property is its own condition, or reduce it to a single observable fact that the cited acceptance criteria define."
+          },
+          {
+            "check": "Sharp prose (why-prose)",
+            "location": "extensions/skills/classroom/SKILL.md — `# --- TERMS ---`, the **Handover Doc** entry",
+            "problem": "The entry ends in rationale — \"lean extraction of heavy, optional, or side-branching work that would otherwise bloat this skill\" — which explains why the shape exists rather than instructing how to use it, and the preceding sentences restate the reading model each handover already carries verbatim in its preamble.",
+            "fix_direction": "Cut the rationale clause and keep only what the parent document needs to act on: what a handover doc is, how it is cited, and that the parent step reads its result."
+          }
+        ]
+      },
+      {
+        "target": "extensions/skills/git-box/SKILL.md (set: SKILL.md, workflows/commit-and-push.md, workflows/multi-commit-and-push.md; handover glob and citations both empty — sets agree)",
+        "verdict": "revise",
+        "scenario_walk": "Happy path held: invoke -> Gather Context (args + git status inline) -> Check Workflows matches commit-and-push, template loaded and filled -> Formulate Brief -> Call Agent (spanning wait, no-mutation invariant in force) -> report arrives -> Present Report records full success -> Conclude ends the run. Fresh-brief path held (no match -> OR block -> workflow check recorded complete -> Formulate Brief). Failure-report path held: outcome recorded as run-with-failures -> Help; Call Agent had already finished on report arrival, so its no-mutation invariant lapsed before Help offers main-chat fixes. Workflow-save path held to the issue upload (gh MCP grant missing, see findings). Two walks broke. (1) Failed agent invocation: Help's second OR block claims it, but Call Agent's finished conditions require \"the git-robot report has arrived\" — a report that will never come — so the step stays in play forever and its invariant \"DO NOT mutate any files while this step is in play\" never lapses, directly contradicting Help's offer to fix things in the main chat: a cold agent is wedged between an active prohibition and its instructed recovery. (2) Out-of-scope request: Gather Context's engagement says tell the user and offer main-chat help, but its finished conditions require \"the request is within scope\", so the step can never finish; the run's only exit is Help's remainder clause \"a situation has arisen that no other step covers\", which is contestable since Gather Context's own engagement covers the telling — two readings, and on one of them the run stalls with no stated stopping point. Clarification loop (ambiguous request) re-holds and resolves cleanly; gate-style refusals do not exist in this document; concurrent in-play overlap during the Call Agent wait is deliberate and intended.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "pass — Help's three OR blocks (recorded failures, skill-process misbehaviour incl. failed invocation, remainder) claim every state no other step covers; noted that two per-step refusal outcomes reach it only via the contestable remainder reading (findings 1-2)"
+          },
+          {
+            "check": "Exit steps present and stating their termination",
+            "verdict": "pass — Conclude, Save a Workflow, and Help each finish on \"the skill is complete\""
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "pass — partial git-robot outcomes arrive in the report's Failures section and land in Help with the user; no step resumes silently over its own partial work; no exclusion clauses in start conditions"
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "pass — Help is a whole standalone error step with the fixed catalogue declaration, claiming the remainder in its third OR block"
+          },
+          {
+            "check": "The run resolves",
+            "verdict": "pass on the walked happy/failure/save paths; broken on the failed-invocation and out-of-scope paths (findings 1-2)"
+          },
+          {
+            "check": "Single source of truth",
+            "verdict": "finding — no-mutation rule stated three times inside +Call Agent (finding 10); intro paragraph duplicates the frontmatter description (finding 7); Gather Context's scope list restates the Git Robot Agent action catalogue (folded into finding 5)"
+          },
+          {
+            "check": "No no-ops",
+            "verdict": "pass — invariants are few and hard; the one soft restatement is recorded under single-source (finding 10)"
+          },
+          {
+            "check": "Cold-readable",
+            "verdict": "pass — no DraftHorse jargon leaned on; the preamble is the only reading lesson needed"
+          },
+          {
+            "check": "Terms earn their place",
+            "verdict": "pass — Request, Procedure, Skill Process, Action, Result, Brief are all leaned on by steps, references, or templates"
+          },
+          {
+            "check": "Sharp prose",
+            "verdict": "finding — the intro paragraph under # Git Box is why-prose duplicating the description (finding 7); the rest is sharp"
+          },
+          {
+            "check": "Naming, not explaining",
+            "verdict": "pass — headings are short unique names; engagement headings are named for the work"
+          }
+        ],
+        "findings": [
+          {
+            "check": "Every outcome the step can end on",
+            "location": "extensions/skills/git-box/SKILL.md — +Call Agent, \"#### Step finished when these are true:\" and \"#### Step invariants:\"",
+            "problem": "The finished conditions are happy-path-only (\"the git-robot report has arrived\"); a failed invocation — an outcome Help's start condition explicitly names — leaves the step permanently in play, so the invariant \"DO NOT mutate any files while this step is in play — from invocation until the report arrives\" never lapses and contradicts Help's fix-in-the-main-chat recovery. Scenario-walk break.",
+            "fix_direction": "Add an OR finished block claiming the failed-invocation outcome (the invocation failed and the failure is recorded), so the step closes, the no-mutation invariant lapses, and Help's claim on the recorded failure takes over cleanly."
+          },
+          {
+            "check": "Every outcome the step can end on",
+            "location": "extensions/skills/git-box/SKILL.md — +Gather Context, \"#### Step finished when these are true:\"",
+            "problem": "The engagement describes a refusal outcome (request outside commit/push/switch scope: tell the user, offer main-chat help) but the finished conditions require \"the request is within scope\", so on that path the step can never finish and the run's exit rests on a contestable reading of Help's remainder clause. Scenario-walk break.",
+            "fix_direction": "State the refusal outcome in an OR finished block (the request is out of scope and the user has been redirected), or have the out-of-scope state explicitly fall to the error step's remainder so exactly one reading exists."
+          },
+          {
+            "check": "Agent decisions",
+            "location": "extensions/skills/git-box/SKILL.md — +Formulate Brief, \"#### Agent decision:\" (below \"### Format:\")",
+            "problem": "The Agent decision block sits below the engagement heading, and after Step invariants; machinery order places Agent decision with the other H4 machinery above the engagement, before Step invariants.",
+            "fix_direction": "Move the \"#### Agent decision:\" block up into the machinery, between the finished conditions and \"#### Step invariants:\", above \"### Format:\"."
+          },
+          {
+            "check": "Reference citations are links",
+            "location": "extensions/skills/git-box/SKILL.md — Workflow Map reference, \"Reference\" table column",
+            "problem": "The only citations of the two external workflow files are bare paths (workflows/commit-and-push.md, workflows/multi-commit-and-push.md), not markdown links; +Check Workflows resolves the file to load through these cells.",
+            "fix_direction": "Make each Reference cell a markdown link with the derived link text (e.g. [Commit And Push](workflows/commit-and-push.md))."
+          },
+          {
+            "check": "No dead weight",
+            "location": "extensions/skills/git-box/SKILL.md — Git Robot Agent reference; +Formulate Brief and +Gather Context engagements",
+            "problem": "The Git Robot Agent reference (procedure catalogue, actions, format, examples) is cited by no step, while +Formulate Brief needs exactly that data to compose the brief and +Gather Context's scope test restates its action list (\"commit / push / switch, stash, pop\") as second-home prose.",
+            "fix_direction": "Cite [Git Robot Agent](#git-robot-agent) at the moments of use — inside +Formulate Brief's format work and +Gather Context's scope test — and let the scope test lean on the catalogue instead of restating it."
+          },
+          {
+            "check": "Permissions",
+            "location": "extensions/skills/git-box/SKILL.md — frontmatter allowed-tools; Issue Creation reference; +Save a Workflow and +Help",
+            "problem": "Two steps create and search GitHub issues via the gh MCP per the Issue Creation reference, but allowed-tools grants only Bash(git status *), Agent(git-robot), and the three dev-tools sub-skills — the grants do not match what the steps actually do.",
+            "fix_direction": "Add the gh MCP issue tools the two steps use to allowed-tools (the Agent/Skill grants for git-robot's sub-skills are used via the +Call Agent launch and are correctly held)."
+          },
+          {
+            "check": "Sharp prose",
+            "location": "extensions/skills/git-box/SKILL.md — paragraph under \"# Git Box\"",
+            "problem": "The intro paragraph is why-prose (\"The main agent loop is important... without reducing quality or burning tokens\") that near-verbatim duplicates the frontmatter description — rationale the agent does not need and a second home for one meaning.",
+            "fix_direction": "Cut the paragraph, or reduce it to a one-line identity statement that does not restate the description."
+          },
+          {
+            "check": "Every outcome the step can end on",
+            "location": "extensions/skills/git-box/SKILL.md — +Save a Workflow, \"#### Step finished when these are true:\"",
+            "problem": "Borderline: a failed issue creation cannot finish the step (\"the workflow issue is created\"); Help's process-misbehaviour claim catches the run but the step lingers in play unfinished. No lingering invariant harm, unlike +Call Agent.",
+            "fix_direction": "Add an OR finished block for the failed-upload outcome so the step closes before Help takes over."
+          },
+          {
+            "check": "Own step only",
+            "location": "extensions/skills/git-box/SKILL.md — +Check Workflows, OR finished block, \"the brief will be written fresh\"",
+            "problem": "Borderline: the item narrates future work belonging to another step's engagement rather than stating this step's completion; the routing fact already lives in \"the workflow check is recorded as complete\" plus +Formulate Brief's start condition.",
+            "fix_direction": "Drop the item or restate it as left-behind state (no workflow draft was adopted)."
+          },
+          {
+            "check": "Single source of truth",
+            "location": "extensions/skills/git-box/SKILL.md — +Call Agent engagement, closing sentence \"This step stays in play for the whole wait...\"",
+            "problem": "Borderline: the no-mutation rule is stated three times in one step — the Step invariants block, the inform-the-user sentence, and the closing sentence restating the invariant's mechanics.",
+            "fix_direction": "Keep the invariant block and the user-facing inform sentence; remove the closing restatement."
+          }
+        ]
+      },
+      {
+        "target": "extensions/skills/git/agent-commit/SKILL.md (document set: this file alone — no external references or handovers cited or present)",
+        "verdict": "revise",
+        "scenario_walk": "Walked four runs. (1) COMMIT(new), all diffs commit cleanly: Read Procedure → Commit New → Result. Holds. (2) COMMIT(amend), push-check finds pushed=true: Agent decision refuses → Amend's OR-clause finished (\"refused\"/\"recorded\") → Result's OR-clause admits it. Holds. (3) A Brief with a no-op procedure followed by a real one: Read Procedure's own start condition (\"no earlier no-op or refusal has ended the run\") deliberately halts further procedure processing after the first no-op/refusal — explicit, not a mis-route, so this is domain design, not a spec defect. (4) A `git commit`/`git commit --amend` invocation itself fails mid-run (hook rejection, unrelated git error) — this is the break: Commit New declares no refusal/failure outcome at all, and Commit Amend's Agent-decision refusal only pre-empts push/multi-commit conditions, not the execution failing. Neither step's finished condition nor Result's \"no-op or refusal\" OR-clause claims this state, so the agent has no reachable next step — a stall.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "FAIL — a failed `git commit`/`git commit --amend` invocation is claimed by no step's start or finished condition; see finding 1."
+          },
+          {
+            "check": "The run resolves",
+            "verdict": "FAIL — same unclaimed-failure gap as above leaves no stopping point for that path."
+          },
+          {
+            "check": "Exit steps present and stating termination",
+            "verdict": "PASS — +Result's finished conditions state \"the skill is complete.\""
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "PASS — unstage/re-stage handling in the Commit: bullets leaves out-of-scope changes in a clean, unambiguous state."
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "PASS — +Result's adapted declaration tail follows the executor exception's sanctioned form."
+          },
+          {
+            "check": "Single source of truth / No no-ops",
+            "verdict": "BORDERLINE — the global invariant restating git-add-before-committing duplicates the explicit git add bullet in both Commit steps; see finding 7."
+          },
+          {
+            "check": "Cold-readable",
+            "verdict": "PASS — no unexplained framework jargon."
+          },
+          {
+            "check": "Terms earn their place",
+            "verdict": "N/A — no terms coined (separate Scaffold finding on the section's presence, finding 5)."
+          },
+          {
+            "check": "Sharp prose",
+            "verdict": "FAIL — negative mirror in +Read Procedure's Step invariants; see finding 6."
+          },
+          {
+            "check": "Naming, not explaining",
+            "verdict": "FAIL — duplicate `#### Commit:` heading across two steps; see finding 3."
+          }
+        ],
+        "findings": [
+          {
+            "check": "Condition Checks — Every outcome the step can end on / Negative space claimed",
+            "location": "+Commit New (Commit: bullets) and +Commit Amend (Commit: bullets), and +Result's start condition",
+            "problem": "No step or OR-clause claims a `git commit`/`git commit --amend` invocation itself failing (e.g. a pre-commit hook rejection, unrelated git error). Commit New declares no failure/refusal outcome at all; Commit Amend's Agent-decision refusal only pre-empts push-status and multi-commit conditions, not the commit command failing. This is a broken edge — the agent has no reachable next step.",
+            "fix_direction": "Add a failure/refusal outcome to Commit New's finished condition, and extend Commit Amend's refusal to cover a failed commit execution, so Result's \"a no-op or refusal has ended the run\" OR-clause can claim both."
+          },
+          {
+            "check": "Notation Checks — Machinery headings",
+            "location": "+Commit Amend, `#### Agent decision:` heading",
+            "problem": "The Agent decision heading is placed after the engagement heading `### Check for Push:` instead of above it with the step's other H4 machinery.",
+            "fix_direction": "Move the `#### Agent decision:` block to sit directly after the Step finished conditions, before the engagement heading."
+          },
+          {
+            "check": "Document-Wide Checks — Naming, not explaining",
+            "location": "+Commit New `#### Commit:` and +Commit Amend `#### Commit:`",
+            "problem": "Both steps use the identical heading text \"Commit:\", producing a duplicated, ambiguous anchor within the same document.",
+            "fix_direction": "Give each heading a unique name, e.g. distinguish \"Commit New Files:\" from \"Commit Amend:\"."
+          },
+          {
+            "check": "Frontmatter Checks — Invocation surface",
+            "location": "Frontmatter (top of file)",
+            "problem": "The description and the Agent Invariant (\"DO NOT use this skill unless you are a Git Robot Agent\") mark this as an executor-only document, but frontmatter carries no `disable-model-invocation`, leaving it reachable sideways by any model-invoked agent.",
+            "fix_direction": "Add `disable-model-invocation: true` (or the harness's equivalent) to close the sideways path."
+          },
+          {
+            "check": "Scaffold Checks — Terms",
+            "location": "`# --- TERMS ---` section at end of file",
+            "problem": "The Terms section is present with a \"**None at this time**\" placeholder even though the document coins no terms; Scaffold Checks call for the section to be absent in that case, not present-empty.",
+            "fix_direction": "Remove the `# --- TERMS ---` divider and its body entirely."
+          },
+          {
+            "check": "Notation Checks — Reference citations are links",
+            "location": "`## Current Git state` heading vs. `[Current Git State](#current-git-state)` citation in +Read Procedure; `## Emoji map` heading vs. `[Emoji Map](#emoji-map)` citation in the Commit Message Format reference",
+            "problem": "Citation text capitalization does not mirror the actual heading text in either case (\"state\"/\"map\" vs. \"State\"/\"Map\").",
+            "fix_direction": "Match each citation's link text casing to its heading exactly, or align the headings' own casing with the intended Title Case."
+          },
+          {
+            "check": "Document-Wide Checks — Sharp prose (negative mirror)",
+            "location": "+Read Procedure, Step invariants: \"**ALWAYS** use the `Expanded Diffs` to write the commit message. Do not guess from filenames or procedure details.\"",
+            "problem": "The trailing negative clause restates what the preceding affirmative already entails.",
+            "fix_direction": "Drop the negative clause and keep the affirmative instruction alone."
+          },
+          {
+            "check": "Document-Wide Checks — No no-ops / Single source of truth (borderline)",
+            "location": "Agent Invariants: \"**ALWAYS** `git add <file>` before committing, regardless of whether the file is already staged or not\" vs. the \"Stage each file in the group with `git add <file>` (re-stage if already staged)\" bullet in both +Commit New and +Commit Amend",
+            "problem": "The global invariant restates the same rule the procedural step bullets already mandate every pass, so a future change to the policy requires editing two places.",
+            "fix_direction": "State the rule once — either as the invariant alone, or fold its wording into the step bullet and drop the invariant."
+          }
+        ]
+      },
+      {
+        "findings": [
+          {
+            "check": "Permissions",
+            "location": "extensions/skills/git/agent-push/SKILL.md, frontmatter `allowed-tools`",
+            "problem": "Grants `Bash(git rev-parse *)` and `Bash(git branch *)` are used by no step and no dynamic reference command — only `git status`, `git log`, and `git push` are ever run. The only conceivable rev-parse use (querying `@{upstream}`) is explicitly banned by a global invariant, and `git branch *` is a write-capable grant nothing needs; a grant no step uses is a finding.",
+            "fix_direction": "Drop the two unused grants from `allowed-tools`; if branch-name resolution is ever meant to use them, wire that use into a step explicitly instead."
+          },
+          {
+            "check": "No dead weight",
+            "location": "extensions/skills/git/agent-push/SKILL.md, References — `## Push outcomes`",
+            "problem": "No step cites the Push outcomes reference. +Push's Run block (\"record ... the resulting state for the `Result`\") and +Result's engagement compose exactly the states this entry catalogues (Pushed / Up to date / Upstream set / Rejected), but neither links it, so the reference is uncited dead weight and the recording moments are missing their data citation.",
+            "fix_direction": "Cite [Push Outcomes](#push-outcomes) at the moment of use — where +Push records the outcome and/or in +Result where the result line is composed (a finished-condition citation would make it binding)."
+          },
+          {
+            "check": "Agent decisions (Step-Shape)",
+            "location": "extensions/skills/git/agent-push/SKILL.md, +Push — `#### Agent decision:` under `### Push the Branch:`",
+            "problem": "The upstream-decides-the-command choice is a bounded fork inside the work — neither branch changes what the step targets or how many times it runs, and it resolves to no named fact the step's finished condition depends on — so per the check it belongs in the engagement as plain prose. The block is also placed below the engagement heading instead of with the step's H4 machinery above it, failing the machinery-heading order either way.",
+            "fix_direction": "Demote the block: fold the no-upstream/`git push -u` versus existing-upstream/`git push` fork into the engagement as plain prose, which removes the misplaced machinery heading in the same edit."
+          },
+          {
+            "check": "Terms form / References entries Title Case (Notation)",
+            "location": "extensions/skills/git/agent-push/SKILL.md, References headings `## Current Git state` and `## Push outcomes`",
+            "problem": "References entries must be Title Case; both entry headings carry a lowercase final word. The step citations already write `[Current Git State](#current-git-state)`, so citation text and heading case diverge.",
+            "fix_direction": "Retitle the two entries in Title Case (Current Git State, Push Outcomes); the existing downcased anchors and citation texts then match without further edits."
+          },
+          {
+            "check": "Single source of truth (Document-Wide) — borderline",
+            "location": "extensions/skills/git/agent-push/SKILL.md, References — Push outcomes, `**Rejected**` entry: \"Record the rejection; do not force.\"",
+            "problem": "\"do not force\" restates the global invariant `**NEVER** use force flags when pushing` inside a reference, so the rule lives in two homes and a change is no longer a one-place edit.",
+            "fix_direction": "Trim the restatement from the Rejected entry; the global invariant already binds the whole run."
+          },
+          {
+            "check": "Sharp prose — why-prose (Document-Wide) — borderline",
+            "location": "extensions/skills/git/agent-push/SKILL.md, Agent Invariants — \"it exits non-zero on a branch that has no upstream, which fails this skill at load before any push permission is granted\"",
+            "problem": "The clause is rationale the executing agent does not need once the guardrail is stated — the prohibition plus the replacement source (\"Read tracking from `Branch + tracking`\") is complete without it, and the at-load failure mode it explains addresses an author, not the executor.",
+            "fix_direction": "Trim the invariant to the prohibition and the replacement source; move the load-time rationale to an authoring surface if it must survive."
+          }
+        ],
+        "scenario_walk": "Five runs walked plus the loop repass. (A) Ahead-with-upstream: +Read Procedure decides fast-forwardable, +Push starts on the decided shape, `git push` runs, outcome recorded, +Result's first arm claims it and emits the line — clean. (B) No upstream: shape decided as no-upstream, +Push's parenthetical admits it, `git push -u origin <branch>` establishes tracking, Upstream set recorded — clean. (C) Up to date: empty Unpushed commits with an existing upstream; +Push's start never holds, +Result's OR arm (\\\"resolved without pushing — up to date\\\") claims the run and emits the no-op note — routing held. (D) Rejection: behind/diverged read from Branch + tracking routes past +Push straight to +Result's OR arm; the race variant (shape decided fast-forwardable, remote rejects at push time) exits through +Push's \\\"completed or failed\\\" into +Result's first arm — no force in either path, the global holds. (E) Error (auth/network failure, or an unclassifiable state such as detached HEAD before any shape is decided): the folded error step's OR arm (\\\"resolved without pushing ... error\\\") claims it, per the sanctioned executor-exception fold — no unclaimed state. (F) Loop repass (+Read Procedure declared Looping, \\\"a different branch each pass\\\"): a second PUSH procedure re-holds the start condition; in the realistic path each pass arrives via a fresh skill invocation so the load-time Current Git State is fresh; on an in-context repass after an external branch switch the agent holds the `git status *` grant and rereading Branch + tracking is the same command refreshed, so routing holds — noted, not a finding. No stalls or mis-routes anywhere; the verdict is driven by non-borderline static findings (permissions, dead-weight citation, misfiled Agent decision, Title Case), none of which is misexecution-class, so revise comes from the borderline-alone clause rather than the forcing clause.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "pass — +Result's OR arm (\"resolved without pushing: up to date, rejection, or error\") subtractively claims every state no other step covers"
+          },
+          {
+            "check": "Exit steps present and stating termination",
+            "verdict": "pass — +Result's finished conditions end on \"the skill is complete\""
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "pass — a failed push is recorded as the outcome and reported, never silently resumed; no half-applied exclusion clauses in any start condition"
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "pass — folded into +Result per the executor exception with the explicit alternative-block claim; adapted declaration tail is the sanctioned shape"
+          },
+          {
+            "check": "Document-wide: the run resolves",
+            "verdict": "pass — every walked run exits through +Result's terminal finished conditions"
+          },
+          {
+            "check": "Document-wide: single source of truth",
+            "verdict": "finding (borderline) — \"do not force\" in the Rejected outcome restates the NEVER-force global"
+          },
+          {
+            "check": "Document-wide: no no-ops",
+            "verdict": "pass — aside from the duplication filed under single source of truth, every line changes behaviour"
+          },
+          {
+            "check": "Document-wide: cold-readable",
+            "verdict": "pass — `Brief`/`PUSH` procedure vocabulary is context the executor holds by design; the description and first global warn off every other reader"
+          },
+          {
+            "check": "Document-wide: terms earn their place",
+            "verdict": "pass — no terms coined; Terms section carries an explicit empty placeholder"
+          },
+          {
+            "check": "Document-wide: sharp prose",
+            "verdict": "finding (borderline) — why-clause on the @{upstream} global invariant"
+          },
+          {
+            "check": "Document-wide: naming, not explaining",
+            "verdict": "pass — headings are short names; noted only as an observation that `## +Result` and `### Result:` reduce to near-identical anchors, with nothing linking either"
+          }
+        ],
+        "target": "extensions/skills/git/agent-push/SKILL.md",
+        "verdict": "revise"
+      },
+      {
+        "target": "extensions/skills/git/agent-switch/SKILL.md (single-file document set; no external references, no handovers cited or present at skill root)",
+        "verdict": "revise",
+        "scenario_walk": "Walked cold as an agent holding a Brief with a SWITCH procedure. Happy path SWITCH(stash, switch, pop) on a dirty tree resolves cleanly: Read Procedure loops through stash→switch→pop, Result reports each line, terminal step states completion. Refusal path SWITCH(switch) with no stash and a dirty tree resolves cleanly too: Read Procedure's Agent decision refuses immediately, Result reports the refusal. Pop-conflict path resolves cleanly: Pop records the conflict as a note, Result surfaces it. The break is in the ordinary case where the tree happens to already be clean at stash time. Stash's finished condition marks that outcome \"an already-clean tree is recorded as a no-op,\" but Read Procedure's own start condition lists \"no-op\" alongside \"refusal\" and \"failure\" as states that have \"ended the run\" — and Result's alternate start condition repeats the same list. So the moment Stash no-ops, Read Procedure's start condition goes false, it never loops back to pick up switch/pop, and Result fires early on the no-op branch. A SWITCH(stash, switch, pop) run on a clean tree never switches branches at all — a genuine mis-route the static per-step checks don't catch in isolation, only visible by walking the loop.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "Finding — the no-op outcome of Stash is folded into the same 'ended the run' bucket as refusal/failure in Read Procedure's start condition, so the benign no-op case is not correctly claimed as 'continue the loop' (see scenario-walk finding)."
+          },
+          {
+            "check": "Exit steps present and stating termination",
+            "verdict": "Pass — Result step's finished condition states 'the skill is complete.'"
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "Pass — failures and conflicts on Switch/Pop are recorded as notes and surfaced via Result, not silently resumed; no step resumes over partial work."
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "Pass — Result step declares '**Error step** — folded into this reporting step per the executor exception' and its start condition explicitly claims the remainder ('a refusal, failure, conflict, or no-op has ended the run early'), matching the sanctioned folded-error-step shape."
+          },
+          {
+            "check": "Document-Wide: The run resolves",
+            "verdict": "Finding — see scenario-walk; the no-op/ended-run conflation can strand the chain before switch/pop run."
+          },
+          {
+            "check": "Document-Wide: Single source of truth",
+            "verdict": "Finding — the 'dirty switch with no stash = refusal' criterion is stated three times: the global NEVER invariants, Read Procedure's Agent decision, and the 'Refused' entry in Switch outcomes."
+          },
+          {
+            "check": "Document-Wide: No no-ops",
+            "verdict": "Pass — no purely redundant filler lines beyond the SSOT triplication already recorded separately."
+          },
+          {
+            "check": "Document-Wide: Cold-readable",
+            "verdict": "Borderline finding — 'Brief', 'task overview', 'git-robot', and 'Output Directive' are used repeatedly without definition in this document or a cited reference."
+          },
+          {
+            "check": "Document-Wide: Terms earn their place",
+            "verdict": "Pass — Terms section is empty ('None at this time'), no coined term goes unused."
+          },
+          {
+            "check": "Document-Wide: Sharp prose",
+            "verdict": "Borderline finding — same unreachable-meaning items as the cold-readable line."
+          },
+          {
+            "check": "Document-Wide: Naming, not explaining",
+            "verdict": "Finding — the Stash, Switch, and Pop steps all use the identical H3 heading '### Run:', a triplicated, ambiguous anchor."
+          }
+        ],
+        "findings": [
+          {
+            "check": "Finished conditions — Exhaustive / Own step only (routing via start conditions)",
+            "location": "extensions/skills/git/agent-switch/SKILL.md — '+Read Procedure' start condition (line 65-67) and '+Stash' finished condition (line 97-107); mirrored in '+Result' start condition (line 167-173)",
+            "problem": "Read Procedure's start condition requires 'no refusal, failure, or no-op has ended the run,' treating a benign Stash no-op (already-clean tree) as equivalent to a refusal or failure. This stops the loop from advancing to switch/pop in a chained SWITCH(stash, switch, pop) procedure whenever the tree happens to already be clean, and Result's mirrored alternate start condition fires early on the same no-op. This is the scenario-walk break.",
+            "fix_direction": "Remove 'no-op' from the ended-the-run alternatives in Read Procedure's and Result's start conditions (or add explicit wording that a no-op resolves the current action and the loop continues), so a clean-tree stash no-op does not halt the remaining chained actions."
+          },
+          {
+            "check": "Invocation surface",
+            "location": "extensions/skills/git/agent-switch/SKILL.md frontmatter, lines 4-6",
+            "problem": "The document is executor-only (Agent Invariants: 'DO NOT use this skill unless you are a Git Robot Agent'; description: 'not for general agent usage'), but frontmatter sets only `user-invocable: false` with no `disable-model-invocation`, leaving it reachable sideways via ordinary model invocation by any agent.",
+            "fix_direction": "Add `disable-model-invocation: true` so the invocation surface matches the document's stated executor-only role."
+          },
+          {
+            "check": "Single source of truth",
+            "location": "extensions/skills/git/agent-switch/SKILL.md — Agent Invariants (lines 15-18), '+Read Procedure' Agent decision (lines 85-87), References 'Switch outcomes' Refused entry (line 52)",
+            "problem": "The refusal criterion — a dirty switch with no preceding stash is refused, not forced — is stated three times in different wording: as a global NEVER invariant, as the Read Procedure step's operational Agent decision, and again as the 'Refused' outcome definition. A change to the criterion (e.g. adding another safety exception) requires editing three places.",
+            "fix_direction": "State the criterion once, most naturally in the Agent decision where it is operationalised, and have the global invariant and the Switch-outcomes 'Refused' entry reference the rule by name rather than restating its condition."
+          },
+          {
+            "check": "Naming, not explaining",
+            "location": "extensions/skills/git/agent-switch/SKILL.md — '### Run:' headings in '+Stash' (line 113), '+Switch' (line 133), '+Pop' (line 157)",
+            "problem": "All three steps reuse the identical H3 engagement heading '### Run:', producing three same-named headings in one document — an ambiguous, unlinkable anchor set.",
+            "fix_direction": "Give each engagement heading a distinct name, e.g. '### Run the Stash:', '### Run the Switch:', '### Run the Pop:'."
+          },
+          {
+            "check": "Agent decisions (placement)",
+            "location": "extensions/skills/git/agent-switch/SKILL.md — '+Read Procedure' step, `#### Agent decision:` block at line 85, following the `### Review the Action:` engagement heading at line 81",
+            "problem": "The Agent decision block is placed below the step's H3 engagement heading instead of sitting with the step's other H4 machinery above it, contrary to the notation rule for its placement.",
+            "fix_direction": "Move `#### Agent decision:` up to directly after `#### Step finished when these are true:` and before `### Review the Action:`."
+          },
+          {
+            "check": "No dead weight / Moment-of-use citation",
+            "location": "extensions/skills/git/agent-switch/SKILL.md — References '## Actions' (lines 35-43) and '## Switch outcomes' (lines 45-52)",
+            "problem": "Neither reference entry is ever cited via markdown link from any step's engagement text — only [Current Git State](#current-git-state) is linked in the whole document. 'Actions' (the stash/switch/pop definitions and chaining rule) and 'Switch outcomes' (the Result vocabulary) are load-bearing content that reads as uncited dead weight under the citation rule.",
+            "fix_direction": "Add explicit link citations at point of use — e.g. Read Procedure's engagement linking [Actions](#actions) where it reads the procedure's actions, and Result's engagement linking [Switch Outcomes](#switch-outcomes) where it assembles the result lines."
+          },
+          {
+            "check": "Permissions",
+            "location": "extensions/skills/git/agent-switch/SKILL.md frontmatter, line 6: `allowed-tools`",
+            "problem": "`Bash(git rev-parse *)` is granted but no step or reference in the document ever runs `git rev-parse` — a grant no step uses.",
+            "fix_direction": "Remove the `git rev-parse` grant, or add the step/reference that needs it if one was intended (e.g. resolving whether a target branch exists)."
+          },
+          {
+            "check": "Sharp prose — Unreachable meaning (borderline)",
+            "location": "extensions/skills/git/agent-switch/SKILL.md — directive (line 11), '+Read Procedure' engagement (line 83), '+Switch' engagement (line 119), '+Result' engagement (line 163)",
+            "problem": "The document repeatedly leans on terms it never defines and has no Terms entry for — `Brief`, `task overview`, `git-robot`, `SWITCH Output Directive` — assuming context from an external Git Robot contract. Read cold against this document alone, their shape cannot be resolved.",
+            "fix_direction": "Add a short Terms entry (or References note) naming what `Brief`, `task overview`, and `Output Directive` are and where they come from, or state in Agent Invariants that this skill is only ever invoked with that context already supplied by the calling Git Robot agent."
+          }
+        ]
+      },
+      {
+        "target": "extensions/agents/git-robot.md",
+        "verdict": "revise",
+        "scenario_walk": "Document set is git-robot.md alone: no markdown-link citations to external files exist anywhere in the body, so no reference files or handovers assemble into the set, and the handover-audit step correctly stays dormant. Happy path (brief with COMMIT then PUSH, both succeed): Dispatch loads /agent-commit, Execute runs it and records a ✅ directive, Dispatch re-fires (uncompleted PUSH remains, no blocking failure), loads /agent-push, Execute runs it, then Report's \"every procedure has been completed or attempted\" branch fires and the report is composed — this run resolves. Failure path (a skill fails to load): the engagement prose under Dispatch says this is recorded as a 🚫 directive and, if blocking, halts further procedures — but Dispatch's own finished condition only states the success case (\"the procedure's skill equivalent is loaded\"), so this outcome has no matching completion branch; Report's independent OR-clause (\"a blocking failure … has ended the run\") still catches the halt since steps are universal and not chained, so the run does not technically stall, but Dispatch itself never reaches a defined \"finished\" state on this path — a real gap even though Report papers over it. Termination: Report's finished conditions never assert the run/skill is complete (only that a report was composed and presented as final text), unlike the checker's own Compose-the-Report step, which pairs \"presented as final message text\" with an explicit \"the review is complete\" — git-robot's exit step is missing that explicit stopping statement, the pattern the spec calls a broken edge.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "pass — Dispatch/Execute/Report between them cover brief-arrived, procedure-loaded, procedure-in-progress, all-done, and blocking-failure/unprocessable-brief states"
+          },
+          {
+            "check": "Exit steps present and stating their termination",
+            "verdict": "fail — Report (the sole exit) never states the run is complete in its finished conditions; see finding 1"
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "pass — no evidence of a step silently resuming over its own partial work; state handling is delegated to the invoked skills"
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "pass — Report folds the error step per the executor exception with an adapted declaration tail and an explicit alternative start-condition block, matching the sanctioned shape"
+          },
+          {
+            "check": "Document-Wide Checks",
+            "verdict": "fail — Single source of truth and Terms-earn-their-place findings recorded (see findings 5 and 6); Sharp prose (why-prose) also present in the global invariants"
+          }
+        ],
+        "findings": [
+          {
+            "check": "Terminal steps state their termination",
+            "location": "extensions/agents/git-robot.md — +Report step, \"Step finished when these are true:\"",
+            "problem": "Finished conditions say the report covers every procedure and is presented as final message text, but never state the run itself is complete — termination is only implied, never asserted, leaving no explicit stopping point (the pattern the spec calls a broken edge that forces revise).",
+            "fix_direction": "Add an explicit finished-condition item asserting the run is complete, alongside the existing report-content and presentation items."
+          },
+          {
+            "check": "Finished conditions — every outcome the step can end on",
+            "location": "+Dispatch step, \"Step finished when these are true:\"",
+            "problem": "The engagement prose describes a failure outcome (\"A skill that fails to load is recorded as a 🚫 Output Directive\") but the finished condition only states the success path (\"the procedure's skill equivalent is loaded\"), so the failure-to-load outcome has no matching completion branch.",
+            "fix_direction": "Add a finished-condition branch (or reword the existing one) so both the loaded and failed-to-load outcomes satisfy this step's completion."
+          },
+          {
+            "check": "Moment-of-use citation / Reference citations are links",
+            "location": "+Report step, \"### Compose the Report:\"",
+            "problem": "The step relies on the `## Output Directives` reference section (the ✅/🚫 line format and per-procedure Result content) but never cites it via a markdown link at the point of use — unlike Dispatch, which properly links `[Procedure Translations](#procedure-translations)`.",
+            "fix_direction": "Add a markdown-link citation to the Output Directives section inside the Compose the Report engagement, at the sentence that needs it."
+          },
+          {
+            "check": "Permissions",
+            "location": "frontmatter, `tools:` line",
+            "problem": "`Bash` is granted directly to git-robot, but every step invariant forbids running git or file commands directly (\"DO NOT attempt to run git commands directly\", \"DO NOT invoke any other skill or tool, except for the procedure's skill equivalent\") — no step ever exercises the Bash grant.",
+            "fix_direction": "Drop the standalone Bash grant, or if some step genuinely needs it, name that step's use explicitly."
+          },
+          {
+            "check": "Single source of truth / No no-ops",
+            "location": "# Agent Invariants (global)",
+            "problem": "Three of the four global invariants restate the same rule — never act directly, always route through the named skills — each padded with an appended rationale clause explaining consequences (why-prose) rather than adding a distinct rule.",
+            "fix_direction": "Consolidate into one hard invariant (route every git/file action through the named skills; never act directly) and drop the restated consequence clauses."
+          },
+          {
+            "check": "Terms earn their place",
+            "location": "# --- TERMS ---, `**Directive**` entry",
+            "problem": "The bare term \"Directive\" (distinct from \"Output Directive\") is defined but never leaned on anywhere in the body — only \"Output Directive\" and its components (\"State Management\", \"Task Overview\") are actually used.",
+            "fix_direction": "Drop the \"Directive\" term entry, or use the term explicitly in the Brief/Steps prose if it is meant to be load-bearing."
+          },
+          {
+            "check": "Multiple functions (borderline)",
+            "location": "+Dispatch step",
+            "problem": "Beyond its declared Looping-step role, Dispatch also resolves branching — judging per-procedure blocking status and routing to one of three skill equivalents via \"base git knowledge\" — criteria that overlap the Routing-step catalogue entry, left undeclared.",
+            "fix_direction": "Confirm whether the blocking-status judgment is real branching; if so, declare Routing step alongside Looping step, or move the judgment into Execute."
+          }
+        ]
+      },
+      {
+        "target": "extensions/agents/doc-reviewer.md",
+        "verdict": "pass",
+        "scenario_walk": "Document set = doc-reviewer.md alone (no external file citations, no handover citations or *-handover.md files at any relevant root, so the handover-audit step is correctly dormant). Walked: (1) Happy path — invocation with path + supplied test: Resolve the Brief reads the document and confirms the test in hand; Execute Cold walks it, recording zero or more stall points; Sweep the Defect Classes applies the seven asks plus the Glob/Grep missing-environment check; Report composes the verdict and states \"the audit is complete.\" No stall. (2) No acceptance test supplied: Resolve's finished condition explicitly covers deriving-and-marking one, so the branch resolves inside Resolve itself, no separate routing needed. (3) Unreadable document / unresolvable path: no step's start condition claims this state, so by the negative-space rule it falls to Report's OR-clause (\"a situation no other step covers... an unresolvable path, an unreadable document\"), which is the sanctioned folded-error-step shape (adapted declaration tail present and correct) — reaches a stopping point cleanly, no stall. (4) Findings present vs. none: Sweep's finished condition is satisfied either way (walked/checked, whatever count), so Report's start condition is reachable in both cases. No mis-route, no stall, no unclaimed state, no unintended step overlap found across any walked run.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "pass — the three working steps' start conditions cover their states in sequence; the unreadable-document/unresolvable-path/out-of-scope-request remainder is subtractively claimed by Report's OR-clause"
+          },
+          {
+            "check": "Exit steps present and stating termination",
+            "verdict": "pass — Report's finished conditions include \"the audit is complete\""
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "pass — no resumable partial-work pattern in this single-pass review; no evidence of silent resumption over prior partial output"
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "pass — Report declares itself the folded Error step via the executor-exception tail and its start condition explicitly claims the remainder (OR-clause), satisfying the explicit-claim requirement"
+          },
+          {
+            "check": "Handover audit (dormant)",
+            "verdict": "not applicable — no handover cited, no *-handover.md file, document itself is not a handover"
+          },
+          {
+            "check": "Document-Wide Checks (run resolves, single source of truth, no no-ops, cold-readable, terms earn their place, sharp prose, naming not explaining)",
+            "verdict": "pass, with two borderline items noted below (frontmatter/body vocabulary drift; a mild wording overlap between a start condition and its step's own engagement verb) — neither would cause misexecution"
+          }
+        ],
+        "findings": [
+          {
+            "check": "Single source of truth / naming consistency",
+            "location": "extensions/agents/doc-reviewer.md — frontmatter `description` (\"It executes a dummy run\") vs. the step named `Execute Cold` and its engagement text (\"cold run\", \"Execute Cold\")",
+            "problem": "The frontmatter's summary calls the same activity a \"dummy run\" while the body consistently names it \"cold run\"/\"Execute Cold\" — a reader skimming only the description meets a term the body never uses.",
+            "fix_direction": "Align the frontmatter description's wording with the term the steps actually use (\"cold run\"), or vice versa, so the concept has one name across the document."
+          },
+          {
+            "check": "Checkable / condition wording overlap",
+            "location": "extensions/agents/doc-reviewer.md — `## +Report`, start condition \"the findings are assembled\" versus the same step's engagement \"Assemble the recorded findings per the [Report Format](#report-format) reference\"",
+            "problem": "The start condition and the step's own engagement both use \"assemble\" for what read as two different actions (findings existing as a raw set, versus formatting/ordering them into the report) — on a careful read it resolves, but a cold reader could momentarily wonder whether the step is gated on doing its own work first.",
+            "fix_direction": "Use a distinct word in the start condition (e.g. \"every finding from prior steps is recorded\") so it reads as a precondition distinct from the report-formatting action named in the engagement."
+          }
+        ]
+      },
+      {
+        "target": "extensions/agents/course-researcher.md",
+        "verdict": "pass",
+        "scenario_walk": "Assembled the set: course-researcher.md cites no external reference files and no handovers (Return Shape, Purchased Options Menu, Durable Link Forms are all inline headings within its own References section); no *-handover.md files exist at the agents/ level either, so the handover-audit step correctly stays dormant. Walked the happy path: parent hands subject + learner context -> Map the Unit Picture's start condition holds, produces an ordered unit list -> its finished conditions clear, handing control to Source and Verify Material (start condition \"a candidate unit list has been mapped\") -> every unit gets material found/verified or marked no-ready-made-material -> Return the Candidate Set (declared Success step) starts and exits cleanly with the assembled candidate set as final message. Walked the failure branches: total search/fetch unavailability and missing handed-over inputs both fall to Handle a Problem's OR-branch remainder clause and terminate with a plain account to the parent, per the Error Step's subtractive-coverage role. Walked a partial-failure branch (some links fail verification mid-sourcing): handled internally by Source and Verify Material's own engagement text (\"drop any that fail\") without needing the error step — no stall. No step names another step, no routing ambiguity found, no unclaimed state, no gate to launder. Routing held on every path walked.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "pass — Handle a Problem's remainder clause (\"a situation has arisen that no other step covers\") plus its \"something has gone wrong\" branch catch every state the other three steps' start conditions don't."
+          },
+          {
+            "check": "Exit steps present and stating their termination",
+            "verdict": "pass — Return the Candidate Set and Handle a Problem both state their return is \"this subagent's final message to the parent\" in their finished conditions."
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "pass — no step resumes silently over partial work; partial findings on failure are explicitly surfaced to the parent, not resumed."
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "pass — Handle a Problem is a whole, standalone Error step (not folded into a reporting step), so the executor-exception's explicit-claim requirement doesn't apply."
+          },
+          {
+            "check": "Document-Wide: The run resolves",
+            "verdict": "pass — every path terminates at Return the Candidate Set or Handle a Problem."
+          },
+          {
+            "check": "Document-Wide: Single source of truth",
+            "verdict": "pass — Return Shape, Purchased Options Menu, and Durable Link Forms are each defined once and cited by moment-of-use link; no duplicated meaning found."
+          },
+          {
+            "check": "Document-Wide: No no-ops",
+            "verdict": "pass — the three global invariants (no file writes/no user interaction, no unverified links, no dropped/invented units) each change default subagent behaviour rather than restating it."
+          },
+          {
+            "check": "Document-Wide: Cold-readable",
+            "verdict": "pass — no undefined DraftHorse jargon leaned on; the universal preamble is copied verbatim and matches the document's shape (skill/agent document, not a handover)."
+          },
+          {
+            "check": "Document-Wide: Terms earn their place",
+            "verdict": "finding — see Findings list (Matter)."
+          },
+          {
+            "check": "Document-Wide: Sharp prose",
+            "verdict": "pass — no clear why-prose, unreachable meaning, or negative-mirror found; borderline only."
+          },
+          {
+            "check": "Document-Wide: Naming, not explaining",
+            "verdict": "pass — all headings (Return Shape, Purchased Options Menu, Durable Link Forms, step names) are short, unique link targets."
+          }
+        ],
+        "findings": [
+          {
+            "check": "One Condition Per Item",
+            "location": "extensions/agents/course-researcher.md — +Handle a Problem, Start this step when these are true, second OR-branch list item (line 116)",
+            "problem": "The single list item \"a situation has arisen that no other step covers — live search or fetch is unavailable, so no link can be verified, or the handed-over inputs are missing what the research needs\" packs two independent, separately-observable facts (tooling unavailable vs. inputs missing) into one condition item, not a shared-subject compound.",
+            "fix_direction": "Split into two separate list items under the same `**OR these are true:**` block — one for search/fetch unavailability, one for missing handed-over inputs."
+          },
+          {
+            "check": "Terms Earn Their Place",
+            "location": "extensions/agents/course-researcher.md — # --- TERMS ---, \"Matter\" entry",
+            "problem": "The Matter term is defined but never leaned on elsewhere in the document; the only other occurrence of the word (\"already-supplied matter the parent points you to\" in Blend the Sources) is generic English, not a reference to this defined term, and the scope boundary it states is already covered by the global invariant \"DO NOT write any file.\"",
+            "fix_direction": "Either drop the Matter entry, or have a step/reference actually cite it by name where the scope boundary matters."
+          }
+        ]
+      },
+      {
+        "target": "extensions/agents/breaking-change-detector.md",
+        "verdict": "revise",
+        "scenario_walk": "Document set is this single agent file — no external references, assets, or handovers are cited, and no *-handover.md sits beside it, so Assemble/Audit-Handovers stayed dormant correctly. Walked: (1) normal diff — Scope the Review resolves paths, takes the diff shape, triages files, hands off to Judge the Changes, which classifies and derives a verdict, then Report closes cleanly. (2) First release — Scope the Review finishes on its first OR-branch without diffing; Judge the Changes' start conditions never hold (by design — it needs diff/triage facts the first-release branch skips) but Report's start condition explicitly admits \"a brief carrying a first release,\" so the run reaches Report directly. Correct, no stall. (3) Broken brief / unresolvable path / empty diff — Scope the Review's start or finish conditions never hold, but Report's folded error branch explicitly enumerates each of these (\"a brief missing its range, paths or version,\" \"a range that will not diff,\" \"a path set that matches nothing,\" \"a repository state that defeats the review\"), so Report claims the remainder directly. Correct, no stall. (4) All-uncertain classification — every triaged file is read, classified, but every finding lands as \"uncertain\" (consumer outside the diffed paths). Judge the Changes' finished condition asks for \"the verdict... derived from the confident findings alone,\" but with zero confident findings there is no highest classification to take, and the Report Format's VERDICT field only allows breaking|additive|internal — none of which the confident-findings rule produces. Unlike the \"triage admits nothing\" case, which the Classify section explicitly defaults to internal, this case has no stated default. Two readings are possible (silently default to internal, or stall/guess) — a genuine scenario-walk break.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "pass — Report's folded error start-condition OR-block enumerates every unresolved state (missing brief fields, undiffable range, empty path match, defeated repository state), catching everything Scope the Review or Judge the Changes doesn't."
+          },
+          {
+            "check": "Exit steps present and state termination",
+            "verdict": "pass — Report's finished conditions state \"the review is complete\" on the success branch and name what was/was not examined on the failure branch."
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "pass / not applicable — the agent is read-only (NEVER write/edit/stage), so no persisted partial work exists to resume or bail."
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "pass — folded into Report per the executor exception, with an explicit alternative start-condition block claiming the failed run, matching the sanctioned adapted declaration tail."
+          },
+          {
+            "check": "Document-Wide Checks (single source of truth, cold-readable, terms earn their place, naming not explaining)",
+            "verdict": "pass, with one scenario-walk-forcing gap (see findings) and one borderline sharp-prose item noted below rather than raised as a blocking finding."
+          }
+        ],
+        "findings": [
+          {
+            "check": "Finished Conditions — Exhaustive (Scenario Walk)",
+            "location": "extensions/agents/breaking-change-detector.md — +Judge the Changes step-finished condition \"the verdict is derived from the confident findings alone\", read against the Classification reference's verdict-to-floor rule and the Report Format's VERDICT field (breaking|additive|internal only)",
+            "problem": "The verdict is defined as \"the highest classification among the confident findings.\" Classification explicitly defaults to internal when triage admits no surface-defining files, but states no default for the case where files ARE classified and every one comes out uncertain — there is then no confident finding to take the highest of, and VERDICT has no \"uncertain\" option to fall back on. The finished condition can be claimed met while the actual verdict to report is undefined, so an executing agent either stalls or guesses.",
+            "fix_direction": "State explicitly what VERDICT to report when every classified finding is uncertain — e.g., default to internal the same way the no-surface-defined case does, or add an explicit rule for this branch — so the finished condition resolves to one reading."
+          },
+          {
+            "check": "Sharp Prose — Negative Mirror",
+            "location": "extensions/agents/breaking-change-detector.md — Agent Invariants, second bullet (\"ONLY run read-only shell commands, as simple invocations that permission rules can auto-allow — no command that executes another, no writes, no checkouts.\")",
+            "problem": "\"no writes, no checkouts\" restates what \"run read-only shell commands\" already entails; removing that clause loses nothing the positive doesn't already cover. \"no command that executes another\" is the invariant's one genuinely new constraint.",
+            "fix_direction": "Drop \"no writes, no checkouts\" and keep the invariant to the read-only instruction plus the genuinely new \"no command that executes another\" constraint."
+          }
+        ]
+      },
+      {
+        "target": "extensions/skills/drafthorse/SKILL.md — set: assets/SKILL-template.md, assets/HANDOVER-template.md, references/collecting-references.md, references/step-splitting.md, references/condition-writing.md, references/step-functions.md (references/README.md present but uncited; skipped per sanctioned shape). Handover glob `*-handover.md` at skill root: empty; no handover citations. +Audit the Handovers stayed dormant, correctly.",
+        "verdict": "revise",
+        "scenario_walk": "Run A — new build, no gaps. Invocation puts +Gather Requirements in play; on established requirements +Collect References enters, gates on user approval; no gap recorded so +Fill Reference Gaps stays dormant (correct). Soft spot at the handoff: +Collect References finishes on \"the reference set is approved\" while +Map the Steps starts on \"the reference set is complete\" — no step ever asserts \"complete\" on the ungapped run. An agent resolves it (approved with no gaps = complete), so routing holds, but the two phrasings for one state repeat at every later seam (\"the step map is complete\" vs \"the user has approved the step map\", \"the invariant set is complete\" vs \"the user has approved the invariant set\"). +Map the Steps → +Set Invariants → +Draft the Skill → +Review → +Deliver, each edge a real gate. +Deliver states \"the build is complete\". Happy path resolves.\n\nRun B — conversion mode. Breaks twice. At +Draft the Skill the finished condition says \"the draft is written to the destination\" while the engagement says the copy target is the sibling `<destination>.draft.md` and \"never overwrite the source before acceptance\". Two readings are live: treat the sibling as satisfying the condition, or take the condition literally and write over the source document before the user has accepted anything. The second reading destroys the conversion source. Then at +Deliver the finished condition \"no sibling draft remains\" requires deleting a file, and the granted tools are Read, Write, Edit, Agent — none can remove one. The condition is unreachable, +Deliver never closes, and the run stalls at the final gate or spills into the error step.\n\nRun C — withdrawn approval at the final gate. +Handle a Problem claims it, the user chooses to restart from the step map, approvals after that point are revoked, and +Map the Steps re-enters correctly. But nothing un-holds +Review's start (\"a complete draft exists\") or +Deliver's start (\"the draft has passed the scenario-walk\") — both are recorded states about the superseded draft, and the error step revokes approvals, not walk verdicts. So +Review and +Deliver sit in play alongside the reopened mapping phase and the agent can re-present the stale draft. Unintended overlap on the repair path.\n\nRun D — failure mid-draft. +Handle a Problem enters; +Draft the Skill is still in play, its start condition holding and its finished conditions unmet, with a partial file on disk. The error step's engagement says \"Otherwise end the build\", but its finished conditions stop at \"the user has decided how to continue\" — nothing states termination, so closing the error step leaves the failed step in play and the agent resumes silently over its own partial draft. The error path has no stopping point.\n\nRun E — saddler agent not installed. +Review says so plainly and continues on its own walk; resolves. Run F — user rejects a gate repeatedly: the step stays in play and iterates, as intended. Run G — an unresolvable source path in +Gather Requirements falls to the error step, and then hits the same non-termination as Run D.",
+        "set_level": [
+          {
+            "check": "Negative space claimed",
+            "verdict": "pass — +Handle a Problem's OR block ('a situation has arisen that no other step covers') claims the remainder, making coverage subtractive."
+          },
+          {
+            "check": "Exit steps present and stating their termination",
+            "verdict": "finding — +Deliver states 'the build is complete'; +Handle a Problem states no termination at all. See Finding 1."
+          },
+          {
+            "check": "Half-applied state bailed rather than resumed",
+            "verdict": "finding — a partial draft left by a failed +Draft the Skill is neither claimed nor bailed; the step's start condition still holds and nothing ends the run, so it resumes over its own partial work. Same root as Finding 1."
+          },
+          {
+            "check": "Error step whole or explicitly folded",
+            "verdict": "pass — a whole standalone +Handle a Problem with the catalogue declaration string; no executor fold attempted."
+          },
+          {
+            "check": "The run resolves",
+            "verdict": "finding — the success path resolves at +Deliver; the error path resolves only in engagement prose. See Finding 1."
+          },
+          {
+            "check": "Single source of truth",
+            "verdict": "finding — the handover-doc definition stands in three homes (Finding 7). Two lesser instances: +Gather Requirements restates the Terms definition of Executor Document inline, and the Conventions Digest condenses rules that also live in condition-writing.md and collecting-references.md."
+          },
+          {
+            "check": "No no-ops",
+            "verdict": "pass — three global invariants, each changing behaviour; none restated per step."
+          },
+          {
+            "check": "Cold-readable",
+            "verdict": "pass (borderline) — 'gate' and 'engagement' are used as framework jargon without Terms entries, but The Scaffold entry and the Conventions Digest give a cold reader enough to resolve both."
+          },
+          {
+            "check": "Terms earn their place",
+            "verdict": "pass — all six terms (Step Candidate, Gap, Mode, Executor Document, Handover Doc, Parent Step) are leaned on by steps."
+          },
+          {
+            "check": "Sharp prose",
+            "verdict": "finding — why-prose in +Review's Independent Review sub-heading (Finding 10) and an unreachable sentence in condition-writing.md (Finding 12)."
+          },
+          {
+            "check": "Naming, not explaining",
+            "verdict": "pass — every heading is a short unique name; no explaining headings, no duplicate anchors."
+          }
+        ],
+        "findings": [
+          {
+            "check": "Terminal steps state their termination",
+            "location": "extensions/skills/drafthorse/SKILL.md — `## +Handle a Problem`, finished conditions",
+            "problem": "The step ends the build only in engagement prose (\"Otherwise end the build\"); its finished conditions stop at \"the user has decided how to continue\". Nothing states the run is over, so when the error step closes, the step that failed still has its start condition holding and its finished conditions unmet — the agent re-enters it and resumes over its own partial work instead of stopping.",
+            "fix_direction": "Give the error step's finished list an explicit terminal outcome alongside the restart outcome, so the ended build and the resumed build are distinguishable states the other steps' start conditions can read; make the failed step's re-entry impossible on the ended branch."
+          },
+          {
+            "check": "Checkable",
+            "location": "extensions/skills/drafthorse/SKILL.md — `## +Draft the Skill`, finished condition \"the draft is written to the destination\" against the `### Write:` engagement",
+            "problem": "In conversion mode the engagement sends the draft to a sibling `<destination>.draft.md` and forbids overwriting the source, while the finished condition names the destination itself. The agent cannot tell done from not-done without choosing between the two, and the literal reading destroys the conversion source before the user has accepted anything.",
+            "fix_direction": "State the target as one mode-aware fact in the finished condition so it matches what the engagement actually produces in each mode, and keep the path stated in one home rather than two."
+          },
+          {
+            "check": "Permissions",
+            "location": "extensions/skills/drafthorse/SKILL.md — frontmatter `allowed-tools: Read, Write, Edit, Agent(drafthorse-saddler)` against `## +Deliver` finished condition \"no sibling draft remains\"",
+            "problem": "Removing the sibling draft file needs a delete capability that none of the granted tools provide, so the finished condition can never be met and +Deliver never closes on a conversion run. +Gather Requirements' \"every piece of source material is located\" has the same shape — locating files needs a search grant, and only Read is given.",
+            "fix_direction": "Either grant the step the capability its stated outcome requires, or restate the outcome as something the granted tools can actually reach; decide which at the step that needs it, since grants may be delivered per-step."
+          },
+          {
+            "check": "In-play overlap deliberate or absent",
+            "location": "extensions/skills/drafthorse/SKILL.md — `## +Review` start condition \"a complete draft exists\" and `## +Deliver` start condition \"the draft has passed the scenario-walk\", on the withdrawn-approval path from `## +Handle a Problem`",
+            "problem": "The error step's repair branch revokes approvals but not the recorded draft and walk states, so after a restart from an earlier phase both +Review and +Deliver stay in play against the superseded draft while the reopened phase runs. The agent can re-present a stale artifact for final acceptance.",
+            "fix_direction": "Make the downstream entry states depend on a fact the restart invalidates — tie them to the currently approved upstream artifact rather than to a one-time recorded event — so a reopened phase drops the later steps out of play."
+          },
+          {
+            "check": "Exhaustive",
+            "location": "extensions/skills/drafthorse/SKILL.md — `## +Draft the Skill`, finished conditions",
+            "problem": "The engagement instructs writing every handover doc the map calls for into the skill root and citing it from its parent step, but the three finished conditions cover only the draft, placeholders, and comment scaffolding. The agent can claim the step complete with the mapped handover docs unwritten and uncited.",
+            "fix_direction": "Add the handover output to the completion criteria so the condition encompasses all the work the engagement performs, phrased so it is vacuously satisfied when the map calls for none."
+          },
+          {
+            "check": "Every outcome the step can end on",
+            "location": "extensions/skills/drafthorse/SKILL.md — `## +Review`, finished conditions against the `#### Independent Review:` sub-heading",
+            "problem": "The engagement adds a user-facing offer with three possible endings — review taken and its findings folded in, review declined, agent not installed — and none of them appears in the finished conditions, which speak only of the scenario-walk. The step can close with the offer never made, and \"any approved fix the scenario-walk found\" leaves who approves unstated.",
+            "fix_direction": "State the offer's disposition as a completion criterion covering all three endings, and name whose approval the fold-in condition means."
+          },
+          {
+            "check": "Single source of truth",
+            "location": "extensions/skills/drafthorse/SKILL.md — `## The Scaffold` (handover paragraph) and the `**Handover Doc**` Terms entry, plus references/step-splitting.md `## Handover extraction`",
+            "problem": "The same three defining facts about a handover doc — the `harness-format: DraftHorse, Handover` stamp, the `-handover` filename, the skill-root location — are stated in three homes that all share run-time context, so a change to the definition is a three-place edit. The deltas list is likewise split between The Scaffold's summary and step-splitting.md's catalogue.",
+            "fix_direction": "Keep the definition in one home and have the other two point at it; the Terms entry or the guide is the natural single owner, with the References entry reduced to a pointer."
+          },
+          {
+            "check": "Relative paths resolve from the citing file",
+            "location": "extensions/skills/drafthorse/references/step-splitting.md — \"`assets/HANDOVER-template.md` carries the canonical text.\"",
+            "problem": "The path is written skill-root-relative from a file nested in `references/`, so a reader following it lands on `references/assets/HANDOVER-template.md`, which does not exist. It is also a bare backticked path rather than markdown link notation.",
+            "fix_direction": "Resolve the target from this file's own location and render it as a markdown link with link text derived from the filename, keeping the deliberate casing."
+          },
+          {
+            "check": "Reference citations are links",
+            "location": "extensions/skills/drafthorse/references/collecting-references.md — \"the smells and the how-to live in `step-splitting.md`\"",
+            "problem": "A genuine pointer the reader is expected to follow is written as a backticked filename instead of markdown link notation, so it is not a callable citation.",
+            "fix_direction": "Convert it to a markdown link with the link text derived from the filename, matching how the skill file cites the same guide."
+          },
+          {
+            "check": "Sharp prose",
+            "location": "extensions/skills/drafthorse/SKILL.md — `## +Review`, `#### Independent Review:`: \"this walk has already caught what it can, and saddler exists to catch what a builder saturated with its own intent reads past.\"",
+            "problem": "Why-prose — rationale for the offer that changes nothing about how the agent behaves once the offer and its handling are stated. The purpose paragraph (\"because steps operate on references\") and +Draft the Skill (\"it stays intact as source material until the build completes\") carry milder instances of the same.",
+            "fix_direction": "Cut the rationale clause and keep the instruction; state the how, drop the why."
+          },
+          {
+            "check": "No dead weight",
+            "location": "extensions/skills/drafthorse/SKILL.md — `## The Scaffold` References entry",
+            "problem": "No step cites this entry at any moment of use, while every other References entry is either cited by a step (`Conventions Digest`) or is a declaration of an external file a step cites directly. It is inline data nothing invokes.",
+            "fix_direction": "Either cite it from the step whose work depends on the scaffold shape (the drafting step is the natural moment), or drop it and let the template and the authoring guides carry the scaffold."
+          },
+          {
+            "check": "Sharp prose",
+            "location": "extensions/skills/drafthorse/references/condition-writing.md — \"`**AND**` is implicit by just be one of many conditions.\"",
+            "problem": "Unreachable meaning — the sentence is malformed and its intended rule cannot be recovered from the document, in the one place that teaches the conjunctive-list rule an author must get right.",
+            "fix_direction": "Restate the conjunction rule plainly: grouped items all hold, and the connective is never written."
+          }
+        ]
+      }
+    ]
+  },
+  "workflowProgress": [
+    {
+      "type": "workflow_phase",
+      "index": 1,
+      "title": "Harvest"
+    },
+    {
+      "type": "workflow_phase",
+      "index": 2,
+      "title": "Audit"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 1,
+      "label": "harvest:6b",
+      "phaseIndex": 1,
+      "phaseTitle": "Harvest",
+      "agentId": "ae182db8787b0cb0c",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787105272965,
+      "lastProgressAt": 1787105272965,
+      "cached": true,
+      "resultPreview": "{\"changes\":[{\"site\":\"/Users/dylangraham/Projects/agent-library/extensions/skills/drafthorse/references/step-functions.md — Error step entry\",\"kind\":\"example-added (block moved from template)\",\"summary\":\"Shipped the full prebuilt +Handle a Problem block, copy-paste complete (directive, declaration, generic start condition, two finished items, Surface the Problem engagement), copied whole from the t…",
+      "promptPreview": "Execute the wave-6b harvest in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-6b-harvest.md and follow it exactly. Edit only the three named target files. Do not commit. Return only the structured result object."
+    },
+    {
+      "type": "workflow_agent",
+      "index": 2,
+      "label": "audit:drafthorse-set",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "ae926369f7cd9b6bc",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1787105287909,
+      "queuedAt": 1787105272965,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "extensions/skills/drafthorse/SKILL.md — set: assets/SKILL-t…",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/skills/drafthorse/SKILL.md (with its assets templates and references files as the cited set). Read-only: never edit any file. Return only t…",
+      "lastProgressAt": 1787105899567,
+      "tokens": 86017,
+      "toolCalls": 13,
+      "durationMs": 611658,
+      "resultPreview": "{\"target\":\"extensions/skills/drafthorse/SKILL.md — set: assets/SKILL-template.md, assets/HANDOVER-template.md, references/collecting-references.md, references/step-splitting.md, references/condition-writing.md, references/step-functions.md (references/README.md present but uncited; skipped per sanctioned shape). Handover glob `*-handover.md` at skill root: empty; no handover citations. +Audit the …"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 3,
+      "label": "audit:versioning",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a9b54a5d59ae7879b",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787105285981,
+      "queuedAt": 1787105272991,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Eleven runs walked. Held: named-unit happy path end to end …",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/skills/versioning/SKILL.md. Read-only: never edit any file. Return only the structured result object.",
+      "lastProgressAt": 1787106172210,
+      "tokens": 88466,
+      "toolCalls": 9,
+      "durationMs": 886228,
+      "resultPreview": "{\"findings\":[{\"check\":\"In-play overlap deliberate or absent\",\"location\":\"extensions/skills/versioning/SKILL.md — +Setup start conditions (second OR list) vs +Handle a Problem start conditions\",\"problem\":\"The state 'a unit path fails to resolve' is claimed by two steps with contradictory dispositions: +Setup's OR-list claims 'the requested unit's definition is wrong — its paths no longer resolve, o…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 4,
+      "label": "audit:classroom-set",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a0e713ca1a8c0e53d",
+      "model": "claude-opus-5[1m]",
+      "state": "done",
+      "startedAt": 1787105288466,
+      "queuedAt": 1787105272991,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "extensions/skills/classroom/SKILL.md — with setup-handover.…",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/skills/classroom/SKILL.md (with its four handover documents and every cited reference and template). Read-only: never edit any file. Return…",
+      "lastProgressAt": 1787106111438,
+      "tokens": 103427,
+      "toolCalls": 25,
+      "durationMs": 820432,
+      "resultPreview": "{\"target\":\"extensions/skills/classroom/SKILL.md — with setup-handover.md, mark-review-handover.md, media-processing-handover.md, deliver-without-renderer-handover.md, references/ (curriculum-spines, vetted-video-channels, pedagogy/dyslexia-kinetic, students/_template, students/example-learner) and templates/ (course-structures, lesson-structures, documents, blocks)\",\"verdict\":\"revise\",\"scenario_wa…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 5,
+      "label": "audit:git-box",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "ab093df7653acc5c6",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787105275015,
+      "queuedAt": 1787105272991,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "extensions/skills/git-box/SKILL.md (set: SKILL.md, workflow…",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/skills/git-box/SKILL.md. Read-only: never edit any file. Return only the structured result object.",
+      "lastProgressAt": 1787105982625,
+      "tokens": 80063,
+      "toolCalls": 9,
+      "durationMs": 707610,
+      "resultPreview": "{\"target\":\"extensions/skills/git-box/SKILL.md (set: SKILL.md, workflows/commit-and-push.md, workflows/multi-commit-and-push.md; handover glob and citations both empty — sets agree)\",\"verdict\":\"revise\",\"scenario_walk\":\"Happy path held: invoke -> Gather Context (args + git status inline) -> Check Workflows matches commit-and-push, template loaded and filled -> Formulate Brief -> Call Agent (spanning…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 6,
+      "label": "audit:agent-commit",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a324fe0bc288bb1bd",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1787105290209,
+      "queuedAt": 1787105272991,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "extensions/skills/git/agent-commit/SKILL.md (document set: …",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/skills/git/agent-commit/SKILL.md. Read-only: never edit any file. Return only the structured result object.",
+      "lastProgressAt": 1787105861722,
+      "tokens": 76851,
+      "toolCalls": 7,
+      "durationMs": 571512,
+      "resultPreview": "{\"target\":\"extensions/skills/git/agent-commit/SKILL.md (document set: this file alone — no external references or handovers cited or present)\",\"verdict\":\"revise\",\"scenario_walk\":\"Walked four runs. (1) COMMIT(new), all diffs commit cleanly: Read Procedure → Commit New → Result. Holds. (2) COMMIT(amend), push-check finds pushed=true: Agent decision refuses → Amend's OR-clause finished (\\\"refused\\\"/\\…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 7,
+      "label": "audit:agent-push",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a4ad0ba720b73324d",
+      "model": "claude-fable-5",
+      "state": "done",
+      "startedAt": 1787105286572,
+      "queuedAt": 1787105272991,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "Five runs walked plus the loop repass. (A) Ahead-with-upstr…",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/skills/git/agent-push/SKILL.md. Read-only: never edit any file. Return only the structured result object.",
+      "lastProgressAt": 1787105952130,
+      "tokens": 72646,
+      "toolCalls": 6,
+      "durationMs": 665557,
+      "resultPreview": "{\"findings\":[{\"check\":\"Permissions\",\"location\":\"extensions/skills/git/agent-push/SKILL.md, frontmatter `allowed-tools`\",\"problem\":\"Grants `Bash(git rev-parse *)` and `Bash(git branch *)` are used by no step and no dynamic reference command — only `git status`, `git log`, and `git push` are ever run. The only conceivable rev-parse use (querying `@{upstream}`) is explicitly banned by a global invari…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 8,
+      "label": "audit:agent-switch",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a9cc3a496fcfdb077",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1787105881404,
+      "queuedAt": 1787105272991,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "extensions/skills/git/agent-switch/SKILL.md (single-file do…",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/skills/git/agent-switch/SKILL.md. Read-only: never edit any file. Return only the structured result object.",
+      "lastProgressAt": 1787106177460,
+      "tokens": 66811,
+      "toolCalls": 7,
+      "durationMs": 296055,
+      "resultPreview": "{\"target\":\"extensions/skills/git/agent-switch/SKILL.md (single-file document set; no external references, no handovers cited or present at skill root)\",\"verdict\":\"revise\",\"scenario_walk\":\"Walked cold as an agent holding a Brief with a SWITCH procedure. Happy path SWITCH(stash, switch, pop) on a dirty tree resolves cleanly: Read Procedure loops through stash→switch→pop, Result reports each line, te…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 9,
+      "label": "audit:git-robot",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a8e1503e308151894",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1787105914945,
+      "queuedAt": 1787105272991,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "extensions/agents/git-robot.md",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/agents/git-robot.md. Read-only: never edit any file. Return only the structured result object.",
+      "lastProgressAt": 1787106181045,
+      "tokens": 54802,
+      "toolCalls": 4,
+      "durationMs": 266100,
+      "resultPreview": "{\"target\":\"extensions/agents/git-robot.md\",\"verdict\":\"revise\",\"scenario_walk\":\"Document set is git-robot.md alone: no markdown-link citations to external files exist anywhere in the body, so no reference files or handovers assemble into the set, and the handover-audit step correctly stays dormant. Happy path (brief with COMMIT then PUSH, both succeed): Dispatch loads /agent-commit, Execute runs it…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 10,
+      "label": "audit:doc-reviewer",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a063b6e0d2310f9c5",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1787105978267,
+      "queuedAt": 1787105272991,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "extensions/agents/doc-reviewer.md",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/agents/doc-reviewer.md. Read-only: never edit any file. Return only the structured result object.",
+      "lastProgressAt": 1787106206381,
+      "tokens": 54486,
+      "toolCalls": 4,
+      "durationMs": 228113,
+      "resultPreview": "{\"target\":\"extensions/agents/doc-reviewer.md\",\"verdict\":\"pass\",\"scenario_walk\":\"Document set = doc-reviewer.md alone (no external file citations, no handover citations or *-handover.md files at any relevant root, so the handover-audit step is correctly dormant). Walked: (1) Happy path — invocation with path + supplied test: Resolve the Brief reads the document and confirms the test in hand; Execut…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 11,
+      "label": "audit:course-researcher",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "a5688055c423805a2",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1787106008620,
+      "queuedAt": 1787105272991,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "extensions/agents/course-researcher.md",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/agents/course-researcher.md. Read-only: never edit any file. Return only the structured result object.",
+      "lastProgressAt": 1787106197883,
+      "tokens": 53936,
+      "toolCalls": 4,
+      "durationMs": 189262,
+      "resultPreview": "{\"target\":\"extensions/agents/course-researcher.md\",\"verdict\":\"pass\",\"scenario_walk\":\"Assembled the set: course-researcher.md cites no external reference files and no handovers (Return Shape, Purchased Options Menu, Durable Link Forms are all inline headings within its own References section); no *-handover.md files exist at the agents/ level either, so the handover-audit step correctly stays dorma…"
+    },
+    {
+      "type": "workflow_agent",
+      "index": 12,
+      "label": "audit:breaking-change-detector",
+      "phaseIndex": 2,
+      "phaseTitle": "Audit",
+      "agentId": "aad4c9217caa9e920",
+      "model": "claude-sonnet-5",
+      "state": "done",
+      "startedAt": 1787106122662,
+      "queuedAt": 1787105272991,
+      "attempt": 1,
+      "lastToolName": "StructuredOutput",
+      "lastToolSummary": "extensions/agents/breaking-change-detector.md",
+      "promptPreview": "Audit a migrated DraftHorse document set in the repository at /Users/dylangraham/Projects/agent-library. Read /Users/dylangraham/Projects/agent-library/dev/workspace/tasks/corpus-sweep/brief-audit.md and follow it exactly. Document set under review: extensions/agents/breaking-change-detector.md. Read-only: never edit any file. Return only the structured result object.",
+      "lastProgressAt": 1787106313895,
+      "tokens": 56194,
+      "toolCalls": 4,
+      "durationMs": 191233,
+      "resultPreview": "{\"target\":\"extensions/agents/breaking-change-detector.md\",\"verdict\":\"revise\",\"scenario_walk\":\"Document set is this single agent file — no external references, assets, or handovers are cited, and no *-handover.md sits beside it, so Assemble/Audit-Handovers stayed dormant correctly. Walked: (1) normal diff — Scope the Review resolves paths, takes the diff shape, triages files, hands off to Judge the…"
+    }
+  ],
+  "totalTokens": 793699,
+  "totalToolCalls": 92
+}
