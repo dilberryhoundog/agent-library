@@ -6,23 +6,25 @@ Branch workspace context for Claude and humans. Not read by the dev-workspace sc
 
 ## Branch
 
-**Name:**
-**Started:**
+**Name:** agent-teams
+**Started:** 2026-08-19
 **Status:**
 
-- [ ] In Progress
+- [x] In Progress
 - [ ] Discard (workspace and branch abandoned)
 - [ ] Complete (ready to merge)
 
+Long-lived branch. Every agent-team build lands here so context and prior work accumulate in one workspace.
+
 ## Purpose
 
-%% Claude: write a brief purpose statement when creating the workspace %%
+Build reusable multi-agent team tooling. First job: convert the two one-off DraftHorse corpus workflows in `.claude/workflows/` into a generic corpus sweep tool that survives any future DraftHorse refactor.
 
 ## Workflow
 
 - [ ] Quick (direct implementation)
 - [ ] Single plan (plan once, execute)
-- [ ] Multi-stage plan (iterative planning)
+- [x] Multi-stage plan (iterative planning)
 
 ## Track Issues
 
@@ -44,4 +46,5 @@ If selected please read the file at the start of the session before starting wor
 
 ## Discoveries
 
-- %% Claude: record discoveries here as you work %%
+- The 16 corpus-sweep briefs the current workflows depend on live only in the archive: `dev/branches/drafthorse-corpus-sweep/tasks/corpus-sweep/`. Neither script would run on any other branch.
+- The sweep's model-tier history is recorded in `dev/branches/drafthorse-corpus-sweep/history/1480a71f_drafthorse-corpus-sweep-executed.txt`, including the tiering rule of thumb derived after the cost blowout.
