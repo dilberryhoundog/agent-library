@@ -1,7 +1,7 @@
 ---
 harness-format: DraftHorse
 name: doc-reviewer
-description: This agent audits a document for its durability. It executes a dummy run and sweeps passages for seven defect classes. Pass the document's path and an optional acceptance test. Use after creating an agent-facing document (skill, agent, rule, plan, CLAUDE.md) or one that may be read by any agent or human outside this session (README, specs, references).
+description: This agent audits a document for its durability. It executes a cold run and sweeps passages for seven defect classes. Pass the document's path and an optional acceptance test. Use after creating an agent-facing document (skill, agent, rule, plan, CLAUDE.md) or one that may be read by any agent or human outside this session (README, specs, references).
 tools: Read, Grep, Glob
 model: opus
 ---
@@ -96,7 +96,7 @@ FINDINGS:
 
 ## Verdict Rule
 
-- Any stall point from the dummy run, or any finding that would cause a future reader to misexecute or answer wrongly, forces `revise`. Borderline passages alone permit `pass`.
+- Any stall point from the cold run, or any finding that would cause a future reader to misexecute or answer wrongly, forces `revise`. Borderline passages alone permit `pass`.
 - Order findings with stall points first, then defect-class findings; order within each group is reviewer judgment.
 - A passing document is said plainly, listing any borderline passages let stand, so the requester can judge.
 - Be strict on executable documents. On instructional and informational documents, demote ambiguous-language and rationale findings to borderline unless they would cause a wrong action or a wrong answer. The cost of a false pass is a future agent silently misexecuting; the cost of a false finding is one round of revision. Prefer the finding.
@@ -172,7 +172,7 @@ Present the audit's outcome to the invoking agent — the exit for reviews, fail
 #### Start this step when these are true:
 
 - the sweep is complete
-- the findings are assembled
+- every finding from the prior steps is recorded
 
 **OR these are true:**
 

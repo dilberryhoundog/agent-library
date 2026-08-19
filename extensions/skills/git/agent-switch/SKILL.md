@@ -3,7 +3,7 @@ harness-format: DraftHorse
 name: agent-switch
 description: Execute the switch procedure using this skill. Specialised skill for `Git Robot`, not for general agent usage.
 user-invocable: false
-allowed-tools: Bash(git switch *), Bash(git stash *), Bash(git status *), Bash(git rev-parse *), Bash(git branch *)
+allowed-tools: Bash(git switch *), Bash(git stash *), Bash(git status *), Bash(git branch *)
 ---
 
 # Switch
@@ -19,7 +19,7 @@ Move the working tree between branches and manage the stash around that move. Th
 
 # --- REFERENCES ---
 
-## Current Git state
+## Current Git State
 
 These overviews show whether the tree is dirty and what branches exist — enough to run each action safely.
 
@@ -42,7 +42,7 @@ A `SWITCH` procedure carries one or more actions, run **in the order written**:
 
 A procedure may chain them (`SWITCH(stash, switch, pop)`) or split them across the brief (`SWITCH(stash)` … `SWITCH(pop)`), bracketing other procedures between the stash and the pop.
 
-## Switch outcomes
+## Switch Outcomes
 
 The `Result` you return mirrors git's own report. Capture the meaningful state for each action run:
 
@@ -80,7 +80,7 @@ Judge the next action against the live tree before running anything.
 
 ### Review the Action:
 
-From the `Brief` read the `SWITCH` procedure and its actions. Review them against the [Current Git State](#current-git-state), to judge tree cleanliness and branch existence. Pick the first/next uncompleted action.
+From the `Brief` read the `SWITCH` procedure and its [Actions](#actions). Review them against the [Current Git State](#current-git-state), to judge tree cleanliness and branch existence. Pick the first/next uncompleted action.
 
 #### Agent decision:
 
@@ -110,7 +110,7 @@ Set the dirty working tree aside before moving.
 
 **DO NOT** create an empty stash. Report the no-op instead.
 
-### Run:
+### Run the Stash:
 
 Run `git stash push -u`. Record the stash result.
 
@@ -130,7 +130,7 @@ Change to the target branch named in the task overview.
 
 - a failure or error is recorded as a refusal note
 
-### Run:
+### Run the Switch:
 
 Run `git switch <branch>`. Record the branch moved to.
 
@@ -154,7 +154,7 @@ Restore the most recent stash entry onto the current branch.
 
 **DO NOT** resolve conflicts from the Pop action. Report the conflict instead.
 
-### Run:
+### Run the Pop:
 
 Run `git stash pop`. Record the restore, and any conflict git reports.
 
@@ -179,11 +179,11 @@ Emit the outcome/s back to git-robot so it can render the `SWITCH` Output Direct
 
 #### Step invariants:
 
-**DO NOT** add prose beyond the action lines and any refusal or conflict note.
+**DO NOT** add prose beyond the action lines and any refusal, conflict, or no-op note.
 
 ### Result:
 
-Return one line per action run — the action and its resulting state:
+Return one line per action run — the action and its resulting state, captured per [Switch Outcomes](#switch-outcomes):
 
 ```txt
 <action> -> <state>

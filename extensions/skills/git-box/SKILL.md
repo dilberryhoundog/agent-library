@@ -72,8 +72,8 @@ Proven briefs saved as reusable workflows. Replace any generic `<placeholder>` w
 
 | Workflow Name         | Type                      | Reference                          | Procedure Map        |
 |-----------------------|---------------------------|------------------------------------|----------------------|
-| commit-and-push       | commit and push           | workflows/commit-and-push.md       | COMMIT(new), PUSH    |
-| multi-commit-and-push | multiple commits and push | workflows/multi-commit-and-push.md | COMMIT(new)…, PUSH   |
+| commit-and-push       | commit and push           | [Commit And Push](workflows/commit-and-push.md)             | COMMIT(new), PUSH    |
+| multi-commit-and-push | multiple commits and push | [Multi Commit And Push](workflows/multi-commit-and-push.md) | COMMIT(new)…, PUSH   |
 
 ## Issue Creation
 
@@ -101,6 +101,12 @@ Collate the request, the git state, and the chat context into a single source of
 - the request is within scope
 - the request carries enough context to write the brief, directly or from the user's clarifications
 
+**OR these are true:**
+
+- the request is out of scope, or cannot be clarified into scope
+- the user has been told, and offered main-chat help instead
+- the skill is complete
+
 #### Step invariants:
 
 **DO NOT** run extra commands or read from the filesystem — the context below is the whole source of truth.
@@ -116,7 +122,7 @@ $ARGUMENTS
 === Chat context ===  
 Use your knowledge of the current chat context.
 
-When the request is unclear or ambiguous, ask the user for clarification. When it involves git commands outside the agent's scope (anything beyond commit / push / switch, stash, pop), tell the user and offer to help manage the current git state in the main chat instead.
+When the request is unclear or ambiguous, ask the user for clarification. When it involves git commands outside the agent's scope (anything beyond the procedures and actions in [Git Robot Agent](#git-robot-agent)), tell the user and offer to help manage the current git state in the main chat instead.
 
 ## +Check Workflows
 
@@ -154,11 +160,17 @@ Turn the gathered context into a brief for the git-robot agent.
 - the brief is formatted per the template
 - the brief covers the user's whole request
 
+#### Agent decision:
+
+`git-robot` has inbuilt logic to split commits into logical groupings, and the brief can also do the splitting by sending each logical commit as its own procedure. Choose by your confidence in the gathered context — if unsure, send the responsibility down to the subagent.
+
 #### Step invariants:
 
 **DO NOT** add any extra prose or context outside the pre-formatted brief.
 
 ### Format:
+
+Write each procedure from the [Git Robot Agent](#git-robot-agent) reference, and ensure each procedure's task overview is adequate for the agent to execute.
 
 - Place each procedure on a new line with an `-->` prefix.
 - Nest state and task overview under the procedure in a list format.
@@ -176,10 +188,6 @@ Turn the gathered context into a brief for the git-robot agent.
 - task overview
 ```
 
-#### Agent decision:
-
-`git-robot` has inbuilt logic to split commits into logical groupings, and the brief can also do the splitting by sending each logical commit as its own procedure. Choose by your confidence in the gathered context — if unsure, send the responsibility down to the subagent. Whichever way, ensure each procedure's task overview is adequate for the agent to execute.
-
 ## +Call Agent
 
 Invoke the git-robot agent to execute the brief in the background, and hold the line until it reports back.
@@ -194,9 +202,14 @@ Invoke the git-robot agent to execute the brief in the background, and hold the 
 - the user has been informed
 - the git-robot report has arrived
 
+**OR these are true:**
+
+- the invocation failed or was aborted
+- the failure is recorded
+
 #### Step invariants:
 
-**DO NOT** mutate any files while this step is in play — from invocation until the report arrives.
+**DO NOT** mutate any files while this step is in play — from invocation until the report arrives or the invocation fails.
 
 ### Invoke:
 

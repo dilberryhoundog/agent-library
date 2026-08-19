@@ -229,7 +229,7 @@ Set the bump floor by scanning for changes that break users of the unit.
 #### Start this step when these are true:
 
 - a chosen unit has commits in range
-- no breaking-change verdict is recorded for it
+- no scan outcome is recorded for it
 
 #### Step finished when these are true:
 
@@ -260,7 +260,7 @@ Derive and present the proposed bump for the unit.
 #### Start this step when these are true:
 
 - a unit has commits in range
-- a breaking-change verdict is recorded for it
+- a scan outcome is recorded for it — a verdict, a skip, or a failure
 - neither an approval nor a decline stands for it
 
 #### Step finished when these are true:
@@ -369,7 +369,7 @@ Report the run's outcome and end the skill.
 
 **OR these are true:**
 
-- the user has ended the run at the error step
+- the user has ended a failed run
 
 #### Step finished when these are true:
 
@@ -388,7 +388,7 @@ Surface anything the other steps don't cover, and decide with the user how to co
 
 #### Start this step when these are true:
 
-- something has gone wrong — a verification mismatch, a failed command mid-release, an unresolvable config, an unresolvable unit path, an unexpected repository state
+- something has gone wrong — a verification mismatch, a failed command mid-release, an unexpected repository state
 
 **OR these are true:**
 
@@ -415,7 +415,7 @@ git ls-remote --tags origin 'refs/tags/<tag>'         # is the tag on the remote
 gh release view <tag>                                 # is the GitHub release published?
 ```
 
-Read the manifest and changelog to see whether they already carry the version. Report to the user exactly which artifacts exist and which do not, and name the manual commands that would complete the release — without running them. A pushed commit and tag are durable even when a later step failed — never retry by re-tagging. End the run, and suggest an issue against this skill so the gap is recorded.
+Read the manifest and changelog to see whether they already carry the version. Report to the user exactly which artifacts exist and which do not, and name the manual commands that would complete the release — without running them. A pushed commit and tag are durable even when a later step failed. End the run, and suggest an issue against this skill so the gap is recorded.
 
 #### Github release failure
 
@@ -428,3 +428,4 @@ Terms used in this skill:
 - **Versioned Unit** — An independently released package defined in the project config, with its own paths, manifest, changelog, tag pattern, and `github-release` flag.
 - **Range** — The commit span released for a unit — `<last-tag>..HEAD` filtered to the unit's paths.
 - **Bump** — The semver increment (major, minor, patch) derived from the conventional commits in range.
+- **Chosen Unit** — A unit this run will release: the unit named at invocation, or a unit the user selected from a bare invocation's survey.

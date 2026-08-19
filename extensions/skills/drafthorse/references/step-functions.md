@@ -80,7 +80,7 @@ Emit the run's outcomes back to the invoking agent.
 
 A loop is a start condition that holds again — a step whose condition reads "an item awaits processing" re-engages for each item, and no loop syntax exists. Declaring the function tells the reading agent to expect repeat entry rather than treating a second pass as an error. Often runs inside the span of a supervisory step that stays in play across the iterations.
 
-One shape of the machinery — the per-item discriminator ("no verdict recorded **for it**") is the re-holding condition that is the loop, and the finished condition ends it for that item:
+One shape of the machinery — the per-item discriminator ("no scan outcome recorded **for it**") is the re-holding condition that is the loop, and the finished condition ends it for that item:
 
 ```markdown
 ## +Breaking Changes
@@ -92,7 +92,7 @@ Set the bump floor by scanning for changes that break users of the unit.
 #### Start this step when these are true:
 
 - a chosen unit has commits in range
-- no breaking-change verdict is recorded for it
+- no scan outcome is recorded for it
 
 #### Step finished when these are true:
 

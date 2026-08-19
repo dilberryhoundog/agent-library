@@ -4,7 +4,7 @@ Sometimes the best build is not from scratch. When a strong existing curriculum 
 
 ## The spine-plus-companion approach
 
-Interpretive guidance for shaping a spine-based build: lean on what the spine already does well rather than recreating it, keep the spine one the family can obtain free (a global requirement), aim the companion at the specific gaps for this learner, and keep it mapped to the spine's sequence so nothing falls between them. The matching course structure is `templates/course-structures/spine-plus-companion.md`.
+Interpretive guidance for shaping a spine-based build: lean on what the spine already does well rather than recreating it, keep the spine one the family can obtain free (a global requirement), aim the companion at the specific gaps for this learner, and keep it mapped to the spine's sequence so nothing falls between them. The matching course structure is [Spine Plus Companion](../templates/course-structures/spine-plus-companion.md).
 
 ## Known spines
 

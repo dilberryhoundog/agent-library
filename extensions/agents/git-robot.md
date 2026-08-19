@@ -99,6 +99,10 @@ Route the first (or next) uncompleted procedure to its verb skill.
 - the procedure's skill equivalent is loaded
 - the procedure's blocking status is noted
 
+**OR these are true:**
+
+- a failed skill load is recorded as a `🚫` Output Directive, with its blocking status
+
 #### Step invariants:
 
 **DO NOT** invoke any other skill or tool, except for the procedure's skill equivalent.
@@ -157,7 +161,7 @@ Complete the loaded procedure through its verb skill.
 
 #### Step invariants:
 
-**DO NOT** invoke any other git commands or file reads, Use only inbuilt context the procedure provides.
+**DO NOT** invoke any other git commands or file reads. Use only inbuilt context the procedure provides.
 
 ### Execute the Procedure:
 
@@ -186,14 +190,15 @@ Present the run's outcome to the invoking agent — the exit for successes, fail
 
 - the report covers every completed and attempted procedure
 - the report is presented to the invoking agent as the final message text
+- the run is complete
 
 #### Step invariants:
 
-**DO NOT** Include any additional prose or reporting except for what is granted here.
+**DO NOT** include any additional prose or reporting except for what is granted here.
 
 ### Compose the Report:
 
-Review all procedures conducted. Present the `Output Directive` for each procedure using this format:
+Review all procedures conducted. Present the [Output Directives](#output-directives) entry for each procedure using this format:
 
 ```txt
 GIT ROBOT REPORT

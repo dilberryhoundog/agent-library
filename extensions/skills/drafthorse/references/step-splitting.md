@@ -32,7 +32,7 @@ The smells that mark a candidate (or a lump of steps) as handover-shaped — no 
 Shaping a handover, hold its deltas from a skill:
 
 - **Frontmatter is the stamp and nothing else** — `harness-format: DraftHorse, Handover`, with no `name`, `description`, `allowed-tools`, or invocation surface. Identity moves into the body: a `# Title (Handover)` heading and one identity paragraph stating what it does and when a parent step folds it in. The reading model is carried by the handover-variant preamble, so the identity paragraph never restates it.
-- **The handover-variant preamble** — a handover opens its steps section with the variant, not the universal preamble, which routes a failed step to an error step a handover does not have. `assets/HANDOVER-template.md` carries the canonical text.
+- **The handover-variant preamble** — a handover opens its steps section with the variant, not the universal preamble, which routes a failed step to an error step a handover does not have. [HANDOVER Template](../assets/HANDOVER-template.md) carries the canonical text.
 - **No required exit steps** — no success exit, no error step, no handed-back outcome. Control returns to the parent step when no handover step is left in play; a failure falls to the parent document's error step. The parent step's own finished condition reads success from the state the handover leaves behind.
 - **Never names its parent** — written to be folded into any step that needs it; it may cite the parent's ambient references by name (never restating them), but the parent never cites the handover's internal references.
 - **Grants come from the parent** — everything the handover's steps do must be covered by the main document's `allowed-tools`.

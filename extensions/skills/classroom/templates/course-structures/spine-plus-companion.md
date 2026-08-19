@@ -8,7 +8,7 @@
 
 ## Shape
 
-1. Identify the spine (see `references/curriculum-spines.md`) and confirm it is free to obtain. The family downloads it.
+1. Identify the spine (see [Curriculum Spines](../../references/curriculum-spines.md)) and confirm it is free to obtain. The family downloads it.
 2. Map the companion to the spine's lesson sequence so there are no gaps.
 3. The companion adds only what the spine lacks for this learner — typically: slower scaffolding of key concepts, a visual worked example up front, guided note templates, verified video links, varied question formats, a separate answer key, and real-world application.
 4. Do **not** recreate what the spine already does well.

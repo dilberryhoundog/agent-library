@@ -19,7 +19,7 @@ Craft the commit(s) for the working tree. The grouping intent lives in the `COMM
 
 # --- REFERENCES ---
 
-## Current Git state
+## Current Git State
 
 These overviews show _what_ changed and how much — enough to plan the grouping. Pull the actual diff content per group in the `+Read Procedure` step; do not rely on the file names alone.
 
@@ -32,7 +32,7 @@ These overviews show _what_ changed and how much — enough to plan the grouping
 === Unstaged overview ===  
 !`git diff --stat`
 
-## Emoji map
+## Emoji Map
 
 - ✨ `feat`: new feature
 - 🐛 `fix`: bug fix
@@ -82,7 +82,7 @@ These overviews show _what_ changed and how much — enough to plan the grouping
 - 💡 `docs`: source-code comments
 - 🚧 `wip`: work in progress
 
-## Commit message format
+## Commit Message Format
 
 Use `<emoji> <type>: <description>`:
 
@@ -91,11 +91,11 @@ Use `<emoji> <type>: <description>`:
 - First line under 72 characters. Add a body only when the change needs explaining beyond its subject.
 - No literal shell syntax anywhere in the message — dollar-parenthesis substitution, backticks, or glob/parenthesis patterns (e.g. a permission pattern like "Bash(git commit ...)"). The permission checker reads the whole command line and treats such text as live shell syntax, forcing a prompt. Describe the syntax in words instead ("the git commit permission grant").
 
-#### Breaking changes
+#### Breaking Changes
 
 Before finalising each message, check the diff for changes that force an existing user to alter something on their side: removed or renamed user-facing names (commands, skills, functions, flags), changed argument/config/file formats, or changed meaning of documented behaviour. When found, mark the type with `!` (e.g. `💥 feat!: rename trigger phrases`) and add a `BREAKING CHANGE: <what breaks and what users must do>` footer to the message body. Additive changes (new things alongside old) are not breaking. When genuinely unsure whether a change breaks consumers, surface it in the `Result` rather than silently guessing — the caller has repo context to judge.
 
-## Splitting heuristics
+## Splitting Heuristics
 
 Split into separate commits when changes cross these boundaries:
 
@@ -120,7 +120,7 @@ Load the current COMMIT procedure and the real diffs it covers.
 #### Start this step when these are true:
 
 - a `COMMIT` procedure from the `Brief` awaits processing
-- no earlier no-op or refusal has ended the run
+- no earlier no-op, refusal, or failure has ended the run
 
 #### Step finished when these are true:
 
@@ -130,8 +130,8 @@ Load the current COMMIT procedure and the real diffs it covers.
 
 #### Step invariants:
 
-**ALWAYS** use the `Expanded Diffs` to write the commit message. Do not guess from filenames or procedure details.
-**NEVER** use extra flags or commands (like `git -C` or `cd`) . trust the working directory is the right place.
+**ALWAYS** use the `Expanded Diffs` to write the commit message.
+**NEVER** use extra flags or commands (like `git -C` or `cd`). Trust the working directory is the right place.
 **NEVER** invent or force an empty commit.
 
 ### Review Against the Tree:
@@ -163,11 +163,16 @@ Create one or more new commits from the working tree, grouped per the procedure'
 - every commit for the current procedure is made
 - every commit is recorded
 
+**OR these are true:**
+
+- a commit command has failed
+- the failure is recorded
+
 ### Commit Splitting:
 
 Map the procedure's directive onto the real changes from the `Expanded Diffs`. A directive may name a count ("3 commits"), a scope filter ("housekeeping, leave the rest"), or a free description. When unclear on how to manage the diff, fall back to the [Splitting Heuristics](#splitting-heuristics). Prefer fewer, cohesive commits — 1–4 per logical unit — and commit dependencies first so history stays bisectable. Your goal is a logical grouping of changes across every file in the procedure.
 
-#### Commit:
+#### Commit Each Group:
 
 - Check `git diff --cached --name-only` for pre-staged files outside the current group; unstage each with `git restore --staged <file>` — the change itself is preserved for a later group or procedure. Note every unstaged path for the `Result`.
 - Stage each file in the group with `git add <file>` (re-stage if already staged)
@@ -192,8 +197,8 @@ Fold the in-scope changes into the previous commit, or reword its message, per t
 
 **OR these are true:**
 
-- the amend is refused
-- the refusal is recorded
+- the amend is refused, or the amend command has failed
+- the refusal or failure is recorded
 
 ### Check for Push:
 
@@ -210,7 +215,7 @@ Treat any non-empty result (or an explicit upstream match) as **pushed = true**.
 
 Two conditions refuse the amend: the directive suggests changes to more than one previous commit (amend is a single-commit action; splitting is not supported), or the `Check for Push` reveals the commit has been pushed. Either way, amend nothing and record the refusal for the result.
 
-#### Commit:
+#### Apply the Amend:
 
 - Check `git diff --cached --name-only` for pre-staged files outside the current group; unstage each with `git restore --staged <file>` — the change itself is preserved for a later group or procedure. Note every unstaged path for the `Result`.
 - Stage each file in the group with `git add <file>` (re-stage if already staged)
@@ -230,7 +235,7 @@ Emit the outcome back to git-robot so it can render the `COMMIT` Output Directiv
 
 **OR these are true:**
 
-- a no-op or refusal has ended the run
+- a no-op, refusal, or failure has ended the run
 
 #### Step finished when these are true:
 

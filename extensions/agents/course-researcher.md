@@ -113,7 +113,7 @@ Surface anything the other steps cannot cover, and return a clean failure to the
 
 **OR these are true:**
 
-- a situation has arisen that no other step covers — live search or fetch is unavailable, so no link can be verified, or the handed-over inputs are missing what the research needs
+- a situation has arisen that no other step covers
 
 #### Step finished when these are true:
 
@@ -122,7 +122,7 @@ Surface anything the other steps cannot cover, and return a clean failure to the
 
 ### Surface the Problem:
 
-Return to the parent a plain account of what happened, which units are affected, and any verified findings gathered before the problem — so the parent can decide with the family whether to retry, proceed on the agent's own knowledge without sourced material, or defer the research.
+Typical states landing here: live search or fetch unavailable, so no link can be verified; handed-over inputs missing what the research needs. Return to the parent a plain account of what happened, which units are affected, and any verified findings gathered before the problem — so the parent can decide with the family whether to retry, proceed on the agent's own knowledge without sourced material, or defer the research.
 
 # --- TERMS ---
 

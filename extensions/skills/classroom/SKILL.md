@@ -20,7 +20,7 @@ Assemble home-education materials tailored to a specific learner and the family'
 
 === Where each piece lives ===
 
-- **Project storage root** — the family's configuration, created once at setup: `global-requirements.md` (standing constants — spelling, page size, cost rule, worldview defaults), `students/` (one file per learner), `CLAUDE.md` (project config + status notes), `.claude/rules/classroom.md` (the static rule that emits the signal below).
+- **Project storage root** — the family's configuration, created once at setup: `global-requirements.md` (standing constants — spelling, page size, cost rule, worldview defaults), `students/` (one file per learner), `CLAUDE.md` (project config + status notes), `.claude/rules/classroom.md` (the project guidance rule) and `.claude/rules/classroom-signal.md` (the static rule that emits the signal below).
 - **This skill** — the reusable library: `templates/` (course/lesson shapes, document shells, blocks) and `references/` (this file's siblings).
 - **Plugin root** — `${CLAUDE_PLUGIN_ROOT}/templates/` (the setup init payload), plus `mcp/` and `scripts/`.
 - **Per course** — `<course>/matter/` (saved source material) and the working-outputs location recorded in `CLAUDE.md` (delivered documents).
@@ -28,7 +28,7 @@ Assemble home-education materials tailored to a specific learner and the family'
 ## Classroom Signal
 
 === the marker that a classroom is set up here ===
-`**CLASSROOM SKILL COMPATIBLE**` — emitted into the loaded context by `.claude/rules/classroom.md` at the project storage root. Its presence means a classroom project exists in the current working directory; its absence means none is set up here.
+`**CLASSROOM SKILL COMPATIBLE**` — emitted into the loaded context by `.claude/rules/classroom-signal.md` at the project storage root. Its presence means a classroom project exists in the current working directory; its absence means none is set up here.
 
 ## Document Pipeline
 
@@ -124,6 +124,11 @@ Identify the learner, load their configuration and course state, and settle what
 - any prior course state in `CLAUDE.md` has been read
 - the run's intent — a new build, continuing a course, or marking completed work — is settled with the user
 
+**OR these are true:**
+
+- the run is setup-only, or the user has chosen to stop before an intent was settled
+- that outcome is recorded
+
 ### Establish Who and What:
 
 Read the [Storage Model](#storage-model) for where each piece lives. Identify the learner and read the relevant file(s) in the project's `students/`, the project's `global-requirements.md`, and the prior status notes in `CLAUDE.md`; search the earlier conversation for an existing course. Do not ask for anything already held in those files or the conversation. If the learner has no file yet, offer to create one under the project's `students/` using the field definitions in [Template](references/students/_template.md) (with [Example Learner](references/students/example-learner.md) as a worked example of a filled profile). Settle with the user what the run is for — a new build, continuing a course, or marking completed work — so the right work follows.
@@ -210,7 +215,7 @@ Produce one unit's documents to the governing format.
 
 #### Start this step when these are true:
 
-- a unit — the sample or a subsequent one — needs its documents
+- a unit needs its documents
 - they are not yet assembled to the governing format
 
 #### Step finished when these are true:
@@ -218,7 +223,7 @@ Produce one unit's documents to the governing format.
 - the unit's documents are built from the chosen shapes
 - every concept's media is verified or marked no-suitable-media
 - each document's HTML is written to `source/`
-- each document is delivered — either converted to A4 PDF whose conversion report matches the document's intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected — `standard` unless the document declares its own `@page` — and no unresolved layout flags), or handed over as a print-ready standalone where the renderer cannot run
+- each document is delivered — either converted to A4 PDF whose conversion report matches the document's intent per the [Document Pipeline](#document-pipeline), or handed over as a print-ready standalone where the renderer cannot run
 - the result satisfies the invariants
 
 #### Step invariants:
@@ -262,7 +267,7 @@ Produce a sample and get its format approved before mass production.
 
 #### Step finished when these are true:
 
-- the scope-and-sequence and one complete sample unit are built, each conversion report matching intent (sheet count equal to the source's `.page`/`.bleed` boxes, print mode as expected, no unresolved layout flags)
+- the scope-and-sequence and one complete sample unit are built, each conversion report matching intent per the [Document Pipeline](#document-pipeline)
 - the user has explicitly approved the format
 
 ### Build the Sample:
@@ -356,8 +361,6 @@ Surface anything the other steps don't cover, and decide with the user how to co
 
 - a situation has arisen that no other step covers
 
-Either case covers a missing or corrupt `global-requirements.md`, a failed PDF conversion, a handover doc's work that could not complete, or requirements that contradict a build invariant.
-
 #### Step finished when these are true:
 
 - the user has been informed of what happened and what state the build is in
@@ -365,7 +368,7 @@ Either case covers a missing or corrupt `global-requirements.md`, a failed PDF c
 
 ### Surface the Problem:
 
-Tell the user plainly what happened, which step it arose in, what state the build is in (especially any half-written documents or a partial course), and what the options are.
+Typical states landing here: a missing or corrupt `global-requirements.md`, a failed PDF conversion, a handover doc's work that could not complete, requirements that contradict a build invariant. Tell the user plainly what happened, which step it arose in, what state the build is in (especially any half-written documents or a partial course), and what the options are.
 
 # --- TERMS ---
 

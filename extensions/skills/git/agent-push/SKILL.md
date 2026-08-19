@@ -3,7 +3,7 @@ harness-format: DraftHorse
 name: agent-push
 description: Execute the push procedure using this skill. Specialised skill for `Git Robot`, not for general agent usage.
 user-invocable: false
-allowed-tools: Bash(git push *), Bash(git status *), Bash(git rev-parse *), Bash(git branch *), Bash(git log *)
+allowed-tools: Bash(git push *), Bash(git status *), Bash(git log *)
 ---
 
 # Push
@@ -18,7 +18,7 @@ Publish the current branch's commits to its remote. The `PUSH` procedure of the 
 
 # --- REFERENCES ---
 
-## Current Git state
+## Current Git State
 
 These overviews show where the local branch sits relative to its remote — enough to decide whether a push is needed and whether it can fast-forward.
 
@@ -30,14 +30,14 @@ These overviews show where the local branch sits relative to its remote — enou
 
 The first line of `Branch + tracking` carries the tracking state. `## <branch>` on its own means no upstream — the branch has never been pushed. `## <branch>...<remote>/<branch>` means an upstream exists, and a trailing `[ahead N]`, `[behind N]`, or `[ahead N, behind M]` reports the divergence. `Unpushed commits` lists the commits that have not reached `origin`, and is empty when there is nothing to deliver. The list is scoped to `origin` alone: in a fork with both `origin` and `upstream` remotes, a commit already on `upstream` still counts as unpushed until it reaches `origin`.
 
-## Push outcomes
+## Push Outcomes
 
 The `Result` you return mirrors git's own report. Capture the meaningful state:
 
 - **Pushed** — commits delivered. Record the branch, the remote, and the ahead count cleared (e.g. `main -> origin/main, 3 commits`).
 - **Up to date** — nothing to push. Record the no-op.
 - **Upstream set** — first push of a new branch. Record that tracking was established (`--set-upstream`).
-- **Rejected** — remote has commits you don't (non-fast-forward). Record the rejection; do not force.
+- **Rejected** — remote has commits you don't (non-fast-forward). Record the rejection.
 
 # --- STEPS ---
 
@@ -87,7 +87,7 @@ The upstream decides the command. No upstream (`Branch + tracking` showed `## <b
 
 #### Run:
 
-Push, and record the branch, the remote it pushed to, and the resulting state for the `Result`.
+Push, and record the branch, the remote it pushed to, and the resulting state for the `Result`, captured per [Push Outcomes](#push-outcomes).
 
 ## +Result
 

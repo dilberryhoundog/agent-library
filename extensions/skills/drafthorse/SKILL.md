@@ -187,7 +187,8 @@ Write the document from the approved parts.
 
 #### Step finished when these are true:
 
-- the draft is written to the destination
+- the draft is written to the destination — in conversion mode, to the sibling draft path
+- every handover doc the map calls for is written and cited from its parent step
 - every template placeholder is resolved
 - no comment scaffolding remains
 
@@ -208,7 +209,8 @@ Walk the draft as a cold reader before the user sees it.
 
 - every scenario routes cleanly
 - every Conventions Digest test passes
-- any approved fix the scenario-walk found is folded into the draft
+- every fix the walk found is folded into the draft
+- the independent review has been taken and its findings folded in, declined by the user, or recorded unavailable
 
 ### Scenario-Walk:
 
