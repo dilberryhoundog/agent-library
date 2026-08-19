@@ -3,7 +3,7 @@ harness-format: DraftHorse
 name: agent-switch
 description: Execute the switch procedure using this skill. Specialised skill for `Git Robot`, not for general agent usage.
 user-invocable: false
-allowed-tools: Bash(git switch *), Bash(git stash *), Bash(git status *), Bash(git rev-parse *), Bash(git branch *)
+allowed-tools: Bash(git switch *), Bash(git stash *), Bash(git status *), Bash(git branch *)
 ---
 
 # Switch
@@ -19,7 +19,7 @@ Move the working tree between branches and manage the stash around that move. Th
 
 # --- REFERENCES ---
 
-## Current Git state
+## Current Git State
 
 These overviews show whether the tree is dirty and what branches exist — enough to run each action safely.
 
@@ -42,7 +42,7 @@ A `SWITCH` procedure carries one or more actions, run **in the order written**:
 
 A procedure may chain them (`SWITCH(stash, switch, pop)`) or split them across the brief (`SWITCH(stash)` … `SWITCH(pop)`), bracketing other procedures between the stash and the pop.
 
-## Switch outcomes
+## Switch Outcomes
 
 The `Result` you return mirrors git's own report. Capture the meaningful state for each action run:
 
@@ -53,35 +53,34 @@ The `Result` you return mirrors git's own report. Capture the meaningful state f
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
 ## +Read Procedure
 
 Judge the next action against the live tree before running anything.
 
+**Looping step** — Re-runnable, taking a different branch each pass.
+
 #### Start this step when these are true:
 
-The `SWITCH` procedure holds an action not yet run, and no refusal or failure has ended the run.
+- the `SWITCH` procedure holds an action not yet run
+- no refusal, failure, or no-op has ended the run
 
 #### Step finished when these are true:
 
-The next action is judged either safe to run (clean tree, or stash precedes switch, and the target exists) or a refusal (recorded with its reason) — or no actions remain.
+- the next action is judged safe to run
 
-#### Suggested next actions:
+**OR these are true:**
 
-A safe `stash`, `switch`, or `pop` action moves to running that action; a refusal, or no actions remaining, moves to reporting the result.
+- a refusal is recorded with its reason
+
+**OR these are true:**
+
+- no actions remain in the procedure
 
 ### Review the Action:
 
-From the `Brief` read the `SWITCH` procedure and its actions. Review them against the `Current Git State`, to judge tree cleanliness and branch existence. Pick the first/next uncompleted action.
+From the `Brief` read the `SWITCH` procedure and its [Actions](#actions). Review them against the [Current Git State](#current-git-state), to judge tree cleanliness and branch existence. Pick the first/next uncompleted action.
 
 #### Agent decision:
 
@@ -93,21 +92,25 @@ Set the dirty working tree aside before moving.
 
 #### Start this step when these are true:
 
-The next safe action is `stash`.
+- the next safe action is `stash`
 
 #### Step finished when these are true:
 
-The stash result is recorded, or a command failure or an already-clean tree is recorded as a no-op or refusal.
+- the stash result is recorded
 
-#### Suggested next actions:
+**OR these are true:**
 
-A recorded failure or no-op moves to reporting the result; otherwise return to judging the next action.
+- a command failure is recorded as a refusal
+
+**OR these are true:**
+
+- an already-clean tree is recorded as a no-op
 
 #### Step invariants:
 
 **DO NOT** create an empty stash. Report the no-op instead.
 
-### Run:
+### Run the Stash:
 
 Run `git stash push -u`. Record the stash result.
 
@@ -117,17 +120,17 @@ Change to the target branch named in the task overview.
 
 #### Start this step when these are true:
 
-The next safe action is `switch`.
+- the next safe action is `switch`
 
 #### Step finished when these are true:
 
-The switch result is recorded, or a failure or error is recorded as a refusal note.
+- the switch result is recorded
 
-#### Suggested next actions:
+**OR these are true:**
 
-A recorded failure moves to reporting the result; otherwise return to judging the next action.
+- a failure or error is recorded as a refusal note
 
-### Run:
+### Run the Switch:
 
 Run `git switch <branch>`. Record the branch moved to.
 
@@ -137,21 +140,21 @@ Restore the most recent stash entry onto the current branch.
 
 #### Start this step when these are true:
 
-The next safe action is `pop`.
+- the next safe action is `pop`
 
 #### Step finished when these are true:
 
-The pop result is recorded, or a failure, error, or conflict is recorded as a note.
+- the pop result is recorded
 
-#### Suggested next actions:
+**OR these are true:**
 
-A recorded failure or conflict moves to reporting the result; otherwise return to judging the next action.
+- a failure, error, or conflict is recorded as a note
 
 #### Step invariants:
 
 **DO NOT** resolve conflicts from the Pop action. Report the conflict instead.
 
-### Run:
+### Run the Pop:
 
 Run `git stash pop`. Record the restore, and any conflict git reports.
 
@@ -159,25 +162,28 @@ Run `git stash pop`. Record the restore, and any conflict git reports.
 
 Emit the outcome/s back to git-robot so it can render the `SWITCH` Output Directive in its report.
 
+**Error step** — folded into this reporting step per the executor exception, so its start condition claims the ended run alongside the completed one.
+
 #### Start this step when these are true:
 
-Every action in the procedure has run, or a refusal, failure, or conflict has ended the run early.
+- every action in the procedure has run
+
+**OR these are true:**
+
+- a refusal, failure, conflict, or no-op has ended the run early
 
 #### Step finished when these are true:
 
-The result lines are emitted.
-
-#### Suggested next actions:
-
-The skill is over, hand control back to git-robot.
+- the result lines are emitted as the final message text
+- the skill is complete
 
 #### Step invariants:
 
-**DO NOT** add prose beyond the action lines and any refusal or conflict note.
+**DO NOT** add prose beyond the action lines and any refusal, conflict, or no-op note.
 
 ### Result:
 
-Return one line per action run — the action and its resulting state:
+Return one line per action run — the action and its resulting state, captured per [Switch Outcomes](#switch-outcomes):
 
 ```txt
 <action> -> <state>

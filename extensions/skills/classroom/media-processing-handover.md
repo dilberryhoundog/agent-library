@@ -27,13 +27,7 @@ Links can shift over time, but the channel name + title will find the media in s
 
 # --- STEPS ---
 
-> Handovers are child steps of a parent step:
->
->- The parent step reads success from the state the handover leaves behind.
->- Invoke a child step any time its *start* conditions are met.
->- If all child steps are *finished* or inactive, return to the parent step and continue.
->- Error handling is covered by the parent document, unless an optional child problem step is present.
->- Global invariants apply across the whole parent step; step invariants are confined to the child step.
+Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Same step rules apply, plus these. Parent step reads success from the state child steps leave behind. All child steps finished or inactive — return to the parent step and continue. Parent document covers error handling, unless an optional child error step is present. Global invariants hold across the parent step's span. Step invariants confine to their own child step.
 
 ## +Assemble and Verify Links
 
@@ -42,7 +36,6 @@ For each concept, build a small set of durable candidate links and prove each on
 #### Start this step when these are true:
 
 - a build needs media for one or more concepts
-- those concepts are not yet resolved — neither verified links nor a *no suitable media* mark against them
 
 #### Step finished when these are true:
 
@@ -55,4 +48,4 @@ For each concept, build a small set of durable candidate links and prove each on
 
 ### Build and Prove the Set:
 
-For each concept, draw 2–3 candidate links favouring the `Durable Link Forms` order, preferring the channels in the `Vetted Channel Database` (large, stable, rarely delete content). Verify each candidate with a real web search or fetch to confirm the channel/episode exists and is current, and drop any that fail. If a concept has no suitable media after a genuine search, mark it *no suitable media* rather than forcing a weak link — the parent step's format decides how a no-media lesson reads.
+For each concept, draw 2–3 candidate links favouring the [Durable Link Forms](#durable-link-forms) order, preferring the channels in the [Vetted Channel Database](#vetted-channel-database) (large, stable, rarely delete content). Verify each candidate with a real web search or fetch to confirm the channel/episode exists and is current, and drop any that fail. If a concept has no suitable media after a genuine search, mark it *no suitable media* rather than forcing a weak link — the parent step's format decides how a no-media lesson reads.

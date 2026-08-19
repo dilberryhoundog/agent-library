@@ -26,7 +26,7 @@ The plugin's `templates/` folder is the init payload; setup copies its whole con
 
 ## Copy the Payload
 
-=== dynamic — run from the project root ===
+=== dynamic — run from the project root, on a root with no prior classroom config ===
 
 ```bash
 cp -a "${CLAUDE_PLUGIN_ROOT}/templates/." .
@@ -42,13 +42,7 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/install-deps.sh"
 
 # --- STEPS ---
 
-> Handovers are child steps of a parent step:
->
->- The parent step reads success from the state the handover leaves behind.
->- Invoke a child step any time its *start* conditions are met.
->- If all child steps are *finished* or inactive, return to the parent step and continue.
->- Error handling is covered by the parent document, unless an optional child problem step is present.
->- Global invariants apply across the whole parent step; step invariants are confined to the child step.
+Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Same step rules apply, plus these. Parent step reads success from the state child steps leave behind. All child steps finished or inactive — return to the parent step and continue. Parent document covers error handling, unless an optional child error step is present. Global invariants hold across the parent step's span. Step invariants confine to their own child step.
 
 ## +Copy the Init Payload
 
@@ -57,20 +51,20 @@ Lay the project skeleton down at the root.
 #### Start this step when these are true:
 
 - the user's consent to set up a classroom in the current working directory is confirmed
-- the init payload has not yet been copied to the root
+- no filled classroom config from a prior setup exists at the root
 
 #### Step finished when these are true:
 
 - the payload's whole contents are present at the project root
-- any pre-existing `CLAUDE.md` is preserved rather than overwritten
+- every pre-existing config file is preserved rather than overwritten
 
 #### Step invariants:
 
-**NEVER** overwrite an existing `CLAUDE.md` at the project root — copy everything else, then merge the classroom config block into it.
+**NEVER** overwrite a pre-existing config file at the project root — `CLAUDE.md`, `global-requirements.md`, anything in `students/`, or the `.claude/` rules. Copy only what is absent; merge the classroom config block into an existing `CLAUDE.md`.
 
 ### Copy, Preserving Any Existing Config:
 
-Run the `Copy the Payload` command from the project root; it brings the `templates/` contents (including the hidden `.claude/`) into place. When a `CLAUDE.md` already exists at the root, preserve it: copy everything else, then merge the classroom config block from `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE.md` into it. The `Init Payload` reference names the source and the fallback when `${CLAUDE_PLUGIN_ROOT}` is not substituted.
+On a bare root, run the [Copy the Payload](#copy-the-payload) command from the project root; it brings the `templates/` contents (including the hidden `.claude/`) into place. Where any payload file already exists at the root, copy only the absent pieces instead — never the whole payload over existing files — and merge the classroom config block from `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE.md` into an existing `CLAUDE.md`. The [Init Payload](#init-payload) reference names the source and the fallback when `${CLAUDE_PLUGIN_ROOT}` is not substituted.
 
 ## +Configure the Project
 
@@ -95,6 +89,8 @@ Fill `CLAUDE.md`'s bracketed fields from a short interview, leaving the learner 
 
 Optionally pre-install the PDF dependency so the first conversion is fast.
 
+**Dormant step** — Skippable, activates only when its state arises.
+
 #### Start this step when these are true:
 
 - the project is configured
@@ -102,8 +98,8 @@ Optionally pre-install the PDF dependency so the first conversion is fast.
 
 #### Step finished when these are true:
 
-- the dependency is installed via the `Warm the PDF Engine` command
+- the dependency is installed via the [Warm the PDF Engine](#warm-the-pdf-engine) command
 
 ### Pre-install:
 
-Run the `Warm the PDF Engine` command. Where it is not run, the `classroom-pdf` MCP server installs its own dependency on first use instead.
+Run the [Warm the PDF Engine](#warm-the-pdf-engine) command. Where it is not run, the `classroom-pdf` MCP server installs its own dependency on first use instead.

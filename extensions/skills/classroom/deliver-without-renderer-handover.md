@@ -15,17 +15,13 @@ The geometry lives at `${CLAUDE_PLUGIN_ROOT}/mcp/print-base.css`. Its correct po
 
 # --- STEPS ---
 
-> Handovers are child steps of a parent step:
->
->- The parent step reads success from the state the handover leaves behind.
->- Invoke a child step any time its *start* conditions are met.
->- If all child steps are *finished* or inactive, return to the parent step and continue.
->- Error handling is covered by the parent document, unless an optional child problem step is present.
->- Global invariants apply across the whole parent step; step invariants are confined to the child step.
+Handover holds child steps of a parent step. Marked `## +<Child Step Name>`. Same step rules apply, plus these. Parent step reads success from the state child steps leave behind. All child steps finished or inactive — return to the parent step and continue. Parent document covers error handling, unless an optional child error step is present. Global invariants hold across the parent step's span. Step invariants confine to their own child step.
 
 ## +Produce a Print-Ready Standalone
 
 Turn a geometry-less source document into a file that prints correctly from a browser.
+
+**Looping step** — Re-runnable, taking a different branch each pass.
 
 #### Start this step when these are true:
 
@@ -45,4 +41,4 @@ Turn a geometry-less source document into a file that prints correctly from a br
 
 ### Inline and Hand Over:
 
-Read the geometry base named in `The Geometry Base` and the document's `source/` HTML. Write a copy of that HTML with the base inlined as the first `<style>` element in `<head>`, saved beside the source under a `.print.html` name so it is never mistaken for the editable copy. Tell the user this print-ready file is their deliverable for now: open it in a browser and Save as PDF at A4. Note that the plain `source/` file stays the copy to edit, and that a normal re-conversion will produce the PDF directly once the renderer is available.
+Read the geometry base named in [The Geometry Base](#the-geometry-base) and the document's `source/` HTML. Write a copy of that HTML with the base inlined as the first `<style>` element in `<head>`, saved beside the source under a `.print.html` name so it is never mistaken for the editable copy. Tell the user this print-ready file is their deliverable for now: open it in a browser and Save as PDF at A4. Note that the plain `source/` file stays the copy to edit, and that a normal re-conversion will produce the PDF directly once the renderer is available.

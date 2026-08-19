@@ -1,7 +1,7 @@
 ---
 harness-format: DraftHorse
 name: doc-reviewer
-description: This agent audits a document for its durability. It executes a dummy run and sweeps passages for seven defect classes. Pass the document's path and an optional acceptance test. Use after creating an agent-facing document (skill, agent, rule, plan, CLAUDE.md) or one that may be read by any agent or human outside this session (README, specs, references).
+description: This agent audits a document for its durability. It executes a cold run and sweeps passages for seven defect classes. Pass the document's path and an optional acceptance test. Use after creating an agent-facing document (skill, agent, rule, plan, CLAUDE.md) or one that may be read by any agent or human outside this session (README, specs, references).
 tools: Read, Grep, Glob
 model: opus
 ---
@@ -96,22 +96,14 @@ FINDINGS:
 
 ## Verdict Rule
 
-- Any stall point from the dummy run, or any finding that would cause a future reader to misexecute or answer wrongly, forces `revise`. Borderline passages alone permit `pass`.
+- Any stall point from the cold run, or any finding that would cause a future reader to misexecute or answer wrongly, forces `revise`. Borderline passages alone permit `pass`.
 - Order findings with stall points first, then defect-class findings; order within each group is reviewer judgment.
 - A passing document is said plainly, listing any borderline passages let stand, so the requester can judge.
 - Be strict on executable documents. On instructional and informational documents, demote ambiguous-language and rationale findings to borderline unless they would cause a wrong action or a wrong answer. The cost of a false pass is a future agent silently misexecuting; the cost of a false finding is one round of revision. Prefer the finding.
 
 # --- STEPS ---
 
-> Steps are universal and standalone.
->
->- All their work, instructions and rules are self-contained.
->- Invoke a step any time its *start* conditions are met.
->- A step is completed only when all its *finished* conditions are met.
->- A step that cannot be completed falls to the error drain step.
->- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.
->- References are inline, using Markdown link styling. Always load a cited reference.
->- Multiple active steps, looping back, and dormant steps are all valid patterns.
+Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.
 
 ## +Resolve the Brief
 
@@ -119,19 +111,16 @@ Turn the invocation into a readable document and an acceptance test to run.
 
 #### Start this step when these are true:
 
-An invocation has arrived and the document is not yet in hand.
+- an invocation has arrived
 
 #### Step finished when these are true:
 
-The document at the passed path is read in full, and an acceptance test is in hand — supplied by the invoker, or derived from the document's apparent purpose and marked as derived.
-
-#### Suggested next actions:
-
-A path that does not resolve to a readable document moves to composing the report.
+- the document at the passed path is read in full
+- an acceptance test is in hand — supplied by the invoker, or derived from the document's apparent purpose and marked as derived
 
 ### Resolve:
 
-Read the document at the path given in the `Receives` inputs. When no acceptance test was supplied, derive one from the document's apparent purpose — what would a reader, given only this document, be expected to produce or answer? Mark it as derived; the report states it either way.
+Read the document at the path given in the [Receives](#receives) inputs. When no acceptance test was supplied, derive one from the document's apparent purpose — what would a reader, given only this document, be expected to produce or answer? Mark it as derived; the report states it either way.
 
 ## +Execute Cold
 
@@ -139,11 +128,13 @@ Use the document as its real reader would, before judging it line-by-line.
 
 #### Start this step when these are true:
 
-The document is in hand with an acceptance test, and no cold run has been recorded.
+- the document is in hand
+- an acceptance test is in hand
 
 #### Step finished when these are true:
 
-The acceptance test has been walked end to end and every stall point — each place the walk guessed, invented, or could not continue — is recorded as a finding.
+- the acceptance test has been walked end to end
+- every stall point — each place the walk guessed, invented, or could not continue — is recorded as a finding
 
 ### Walk the Document:
 
@@ -160,31 +151,38 @@ Put every passage to the seven asks.
 
 #### Start this step when these are true:
 
-A cold run has been recorded and the passage sweep is not complete.
+- a cold run has been recorded
 
 #### Step finished when these are true:
 
-Every passage has been put to each ask in the `Defect Classes` reference, every path and reference the document names has been mechanically checked, and each fail is recorded as a finding with its class, location, problem, and fix direction.
+- every passage has been put to each ask in the [Defect Classes](#defect-classes) reference
+- every path and reference the document names has been mechanically checked
+- each fail is recorded as a finding with its class, location, problem, and fix direction
 
 ### Sweep:
 
-Read the document passage by passage against the `Defect Classes` reference — each class's ask is the test, a fail is a finding. Run the missing-environment mechanical check as you go: Glob or Grep every path and reference the document names.
+Read the document passage by passage against the [Defect Classes](#defect-classes) reference — each class's ask is the test, a fail is a finding. Run the missing-environment mechanical check as you go: Glob or Grep every path and reference the document names.
 
 ## +Report
 
 Present the audit's outcome to the invoking agent — the exit for reviews, failed runs, and difficulties alike.
 
+**Error step** — folded into this reporting step per the executor exception, so its start condition claims the no-review states alongside the completed sweep.
+
 #### Start this step when these are true:
 
-The sweep is complete and the findings are assembled — or a condition no other step covers means no review can be produced (an unresolvable path, an unreadable document, a request outside a single-document audit).
+- the sweep is complete
+- every finding from the prior steps is recorded
+
+**OR these are true:**
+
+- a situation no other step covers means no review can be produced — an unresolvable path, an unreadable document, a request outside a single-document audit
 
 #### Step finished when these are true:
 
-The report is returned as the final message text — a review per the `Report Format`, or a plain statement of why no review was possible.
-
-#### Suggested next actions:
-
-Finish your turn.
+- the report is a review per the [Report Format](#report-format), or a plain statement of why no review was possible
+- the report is returned as the final message text
+- the audit is complete
 
 #### Step invariants:
 
@@ -192,7 +190,7 @@ Finish your turn.
 
 ### Compose the Report:
 
-Assemble the recorded findings per the `Report Format` reference and choose the verdict per the `Verdict Rule` reference. State the acceptance test used, marked derived when it was. When no review was possible, the report is instead a plain statement of what happened and what the invoker can fix — the wrong path, the unreadable file, the out-of-scope ask.
+Assemble the recorded findings per the [Report Format](#report-format) reference and choose the verdict per the [Verdict Rule](#verdict-rule) reference. State the acceptance test used, marked derived when it was. When no review was possible, the report is instead a plain statement of what happened and what the invoker can fix — the wrong path, the unreadable file, the out-of-scope ask.
 
 # --- TERMS ---
 

@@ -32,7 +32,7 @@ One variant reuses the whole scaffold: a **handover doc** — a file in the skil
 
 ## The Template
 
-[SKILL Template](assets/SKILL-template.md) is the fill-in skeleton for the draft — the scaffold with every part annotated, the steps preamble baked in verbatim, and the error step shipped as real text.
+[SKILL Template](assets/SKILL-template.md) is the fill-in skeleton for the draft — the scaffold with every part annotated and the steps preamble baked in verbatim; the prebuilt error and success blocks live in [Step Functions](references/step-functions.md).
 
 ## Conventions Digest
 
@@ -87,9 +87,9 @@ Work out with the user, from `$ARGUMENTS` and the conversation:
 
 - **Purpose** — the one- or two-line statement of what the document is for.
 - **Mode** — a new build, or a conversion of an existing document (the path to it).
-- **Invocation surface** — model-invoked, user-invoked, or executor-only; this shapes the description and frontmatter.
+- **Invocation surface** — model-invoked, user-invoked, or executor-only (an executor document: invoked only by another agent as part of a fixed pipeline); this shapes the description and frontmatter.
 - **Scope** — what the skill covers and what it deliberately refuses.
-- **Destination** — where the finished document lives.
+- **Destination** — where the finished document lives. In conversion mode, capture the source path and the output path separately where they differ (the common case: they are the same path).
 - **Source material** — the reference terrain: existing documents, commands, formats, examples, live state the steps will need.
 
 ## +Collect References
@@ -187,14 +187,15 @@ Write the document from the approved parts.
 
 #### Step finished when these are true:
 
-- the draft is written to the destination
+- the draft is written to the destination — in conversion mode, to the sibling draft path
+- every handover doc the map calls for is written and cited from its parent step
 - every template placeholder is resolved
 - no comment scaffolding remains
 
 ### Write:
 
-Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. Write every step's conditions per [Condition Writing](references/condition-writing.md). Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Keep the steps preamble verbatim; keep the error step. Write each handover doc the map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps —
-and cite it from its parent step in the handover citation form, `[Name — Handover](name-handover.md)`.
+Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. In conversion mode the copy target is the sibling draft path (`<destination>.draft.md`) — never overwrite the source before acceptance; it stays intact as source material until the build completes. Write every step's conditions per [Condition Writing](references/condition-writing.md). Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Copy the prebuilt error and success blocks from that same reference into the draft — the error step whole and mandatory, the success exit adjusted to the map. Keep the steps preamble verbatim. Write each handover doc the
+map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps — and cite it from its parent step in the handover citation form, `[Name — Handover](name-handover.md)`.
 
 ## +Review
 
@@ -202,13 +203,15 @@ Walk the draft as a cold reader before the user sees it.
 
 #### Start this step when these are true:
 
-- a complete draft exists
+- a settled draft exists
+- the draft is not contended
 
 #### Step finished when these are true:
 
 - every scenario routes cleanly
 - every Conventions Digest test passes
-- any approved fix the scenario-walk found is folded into the draft
+- every fix the walk found is folded into the draft
+- the independent review has been taken and its findings folded in, declined by the user, or recorded unavailable
 
 ### Scenario-Walk:
 
@@ -226,17 +229,18 @@ Present the reviewed draft for the final gate and hand it over.
 
 #### Start this step when these are true:
 
-- the draft has passed the scenario-walk
+- the draft is settled after passing the scenario-walk
 
 #### Step finished when these are true:
 
 - the user accepts the document
 - the document still passes the scenario-walk with the user's edits folded in
+- in conversion mode, the accepted document stands at the destination, and the sibling draft's removal command has been presented to the user
 - the build is complete
 
 ### Present:
 
-Show the user the draft with a short summary — the steps, the reference placements, the invariants, and any judgment calls made along the way. Iterate their edits directly into the document.
+Show the user the draft with a short summary — the steps, the reference placements, the invariants, and any judgment calls made along the way. Iterate their edits directly into the document. In conversion mode, on acceptance write the draft over the original at the destination, then present a removal command for the sibling file (`rm '<destination>.draft.md'`) for the user to run themselves.
 
 ## +Handle a Problem
 
@@ -259,9 +263,9 @@ Surface anything the other steps don't cover, and decide with the user how to co
 
 ### Surface the Problem:
 
-Tell the user plainly what happened, which phase it arose in, what state the build is in, and what the options are.
+End the build. Tell the user plainly what happened, which phase it arose in, what state the build is in, and what the options are.
 
-Where the problem is a withdrawn approval, claim the remainder: restart from the phase the user chose and revoke every approval after it. Otherwise end the build.
+Where the problem is a withdrawn approval, claim the remainder: restart from the step the user chose and revoke all user approvals after that. Otherwise, end the build.
 
 # --- TERMS ---
 
@@ -270,5 +274,6 @@ Terms used in this skill:
 - **Step Candidate** — A piece of work extracted from the reference terrain or the requirements — ordered actions, conditionals, anything the agent does — awaiting shaping into a step.
 - **Gap** — A reference the document needs but that does not exist yet — named and classified during collection, produced in `+Fill Reference Gaps`.
 - **Mode** — Whether the build creates a new document or converts an existing one.
+- **Executor Document** — A document invoked only by another agent as part of a fixed pipeline (`user-invocable: false`); its description warns off general usage, and its reporting step may fold in the error step's role per the executor exception.
 - **Handover Doc** — A `harness-format: DraftHorse, Handover` document in the skill's root folder, its name ending `-handover`, whose steps a parent step in the main document folds into the run as child steps — the extraction target for heavy, optional, or side-branching work.
 - **Parent Step** — The step in the main document that folds a handover doc in, owns the logic around it, and reads success from the state the handover leaves behind.

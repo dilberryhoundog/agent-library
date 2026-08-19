@@ -4,7 +4,7 @@ How to write the conditions that frame every step. They carry all the routing a 
 
 ## Writing the list
 
-A condition list is implicitly conjunctive — every grouped condition holds. `**AND**` is implicit by just be one of many conditions. Where a step admits genuinely alternative states, close the list and open another with `**OR these are true:**` on its own line between them: each list ANDs within itself, and the list groups OR against each other.
+A condition list is implicitly conjunctive — every grouped condition holds, and the connective is never written; `**AND**` appearing in a list is a defect. Where a step admits genuinely alternative states, close the list and open another with `**OR these are true:**` on its own line between them: each list ANDs within itself, and the list groups OR against each other.
 
 ```
 #### Start this step when these are true:

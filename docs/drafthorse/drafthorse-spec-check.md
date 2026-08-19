@@ -163,6 +163,8 @@ VERDICT: pass | revise
 
 SCENARIO-WALK: <the runs walked and what happened — where routing held, where it broke>
 
+SET-LEVEL: <one line per set-level check — pass, or the finding it produced>
+
 FINDINGS:
 1. [<check name>] <location: file, section heading or quoted fragment>
    Problem: <what fails the check, in one or two sentences>
@@ -182,7 +184,6 @@ Resolve the document under review and gather everything it cites.
 #### Start this step when these are true:
 
 - a review has been requested
-- the document set is not yet assembled
 
 #### Step finished when these are true:
 
@@ -210,7 +211,6 @@ Lint the structure: scaffold order, notation form, frontmatter fit.
 #### Start this step when these are true:
 
 - the document set is assembled
-- the frame has not been checked
 
 #### Step finished when these are true:
 
@@ -230,7 +230,6 @@ Judge the References utility: placement, citation, and hidden work.
 #### Start this step when these are true:
 
 - the document set is assembled
-- the references (inline and external) have not been audited
 
 #### Step finished when these are true:
 
@@ -251,18 +250,22 @@ Judge every step's contract and shape against the condition and step-shape check
 #### Start this step when these are true:
 
 - the document set is assembled
-- the steps have not been audited
 
 #### Step finished when these are true:
 
 - every test in [Condition Checks](#condition-checks) has been applied to every step, including the exit steps and the error step
 - every test in [Step-Shape Checks](#step-shape-checks) has been applied to every step, including the exit steps and the error step
 - every test in [Step Function Checks](#step-function-checks) has been applied to every declared function, and every step has been swept for an undeclared one
+- every set-level check has an explicit recorded verdict
 - each failure is recorded as a finding
 
 ### Test Each Step:
 
-Take the steps one at a time: self-description, declared function where one is claimed, start condition (state terms), finished condition (checkable, exhaustive, own-step-only, every outcome stated, compound if a gate), invariants (behaviour-changing, correctly scoped), standalone test, sizing smells. Then judge the set as a whole: negative space claimed, exit steps present and stating their termination, half-applied state bailed to the user rather than re-run, error step whole or explicitly folded, and the [Document-Wide Checks](#document-wide-checks) swept over everything.
+Take the steps one at a time: self-description, declared function where one is claimed, start condition (state terms), finished condition (checkable, exhaustive, own-step-only, every outcome stated, compound if a gate), invariants (behaviour-changing, correctly scoped), standalone test, sizing smells.
+
+#### Judge the set:
+
+Sweep each set-level check over the step set as a whole: negative space claimed; exit steps present and stating their termination; half-applied state bailed rather than resumed; error step whole or explicitly folded; the [Document-Wide Checks](#document-wide-checks) over everything. Record an explicit verdict for each set-level check — pass, or the finding it produced. Silence is not a pass.
 
 ## +Audit the Handovers
 
@@ -274,7 +277,6 @@ Walk every handover in the set against the handover-specific checks and its pair
 
 - the document set is assembled
 - a handover is present in it — cited by the document, discovered by the `*-handover.md` glob, or the reviewed document is itself a handover
-- the handovers have not been audited
 
 #### Step finished when these are true:
 
@@ -306,7 +308,6 @@ Run the document in the head: every realistic path, watching the in-play set.
 - the references have been audited
 - the steps have been audited
 - the handovers have been audited or none are present
-- no scenario-walk has been completed
 
 #### Step finished when these are true:
 

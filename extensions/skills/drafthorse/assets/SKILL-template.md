@@ -93,50 +93,6 @@ Steps are universal and standalone. Marked `## +<Step Name>`. Work, instructions
 
 <!-- Separate the engagement into distinct sections, if necessary, to help the agent differentiate varied context. -->
 
-## +<Success Exit Step Name>
-
-<!-- The directive — reports the outcome and ends the skill. -->
-
-**Success step** — Resolves the run's done state and exits.
-
-#### Start this step when these are true:
-
-<!-- All the work is finished — stated exhaustively ("every item processed, declined, or reported empty"). -->
-
-- <condition 1>
-
-#### Step finished when these are true:
-
-<!-- The summary is presented, and the run is stated complete. -->
-
-- <condition 1>
-- the skill is complete
-
-### <Report>:
-
-<!-- Summarise the run's outcome for the user. -->
-
-## +Handle a Problem
-
-<!-- The error step — what makes coverage subtractive. Keep the start condition generic. -->
-
-Surface anything the other steps don't cover, and decide with the user how to continue.
-
-**Error step** — Handles recovery and bails.
-
-#### Start this step when these are true:
-
-- something has gone wrong, or a situation has arisen that no other step covers
-
-#### Step finished when these are true:
-
-- the user has been informed of what happened and what state things are now in
-- the user has decided how to continue
-
-### Surface the Problem:
-
-Tell the user plainly what happened, where it arose, what state things are now in (half-applied states also), and what the options are.
-
 # --- TERMS ---
 
 <!-- Glossary for skill-specific terms the steps and references lean on. Title Case names, bolded list-entry form. Delete the section if none. -->
