@@ -26,7 +26,7 @@ The plugin's `templates/` folder is the init payload; setup copies its whole con
 
 ## Copy the Payload
 
-=== dynamic — run from the project root ===
+=== dynamic — run from the project root, on a root with no prior classroom config ===
 
 ```bash
 cp -a "${CLAUDE_PLUGIN_ROOT}/templates/." .
@@ -51,19 +51,20 @@ Lay the project skeleton down at the root.
 #### Start this step when these are true:
 
 - the user's consent to set up a classroom in the current working directory is confirmed
+- no filled classroom config from a prior setup exists at the root
 
 #### Step finished when these are true:
 
 - the payload's whole contents are present at the project root
-- any pre-existing `CLAUDE.md` is preserved rather than overwritten
+- every pre-existing config file is preserved rather than overwritten
 
 #### Step invariants:
 
-**NEVER** overwrite an existing `CLAUDE.md` at the project root — copy everything else, then merge the classroom config block into it.
+**NEVER** overwrite a pre-existing config file at the project root — `CLAUDE.md`, `global-requirements.md`, anything in `students/`, or the `.claude/` rules. Copy only what is absent; merge the classroom config block into an existing `CLAUDE.md`.
 
 ### Copy, Preserving Any Existing Config:
 
-Run the [Copy the Payload](#copy-the-payload) command from the project root; it brings the `templates/` contents (including the hidden `.claude/`) into place. When a `CLAUDE.md` already exists at the root, preserve it: copy everything else, then merge the classroom config block from `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE.md` into it. The [Init Payload](#init-payload) reference names the source and the fallback when `${CLAUDE_PLUGIN_ROOT}` is not substituted.
+On a bare root, run the [Copy the Payload](#copy-the-payload) command from the project root; it brings the `templates/` contents (including the hidden `.claude/`) into place. Where any payload file already exists at the root, copy only the absent pieces instead — never the whole payload over existing files — and merge the classroom config block from `${CLAUDE_PLUGIN_ROOT}/templates/CLAUDE.md` into an existing `CLAUDE.md`. The [Init Payload](#init-payload) reference names the source and the fallback when `${CLAUDE_PLUGIN_ROOT}` is not substituted.
 
 ## +Configure the Project
 

@@ -194,8 +194,8 @@ Write the document from the approved parts.
 
 ### Write:
 
-Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. In conversion mode the copy target is the sibling draft path (`<destination>.draft.md`) — never overwrite the source before acceptance; it stays intact as source material until the build completes. Write every step's conditions per [Condition Writing](references/condition-writing.md). Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Copy the prebuilt error and success blocks from that same reference into the draft — the error step whole and mandatory, the success exit adjusted to the map. Keep the steps preamble verbatim. Write each handover doc the map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps —
-and cite it from its parent step in the handover citation form, `[Name — Handover](name-handover.md)`.
+Copy [SKILL Template](assets/SKILL-template.md) to the destination and fill it: frontmatter per the invocation surface, the purpose statement, the approved invariants, the approved references (placed inline, external, or dynamic as classified), the approved steps in map order. In conversion mode the copy target is the sibling draft path (`<destination>.draft.md`) — never overwrite the source before acceptance; it stays intact as source material until the build completes. Write every step's conditions per [Condition Writing](references/condition-writing.md). Open each step with its directive, and declare its function where one of the shapes in [Step Functions](references/step-functions.md) fits — copy the fixed string, one function, or none for an ordinary working step. Copy the prebuilt error and success blocks from that same reference into the draft — the error step whole and mandatory, the success exit adjusted to the map. Keep the steps preamble verbatim. Write each handover doc the
+map calls for from [HANDOVER Template](assets/HANDOVER-template.md) into the skill's root folder as `<name>-handover.md`, per the deltas in [Step Splitting](references/step-splitting.md) — `harness-format: DraftHorse, Handover` frontmatter, identity paragraph, the handover-variant preamble verbatim, no exit steps — and cite it from its parent step in the handover citation form, `[Name — Handover](name-handover.md)`.
 
 ## +Review
 
@@ -203,7 +203,8 @@ Walk the draft as a cold reader before the user sees it.
 
 #### Start this step when these are true:
 
-- a complete draft exists
+- a settled draft exists
+- the draft is not contended
 
 #### Step finished when these are true:
 
@@ -228,18 +229,18 @@ Present the reviewed draft for the final gate and hand it over.
 
 #### Start this step when these are true:
 
-- the draft has passed the scenario-walk
+- the draft is settled after passing the scenario-walk
 
 #### Step finished when these are true:
 
 - the user accepts the document
 - the document still passes the scenario-walk with the user's edits folded in
-- in conversion mode, the accepted document stands at the destination and no sibling draft remains
+- in conversion mode, the accepted document stands at the destination, and the sibling draft's removal command has been presented to the user
 - the build is complete
 
 ### Present:
 
-Show the user the draft with a short summary — the steps, the reference placements, the invariants, and any judgment calls made along the way. Iterate their edits directly into the document. In conversion mode, on acceptance the draft replaces the original at the destination and the sibling draft file is removed.
+Show the user the draft with a short summary — the steps, the reference placements, the invariants, and any judgment calls made along the way. Iterate their edits directly into the document. In conversion mode, on acceptance write the draft over the original at the destination, then present a removal command for the sibling file (`rm '<destination>.draft.md'`) for the user to run themselves.
 
 ## +Handle a Problem
 
@@ -262,9 +263,9 @@ Surface anything the other steps don't cover, and decide with the user how to co
 
 ### Surface the Problem:
 
-Tell the user plainly what happened, which phase it arose in, what state the build is in, and what the options are.
+End the build. Tell the user plainly what happened, which phase it arose in, what state the build is in, and what the options are.
 
-Where the problem is a withdrawn approval, claim the remainder: restart from the phase the user chose and revoke every approval after it. Otherwise end the build.
+Where the problem is a withdrawn approval, claim the remainder: restart from the step the user chose and revoke all user approvals after that. Otherwise, end the build.
 
 # --- TERMS ---
 

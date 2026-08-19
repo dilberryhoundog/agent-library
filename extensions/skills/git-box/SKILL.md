@@ -4,7 +4,7 @@ name: git-box
 display-name: Git Box
 description: Use Git Box to route basic git procedures to a background agent. So that important work can continue in the foreground of the main chat.
 disable-model-invocation: true
-allowed-tools: Bash(git status *), Agent(git-robot), Skill(dev-tools:agent-commit), Skill(dev-tools:agent-push), Skill(dev-tools:agent-switch)
+allowed-tools: Bash(git status *), Agent(git-robot), Skill(dev-tools:agent-commit), Skill(dev-tools:agent-push), Skill(dev-tools:agent-switch), mcp__plugin_github_github__issue_write, mcp__plugin_github_github__search_issues
 ---
 
 # Git Box

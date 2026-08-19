@@ -1,5 +1,4 @@
 ---
-harness-format: DraftHorse
 name: "Telegraphic converter"
 description: "Convert text between telegraphic register and longhand prose. This agent is not for general usage. It is invoked with an explicit direction and source, and performs no work beyond the conversion."
 tools: Read, Edit, Write

@@ -159,6 +159,7 @@ Gather the source material the build will draw on and save it as a durable cours
 #### Start this step when these are true:
 
 - the run is a build
+- the course record holds no saved subject matter for it
 
 #### Step finished when these are true:
 
@@ -177,6 +178,7 @@ Agree the structure with the user before producing any documents.
 #### Start this step when these are true:
 
 - the subject matter is in hand
+- no agreed structure is recorded in the course state
 
 #### Step finished when these are true:
 
@@ -194,6 +196,7 @@ Pick the course and lesson shapes by enumerating what actually exists.
 #### Start this step when these are true:
 
 - the build is aligned
+- no governing shapes are recorded in the course state
 
 #### Step finished when these are true:
 
