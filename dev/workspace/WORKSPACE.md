@@ -6,23 +6,25 @@ Branch workspace context for Claude and humans. Not read by the dev-workspace sc
 
 ## Branch
 
-**Name:**
-**Started:**
+**Name:** artifacts
+**Started:** 2026-08-19
 **Status:**
 
-- [ ] In Progress
+- [x] In Progress
 - [ ] Discard (workspace and branch abandoned)
 - [ ] Complete (ready to merge)
 
+Long-lived branch. Stays open across sessions; merges to main in increments rather than closing out.
+
 ## Purpose
 
-%% Claude: write a brief purpose statement when creating the workspace %%
+Explore and build Claude Code Artifacts — published HTML and Markdown pages, their design patterns, runtime capabilities, and any skills, agents, or plugin assets this repository grows to support them. Assets land in `extensions/artifacts/`.
 
 ## Workflow
 
 - [ ] Quick (direct implementation)
 - [ ] Single plan (plan once, execute)
-- [ ] Multi-stage plan (iterative planning)
+- [x] Multi-stage plan (iterative planning)
 
 ## Track Issues
 
