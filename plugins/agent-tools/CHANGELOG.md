@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-08-21
+
+### Added
+
+- Conversion mode: convert an existing document to the DraftHorse spec, writing to a sibling `.draft.md` path and preserving the source until accepted.
+- "Executor document" defined as a term with its own invocation-surface note.
+- Step-shape examples added to the drafthorse reference; the skill's fill-in template reduced to a skeleton, with prebuilt step blocks (Success, Error, Looping) moved to a new `references/step-functions.md`.
+- `drafthorse-saddler` audit report gains a `SET-LEVEL` line alongside `VERDICT`/`SCENARIO-WALK`/`FINDINGS`.
+
+### Fixed
+
+- Audit repairs applied across the corpus swept to the upgraded step-anatomy spec (review decisions D8, D11, D12, D13, D16, D18).
+
 ## [0.6.0] - 2026-08-19
 
 ### Added
