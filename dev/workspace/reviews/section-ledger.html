@@ -1,0 +1,993 @@
+<meta charset="utf-8">
+<title>Section Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+	:root {
+		--paper:        #F4F6F6;
+		--surface:      #FFFFFF;
+		--surface-sunk: #ECF0EF;
+		--ink:          #14191A;
+		--ink-soft:     #4E5B5C;
+		--ink-faint:    #78878A;
+		--rule:         #D6DEDD;
+		--accent:       #0D6B64;
+		--accent-soft:  #E2EFED;
+		--warn:         #8A5B00;
+		--warn-soft:    #F6EBD6;
+		--stop:         #93332A;
+		--stop-soft:    #F7E5E2;
+		--shadow:       0 1px 2px rgba(20, 25, 26, .05), 0 8px 24px rgba(20, 25, 26, .05);
+
+		--serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+		--disp:  Bitter, "Source Serif 4", Georgia, serif;
+		--mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--paper:        #0E1313;
+			--surface:      #161C1C;
+			--surface-sunk: #1D2525;
+			--ink:          #E7EDEC;
+			--ink-soft:     #A9B6B5;
+			--ink-faint:    #7D8B8A;
+			--rule:         #293333;
+			--accent:       #59C5B9;
+			--accent-soft:  #16302E;
+			--warn:         #D9A44F;
+			--warn-soft:    #2E2617;
+			--stop:         #E08277;
+			--stop-soft:    #331C19;
+			--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+		}
+	}
+	:root[data-theme="dark"] {
+		--paper:        #0E1313;
+		--surface:      #161C1C;
+		--surface-sunk: #1D2525;
+		--ink:          #E7EDEC;
+		--ink-soft:     #A9B6B5;
+		--ink-faint:    #7D8B8A;
+		--rule:         #293333;
+		--accent:       #59C5B9;
+		--accent-soft:  #16302E;
+		--warn:         #D9A44F;
+		--warn-soft:    #2E2617;
+		--stop:         #E08277;
+		--stop-soft:    #331C19;
+		--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+	}
+
+	* { box-sizing: border-box; }
+
+	body {
+		margin:                 0;
+		background:             var(--paper);
+		color:                  var(--ink);
+		font-family:            var(--serif);
+		font-size:              17px;
+		line-height:            1.6;
+		-webkit-font-smoothing: antialiased;
+	}
+
+	h1, h2, h3, h4, h5 { font-family: var(--disp); text-wrap: balance; }
+	code, .mono, kbd { font-family: var(--mono); }
+	a { color: var(--accent); }
+	code { font-size: .87em; background: var(--surface-sunk); padding: 1px 5px; border-radius: 2px; }
+
+	.shell {
+		display:               grid;
+		grid-template-columns: 1fr;
+		max-width:             1180px;
+		margin:                0 auto;
+		padding:               0 20px 96px;
+	}
+	@media (min-width: 1040px) {
+		.shell { grid-template-columns: 224px minmax(0, 1fr); gap: 56px; padding-right: 32px; }
+	}
+
+	/* ---------- masthead ---------- */
+
+	.masthead {
+		grid-column:   1 / -1;
+		border-bottom: 1px solid var(--rule);
+		padding:       40px 0 26px;
+		margin-bottom: 40px;
+	}
+	.eyebrow {
+		font-family:    var(--mono);
+		font-size:      12px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		display:        flex;
+		flex-wrap:      wrap;
+		gap:            8px 18px;
+		align-items:    center;
+	}
+	h1 {
+		font-size:      clamp(30px, 4.4vw, 46px);
+		line-height:    1.1;
+		font-weight:    600;
+		margin:         16px 0 10px;
+		letter-spacing: -.015em;
+	}
+	.standfirst { max-width: 62ch; color: var(--ink-soft); font-size: 19px; margin: 0; }
+	.tally {
+		display:    flex;
+		flex-wrap:  wrap;
+		gap:        10px 28px;
+		margin-top: 22px;
+		font-size:  14px;
+		color:      var(--ink-soft);
+	}
+	.tally b { color: var(--ink); font-weight: 600; }
+
+	/* ---------- rail ---------- */
+
+	.rail { display: none; }
+	@media (min-width: 1040px) {
+		.rail {
+			display:        block;
+			position:       sticky;
+			top:            24px;
+			align-self:     start;
+			max-height:     calc(100vh - 48px);
+			overflow-y:     auto;
+			padding-bottom: 20px;
+		}
+	}
+	.rail h4 {
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		margin:         22px 0 10px;
+		font-weight:    500;
+	}
+	.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+	.rail a {
+		text-decoration: none;
+		color:           var(--ink-soft);
+		font-size:       14.5px;
+		line-height:     1.35;
+		display:         block;
+		border-left:     2px solid var(--rule);
+		padding-left:    10px;
+	}
+	.rail a:hover, .rail a:focus-visible { color: var(--accent); border-left-color: var(--accent); }
+
+	/* ---------- main ---------- */
+
+	main { min-width: 0; }
+	section { margin-bottom: 64px; }
+
+	.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 10px; }
+	.sec-head h2 { font-size: 25px; margin: 0; font-weight: 600; letter-spacing: -.01em; }
+	.sec-head .count { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+	.sec-intro { color: var(--ink-soft); max-width: 68ch; margin: 14px 0 30px; }
+
+	.headline {
+		background:    var(--accent-soft);
+		border:        1px solid var(--accent);
+		border-radius: 3px;
+		padding:       18px 22px;
+		margin-bottom: 34px;
+	}
+	.headline h3 { font-size: 18px; margin: 0 0 8px; color: var(--accent); }
+	.headline p { margin: 0; max-width: 68ch; }
+
+	/* ---------- entries ---------- */
+
+	.entry {
+		background:    var(--surface);
+		border:        1px solid var(--rule);
+		border-left:   3px solid var(--rule);
+		border-radius: 3px;
+		box-shadow:    var(--shadow);
+		padding:       22px 24px;
+		margin-bottom: 22px;
+	}
+	.entry.add       { border-left-color: var(--accent); }
+	.entry.cut       { border-left-color: var(--stop); }
+	.entry.merge     { border-left-color: var(--warn); }
+	.entry.withdrawn { border-left-color: var(--ink-faint); background: var(--surface-sunk); }
+	.entry.withdrawn h3 { color: var(--ink-soft); }
+	.entry > *:first-child { margin-top: 0; }
+	.entry h3 { font-size: 19.5px; margin: 0 0 8px; font-weight: 600; line-height: 1.3; }
+	.entry p { max-width: 68ch; }
+	.entry p:last-child { margin-bottom: 0; }
+	.entry ul { max-width: 68ch; padding-left: 20px; }
+	.entry li { margin-bottom: 6px; }
+
+	.chiprow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+	.chip {
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .08em;
+		text-transform: uppercase;
+		padding:        3px 8px;
+		border-radius:  2px;
+		background:     var(--surface-sunk);
+		color:          var(--ink-soft);
+		white-space:    nowrap;
+	}
+	.chip.id     { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); }
+	.chip.add    { background: var(--accent-soft); color: var(--accent); }
+	.chip.cut    { background: var(--stop-soft); color: var(--stop); }
+	.chip.merge  { background: var(--warn-soft); color: var(--warn); }
+	.chip.dead   { background: transparent; border: 1px dashed var(--rule); color: var(--ink-faint); text-decoration: line-through; }
+
+	blockquote {
+		margin:      14px 0;
+		padding:     4px 0 4px 16px;
+		border-left: 2px solid var(--accent);
+		color:       var(--ink-soft);
+		font-style:  italic;
+		max-width:   66ch;
+	}
+	blockquote code { font-style: normal; }
+
+	.delta { display: grid; gap: 10px; margin: 16px 0; }
+	@media (min-width: 720px) { .delta { grid-template-columns: 1fr 1fr; } }
+	.delta > div { border: 1px solid var(--rule); border-radius: 2px; padding: 12px 14px; background: var(--surface-sunk); }
+	.delta h5 {
+		font-family:    var(--mono);
+		font-size:      10.5px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		margin:         0 0 8px;
+		font-weight:    500;
+		color:          var(--ink-faint);
+	}
+	.delta .now  { border-left: 2px solid var(--stop); }
+	.delta .next { border-left: 2px solid var(--accent); }
+	.delta p { margin: 0; font-size: 15px; }
+
+	.sample {
+		font-family: var(--mono);
+		font-size:   12.5px;
+		line-height: 1.55;
+		color:       var(--ink-faint);
+		background:  var(--surface-sunk);
+		border-left: 2px solid var(--rule);
+		padding:     10px 12px;
+		margin:      14px 0;
+		overflow-x:  auto;
+		white-space: pre;
+	}
+
+	/* ---------- section map ---------- */
+
+	.map { display: grid; gap: 16px; margin-top: 22px; }
+	@media (min-width: 760px) { .map { grid-template-columns: repeat(3, 1fr); } }
+	.group {
+		border:        1px solid var(--rule);
+		border-radius: 3px;
+		background:    var(--surface);
+		box-shadow:    var(--shadow);
+		padding:       16px 16px 12px;
+	}
+	.group h4 {
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		margin:         0 0 4px;
+		font-weight:    500;
+	}
+	.group .gloss { font-size: 14px; color: var(--ink-soft); margin: 0 0 14px; }
+	.group ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+	.group li {
+		display:       flex;
+		align-items:   baseline;
+		gap:           9px;
+		font-size:     15.5px;
+		border-bottom: 1px solid var(--rule);
+		padding-bottom: 7px;
+	}
+	.group li:last-child { border-bottom: 0; padding-bottom: 0; }
+	.group li .name { font-weight: 600; }
+	.state {
+		font-family:    var(--mono);
+		font-size:      9.5px;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+		margin-left:    auto;
+		padding:        2px 6px;
+		border-radius:  2px;
+		white-space:    nowrap;
+	}
+	.state.new     { background: var(--accent-soft); color: var(--accent); }
+	.state.changed { background: var(--warn-soft); color: var(--warn); }
+	.state.gone    { background: var(--stop-soft); color: var(--stop); }
+	.state.same    { background: var(--surface-sunk); color: var(--ink-faint); }
+
+	/* ---------- process chain ---------- */
+
+	.chain { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin: 16px 0; }
+	.stage {
+		display:        inline-flex;
+		align-items:    baseline;
+		gap:            7px;
+		font-family:    var(--mono);
+		font-size:      12px;
+		letter-spacing: .04em;
+		border:         1px solid var(--accent);
+		background:     var(--accent-soft);
+		color:          var(--accent);
+		border-radius:  2px;
+		padding:        6px 10px;
+	}
+	.stage .n { font-size: 10px; opacity: .7; font-variant-numeric: tabular-nums; }
+	.arrow { color: var(--ink-faint); font-family: var(--mono); font-size: 13px; }
+
+	.palette { display: grid; gap: 14px; margin: 18px 0 0; }
+	@media (min-width: 700px) { .palette { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); } }
+	.pal h5 {
+		font-family:    var(--mono);
+		font-size:      10.5px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		margin:         0 0 9px;
+		font-weight:    500;
+	}
+	.pal .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+	.opt {
+		font-family:    var(--mono);
+		font-size:      11.5px;
+		letter-spacing: .04em;
+		border:         1px solid var(--rule);
+		background:     var(--surface);
+		color:          var(--ink-soft);
+		border-radius:  2px;
+		padding:        4px 9px;
+	}
+
+	/* ---------- table ---------- */
+
+	.ledger { margin: 16px 0; overflow-x: auto; }
+	.ledger table { border-collapse: collapse; font-size: 14.5px; min-width: 100%; }
+	.ledger th, .ledger td { text-align: left; padding: 8px 18px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+	.ledger th {
+		font-family:    var(--mono);
+		font-size:      10.5px;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		font-weight:    500;
+	}
+	.ledger td.k { font-family: var(--mono); font-size: 13px; white-space: nowrap; color: var(--accent); }
+
+	/* ---------- questions ---------- */
+
+	.q { border-top: 1px solid var(--rule); padding-top: 16px; margin-top: 16px; }
+	.q:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+	.q h4 { font-size: 17px; margin: 0 0 6px; font-weight: 600; }
+	.q p { margin: 0; max-width: 68ch; color: var(--ink-soft); }
+	.q .rec { color: var(--ink); margin-top: 8px; }
+	.q .rec b { color: var(--accent); }
+
+	/* ---------- response surface ---------- */
+
+	.respond {
+		margin-top:  18px;
+		border-top:  1px dashed var(--rule);
+		padding-top: 14px;
+	}
+	.verdicts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+	.verdicts label {
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .06em;
+		text-transform: uppercase;
+		border:         1px solid var(--rule);
+		border-radius:  2px;
+		padding:        4px 10px;
+		cursor:         pointer;
+		color:          var(--ink-soft);
+		user-select:    none;
+		background:     var(--surface);
+	}
+	.verdicts input { position: absolute; opacity: 0; width: 0; height: 0; }
+	.verdicts label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+	.verdicts label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+	textarea {
+		width:         100%;
+		min-height:    68px;
+		resize:        vertical;
+		background:    var(--surface-sunk);
+		color:         var(--ink);
+		border:        1px solid var(--rule);
+		border-radius: 2px;
+		padding:       10px 12px;
+		font-family:   var(--serif);
+		font-size:     15.5px;
+		line-height:   1.5;
+	}
+	textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+	textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+
+	.loose { border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); padding: 16px 18px; margin-top: 22px; box-shadow: var(--shadow); }
+	.loose .lab {
+		display:        block;
+		font-family:    var(--mono);
+		font-size:      10.5px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		margin-bottom:  9px;
+		font-weight:    500;
+	}
+
+	/* ---------- actions ---------- */
+
+	.actions {
+		position:    sticky;
+		bottom:      0;
+		background:  linear-gradient(to top, var(--paper) 62%, transparent);
+		padding:     22px 0 20px;
+		display:     flex;
+		flex-wrap:   wrap;
+		gap:         10px;
+		align-items: center;
+		z-index:     5;
+	}
+	button {
+		font-family:    var(--mono);
+		font-size:      12px;
+		letter-spacing: .07em;
+		text-transform: uppercase;
+		padding:        10px 16px;
+		border-radius:  2px;
+		border:         1px solid var(--accent);
+		background:     var(--accent);
+		color:          var(--paper);
+		cursor:         pointer;
+	}
+	button.ghost { background: transparent; color: var(--accent); }
+	button:hover { filter: brightness(1.08); }
+	button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+	.status { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+
+	#out {
+		width:       100%;
+		min-height:  300px;
+		font-family: var(--mono);
+		font-size:   12.5px;
+		line-height: 1.5;
+		margin-top:  12px;
+	}
+	#outwrap[hidden] { display: none; }
+
+	footer {
+		grid-column: 1 / -1;
+		border-top:  1px solid var(--rule);
+		padding-top: 18px;
+		color:       var(--ink-faint);
+		font-size:   14px;
+	}
+	@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="shell">
+
+	<header class="masthead">
+		<div class="eyebrow">
+			<span>Prompt engine · section model</span>
+			<span>·</span>
+			<span>rev 2, after responses</span>
+			<span>·</span>
+			<span>branch <code>artifacts</code></span>
+		</div>
+		<h1>Section Ledger</h1>
+		<p class="standfirst">All six additions land, and a seventh arrives from your response to the fifth. The cut is withdrawn — it rested on sections competing for one prompt, and they do not. Sixteen sections, two groups, three new field kinds.</p>
+		<div class="tally">
+			<span><b>Sections now</b> 10</span>
+			<span><b>Added</b> 6</span>
+			<span><b>Cut</b> 0</span>
+			<span><b>Reworked</b> 2</span>
+			<span><b>Net</b> 16</span>
+			<span><b>New field kinds</b> 3</span>
+		</div>
+	</header>
+
+	<nav class="rail" aria-label="Contents">
+		<h4>Findings</h4>
+		<ol>
+			<li><a href="#e1">1 · Problem earns a section</a></li>
+			<li><a href="#e2">2 · The cut, withdrawn</a></li>
+			<li><a href="#e3">3 · Goals vs acceptance</a></li>
+			<li><a href="#e4">4 · Architecture is prescriptive</a></li>
+			<li><a href="#e5">5 · Skills, and Recipes</a></li>
+			<li><a href="#e6">6 · Agent teams</a></li>
+			<li><a href="#e7">7 · Process chooser</a></li>
+			<li><a href="#e8">8 · Write and Choose</a></li>
+			<li><a href="#e9">9 · Two orders, not one</a></li>
+		</ol>
+		<h4>Proposed</h4>
+		<ol>
+			<li><a href="#map">Section map</a></li>
+			<li><a href="#stages">Stage vocabulary</a></li>
+			<li><a href="#kinds">New field kinds</a></li>
+			<li><a href="#questions">Open questions</a></li>
+		</ol>
+	</nav>
+
+	<main>
+
+		<section id="findings">
+			<div class="sec-head">
+				<h2>Findings</h2>
+				<span class="count">9 entries</span>
+			</div>
+
+			<div class="headline">
+				<h3>Where it lands, rev 2</h3>
+				<p><code>problem</code>, <code>architecture</code>, <code>skills</code>, <code>agents</code>, <code>process</code>, and now <code>recipes</code> all go in. <code>goals</code> stays. Rev 1 argued for cutting it on the premise that overlapping sections compete for one prompt — they do not. The page is a menu you draw from, so two sections covering adjacent ground is coverage, not duplication. That premise was doing quiet work under three findings; each is corrected below.</p>
+			</div>
+
+			<article class="entry add" id="e1">
+				<div class="chiprow"><span class="chip id">01</span><span class="chip add">Add</span><span class="chip">problem</span></div>
+				<h3>Problem earns a section, on one condition</h3>
+				<p>Task is an imperative — <i>add a dry-run flag</i>. Problem is a symptom and its cost — <i>people run sync blind and find out what it restored afterwards</i>. Those are genuinely different inputs, and the second is the one that lets an agent push back on the first. Without it, a wrong Task is executed faithfully.</p>
+				<p>The condition stands, but it is smaller than rev 1 made it. Sections are optional and you fill the ones you want — some sessions open with a task, others open with a symptom and no proposed fix. The blurbs still need to keep the two apart so that whichever one you reach for, you know it is the right one.</p>
+				<div class="delta">
+					<div class="now"><h5>Reads interchangeable</h5><p>"Describe the problem you are solving."</p></div>
+					<div class="next"><h5>Reads distinct</h5><p>"What is happening now, who it costs, and how you noticed. No proposed fix — that is Task."</p></div>
+				</div>
+				<p>Output order: Task first, Problem second when both are filled. An agent anchors hardest on what it reads first, and that should be the instruction rather than the backstory. When only Problem is filled it lands first by default, which is the right behaviour for a session that opens with a symptom.</p>
+			</article>
+
+			<article class="entry withdrawn" id="e2">
+				<div class="chiprow"><span class="chip id">02</span><span class="chip dead">Cut</span><span class="chip">Withdrawn</span><span class="chip">goals</span></div>
+				<h3>Adding Problem is what kills Goals</h3>
+				<p>Withdrawn. The argument assumed every section competes for room in one prompt, so two sections covering adjacent ground meant the emitted text would say the same thing twice. That is not how the page works — sections are optional, you fill what the session needs, and a page holding both Problem and Goals costs a tile rather than a repetition.</p>
+				<p>The failure mode I was guarding against does not survive the correction either. Three fields inviting the same sentence is only a problem if you are obliged to fill all three. You are not.</p>
+				<p>Goals stays, unchanged, and earns its keep on exactly the larger sessions where you want the outcome stated separately from the pain and separately from the test.</p>
+			</article>
+
+			<article class="entry merge" id="e3">
+				<div class="chiprow"><span class="chip id">03</span><span class="chip merge">Rework</span><span class="chip">verify</span></div>
+				<h3>Goals and acceptance criteria are not the same thing — but only one of them belongs here</h3>
+				<p>Three distinct ideas hide in the current wording, and separating them settles the question:</p>
+				<ul>
+					<li><b>Goal</b> — the outcome, in prose. Not falsifiable on its own. <i>People should see what sync will restore before it runs.</i></li>
+					<li><b>Acceptance criterion</b> — binary, checkable, no judgement needed. <i>The flag writes zero bytes.</i></li>
+					<li><b>Verification</b> — the procedure that produces the evidence. <i>Run it against a dirty tree, paste the output.</i></li>
+				</ul>
+				<p>So: not the same thing, and all three stay. What changes is only which section holds which — right now Goals is labelled "Criteria" and blurbed as success criteria, which points its field at the wrong one of the three.</p>
+				<div class="delta">
+					<div class="now"><h5>Now — Goals wearing Verification's label</h5><p><code>goals.items</code> "Criteria", blurbed <i>"Success criteria. The agent checks its own work against these."</i></p></div>
+					<div class="next"><h5>Next — each field says what it is</h5><p><code>goals.items</code> "Outcomes" · <code>verify.criteria</code> "Acceptance criteria" · <code>verify.gates</code> · <code>verify.items</code> "How to check"</p></div>
+				</div>
+				<p>Goals keeps its list widget and gets a blurb about outcomes rather than criteria. Verification gains the criteria field it was already describing. No section moves, no section goes.</p>
+			</article>
+
+			<article class="entry add" id="e4">
+				<div class="chiprow"><span class="chip id">04</span><span class="chip add">Add</span><span class="chip">architecture</span><span class="chip merge">reading corrected</span></div>
+				<h3>Architecture splits cleanly from Output — and it is prescriptive, not descriptive</h3>
+				<p>Output currently carries <code>stack</code>, which does not belong to it. Output describes <b>the reply</b>: what comes back and how much prose wraps it. Architecture prescribes <b>the build</b>: what to use, so the agent stops guessing. That last word settles the ambiguity rev 1 left open — this is not a description of what exists, it is an instruction about what to reach for.</p>
+				<p>The shift changes the fields. A descriptive section would ask you to survey the codebase; a prescriptive one gives you lists to pick from, because you already know what you want used.</p>
+				<div class="ledger">
+					<table>
+						<thead><tr><th>Section</th><th>Answers</th><th>Fields</th></tr></thead>
+						<tbody>
+							<tr><td class="k">architecture</td><td>What should this be built with?</td><td>Language / runtime · Framework &amp; libraries · Storage &amp; data shape · Patterns to follow · Integration points · Free-text notes</td></tr>
+							<tr><td class="k">output</td><td>What lands in my terminal?</td><td>Deliverable · Depth</td></tr>
+						</tbody>
+					</table>
+				</div>
+				<p>Every field but the last is picks-plus-free-text, so the common case is four clicks and the uncommon one still has somewhere to go. <i>Propose an architecture</i> remains a Deliverable value in Output, where it does not collide with this.</p>
+			</article>
+
+			<article class="entry add" id="e5">
+				<div class="chiprow"><span class="chip id">05</span><span class="chip add">Add</span><span class="chip">skills</span><span class="chip add">recipes</span></div>
+				<h3>Skills chooser — the widget is easy, the list is the problem</h3>
+				<p>Grouped multi-select, one group per plugin. Emit invocations rather than names, because the target session acts on the slash form:</p>
+				<div class="sample">## Skills
+
+- Read <code>markdown</code> before drafting the document
+- Run <code>/dev-tools:versioning</code> to cut the release</div>
+				<p>The real question is where the list comes from. A local HTML file cannot read your installed plugins, so the options are hand-maintained in the JSON block and will drift the first time you add a plugin. Two ways out, both cheap:</p>
+				<ul>
+					<li><b>Regenerate on demand</b> — a small script walks <code>plugins/</code> and <code>extensions/skills/</code>, prints a JSON fragment, you paste it. Drift becomes a deliberate refresh rather than a slow rot.</li>
+					<li><b>Free-text escape</b> — a "other skill" text row alongside the chips, so an unlisted skill never blocks you.</li>
+				</ul>
+				<p>Ship both — you called hand-maintained, and the text row is what makes that safe. The chips cover the skills you reach for weekly; the text row covers everything else.</p>
+
+				<h3 style="margin-top:26px">Omakase prompts are a separate section, and the refactor is smaller than it looks</h3>
+				<p>A skill and a recipe are not the same mechanism. Picking <code>markdown</code> emits a reference the agent resolves on its end. A recipe emits its own prose verbatim — the text <i>is</i> the payload. Putting them in one section means one widget doing two jobs and a chip whose behaviour you cannot predict from looking at it.</p>
+				<p>So: <code>recipes</code>, its own tile. Read-only blocks you toggle on. The layout problem you sensed is real but narrow — a recipe's whole value is its wording, so you have to be able to read it before enabling it. A chip cannot show a paragraph. The section page shows each recipe as a card with its text visible in full, monospace, unselectable, and a toggle in the corner. That is a new field kind and no change to anything around it.</p>
+				<p>A starter set worth having, drawn from what this repository already asks of agents:</p>
+				<div class="ledger">
+					<table>
+						<thead><tr><th>Recipe</th><th>Does</th><th>Position</th></tr></thead>
+						<tbody>
+							<tr><td class="k">Update this tool</td><td>Open <code>prompt-engine.html</code>, fold in the state of play, keep the JSON block hand-editable</td><td>first</td></tr>
+							<tr><td class="k">Plan before touching</td><td>Produce the plan, stop, wait for approval</td><td>first</td></tr>
+							<tr><td class="k">Show the diff</td><td>Present changes for review before writing them</td><td>last</td></tr>
+							<tr><td class="k">Workspace protocol</td><td>Sync, commit workspace files, archive, push — the dev-workspace state rules</td><td>last</td></tr>
+							<tr><td class="k">Durable document</td><td>Agent-agnostic writing: no session context, no negative mirrors, no no-ops</td><td>last</td></tr>
+							<tr><td class="k">Telegraphic reply</td><td>Condensed register, function words dropped, one claim per sentence</td><td>last</td></tr>
+						</tbody>
+					</table>
+				</div>
+				<p>The position column is what makes <b>Update this tool</b> work without a preset system. That recipe is effectively a whole prompt — you would toggle it and leave every other section blank. Since empty sections already vanish, the emitted text is just the recipe, sitting first. No mode switch, no form that replaces the form. Each recipe declares <code>first</code> or <code>last</code> in the JSON and the renderer honours it.</p>
+				<p>One consequence to accept deliberately: recipes are the only place where the page ships prose you did not write. Keep the texts short enough to read in one glance, or the read-only card becomes a wall you toggle without reading — which is the failure this section exists to avoid.</p>
+			</article>
+
+			<article class="entry add" id="e6">
+				<div class="chiprow"><span class="chip id">06</span><span class="chip add">Add</span><span class="chip">agents</span></div>
+				<h3>Agent teams is two fields, not one — roster and shape</h3>
+				<p>"Which agents" and "how they run" are independent choices, and picking only the first produces a prompt that reads as a list of names with no instruction attached.</p>
+				<div class="delta">
+					<div class="next"><h5>Roster — grouped multi</h5><p>Explore · Plan · general-purpose · doc-reviewer · drafthorse-saddler · breaking-change-detector · git-robot · course-researcher</p></div>
+					<div class="next"><h5>Shape — single select</h5><p>Solo · Parallel fan-out · Pipeline · Judge panel · Adversarial verify</p></div>
+				</div>
+				<p>The shape vocabulary is worth taking seriously — those five are the orchestration patterns that actually differ in outcome, and naming one tells the agent more than naming three subagents does.</p>
+				<p>One caveat to put in the blurb: this section only pays off when the receiving session can spawn agents. Emitting nothing when empty already handles the rest.</p>
+			</article>
+
+			<article class="entry add" id="e7">
+				<div class="chiprow"><span class="chip id">07</span><span class="chip add">Add</span><span class="chip">process</span><span class="chip merge">largest build</span></div>
+				<h3>Process chooser changes what the page is for</h3>
+				<p>Every other section describes the work. Process describes <b>the run</b> — it turns a paragraph into a sequence with checkpoints in it. For anything longer than one edit it is the highest-leverage field on the page, and <code>User Approval</code> sitting at position four is the whole reason why.</p>
+				<p>This is also the one place where numbering is not decoration. Order carries meaning here, so the emitted list is numbered and the widget shows positions:</p>
+				<div class="chain">
+					<span class="stage"><span class="n">01</span>Investigate</span><span class="arrow">→</span>
+					<span class="stage"><span class="n">02</span>Concept</span><span class="arrow">→</span>
+					<span class="stage"><span class="n">03</span>Tech Plan</span><span class="arrow">→</span>
+					<span class="stage"><span class="n">04</span>User Approval</span><span class="arrow">→</span>
+					<span class="stage"><span class="n">05</span>Implement</span><span class="arrow">→</span>
+					<span class="stage"><span class="n">06</span>Test</span><span class="arrow">→</span>
+					<span class="stage"><span class="n">07</span>Commit Work</span><span class="arrow">→</span>
+					<span class="stage"><span class="n">08</span>Github PR</span>
+				</div>
+				<p>Three build decisions worth making before code:</p>
+				<ul>
+					<li><b>Duplicates are allowed.</b> Test before review and test after review is a normal shape. That means each placed stage needs its own instance identity, not just a label — otherwise removing the second Test removes the first.</li>
+					<li><b>Drag needs a keyboard twin.</b> Native HTML5 drag-and-drop works and is entirely unusable without a mouse. Pair it with <kbd>Alt</kbd> + <kbd>↑</kbd>/<kbd>↓</kbd> on a focused stage, and let clicking a palette chip append rather than requiring a drag at all. The drag becomes the fast path, not the only path.</li>
+					<li><b>Stages take notes.</b> A bare <code>User Approval</code> is weaker than <code>User Approval — show the file list before writing</code>. One optional inline note per placed stage, emitted after an em dash.</li>
+				</ul>
+			</article>
+
+			<article class="entry merge" id="e8">
+				<div class="chiprow"><span class="chip id">08</span><span class="chip merge">Restructure</span><span class="chip">dashboard</span></div>
+				<h3>Two groups, not three — the writing ones and the choosing ones</h3>
+				<p>Sixteen tiles is a search task. Rev 1 proposed three phase-of-work groups; your split is better and I am taking it. Phases are a story about how a prompt gets written, which is a story that changes every session. Write versus Choose is a property of the tile itself and never moves.</p>
+				<p>It also encodes something the phase grouping could not: cost. A Write tile asks for sentences and a minute of thought. A Choose tile asks for three clicks. Scanning the dashboard tells you what a fuller prompt would actually cost you, which is the question you are asking when you scan it.</p>
+				<div class="delta">
+					<div class="next"><h5>Write — you compose</h5><p>Problem · Task · Context · Goals · Scope · References · Verification</p></div>
+					<div class="next"><h5>Choose — you pick</h5><p>Architecture · Constraints · Output · Tone · Process · Skills · Agent teams · Recipes · Guardrails</p></div>
+				</div>
+				<p>Mixed sections sit with their primary field. Constraints has a free-text box under its chips and still belongs in Choose, because the chips are what you use. Verification has chips for gates and still belongs in Write, because the criteria and checks are where the work is.</p>
+			</article>
+
+			<article class="entry merge" id="e9">
+				<div class="chiprow"><span class="chip id">09</span><span class="chip merge">Restructure</span><span class="chip">output order</span></div>
+				<h3>Dashboard order and prompt order stop being the same list</h3>
+				<p>Right now the array does both jobs. Grouping breaks that: the order you fill sections in is not the order they should reach the agent. Problem is written before Task and read after it. Guardrails are filled early and belong last, where they are still in view when the agent starts working.</p>
+				<p>Cheap fix — give each section an explicit <code>order</code> number used only by the renderer, and let array position drive the dashboard. Two numbers, no new machinery.</p>
+			</article>
+		</section>
+
+		<section id="map">
+			<div class="sec-head">
+				<h2>Section map</h2>
+				<span class="count">16 sections · 2 groups</span>
+			</div>
+			<p class="sec-intro">Group order is dashboard order. The number after each name is its position in the emitted prompt — a separate sequence, per finding 09. Every section is optional; the numbers only decide who goes first among those you filled.</p>
+
+			<div class="map" style="grid-template-columns:1fr">
+				<div class="group">
+					<h4>Write · you compose</h4>
+					<p class="gloss">Sentences and a minute of thought. Seven tiles.</p>
+					<ol>
+						<li><span class="name">Task</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">01</span> <span class="state same">unchanged</span></li>
+						<li><span class="name">Problem</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">02</span> <span class="state new">new</span></li>
+						<li><span class="name">Context</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">03</span> <span class="state same">unchanged</span></li>
+						<li><span class="name">Goals</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">04</span> <span class="state changed">reblurbed</span></li>
+						<li><span class="name">References</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">06</span> <span class="state same">unchanged</span></li>
+						<li><span class="name">Scope</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">07</span> <span class="state same">unchanged</span></li>
+						<li><span class="name">Verification</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">10</span> <span class="state changed">+criteria</span></li>
+					</ol>
+				</div>
+
+				<div class="group">
+					<h4>Choose · you pick</h4>
+					<p class="gloss">Chips, lists, and a few clicks. Nine tiles.</p>
+					<ol>
+						<li><span class="name">Architecture</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">05</span> <span class="state new">new</span></li>
+						<li><span class="name">Constraints</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">08</span> <span class="state same">unchanged</span></li>
+						<li><span class="name">Output</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">09</span> <span class="state changed">stack out</span></li>
+						<li><span class="name">Tone</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">11</span> <span class="state same">unchanged</span></li>
+						<li><span class="name">Process</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">12</span> <span class="state new">new</span></li>
+						<li><span class="name">Skills</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">13</span> <span class="state new">new</span></li>
+						<li><span class="name">Agent teams</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">14</span> <span class="state new">new</span></li>
+						<li><span class="name">Guardrails</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">15</span> <span class="state same">unchanged</span></li>
+						<li><span class="name">Recipes</span> <span class="mono" style="color:var(--ink-faint);font-size:12px">00 / 16</span> <span class="state new">new</span></li>
+					</ol>
+				</div>
+			</div>
+			<p style="margin-top:18px;color:var(--ink-soft);max-width:68ch">Recipes carries two positions because each recipe declares its own. A <code>first</code> recipe lands at 00, ahead of Task; a <code>last</code> one lands at 16, after Guardrails.</p>
+		</section>
+
+		<section id="stages">
+			<div class="sec-head">
+				<h2>Stage vocabulary</h2>
+				<span class="count">24 stages · 5 families</span>
+			</div>
+			<p class="sec-intro">Your eight, plus the ones your own tooling already names. The dev-workspace and versioning stages are worth having as chips precisely because they are the steps most often skipped.</p>
+
+			<div class="palette">
+				<div class="pal">
+					<h5>Discover</h5>
+					<div class="opts">
+						<span class="opt">Investigate</span><span class="opt">Interview</span><span class="opt">Research</span><span class="opt">Scope</span><span class="opt">Reproduce</span>
+					</div>
+				</div>
+				<div class="pal">
+					<h5>Design</h5>
+					<div class="opts">
+						<span class="opt">Concept</span><span class="opt">Tech Plan</span><span class="opt">Spike</span><span class="opt">User Approval</span>
+					</div>
+				</div>
+				<div class="pal">
+					<h5>Build</h5>
+					<div class="opts">
+						<span class="opt">Implement</span><span class="opt">Refactor</span><span class="opt">Document</span><span class="opt">Changelog</span>
+					</div>
+				</div>
+				<div class="pal">
+					<h5>Check</h5>
+					<div class="opts">
+						<span class="opt">Test</span><span class="opt">Self-review</span><span class="opt">Code Review</span><span class="opt">Spec Check</span><span class="opt">User Approval</span>
+					</div>
+				</div>
+				<div class="pal">
+					<h5>Ship</h5>
+					<div class="opts">
+						<span class="opt">Commit Work</span><span class="opt">Push</span><span class="opt">Github PR</span><span class="opt">Sync Branch</span><span class="opt">Merge</span><span class="opt">Version Bump</span><span class="opt">Archive Workspace</span><span class="opt">Handover</span>
+					</div>
+				</div>
+			</div>
+			<p style="margin-top:22px;color:var(--ink-soft);max-width:68ch">User Approval appears in two families deliberately — it is the one stage you place more than once, and burying it in a single family means you only find it the first time you need it.</p>
+		</section>
+
+		<section id="kinds">
+			<div class="sec-head">
+				<h2>New field kinds</h2>
+				<span class="count">3 new · 5 existing</span>
+			</div>
+			<p class="sec-intro">Everything else reuses what mock 1 already has. These three do not exist yet.</p>
+
+			<div class="ledger">
+				<table>
+					<thead><tr><th>Kind</th><th>Used by</th><th>Behaviour</th><th>Build cost</th></tr></thead>
+					<tbody>
+						<tr>
+							<td class="k">grouped-multi</td>
+							<td>skills · agents.roster</td>
+							<td>Multi-select chips under labelled sub-headings. Config becomes an object of arrays rather than a flat array. Optional free-text row for anything unlisted.</td>
+							<td>Small — a loop around the existing chip widget.</td>
+						</tr>
+						<tr>
+							<td class="k">pipeline</td>
+							<td>process.stages</td>
+							<td>Grouped palette above, ordered drop zone below. Click to append, drag to reorder, <kbd>Alt</kbd>+arrows as the keyboard path, per-stage note field, duplicates allowed with instance ids.</td>
+							<td>Real — the only field on the page holding ordered state with identity.</td>
+						</tr>
+						<tr>
+							<td class="k">canned</td>
+							<td>recipes.blocks</td>
+							<td>Stack of cards, each showing a recipe's full text read-only with a toggle. Selected blocks emit verbatim at the position the recipe declares.</td>
+							<td>Small — a checkbox and a <code>&lt;pre&gt;</code>. The work is writing the recipe texts.</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<p>Three config shapes change as a result. <code>grouped-multi</code> reads <code>{"Plugin name": ["skill", …]}</code> instead of a flat array; <code>pipeline</code> reads the same grouped shape for its palette; <code>canned</code> reads <code>[{name, position, text}]</code> and is long enough to deserve its own JSON block rather than crowding the options one. All three stay hand-editable, which was the point.</p>
+		</section>
+
+		<section id="questions">
+			<div class="sec-head">
+				<h2>Open questions</h2>
+				<span class="count">5</span>
+			</div>
+			<p class="sec-intro">Each carries a recommendation. Silence on any of them means I build the recommendation.</p>
+
+			<div class="q">
+				<h4>1 · What does the self-update recipe actually say?</h4>
+				<p>It is the recipe that prompted the section and the only one whose wording I cannot guess. It has to tell an agent where the file is, what "current state of play" means, and what to leave alone — the hand-editable JSON blocks in particular.</p>
+				<p class="rec"><b>Recommend:</b> I draft it, you edit it in place. Faster than specifying it in the abstract, and the draft is throwaway if it reads wrong.</p>
+			</div>
+
+			<div class="q">
+				<h4>2 · Do recipe texts duplicate the repository's rules, or point at them?</h4>
+				<p>Durable-document rules and the workspace protocol already exist as files. A recipe can restate them or say "read <code>extensions/rules/durable-documents.md</code>".</p>
+				<p class="rec"><b>Recommend:</b> point, with one line of gist. The pointer never goes stale and the gist tells you what you enabled without opening anything.</p>
+			</div>
+
+			<div class="q">
+				<h4>3 · What fills the Architecture pick lists?</h4>
+				<p>The section is prescriptive, so the lists have to hold what you actually build with. I can seed them from this repository — plain HTML, JavaScript without a build step, Node for scripts, markdown — but that is one project's vocabulary and you prompt across more than one.</p>
+				<p class="rec"><b>Recommend:</b> seed broad, prune later. An unused chip costs a glance; a missing one costs a trip to the free-text box.</p>
+			</div>
+
+			<div class="q">
+				<h4>4 · Do process stages carry agents?</h4>
+				<p>Carried over — unanswered in rev 1. A placed stage could name the agent that runs it, <code>Investigate → Explore</code>. It is the natural join between two of the new sections and it doubles the pipeline widget's complexity.</p>
+				<p class="rec"><b>Recommend:</b> not in mock 2. Ship the note field first; if you find yourself typing agent names into notes, that is the signal.</p>
+			</div>
+
+			<div class="q">
+				<h4>5 · How much of this lands in mock 2?</h4>
+				<p>Six new sections, three new field kinds, a regrouped dashboard, and a split output order. That is a full rebuild of the page rather than an edit to it.</p>
+				<p class="rec"><b>Recommend:</b> all of it, one pass. The regroup and the order split touch every section anyway, so staging it means doing that work twice.</p>
+			</div>
+		</section>
+
+		<div class="actions">
+			<button id="copy" type="button">Copy responses</button>
+			<button id="show" class="ghost" type="button">Show as text</button>
+			<span class="status" id="status"></span>
+		</div>
+
+		<div id="outwrap" hidden>
+			<textarea id="out" readonly aria-label="Responses as plain text"></textarea>
+		</div>
+
+	</main>
+
+	<footer>
+		Review of <code>dev/workspace/filebox/prompt-engine.html</code> at mock 1. Nothing has been changed in the file — this is the pass before mock 2. Verdicts and comments stay in this page until you copy them.
+	</footer>
+</div>
+
+<script>
+(function () {
+	"use strict";
+
+	// Response surfaces are generated rather than hand-authored, so every entry
+	// and question gets one and the labels always match their headings.
+
+	var ENTRY_PICKS = ["Agree", "Revise", "Reject"];
+
+	// Keyed by the leading number in each question heading.
+	var QUESTION_PICKS = {
+		"1": ["You draft it", "I'll write it"],
+		"2": ["Point at the file", "Restate in full"],
+		"3": ["Seed broad", "This repo only"],
+		"4": ["Note field only", "Stages carry agents"],
+		"5": ["All in one pass", "Stage it"]
+	};
+
+	var LOOSE = {
+		map:    "Section map — grouping, order, anything missing",
+		stages: "Stage vocabulary — add, rename, or drop stages",
+		kinds:  "Field kinds — behaviour and build order"
+	};
+
+	function node(tag, cls, text) {
+		var n = document.createElement(tag);
+		if (cls) n.className = cls;
+		if (text != null) n.textContent = text;
+		return n;
+	}
+
+	function attach(host, label, picks, placeholder) {
+		var box = node("div", "respond");
+		if (picks && picks.length) {
+			var row = node("div", "verdicts");
+			row.dataset.item = label;
+			picks.forEach(function (p) {
+				var lab = document.createElement("label");
+				var inp = document.createElement("input");
+				inp.type = "radio";
+				inp.name = "v-" + label.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
+				inp.value = p;
+				lab.appendChild(inp);
+				lab.appendChild(document.createTextNode(p));
+				row.appendChild(lab);
+			});
+			box.appendChild(row);
+		}
+		var ta = document.createElement("textarea");
+		ta.dataset.item = label;
+		ta.placeholder = placeholder;
+		box.appendChild(ta);
+		host.appendChild(box);
+	}
+
+	// Findings
+	document.querySelectorAll("article.entry").forEach(function (entry) {
+		var id = (entry.querySelector(".chip.id") || {}).textContent || "";
+		var title = (entry.querySelector("h3") || {}).textContent || "";
+		attach(entry, id.trim() + " · " + title.trim(), ENTRY_PICKS, "Comment on finding " + id.trim() + "…");
+	});
+
+	// Open questions
+	document.querySelectorAll("#questions .q").forEach(function (q) {
+		var h = (q.querySelector("h4") || {}).textContent || "";
+		var num = (h.match(/^\s*(\d+)/) || [])[1] || "";
+		attach(q, "Q" + num + " · " + h.replace(/^\s*\d+\s*·\s*/, "").trim(), QUESTION_PICKS[num] || null, "Answer…");
+	});
+
+	// Loose comment boxes on the proposal sections
+	Object.keys(LOOSE).forEach(function (secId) {
+		var sec = document.getElementById(secId);
+		if (!sec) return;
+		var wrap = node("div", "loose");
+		wrap.appendChild(node("span", "lab", "Comment"));
+		var ta = document.createElement("textarea");
+		ta.dataset.item = LOOSE[secId];
+		ta.placeholder = "Optional…";
+		wrap.appendChild(ta);
+		sec.appendChild(wrap);
+	});
+
+	// ---- collect ----
+
+	function collect() {
+		var lines = ["## Prompt engine — section review, responses", ""];
+		var wrote = false;
+
+		function emit(label, picked, note) {
+			if (!picked && !note) return;
+			lines.push("**" + label + "**");
+			if (picked) lines.push("- " + (label.charAt(0) === "Q" ? "Answer" : "Verdict") + ": " + picked);
+			if (note) lines.push("- " + note.replace(/\s*\n+\s*/g, " ").trim());
+			lines.push("");
+			wrote = true;
+		}
+
+		document.querySelectorAll(".respond").forEach(function (r) {
+			var ta = r.querySelector("textarea");
+			var picked = r.querySelector("input:checked");
+			emit(ta.dataset.item, picked ? picked.value : "", ta.value.trim());
+		});
+
+		document.querySelectorAll(".loose textarea").forEach(function (ta) {
+			emit(ta.dataset.item, "", ta.value.trim());
+		});
+
+		if (!wrote) lines.push("_No responses entered._");
+		return lines.join("\n").trim();
+	}
+
+	var status = document.getElementById("status");
+	var outwrap = document.getElementById("outwrap");
+	var out = document.getElementById("out");
+
+	document.getElementById("copy").addEventListener("click", function () {
+		var text = collect();
+		function fallback() {
+			out.value = text;
+			outwrap.hidden = false;
+			out.select();
+			status.textContent = "Clipboard blocked — select the text below and copy.";
+		}
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).then(function () {
+				status.textContent = "Copied — paste into the chat.";
+			}, fallback);
+		} else {
+			fallback();
+		}
+	});
+
+	document.getElementById("show").addEventListener("click", function () {
+		out.value = collect();
+		outwrap.hidden = !outwrap.hidden;
+		status.textContent = outwrap.hidden ? "" : "Select all and copy.";
+		if (!outwrap.hidden) out.focus();
+	});
+})();
+</script>
