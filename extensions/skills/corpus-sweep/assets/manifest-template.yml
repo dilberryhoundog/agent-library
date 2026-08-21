@@ -1,0 +1,20 @@
+# Sweep manifest — built at the start of every sweep, discarded at the end.
+# Lives in the sweep's working directory. Never in a profile: a corpus changes
+# between sweeps, so a stored assignment list is stale the moment a document is
+# added, a handover is split off, or an agent is converted.
+
+sweep: <sweep-name>              # names the branch, the working directory, and the review page
+profile: <corpus>                # the profile this sweep runs under
+base: <commit-or-branch>         # what each assignment branches from, and what the audit diffs against
+
+spec_docs:                       # authority documents relevant to THIS change, in reading order.
+  - <path>                       # Reaches high-tier briefs only. Empty when the change needs none.
+
+assignments:
+
+  - name: <label>                # used for the branch, the brief filename, and the agent label
+    files:                       # authoritative: bounds what the agent may edit, and what the
+      - <path>                   # integration assertion checks the commit against
+    tier: standard               # high | standard | mechanical
+    brief: brief-<label>.md      # filename in the working directory
+    audit_as: single             # set for a multi-document assignment, single otherwise
