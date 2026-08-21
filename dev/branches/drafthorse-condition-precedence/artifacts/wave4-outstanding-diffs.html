@@ -1,178 +1,204 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Wave 4 — Outstanding</title>
-<style>
-:root { --bg:#fbfaf8; --panel:#fff; --ink:#1c1b19; --muted:#6b6862; --line:#e2ded7;
-  --del-bg:#fdecec; --del-ink:#8a1f1f; --add-bg:#e9f6ec; --add-ink:#14622c; --accent:#7a5c2e; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6; --line:#33313c;
-  --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab; --accent:#d5b27a; } }
-:root[data-theme="dark"] { --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6;
-  --line:#33313c; --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab; --accent:#d5b27a; }
-* { box-sizing:border-box; }
-body { margin:0; padding:2rem 1.25rem 6rem; background:var(--bg); color:var(--ink);
-  font:16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
-.wrap { max-width:62rem; margin:0 auto; }
-header { border-bottom:2px solid var(--line); padding-bottom:1.25rem; margin-bottom:1.5rem; }
-h1 { font-size:1.5rem; margin:0 0 .4rem; letter-spacing:-.01em; }
-.sub { color:var(--muted); font-size:.9rem; margin:0; }
-h2.sec { font-size:.8rem; letter-spacing:.09em; text-transform:uppercase; color:var(--accent);
-  margin:2.5rem 0 1rem; padding-bottom:.4rem; border-bottom:1px solid var(--line);
-  font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
-.note { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
-  padding:.9rem 1.1rem; margin:1.25rem 0 1.5rem; font-size:.9rem; }
-.note b { color:var(--accent); }
-article { background:var(--panel); border:1px solid var(--line); border-radius:6px;
-  padding:1.1rem 1.25rem 1.25rem; margin-bottom:1.25rem; }
-h3 { font-size:1rem; margin:0 0 .15rem; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
-.tag { display:inline-block; font-size:.68rem; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--muted); border:1px solid var(--line); border-radius:3px; padding:.1rem .4rem;
-  margin-left:.4rem; vertical-align:middle; }
-.why { color:var(--muted); font-size:.875rem; margin:.35rem 0 .9rem; }
-.diff { border:1px solid var(--line); border-radius:4px; overflow-x:auto;
-  font:13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
-.diff div { padding:.35rem .7rem; white-space:pre-wrap; word-break:break-word; }
-.del { background:var(--del-bg); color:var(--del-ink); }
-.add { background:var(--add-bg); color:var(--add-ink); }
-table.keep { width:100%; border-collapse:collapse; font-size:.85rem; }
-table.keep td { padding:.45rem .6rem; border-bottom:1px solid var(--line); vertical-align:top; }
-table.keep td:first-child { color:var(--muted); white-space:nowrap; width:13rem;
-  font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
-table.keep tr:last-child td { border-bottom:0; }
-label.cmt { display:block; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase;
-  color:var(--muted); margin:1.1rem 0 .35rem; }
-textarea { width:100%; min-height:4rem; resize:vertical; padding:.6rem .7rem; background:var(--bg);
-  color:var(--ink); border:1px solid var(--line); border-radius:4px;
-  font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
-textarea:focus { outline:2px solid var(--accent); outline-offset:-1px; }
-.bar { position:sticky; bottom:0; background:var(--panel); border-top:1px solid var(--line);
-  padding:.9rem 1.25rem; margin:2rem -1.25rem -6rem; display:flex; gap:.75rem;
-  align-items:center; flex-wrap:wrap; }
-button { font:inherit; font-size:.9rem; padding:.5rem 1rem; border-radius:4px; cursor:pointer;
-  border:1px solid var(--accent); background:var(--accent); color:var(--panel); }
-button.ghost { background:transparent; color:var(--accent); }
-#status { color:var(--muted); font-size:.85rem; }
-#out { width:100%; min-height:12rem; margin-top:1rem; display:none; }
-</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wave 4 — Outstanding</title>
+    <style>
+		:root { --bg: #fbfaf8; --panel: #fff; --ink: #1c1b19; --muted: #6b6862; --line: #e2ded7;
+			--del-bg: #fdecec; --del-ink: #8a1f1f; --add-bg: #e9f6ec; --add-ink: #14622c; --accent: #7a5c2e; }
+		@media (prefers-color-scheme: dark) {
+			:root:not([data-theme="light"]) {
+				--bg:     #16151a; --panel: #1e1d23; --ink: #eceaf2; --muted: #9c98a6; --line: #33313c;
+				--del-bg: #3a1e21; --del-ink: #ff9c9c; --add-bg: #1a3324; --add-ink: #8fe3ab; --accent: #d5b27a; }
+		}
+		:root[data-theme="dark"] { --bg: #16151a; --panel: #1e1d23; --ink: #eceaf2; --muted: #9c98a6;
+			--line:                      #33313c; --del-bg: #3a1e21; --del-ink: #ff9c9c; --add-bg: #1a3324; --add-ink: #8fe3ab; --accent: #d5b27a; }
+		* { box-sizing: border-box; }
+		body { margin: 0; padding: 2rem 1.25rem 6rem; background: var(--bg); color: var(--ink);
+			font:      16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+		.wrap { max-width: 62rem; margin: 0 auto; }
+		header { border-bottom: 2px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 1.5rem; }
+		h1 { font-size: 1.5rem; margin: 0 0 .4rem; letter-spacing: -.01em; }
+		.sub { color: var(--muted); font-size: .9rem; margin: 0; }
+		h2.sec { font-size: .8rem; letter-spacing: .09em; text-transform: uppercase; color: var(--accent);
+			margin:         2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line);
+			font-family:    ui-monospace, SFMono-Regular, Menlo, monospace; }
+		.note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+			padding:        .9rem 1.1rem; margin: 1.25rem 0 1.5rem; font-size: .9rem; }
+		.note b { color: var(--accent); }
+		article { background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+			padding:          1.1rem 1.25rem 1.25rem; margin-bottom: 1.25rem; }
+		h3 { font-size: 1rem; margin: 0 0 .15rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+		.tag { display:  inline-block; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
+			color:       var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: .1rem .4rem;
+			margin-left: .4rem; vertical-align: middle; }
+		.why { color: var(--muted); font-size: .875rem; margin: .35rem 0 .9rem; }
+		.diff { border: 1px solid var(--line); border-radius: 4px; overflow-x: auto;
+			font:       13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+		.diff div { padding: .35rem .7rem; white-space: pre-wrap; word-break: break-word; }
+		.del { background: var(--del-bg); color: var(--del-ink); }
+		.add { background: var(--add-bg); color: var(--add-ink); }
+		table.keep { width: 100%; border-collapse: collapse; font-size: .85rem; }
+		table.keep td { padding: .45rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+		table.keep td:first-child { color: var(--muted); white-space: nowrap; width: 13rem;
+			font-family:                   ui-monospace, SFMono-Regular, Menlo, monospace; }
+		table.keep tr:last-child td { border-bottom: 0; }
+		label.cmt { display: block; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase;
+			color:           var(--muted); margin: 1.1rem 0 .35rem; }
+		textarea { width: 100%; min-height: 4rem; resize: vertical; padding: .6rem .7rem; background: var(--bg);
+			color:        var(--ink); border: 1px solid var(--line); border-radius: 4px;
+			font:         14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+		textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+		.bar { position: sticky; bottom: 0; background: var(--panel); border-top: 1px solid var(--line);
+			padding:     .9rem 1.25rem; margin: 2rem -1.25rem -6rem; display: flex; gap: .75rem;
+			align-items: center; flex-wrap: wrap; }
+		button { font: inherit; font-size: .9rem; padding: .5rem 1rem; border-radius: 4px; cursor: pointer;
+			border:    1px solid var(--accent); background: var(--accent); color: var(--panel); }
+		button.ghost { background: transparent; color: var(--accent); }
+		#status { color: var(--muted); font-size: .85rem; }
+		#out { width: 100%; min-height: 12rem; margin-top: 1rem; display: none; }
+    </style>
 </head>
 <body>
 <div class="wrap">
 
-<header>
-  <h1>Wave 4 — what is still outstanding</h1>
-  <p class="sub">Proposals only. Nothing below is written to <code>extensions/skills/drafthorse/SKILL.md</code>. The audit stays parked.</p>
-</header>
+    <header>
+        <h1>Wave 4 — what is still outstanding</h1>
+        <p class="sub">Proposals only. Nothing below is written to <code>extensions/skills/drafthorse/SKILL.md</code>. The audit stays parked.</p>
+    </header>
 
-<div class="note">
-  <b>Two of the three items shrank once I looked</b>
-  <p style="margin:.5rem 0 0">The preamble is done — settled universal prose, swapped in the working tree. Error-step vocabulary needs nothing: <code>grep</code> for "drain" returns zero, and every mention already reads "error step". Wave 2 covered it, and my listing it as outstanding was wrong.</p>
-  <p style="margin:.5rem 0 0">Directives: I said nine to rewrite. On reading them against the check — "a single-line directive hinting at the agent's task on entering this step; a general description rather than a hint is a finding" — seven already pass. They are imperative and name the task. Two carry explanatory padding. Those are the proposals.</p>
-</div>
+    <div class="note">
+        <b>Two of the three items shrank once I looked</b>
+        <p style="margin:.5rem 0 0">The preamble is done — settled universal prose, swapped in the working tree. Error-step vocabulary needs nothing: <code>grep</code> for "drain" returns zero, and every mention already reads "error step". Wave 2 covered it, and my listing it as outstanding was wrong.</p>
+        <p style="margin:.5rem 0 0">Directives: I said nine to rewrite. On reading them against the check — "a single-line directive hinting at the agent's task on entering this step; a general description rather than a hint is a finding" — seven already pass. They are imperative and name the task. Two carry explanatory padding. Those are the proposals.</p>
+    </div>
 
-<h2 class="sec">Proposed — directives</h2>
+    <h2 class="sec">Proposed — directives</h2>
 
-<article>
-  <h3>D1 &nbsp;+Fill Reference Gaps<span class="tag">line 112</span></h3>
-  <p class="why">The trailing clause is why-prose — it explains the step's purpose in the run rather than naming the task. <code>Sharp prose</code> lists why-prose as a finding in its own right.</p>
-  <div class="diff">
-    <div class="del">- Produce the references that do not exist yet, so the steps have a complete set to operate on.</div>
-    <div class="add">+ Produce the references that do not exist yet.</div>
-  </div>
-  <label class="cmt" for="c1">Comments</label>
-  <textarea id="c1" data-label="D1 · +Fill Reference Gaps"></textarea>
-</article>
+    <article>
+        <h3>D1 &nbsp;+Fill Reference Gaps<span class="tag">line 112</span></h3>
+        <p class="why">The trailing clause is why-prose — it explains the step's purpose in the run rather than naming the task. <code>Sharp prose</code> lists why-prose as a finding in its own right.</p>
+        <div class="diff">
+            <div class="del">- Produce the references that do not exist yet, so the steps have a complete set to operate on.</div>
+            <div class="add">+ Produce the references that do not exist yet.</div>
+        </div>
+        <label class="cmt" for="c1">Comments</label>
+        <textarea id="c1" data-label="D1 · +Fill Reference Gaps"></textarea>
+    </article>
 
-<article>
-  <h3>D2 &nbsp;+Collect References<span class="tag">line 92</span></h3>
-  <p class="why">"The data the steps will operate on" is a description of what the data is for. The task is harvest, classify, mine. Weaker case than D1 — the padding is mid-sentence, not a trailing clause, and you may read it as useful orientation.</p>
-  <div class="diff">
-    <div class="del">- Harvest and classify the data the steps will operate on, and mine it for hidden work.</div>
-    <div class="add">+ Harvest and classify the source material, and mine it for hidden work.</div>
-  </div>
-  <label class="cmt" for="c2">Comments</label>
-  <textarea id="c2" data-label="D2 · +Collect References"></textarea>
-</article>
+    <article>
+        <h3>D2 &nbsp;+Collect References<span class="tag">line 92</span></h3>
+        <p class="why">"The data the steps will operate on" is a description of what the data is for. The task is harvest, classify, mine. Weaker case than D1 — the padding is mid-sentence, not a trailing clause, and you may read it as useful orientation.</p>
+        <div class="diff">
+            <div class="del">- Harvest and classify the data the steps will operate on, and mine it for hidden work.</div>
+            <div class="add">+ Harvest and classify the source material, and mine it for hidden work.</div>
+        </div>
+        <label class="cmt" for="c2">Comments</label>
+        <textarea id="c2" data-label="D2 · +Collect References"></textarea>
+    </article>
 
-<h2 class="sec">Judged — no change</h2>
+    <h2 class="sec">Judged — no change</h2>
 
-<div class="note">
-  <p style="margin:0 0 .6rem">Each of these is imperative and names the agent's task on entry. Listed so you can overturn any of them.</p>
-  <table class="keep">
-    <tr><td>+Gather Requirements</td><td>Establish what is being built, for whom, and from what.</td></tr>
-    <tr><td>+Map the Steps</td><td>Shape the steps from the candidates, the requirements, and the references in view.</td></tr>
-    <tr><td>+Set Invariants</td><td>Bound the document — safety floors global, step-bound rules local.</td></tr>
-    <tr><td>+Draft the Skill</td><td>Write the document from the approved parts.</td></tr>
-    <tr><td>+Review</td><td>Walk the draft as a cold reader before the user sees it.</td></tr>
-    <tr><td>+Deliver</td><td>Present the reviewed draft for the final gate and hand it over.</td></tr>
-    <tr><td>+Handle a Problem</td><td>Surface anything the other steps don't cover, and decide with the user how to continue.</td></tr>
-  </table>
-  <label class="cmt" for="c3" style="margin-top:1rem">Comments — overturn any of the seven here</label>
-  <textarea id="c3" data-label="No-change set"></textarea>
-</div>
+    <div class="note">
+        <p style="margin:0 0 .6rem">Each of these is imperative and names the agent's task on entry. Listed so you can overturn any of them.</p>
+        <table class="keep">
+            <tr>
+                <td>+Gather Requirements</td>
+                <td>Establish what is being built, for whom, and from what.</td>
+            </tr>
+            <tr>
+                <td>+Map the Steps</td>
+                <td>Shape the steps from the candidates, the requirements, and the references in view.</td>
+            </tr>
+            <tr>
+                <td>+Set Invariants</td>
+                <td>Bound the document — safety floors global, step-bound rules local.</td>
+            </tr>
+            <tr>
+                <td>+Draft the Skill</td>
+                <td>Write the document from the approved parts.</td>
+            </tr>
+            <tr>
+                <td>+Review</td>
+                <td>Walk the draft as a cold reader before the user sees it.</td>
+            </tr>
+            <tr>
+                <td>+Deliver</td>
+                <td>Present the reviewed draft for the final gate and hand it over.</td>
+            </tr>
+            <tr>
+                <td>+Handle a Problem</td>
+                <td>Surface anything the other steps don't cover, and decide with the user how to continue.</td>
+            </tr>
+        </table>
+        <label class="cmt" for="c3" style="margin-top:1rem">Comments — overturn any of the seven here</label>
+        <textarea id="c3" data-label="No-change set"></textarea>
+    </div>
 
-<h2 class="sec">Found while reading — not previously listed</h2>
+    <h2 class="sec">Found while reading — not previously listed</h2>
 
-<article>
-  <h3>X1 &nbsp;Conventions Digest, <code>The run resolves</code><span class="tag">line 45</span></h3>
-  <p class="why">This bullet contradicts the checker it mirrors. The spec-check reads "document resolution comes by a naturally understandable directive <b>or</b> specific exit step handling" — both legitimate, which was the whole point of commit <code>6c92e14</code> replacing presence with resolution. The pilot's copy demotes agent handling with a negative mirror ("rather than the agent's own handling"), and the trailing instruction about the prebuilt error step is build guidance sitting in a test list.</p>
-  <div class="diff">
-    <div class="del">- **The run resolves** — every path ends somewhere stated, prefer an exit and success step, rather than the agent's own handling. The prebuilt error step handles unresolvable errors, destructive and half-applied states, include the default step in your build or make slight changes.</div>
-    <div class="add">+ **The run resolves** — every path ends somewhere stated, by an exit step or by the agent's own handling. The error step claims unresolvable errors, destructive actions and half-applied state.</div>
-  </div>
-  <label class="cmt" for="c4">Comments</label>
-  <textarea id="c4" data-label="X1 · run resolves bullet"></textarea>
-</article>
+    <article>
+        <h3>X1 &nbsp;Conventions Digest, <code>The run resolves</code><span class="tag">line 45</span></h3>
+        <p class="why">This bullet contradicts the checker it mirrors. The spec-check reads "document resolution comes by a naturally understandable directive <b>or</b> specific exit step handling" — both legitimate, which was the whole point of commit <code>6c92e14</code> replacing presence with resolution. The pilot's copy demotes agent handling with a negative mirror ("rather than the agent's own handling"), and the trailing instruction about the prebuilt error step is build guidance sitting in a test list.</p>
+        <div class="diff">
+            <div class="del">- **The run resolves** — every path ends somewhere stated, prefer an exit and success step, rather than the agent's own handling. The prebuilt error step handles unresolvable errors, destructive and half-applied states, include the default step in your build or make slight changes.</div>
+            <div class="add">+ **The run resolves** — every path ends somewhere stated, by an exit step or by the agent's own handling. The error step claims unresolvable errors, destructive actions and half-applied state.</div>
+        </div>
+        <label class="cmt" for="c4">Comments</label>
+        <textarea id="c4" data-label="X1 · run resolves bullet"></textarea>
+    </article>
 
-<h2 class="sec">After this</h2>
+    <h2 class="sec">After this</h2>
 
-<div class="note">
-  <p style="margin:0">Wave 4's last item is the by-hand audit against <code>drafthorse-spec-check.md</code> — parked at your instruction. Everything else in the wave is applied or proposed above.</p>
-  <label class="cmt" for="c5">General comments</label>
-  <textarea id="c5" data-label="General"></textarea>
-</div>
+    <div class="note">
+        <p style="margin:0">Wave 4's last item is the by-hand audit against <code>drafthorse-spec-check.md</code> — parked at your instruction. Everything else in the wave is applied or proposed above.</p>
+        <label class="cmt" for="c5">General comments</label>
+        <textarea id="c5" data-label="General"></textarea>
+    </div>
 
-<div class="bar">
-  <button id="copy">Copy comments</button>
-  <button class="ghost" id="show">Show as text</button>
-  <span id="status"></span>
-</div>
+    <div class="bar">
+        <button id="copy">Copy comments</button>
+        <button class="ghost" id="show">Show as text</button>
+        <span id="status"></span>
+    </div>
 
-<textarea id="out" readonly></textarea>
+    <textarea id="out" readonly></textarea>
 
 </div>
 <script>
-function assemble() {
-  var boxes = document.querySelectorAll('textarea[data-label]');
-  var lines = ['# Wave 4 outstanding — comments', ''];
-  var any = false;
-  boxes.forEach(function (b) {
-    var v = b.value.trim();
-    if (!v) return;
-    any = true;
-    lines.push('## ' + b.dataset.label, '', v, '');
-  });
-  if (!any) lines.push('_No comments entered — proposals accepted as written._', '');
-  return lines.join('\n');
-}
-document.getElementById('copy').addEventListener('click', function () {
-  var text = assemble(), status = document.getElementById('status');
-  navigator.clipboard.writeText(text).then(function () {
-    status.textContent = 'Copied. Paste it back into the session.';
-  }).catch(function () {
-    var out = document.getElementById('out');
-    out.value = text; out.style.display = 'block'; out.select();
-    status.textContent = 'Clipboard blocked — select the text below and copy manually.';
-  });
-});
-document.getElementById('show').addEventListener('click', function () {
-  var out = document.getElementById('out');
-  out.value = assemble();
-  out.style.display = out.style.display === 'block' ? 'none' : 'block';
-  document.getElementById('status').textContent = '';
-});
+    function assemble() {
+        var boxes = document.querySelectorAll('textarea[data-label]');
+        var lines = ['# Wave 4 outstanding — comments', ''];
+        var any = false;
+        boxes.forEach(function (b) {
+            var v = b.value.trim();
+            if (!v) return;
+            any = true;
+            lines.push('## ' + b.dataset.label, '', v, '');
+        });
+        if (!any) lines.push('_No comments entered — proposals accepted as written._', '');
+        return lines.join('\n');
+    }
+
+    document.getElementById('copy').addEventListener('click', function () {
+        var text = assemble(), status = document.getElementById('status');
+        navigator.clipboard.writeText(text).then(function () {
+            status.textContent = 'Copied. Paste it back into the session.';
+        }).catch(function () {
+            var out = document.getElementById('out');
+            out.value = text;
+            out.style.display = 'block';
+            out.select();
+            status.textContent = 'Clipboard blocked — select the text below and copy manually.';
+        });
+    });
+    document.getElementById('show').addEventListener('click', function () {
+        var out = document.getElementById('out');
+        out.value = assemble();
+        out.style.display = out.style.display === 'block' ? 'none' : 'block';
+        document.getElementById('status').textContent = '';
+    });
 </script>
 </body>
 </html>

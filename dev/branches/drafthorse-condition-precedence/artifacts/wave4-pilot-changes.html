@@ -1,288 +1,315 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Wave 4 — Pilot Changes</title>
-<style>
-:root {
-  --bg: #fbfaf8; --panel: #ffffff; --ink: #1c1b19; --muted: #6b6862;
-  --line: #e2ded7; --del-bg: #fdecec; --del-ink: #8a1f1f;
-  --add-bg: #e9f6ec; --add-ink: #14622c; --accent: #7a5c2e; --ok: #14622c;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #16151a; --panel: #1e1d23; --ink: #eceaf2; --muted: #9c98a6;
-    --line: #33313c; --del-bg: #3a1e21; --del-ink: #ff9c9c;
-    --add-bg: #1a3324; --add-ink: #8fe3ab; --accent: #d5b27a; --ok: #8fe3ab;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #16151a; --panel: #1e1d23; --ink: #eceaf2; --muted: #9c98a6;
-  --line: #33313c; --del-bg: #3a1e21; --del-ink: #ff9c9c;
-  --add-bg: #1a3324; --add-ink: #8fe3ab; --accent: #d5b27a; --ok: #8fe3ab;
-}
-* { box-sizing: border-box; }
-body { margin: 0; padding: 2rem 1.25rem 6rem; background: var(--bg); color: var(--ink);
-  font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
-.wrap { max-width: 62rem; margin: 0 auto; }
-header { border-bottom: 2px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 1.75rem; }
-h1 { font-size: 1.5rem; margin: 0 0 .4rem; letter-spacing: -.01em; }
-.sub { color: var(--muted); font-size: .9rem; margin: 0; }
-h2.file { font-size: .8rem; letter-spacing: .09em; text-transform: uppercase; color: var(--accent);
-  margin: 2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-.note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
-  padding: .9rem 1.1rem; margin: 1.25rem 0 1.75rem; font-size: .9rem; }
-.note b { color: var(--accent); }
-.note ol, .note ul { margin: .5rem 0 0; padding-left: 1.2rem; }
-.note li { margin-bottom: .3rem; }
-article { background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
-  padding: 1.1rem 1.25rem 1.25rem; margin-bottom: 1.25rem; }
-h3 { font-size: 1rem; margin: 0 0 .15rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-.tag { display: inline-block; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: .1rem .4rem;
-  margin-left: .4rem; vertical-align: middle; }
-.tag.done { color: var(--ok); border-color: var(--ok); }
-.why { color: var(--muted); font-size: .875rem; margin: .35rem 0 .9rem; }
-.field { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted);
-  margin: .9rem 0 .3rem; }
-.diff { border: 1px solid var(--line); border-radius: 4px; overflow-x: auto;
-  font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
-.diff div { padding: .35rem .7rem; white-space: pre-wrap; word-break: break-word; }
-.del { background: var(--del-bg); color: var(--del-ink); }
-.add { background: var(--add-bg); color: var(--add-ink); }
-table.compact { width: 100%; border-collapse: collapse; font-size: .85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-table.compact td { padding: .4rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-table.compact td:first-child { color: var(--muted); white-space: nowrap; width: 12rem; }
-table.compact tr:last-child td { border-bottom: 0; }
-.was { color: var(--del-ink); display: block; }
-.now { color: var(--add-ink); display: block; }
-label.cmt { display: block; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase;
-  color: var(--muted); margin: 1.1rem 0 .35rem; }
-textarea { width: 100%; min-height: 4rem; resize: vertical; padding: .6rem .7rem;
-  background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px;
-  font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
-textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-.bar { position: sticky; bottom: 0; background: var(--panel); border-top: 1px solid var(--line);
-  padding: .9rem 1.25rem; margin: 2rem -1.25rem -6rem; display: flex; gap: .75rem;
-  align-items: center; flex-wrap: wrap; }
-button { font: inherit; font-size: .9rem; padding: .5rem 1rem; border-radius: 4px; cursor: pointer;
-  border: 1px solid var(--accent); background: var(--accent); color: var(--panel); }
-button.ghost { background: transparent; color: var(--accent); }
-#status { color: var(--muted); font-size: .85rem; }
-#out { width: 100%; min-height: 12rem; margin-top: 1rem; display: none; }
-</style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wave 4 — Pilot Changes</title>
+    <style>
+		:root {
+			--bg:     #fbfaf8; --panel: #ffffff; --ink: #1c1b19; --muted: #6b6862;
+			--line:   #e2ded7; --del-bg: #fdecec; --del-ink: #8a1f1f;
+			--add-bg: #e9f6ec; --add-ink: #14622c; --accent: #7a5c2e; --ok: #14622c;
+		}
+		@media (prefers-color-scheme: dark) {
+			:root:not([data-theme="light"]) {
+				--bg:     #16151a; --panel: #1e1d23; --ink: #eceaf2; --muted: #9c98a6;
+				--line:   #33313c; --del-bg: #3a1e21; --del-ink: #ff9c9c;
+				--add-bg: #1a3324; --add-ink: #8fe3ab; --accent: #d5b27a; --ok: #8fe3ab;
+			}
+		}
+		:root[data-theme="dark"] {
+			--bg:     #16151a; --panel: #1e1d23; --ink: #eceaf2; --muted: #9c98a6;
+			--line:   #33313c; --del-bg: #3a1e21; --del-ink: #ff9c9c;
+			--add-bg: #1a3324; --add-ink: #8fe3ab; --accent: #d5b27a; --ok: #8fe3ab;
+		}
+		* { box-sizing: border-box; }
+		body { margin: 0; padding: 2rem 1.25rem 6rem; background: var(--bg); color: var(--ink);
+			font:      16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+		.wrap { max-width: 62rem; margin: 0 auto; }
+		header { border-bottom: 2px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 1.75rem; }
+		h1 { font-size: 1.5rem; margin: 0 0 .4rem; letter-spacing: -.01em; }
+		.sub { color: var(--muted); font-size: .9rem; margin: 0; }
+		h2.file { font-size: .8rem; letter-spacing: .09em; text-transform: uppercase; color: var(--accent);
+			margin:          2.5rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line);
+			font-family:     ui-monospace, SFMono-Regular, Menlo, monospace; }
+		.note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+			padding:        .9rem 1.1rem; margin: 1.25rem 0 1.75rem; font-size: .9rem; }
+		.note b { color: var(--accent); }
+		.note ol, .note ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+		.note li { margin-bottom: .3rem; }
+		article { background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+			padding:          1.1rem 1.25rem 1.25rem; margin-bottom: 1.25rem; }
+		h3 { font-size: 1rem; margin: 0 0 .15rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+		.tag { display:  inline-block; font-size: .68rem; letter-spacing: .06em; text-transform: uppercase;
+			color:       var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: .1rem .4rem;
+			margin-left: .4rem; vertical-align: middle; }
+		.tag.done { color: var(--ok); border-color: var(--ok); }
+		.why { color: var(--muted); font-size: .875rem; margin: .35rem 0 .9rem; }
+		.field { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted);
+			margin:         .9rem 0 .3rem; }
+		.diff { border: 1px solid var(--line); border-radius: 4px; overflow-x: auto;
+			font:       13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+		.diff div { padding: .35rem .7rem; white-space: pre-wrap; word-break: break-word; }
+		.del { background: var(--del-bg); color: var(--del-ink); }
+		.add { background: var(--add-bg); color: var(--add-ink); }
+		table.compact { width: 100%; border-collapse: collapse; font-size: .85rem;
+			font-family:       ui-monospace, SFMono-Regular, Menlo, monospace; }
+		table.compact td { padding: .4rem .6rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+		table.compact td:first-child { color: var(--muted); white-space: nowrap; width: 12rem; }
+		table.compact tr:last-child td { border-bottom: 0; }
+		.was { color: var(--del-ink); display: block; }
+		.now { color: var(--add-ink); display: block; }
+		label.cmt { display: block; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase;
+			color:           var(--muted); margin: 1.1rem 0 .35rem; }
+		textarea { width: 100%; min-height: 4rem; resize: vertical; padding: .6rem .7rem;
+			background:   var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 4px;
+			font:         14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+		textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+		.bar { position: sticky; bottom: 0; background: var(--panel); border-top: 1px solid var(--line);
+			padding:     .9rem 1.25rem; margin: 2rem -1.25rem -6rem; display: flex; gap: .75rem;
+			align-items: center; flex-wrap: wrap; }
+		button { font: inherit; font-size: .9rem; padding: .5rem 1rem; border-radius: 4px; cursor: pointer;
+			border:    1px solid var(--accent); background: var(--accent); color: var(--panel); }
+		button.ghost { background: transparent; color: var(--accent); }
+		#status { color: var(--muted); font-size: .85rem; }
+		#out { width: 100%; min-height: 12rem; margin-top: 1rem; display: none; }
+    </style>
 </head>
 <body>
 <div class="wrap">
 
-<header>
-  <h1>Wave 4 — the pilot, as applied</h1>
-  <p class="sub">Branch <code>drafthorse-step-anatomy</code>. Everything below is <b>already written to the files</b> — commit <code>4a87a56</code> plus the preamble swap in the working tree. Comment boxes are for tuning, not approval.</p>
-</header>
+    <header>
+        <h1>Wave 4 — the pilot, as applied</h1>
+        <p class="sub">Branch <code>drafthorse-step-anatomy</code>. Everything below is <b>already written to the files</b> — commit <code>4a87a56</code> plus the preamble swap in the working tree. Comment boxes are for tuning, not approval.</p>
+    </header>
 
-<div class="note">
-  <b>Rule these changes serve</b>
-  <ol>
-    <li>Start not met — the step does not run.</li>
-    <li>Start met, finish not met — the step runs.</li>
-    <li>Finish met — the step does not run.</li>
-  </ol>
-  <p style="margin:.6rem 0 0">Start conditions therefore stop carrying a negated copy of their own finish. Issue #45 holds the framework side; your spec work for it sits on <code>drafthorse-condition-precedence</code>.</p>
-</div>
+    <div class="note">
+        <b>Rule these changes serve</b>
+        <ol>
+            <li>Start not met — the step does not run.</li>
+            <li>Start met, finish not met — the step runs.</li>
+            <li>Finish met — the step does not run.</li>
+        </ol>
+        <p style="margin:.6rem 0 0">Start conditions therefore stop carrying a negated copy of their own finish. Issue #45 holds the framework side; your spec work for it sits on <code>drafthorse-condition-precedence</code>.</p>
+    </div>
 
-<h2 class="file">assets/SKILL-template.md</h2>
+    <h2 class="file">assets/SKILL-template.md</h2>
 
-<article>
-  <h3>T1 &nbsp;Success exit step<span class="tag done">applied</span></h3>
-  <p class="why">Function declared, directive comment aligned, and the run's completion moved out of the retired slot into the contract. <code>Terminal steps state their termination</code> is an explicit check, so this one is not judgment.</p>
-  <div class="diff">
-    <div class="del">- &lt;!-- Reports the outcome and ends the skill. --&gt;</div>
-    <div class="add">+ &lt;!-- The directive — reports the outcome and ends the skill. --&gt;</div>
-    <div class="add">+</div>
-    <div class="add">+ **Success step** — Resolves the run's done state and exits.</div>
-  </div>
-  <div class="field">Step finished when these are true</div>
-  <div class="diff">
-    <div class="del">- &lt;!-- The summary is presented. --&gt;</div>
-    <div class="add">+ &lt;!-- The summary is presented, and the run is stated complete. --&gt;</div>
-    <div class="del">-</div>
-    <div class="del">- #### Suggested next actions:</div>
-    <div class="del">- End the skill and return to the user.</div>
-    <div class="add">+ - the skill is complete</div>
-  </div>
-  <label class="cmt" for="c1">Comments</label>
-  <textarea id="c1" data-label="T1 · template success exit"></textarea>
-</article>
+    <article>
+        <h3>T1 &nbsp;Success exit step<span class="tag done">applied</span></h3>
+        <p class="why">Function declared, directive comment aligned, and the run's completion moved out of the retired slot into the contract. <code>Terminal steps state their termination</code> is an explicit check, so this one is not judgment.</p>
+        <div class="diff">
+            <div class="del">- &lt;!-- Reports the outcome and ends the skill. --&gt;</div>
+            <div class="add">+ &lt;!-- The directive — reports the outcome and ends the skill. --&gt;</div>
+            <div class="add">+</div>
+            <div class="add">+ **Success step** — Resolves the run's done state and exits.</div>
+        </div>
+        <div class="field">Step finished when these are true</div>
+        <div class="diff">
+            <div class="del">- &lt;!-- The summary is presented. --&gt;</div>
+            <div class="add">+ &lt;!-- The summary is presented, and the run is stated complete. --&gt;</div>
+            <div class="del">-</div>
+            <div class="del">- #### Suggested next actions:</div>
+            <div class="del">- End the skill and return to the user.</div>
+            <div class="add">+ - the skill is complete</div>
+        </div>
+        <label class="cmt" for="c1">Comments</label>
+        <textarea id="c1" data-label="T1 · template success exit"></textarea>
+    </article>
 
-<article>
-  <h3>T2 &nbsp;+Handle a Problem<span class="tag done">applied</span></h3>
-  <p class="why">Slot deleted, nothing rehomed. Its resume half is covered by start conditions re-holding; its exit half is a no-op, since a finished step with no start condition holding is a stopped run. An <code>OR these are true</code> block stating the abandoned run was added mid-session and then reverted on the same reasoning — net effect is the deletion alone.</p>
-  <div class="diff">
-    <div class="del">- #### Suggested next actions:</div>
-    <div class="del">- Resume the step the user chose, or end the skill.</div>
-  </div>
-  <label class="cmt" for="c2">Comments</label>
-  <textarea id="c2" data-label="T2 · template error step"></textarea>
-</article>
+    <article>
+        <h3>T2 &nbsp;+Handle a Problem<span class="tag done">applied</span></h3>
+        <p class="why">Slot deleted, nothing rehomed. Its resume half is covered by start conditions re-holding; its exit half is a no-op, since a finished step with no start condition holding is a stopped run. An <code>OR these are true</code> block stating the abandoned run was added mid-session and then reverted on the same reasoning — net effect is the deletion alone.</p>
+        <div class="diff">
+            <div class="del">- #### Suggested next actions:</div>
+            <div class="del">- Resume the step the user chose, or end the skill.</div>
+        </div>
+        <label class="cmt" for="c2">Comments</label>
+        <textarea id="c2" data-label="T2 · template error step"></textarea>
+    </article>
 
-<h2 class="file">extensions/skills/drafthorse/SKILL.md</h2>
+    <h2 class="file">extensions/skills/drafthorse/SKILL.md</h2>
 
-<article>
-  <h3>P1 &nbsp;Steps preamble<span class="tag done">applied</span></h3>
-  <p class="why">Blockquote list replaced with the settled universal prose — the text as it stands in <code>framework/steps.md</code> and <code>plan-preamble-prose.md</code>, <b>not</b> the amended wording proposed in #45. Nine lines to one.</p>
-  <div class="diff">
-    <div class="del">- &gt; Steps are universal and standalone.</div>
-    <div class="del">- &gt;</div>
-    <div class="del">- &gt;- All their work, instructions and rules are self-contained.</div>
-    <div class="del">- &gt;- Invoke a step any time its *start* conditions are met.</div>
-    <div class="del">- &gt;- A step is completed only when all its *finished* conditions are met.</div>
-    <div class="del">- &gt;- A step that cannot be completed falls to the error drain step.</div>
-    <div class="del">- &gt;- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.</div>
-    <div class="del">- &gt;- References are inline, using Markdown link styling. Always load a cited reference.</div>
-    <div class="del">- &gt;- Multiple active steps, looping back, and dormant steps are all valid patterns.</div>
-    <div class="add">+ Steps are universal and standalone. Marked `## +&lt;Step Name&gt;`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.</div>
-  </div>
-  <label class="cmt" for="c3">Comments</label>
-  <textarea id="c3" data-label="P1 · preamble"></textarea>
-</article>
+    <article>
+        <h3>P1 &nbsp;Steps preamble<span class="tag done">applied</span></h3>
+        <p class="why">Blockquote list replaced with the settled universal prose — the text as it stands in <code>framework/steps.md</code> and <code>plan-preamble-prose.md</code>, <b>not</b> the amended wording proposed in #45. Nine lines to one.</p>
+        <div class="diff">
+            <div class="del">- &gt; Steps are universal and standalone.</div>
+            <div class="del">- &gt;</div>
+            <div class="del">- &gt;- All their work, instructions and rules are self-contained.</div>
+            <div class="del">- &gt;- Invoke a step any time its *start* conditions are met.</div>
+            <div class="del">- &gt;- A step is completed only when all its *finished* conditions are met.</div>
+            <div class="del">- &gt;- A step that cannot be completed falls to the error drain step.</div>
+            <div class="del">- &gt;- A handover folds in as child steps of the parent step; flow control always belongs to the parent step.</div>
+            <div class="del">- &gt;- References are inline, using Markdown link styling. Always load a cited reference.</div>
+            <div class="del">- &gt;- Multiple active steps, looping back, and dormant steps are all valid patterns.</div>
+            <div class="add">+ Steps are universal and standalone. Marked `## +&lt;Step Name&gt;`. Work, instructions, rules — self-contained. Invoke a step whenever its start conditions match. Step completes only when its finished conditions match. Multiple steps activate at once. Call every cited reference. References use markdown link notation.</div>
+        </div>
+        <label class="cmt" for="c3">Comments</label>
+        <textarea id="c3" data-label="P1 · preamble"></textarea>
+    </article>
 
-<article>
-  <h3>P2 &nbsp;Start conditions — all eight<span class="tag done">applied</span></h3>
-  <p class="why">De-hold clauses removed. Each start condition is now entry state alone. <code>+Fill Reference Gaps</code> also loses "however late it surfaced" — its finish unsticks itself the moment a new gap is recorded, so the phrase no longer earns its place. <code>+Handle a Problem</code>'s generic remainder is untouched.</p>
-  <table class="compact">
-    <tr><td>+Gather Requirements</td><td>
-      <span class="was">The skill has been invoked and the requirements are not yet established.</span>
-      <span class="now">The skill has been invoked.</span></td></tr>
-    <tr><td>+Collect References</td><td>
-      <span class="was">Requirements are established and the reference set has not been approved.</span>
-      <span class="now">Requirements are established.</span></td></tr>
-    <tr><td>+Fill Reference Gaps</td><td>
-      <span class="was">The reference set is approved, and a reference the document needs is recorded as an unfilled gap — however late it surfaced.</span>
-      <span class="now">The reference set is approved, and a reference the document needs is recorded as an unfilled gap.</span></td></tr>
-    <tr><td>+Map the Steps</td><td>
-      <span class="was">The reference set is approved with no unfilled gaps, and no step map has been approved.</span>
-      <span class="now">The reference set is approved with no unfilled gaps.</span></td></tr>
-    <tr><td>+Set Invariants</td><td>
-      <span class="was">The step map is approved and no invariant set has been approved.</span>
-      <span class="now">The step map is approved.</span></td></tr>
-    <tr><td>+Draft the Skill</td><td>
-      <span class="was">Invariants are approved and no complete draft exists.</span>
-      <span class="now">Invariants are approved.</span></td></tr>
-    <tr><td>+Review</td><td>
-      <span class="was">A complete draft exists and has not passed the scenario-walk.</span>
-      <span class="now">A complete draft exists.</span></td></tr>
-    <tr><td>+Deliver</td><td>
-      <span class="was">The draft has passed the scenario-walk and the user has not yet accepted it.</span>
-      <span class="now">The draft has passed the scenario-walk.</span></td></tr>
-  </table>
-  <label class="cmt" for="c4">Comments</label>
-  <textarea id="c4" data-label="P2 · start conditions"></textarea>
-</article>
+    <article>
+        <h3>P2 &nbsp;Start conditions — all eight<span class="tag done">applied</span></h3>
+        <p class="why">De-hold clauses removed. Each start condition is now entry state alone. <code>+Fill Reference Gaps</code> also loses "however late it surfaced" — its finish unsticks itself the moment a new gap is recorded, so the phrase no longer earns its place. <code>+Handle a Problem</code>'s generic remainder is untouched.</p>
+        <table class="compact">
+            <tr>
+                <td>+Gather Requirements</td>
+                <td>
+                    <span class="was">The skill has been invoked and the requirements are not yet established.</span>
+                    <span class="now">The skill has been invoked.</span></td>
+            </tr>
+            <tr>
+                <td>+Collect References</td>
+                <td>
+                    <span class="was">Requirements are established and the reference set has not been approved.</span>
+                    <span class="now">Requirements are established.</span></td>
+            </tr>
+            <tr>
+                <td>+Fill Reference Gaps</td>
+                <td>
+                    <span class="was">The reference set is approved, and a reference the document needs is recorded as an unfilled gap — however late it surfaced.</span>
+                    <span class="now">The reference set is approved, and a reference the document needs is recorded as an unfilled gap.</span></td>
+            </tr>
+            <tr>
+                <td>+Map the Steps</td>
+                <td>
+                    <span class="was">The reference set is approved with no unfilled gaps, and no step map has been approved.</span>
+                    <span class="now">The reference set is approved with no unfilled gaps.</span></td>
+            </tr>
+            <tr>
+                <td>+Set Invariants</td>
+                <td>
+                    <span class="was">The step map is approved and no invariant set has been approved.</span>
+                    <span class="now">The step map is approved.</span></td>
+            </tr>
+            <tr>
+                <td>+Draft the Skill</td>
+                <td>
+                    <span class="was">Invariants are approved and no complete draft exists.</span>
+                    <span class="now">Invariants are approved.</span></td>
+            </tr>
+            <tr>
+                <td>+Review</td>
+                <td>
+                    <span class="was">A complete draft exists and has not passed the scenario-walk.</span>
+                    <span class="now">A complete draft exists.</span></td>
+            </tr>
+            <tr>
+                <td>+Deliver</td>
+                <td>
+                    <span class="was">The draft has passed the scenario-walk and the user has not yet accepted it.</span>
+                    <span class="now">The draft has passed the scenario-walk.</span></td>
+            </tr>
+        </table>
+        <label class="cmt" for="c4">Comments</label>
+        <textarea id="c4" data-label="P2 · start conditions"></textarea>
+    </article>
 
-<article>
-  <h3>P3 &nbsp;+Deliver<span class="tag done">applied</span></h3>
-  <p class="why">Declares the Success function; termination moves from the retired slot into the finished condition.</p>
-  <div class="diff">
-    <div class="add">+ **Success step** — Resolves the run's done state and exits.</div>
-  </div>
-  <div class="field">Step finished when these are true</div>
-  <div class="diff">
-    <div class="del">- The user accepts the document — and it still passes the scenario-walk with their edits folded in (re-walk anything an edit touched).</div>
-    <div class="add">+ The user accepts the document — it still passes the scenario-walk with their edits folded in (re-walk anything an edit touched) — and the build is complete.</div>
-  </div>
-  <div class="field">Suggested next actions (deleted)</div>
-  <div class="diff">
-    <div class="del">- End the skill and return to the user.</div>
-  </div>
-  <label class="cmt" for="c5">Comments</label>
-  <textarea id="c5" data-label="P3 · +Deliver"></textarea>
-</article>
+    <article>
+        <h3>P3 &nbsp;+Deliver<span class="tag done">applied</span></h3>
+        <p class="why">Declares the Success function; termination moves from the retired slot into the finished condition.</p>
+        <div class="diff">
+            <div class="add">+ **Success step** — Resolves the run's done state and exits.</div>
+        </div>
+        <div class="field">Step finished when these are true</div>
+        <div class="diff">
+            <div class="del">- The user accepts the document — and it still passes the scenario-walk with their edits folded in (re-walk anything an edit touched).</div>
+            <div class="add">+ The user accepts the document — it still passes the scenario-walk with their edits folded in (re-walk anything an edit touched) — and the build is complete.</div>
+        </div>
+        <div class="field">Suggested next actions (deleted)</div>
+        <div class="diff">
+            <div class="del">- End the skill and return to the user.</div>
+        </div>
+        <label class="cmt" for="c5">Comments</label>
+        <textarea id="c5" data-label="P3 · +Deliver"></textarea>
+    </article>
 
-<article>
-  <h3>P4 &nbsp;+Handle a Problem<span class="tag done">applied</span></h3>
-  <p class="why">Error function declared. Slot deleted whole — including the un-approval cascade sentence, which retires rather than moving. Finished condition unchanged.</p>
-  <div class="diff">
-    <div class="add">+ **Error step** — Handles recovery and bails.</div>
-  </div>
-  <div class="field">Suggested next actions (deleted)</div>
-  <div class="diff">
-    <div class="del">- Resume the phase the user chose — revising an approved artifact un-approves it and everything downstream of it, so that phase's start condition holds again — or end the build.</div>
-  </div>
-  <label class="cmt" for="c6">Comments</label>
-  <textarea id="c6" data-label="P4 · +Handle a Problem"></textarea>
-</article>
+    <article>
+        <h3>P4 &nbsp;+Handle a Problem<span class="tag done">applied</span></h3>
+        <p class="why">Error function declared. Slot deleted whole — including the un-approval cascade sentence, which retires rather than moving. Finished condition unchanged.</p>
+        <div class="diff">
+            <div class="add">+ **Error step** — Handles recovery and bails.</div>
+        </div>
+        <div class="field">Suggested next actions (deleted)</div>
+        <div class="diff">
+            <div class="del">- Resume the phase the user chose — revising an approved artifact un-approves it and everything downstream of it, so that phase's start condition holds again — or end the build.</div>
+        </div>
+        <label class="cmt" for="c6">Comments</label>
+        <textarea id="c6" data-label="P4 · +Handle a Problem"></textarea>
+    </article>
 
-<h2 class="file">Decisions taken, and what they cost</h2>
+    <h2 class="file">Decisions taken, and what they cost</h2>
 
-<div class="note">
-  <b>Rejected — scoping phrases on gate finished conditions</b>
-  <p style="margin:.4rem 0 0">Four gates were to gain "approved against the established requirements", "against the approved reference set", and so on, so a revised upstream artifact would unstick everything below it. Dropped: the jam they defended against was an artefact of de-hold's process-negations, which no reading could invalidate. With every finish an artifact fact, an agent reading a stale approval handles it. Also the direction commit <code>6c92e14</code> set — lean on the model's reading, treat bloat toward code as the danger.</p>
-  <p style="margin:.6rem 0 0"><b>Residual risk, stated plainly:</b> a cold agent resuming a long-abandoned build sees an approved map and a changed reference set with no conversation history. It must infer staleness from the artifacts alone. Judged acceptable; if it bites, the scoping phrases are the fix and they go on the finished conditions.</p>
-</div>
+    <div class="note">
+        <b>Rejected — scoping phrases on gate finished conditions</b>
+        <p style="margin:.4rem 0 0">Four gates were to gain "approved against the established requirements", "against the approved reference set", and so on, so a revised upstream artifact would unstick everything below it. Dropped: the jam they defended against was an artefact of de-hold's process-negations, which no reading could invalidate. With every finish an artifact fact, an agent reading a stale approval handles it. Also the direction commit <code>6c92e14</code> set — lean on the model's reading, treat bloat toward code as the danger.</p>
+        <p style="margin:.6rem 0 0"><b>Residual risk, stated plainly:</b> a cold agent resuming a long-abandoned build sees an approved map and a changed reference set with no conversation history. It must infer staleness from the artifacts alone. Judged acceptable; if it bites, the scoping phrases are the fix and they go on the finished conditions.</p>
+    </div>
 
-<div class="note">
-  <b>Rejected — an explicit abandoned-run exit</b>
-  <p style="margin:.4rem 0 0">"The user has decided how to continue" already covers deciding to stop, and the spec-check no longer demands a stated exit — <code>The run resolves</code> is judged on the scenario walk. Applied to the template, then reverted. Applies equally to the pilot's error step.</p>
-</div>
+    <div class="note">
+        <b>Rejected — an explicit abandoned-run exit</b>
+        <p style="margin:.4rem 0 0">"The user has decided how to continue" already covers deciding to stop, and the spec-check no longer demands a stated exit — <code>The run resolves</code> is judged on the scenario walk. Applied to the template, then reverted. Applies equally to the pilot's error step.</p>
+    </div>
 
-<div class="note">
-  <b>Retired outright — the un-approval cascade</b>
-  <p style="margin:.4rem 0 0">Considered as a global invariant, a Terms entry, a dormant step and a routing step across the session. None survived: once de-hold goes, the fact is emergent. Note this diverges from the parallel work on <code>drafthorse-condition-precedence</code>, which rehomes it into <code>+Handle a Problem</code>'s engagement prose. One of the two gives way at the merge.</p>
-</div>
+    <div class="note">
+        <b>Retired outright — the un-approval cascade</b>
+        <p style="margin:.4rem 0 0">Considered as a global invariant, a Terms entry, a dormant step and a routing step across the session. None survived: once de-hold goes, the fact is emergent. Note this diverges from the parallel work on <code>drafthorse-condition-precedence</code>, which rehomes it into <code>+Handle a Problem</code>'s engagement prose. One of the two gives way at the merge.</p>
+    </div>
 
-<h2 class="file">Still outstanding in wave 4</h2>
+    <h2 class="file">Still outstanding in wave 4</h2>
 
-<div class="note">
-  <ul>
-    <li><b>Directives</b> — nine step opening lines are still descriptions. <code>Directive</code> is a spec-check finding, so these are not optional.</li>
-    <li><b>Error-step vocabulary</b> — the pilot's prose still says "error drain step" in places.</li>
-    <li><b>The by-hand audit</b> — deferred at your instruction. No live saddler; the audit reads <code>drafthorse-spec-check.md</code> and applies its checks directly.</li>
-  </ul>
-</div>
+    <div class="note">
+        <ul>
+            <li><b>Directives</b> — nine step opening lines are still descriptions. <code>Directive</code> is a spec-check finding, so these are not optional.</li>
+            <li><b>Error-step vocabulary</b> — the pilot's prose still says "error drain step" in places.</li>
+            <li><b>The by-hand audit</b> — deferred at your instruction. No live saddler; the audit reads <code>drafthorse-spec-check.md</code> and applies its checks directly.</li>
+        </ul>
+    </div>
 
-<div class="bar">
-  <button id="copy">Copy comments</button>
-  <button class="ghost" id="show">Show as text</button>
-  <span id="status"></span>
-</div>
+    <div class="bar">
+        <button id="copy">Copy comments</button>
+        <button class="ghost" id="show">Show as text</button>
+        <span id="status"></span>
+    </div>
 
-<textarea id="out" readonly></textarea>
+    <textarea id="out" readonly></textarea>
 
 </div>
 <script>
-function assemble() {
-  var boxes = document.querySelectorAll('textarea[data-label]');
-  var lines = ['# Wave 4 pilot — comments', ''];
-  var any = false;
-  boxes.forEach(function (b) {
-    var v = b.value.trim();
-    if (!v) return;
-    any = true;
-    lines.push('## ' + b.dataset.label, '', v, '');
-  });
-  if (!any) lines.push('_No comments entered._', '');
-  return lines.join('\n');
-}
-document.getElementById('copy').addEventListener('click', function () {
-  var text = assemble();
-  var status = document.getElementById('status');
-  navigator.clipboard.writeText(text).then(function () {
-    status.textContent = 'Copied. Paste it back into the session.';
-  }).catch(function () {
-    var out = document.getElementById('out');
-    out.value = text; out.style.display = 'block'; out.select();
-    status.textContent = 'Clipboard blocked — select the text below and copy manually.';
-  });
-});
-document.getElementById('show').addEventListener('click', function () {
-  var out = document.getElementById('out');
-  out.value = assemble();
-  out.style.display = out.style.display === 'block' ? 'none' : 'block';
-  document.getElementById('status').textContent = '';
-});
+    function assemble() {
+        var boxes = document.querySelectorAll('textarea[data-label]');
+        var lines = ['# Wave 4 pilot — comments', ''];
+        var any = false;
+        boxes.forEach(function (b) {
+            var v = b.value.trim();
+            if (!v) return;
+            any = true;
+            lines.push('## ' + b.dataset.label, '', v, '');
+        });
+        if (!any) lines.push('_No comments entered._', '');
+        return lines.join('\n');
+    }
+
+    document.getElementById('copy').addEventListener('click', function () {
+        var text = assemble();
+        var status = document.getElementById('status');
+        navigator.clipboard.writeText(text).then(function () {
+            status.textContent = 'Copied. Paste it back into the session.';
+        }).catch(function () {
+            var out = document.getElementById('out');
+            out.value = text;
+            out.style.display = 'block';
+            out.select();
+            status.textContent = 'Clipboard blocked — select the text below and copy manually.';
+        });
+    });
+    document.getElementById('show').addEventListener('click', function () {
+        var out = document.getElementById('out');
+        out.value = assemble();
+        out.style.display = out.style.display === 'block' ? 'none' : 'block';
+        document.getElementById('status').textContent = '';
+    });
 </script>
 </body>
 </html>

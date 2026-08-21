@@ -1,647 +1,686 @@
+<meta charset="utf-8">
 <title>Drafthorse Corpus Sweep</title>
 <style>
-:root { --bg:#fbfaf8; --panel:#fff; --ink:#1c1b19; --muted:#6b6862; --line:#e2ded7;
-  --del-bg:#fdecec; --del-ink:#8a1f1f; --add-bg:#e9f6ec; --add-ink:#14622c;
-  --accent:#7a5c2e; --warn:#8a1f1f; --ok:#14622c; --prop:#3f5873; --chipbg:#f4f0e9; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6; --line:#33313c;
-  --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab;
-  --accent:#d5b27a; --warn:#ff9c9c; --ok:#8fe3ab; --prop:#9fb8d8; --chipbg:#26242e; } }
-:root[data-theme="dark"] { --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6;
-  --line:#33313c; --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab;
-  --accent:#d5b27a; --warn:#ff9c9c; --ok:#8fe3ab; --prop:#9fb8d8; --chipbg:#26242e; }
-* { box-sizing:border-box; }
-body { margin:0; padding:2rem 1.25rem 7rem; background:var(--bg); color:var(--ink);
-  font:16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
-.wrap { max-width:64rem; margin:0 auto; }
-header { border-bottom:2px solid var(--line); padding-bottom:1.25rem; margin-bottom:1rem; }
-h1 { font-size:1.5rem; margin:0 0 .4rem; letter-spacing:-.01em; text-wrap:balance; }
-.sub { color:var(--muted); font-size:.9rem; margin:.2rem 0; }
-code { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:.9em; }
-nav.toc { display:flex; flex-wrap:wrap; gap:.5rem; margin:1rem 0 2rem; }
-nav.toc a { font:12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--accent);
-  text-decoration:none; border:1px solid var(--line); border-radius:999px; padding:.45rem .8rem; background:var(--panel); }
-nav.toc a:hover { border-color:var(--accent); }
-h2.sec { font-size:.8rem; letter-spacing:.09em; text-transform:uppercase; color:var(--accent);
-  margin:2.75rem 0 1rem; padding-bottom:.4rem; border-bottom:1px solid var(--line);
-  font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
-.note { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
-  padding:.9rem 1.1rem; margin:1.25rem 0 1.5rem; font-size:.9rem; }
-.note b { color:var(--accent); }
-.note ul, article ul { margin:.5rem 0 0; padding-left:1.2rem; }
-article { background:var(--panel); border:1px solid var(--line); border-radius:6px;
-  padding:1.1rem 1.25rem 1.25rem; margin-bottom:1.25rem; }
-h3 { font-size:1rem; margin:0 0 .3rem; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
-.chip { display:inline-block; font-size:.66rem; letter-spacing:.07em; text-transform:uppercase;
-  border-radius:3px; padding:.14rem .45rem; margin-left:.45rem; vertical-align:middle; border:1px solid; }
-.chip.applied { color:var(--accent); border-color:var(--accent); background:var(--chipbg); }
-.chip.proposed { color:var(--prop); border-color:var(--prop); }
-.chip.pass { color:var(--ok); border-color:var(--ok); }
-.chip.revise { color:var(--warn); border-color:var(--warn); }
-.chip.info { color:var(--muted); border-color:var(--line); }
-.why { color:var(--muted); font-size:.875rem; margin:.35rem 0 .9rem; }
-.field { font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin:.9rem 0 .3rem; }
-.diff { border:1px solid var(--line); border-radius:4px; overflow-x:auto;
-  font:13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; margin:.25rem 0; }
-.diff div { padding:.3rem .7rem; white-space:pre-wrap; word-break:break-word; }
-.del { background:var(--del-bg); color:var(--del-ink); }
-.add { background:var(--add-bg); color:var(--add-ink); }
-.ctx { color:var(--muted); }
-.controls { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:1rem;
-  padding-top:.9rem; border-top:1px solid var(--line); }
-.controls label { font-size:.85rem; display:inline-flex; align-items:center; gap:.3rem; cursor:pointer; }
-label.cmt { display:block; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase;
-  color:var(--muted); margin:.9rem 0 .35rem; }
-textarea { width:100%; min-height:3rem; resize:vertical; padding:.6rem .7rem; background:var(--bg);
-  color:var(--ink); border:1px solid var(--line); border-radius:4px;
-  font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
-textarea:focus, button:focus-visible, nav.toc a:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
-details { background:var(--panel); border:1px solid var(--line); border-radius:6px;
-  padding:.75rem 1.1rem; margin-bottom:.8rem; }
-details summary { cursor:pointer; font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
-details summary .chip { margin-left:.5rem; }
-details .body { padding-top:.6rem; font-size:.9rem; }
-.stats { display:flex; flex-wrap:wrap; gap:.6rem; margin:1rem 0 0; }
-.stat { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:.55rem .9rem; }
-.stat b { display:block; font-size:1.15rem; font-variant-numeric:tabular-nums; }
-.stat span { font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
-.bar { position:sticky; bottom:0; background:var(--panel); border-top:1px solid var(--line);
-  padding:.9rem 1.25rem; margin:2rem -1.25rem -7rem; display:flex; gap:.75rem; align-items:center; flex-wrap:wrap; }
-button { font:inherit; font-size:.9rem; padding:.5rem 1rem; border-radius:4px; cursor:pointer;
-  border:1px solid var(--accent); background:var(--accent); color:var(--panel); }
-button.ghost { background:transparent; color:var(--accent); }
-#status { color:var(--muted); font-size:.85rem; }
-#out { width:100%; min-height:14rem; margin-top:1rem; display:none; }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto !important; } }
+	:root { --bg: #fbfaf8; --panel: #fff; --ink: #1c1b19; --muted: #6b6862; --line: #e2ded7;
+		--del-bg: #fdecec; --del-ink: #8a1f1f; --add-bg: #e9f6ec; --add-ink: #14622c;
+		--accent: #7a5c2e; --warn: #8a1f1f; --ok: #14622c; --prop: #3f5873; --chipbg: #f4f0e9; }
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--bg:     #16151a; --panel: #1e1d23; --ink: #eceaf2; --muted: #9c98a6; --line: #33313c;
+			--del-bg: #3a1e21; --del-ink: #ff9c9c; --add-bg: #1a3324; --add-ink: #8fe3ab;
+			--accent: #d5b27a; --warn: #ff9c9c; --ok: #8fe3ab; --prop: #9fb8d8; --chipbg: #26242e; }
+	}
+	:root[data-theme="dark"] { --bg: #16151a; --panel: #1e1d23; --ink: #eceaf2; --muted: #9c98a6;
+		--line:                      #33313c; --del-bg: #3a1e21; --del-ink: #ff9c9c; --add-bg: #1a3324; --add-ink: #8fe3ab;
+		--accent:                    #d5b27a; --warn: #ff9c9c; --ok: #8fe3ab; --prop: #9fb8d8; --chipbg: #26242e; }
+	* { box-sizing: border-box; }
+	body { margin: 0; padding: 2rem 1.25rem 7rem; background: var(--bg); color: var(--ink);
+		font:      16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+	.wrap { max-width: 64rem; margin: 0 auto; }
+	header { border-bottom: 2px solid var(--line); padding-bottom: 1.25rem; margin-bottom: 1rem; }
+	h1 { font-size: 1.5rem; margin: 0 0 .4rem; letter-spacing: -.01em; text-wrap: balance; }
+	.sub { color: var(--muted); font-size: .9rem; margin: .2rem 0; }
+	code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+	nav.toc { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 2rem; }
+	nav.toc a { font:    12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--accent);
+		text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: .45rem .8rem; background: var(--panel); }
+	nav.toc a:hover { border-color: var(--accent); }
+	h2.sec { font-size: .8rem; letter-spacing: .09em; text-transform: uppercase; color: var(--accent);
+		margin:         2.75rem 0 1rem; padding-bottom: .4rem; border-bottom: 1px solid var(--line);
+		font-family:    ui-monospace, SFMono-Regular, Menlo, monospace; }
+	.note { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+		padding:        .9rem 1.1rem; margin: 1.25rem 0 1.5rem; font-size: .9rem; }
+	.note b { color: var(--accent); }
+	.note ul, article ul { margin: .5rem 0 0; padding-left: 1.2rem; }
+	article { background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+		padding:          1.1rem 1.25rem 1.25rem; margin-bottom: 1.25rem; }
+	h3 { font-size: 1rem; margin: 0 0 .3rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+	.chip { display:   inline-block; font-size: .66rem; letter-spacing: .07em; text-transform: uppercase;
+		border-radius: 3px; padding: .14rem .45rem; margin-left: .45rem; vertical-align: middle; border: 1px solid; }
+	.chip.applied { color: var(--accent); border-color: var(--accent); background: var(--chipbg); }
+	.chip.proposed { color: var(--prop); border-color: var(--prop); }
+	.chip.pass { color: var(--ok); border-color: var(--ok); }
+	.chip.revise { color: var(--warn); border-color: var(--warn); }
+	.chip.info { color: var(--muted); border-color: var(--line); }
+	.why { color: var(--muted); font-size: .875rem; margin: .35rem 0 .9rem; }
+	.field { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin: .9rem 0 .3rem; }
+	.diff { border: 1px solid var(--line); border-radius: 4px; overflow-x: auto;
+		font:       13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; margin: .25rem 0; }
+	.diff div { padding: .3rem .7rem; white-space: pre-wrap; word-break: break-word; }
+	.del { background: var(--del-bg); color: var(--del-ink); }
+	.add { background: var(--add-bg); color: var(--add-ink); }
+	.ctx { color: var(--muted); }
+	.controls { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1rem;
+		padding-top:     .9rem; border-top: 1px solid var(--line); }
+	.controls label { font-size: .85rem; display: inline-flex; align-items: center; gap: .3rem; cursor: pointer; }
+	label.cmt { display: block; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase;
+		color:           var(--muted); margin: .9rem 0 .35rem; }
+	textarea { width: 100%; min-height: 3rem; resize: vertical; padding: .6rem .7rem; background: var(--bg);
+		color:        var(--ink); border: 1px solid var(--line); border-radius: 4px;
+		font:         14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+	textarea:focus, button:focus-visible, nav.toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; }
+	details { background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+		padding:          .75rem 1.1rem; margin-bottom: .8rem; }
+	details summary { cursor: pointer; font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+	details summary .chip { margin-left: .5rem; }
+	details .body { padding-top: .6rem; font-size: .9rem; }
+	.stats { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1rem 0 0; }
+	.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: .55rem .9rem; }
+	.stat b { display: block; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+	.stat span { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+	.bar { position: sticky; bottom: 0; background: var(--panel); border-top: 1px solid var(--line);
+		padding:     .9rem 1.25rem; margin: 2rem -1.25rem -7rem; display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+	button { font: inherit; font-size: .9rem; padding: .5rem 1rem; border-radius: 4px; cursor: pointer;
+		border:    1px solid var(--accent); background: var(--accent); color: var(--panel); }
+	button.ghost { background: transparent; color: var(--accent); }
+	#status { color: var(--muted); font-size: .85rem; }
+	#out { width: 100%; min-height: 14rem; margin-top: 1rem; display: none; }
+	@media (prefers-reduced-motion: reduce) {
+		* { scroll-behavior: auto !important; }
+	}
 </style>
 
 <div class="wrap">
 
-<header>
-  <h1>DraftHorse corpus sweep — implementation review</h1>
-  <p class="sub">Branch <code>drafthorse-corpus-sweep</code> · five commits: <code>432254c</code> sweep · <code>5b3b6ec</code> #42 wiring · <code>64bbc7a</code> wave 6b · <code>cc863e7</code> audit repairs · workspace files. Issues #38, #37 (from #45), #39, #40, #42.</p>
-  <p class="sub">Everything below sits on the branch, unmerged. Approve, adjust, or reject each card; <b>Copy decisions</b> serialises your answers to paste back into the session.</p>
-  <div class="stats">
-    <div class="stat"><b>13</b><span>documents migrated</span></div>
-    <div class="stat"><b>254</b><span>recorded changes</span></div>
-    <div class="stat"><b>34</b><span>slots retired</span></div>
-    <div class="stat"><b>~33</b><span>de-hold trims</span></div>
-    <div class="stat"><b>11</b><span>independent audits</span></div>
-    <div class="stat"><b>30</b><span>audit repairs applied</span></div>
-  </div>
-</header>
+    <header>
+        <h1>DraftHorse corpus sweep — implementation review</h1>
+        <p class="sub">Branch <code>drafthorse-corpus-sweep</code> · five commits: <code>432254c</code> sweep · <code>5b3b6ec</code> #42 wiring · <code>64bbc7a</code> wave 6b · <code>cc863e7</code> audit repairs · workspace files. Issues #38, #37 (from #45), #39, #40, #42.</p>
+        <p class="sub">Everything below sits on the branch, unmerged. Approve, adjust, or reject each card; <b>Copy decisions</b> serialises your answers to paste back into the session.</p>
+        <div class="stats">
+            <div class="stat"><b>13</b><span>documents migrated</span></div>
+            <div class="stat"><b>254</b><span>recorded changes</span></div>
+            <div class="stat"><b>34</b><span>slots retired</span></div>
+            <div class="stat"><b>~33</b><span>de-hold trims</span></div>
+            <div class="stat"><b>11</b><span>independent audits</span></div>
+            <div class="stat"><b>30</b><span>audit repairs applied</span></div>
+        </div>
+    </header>
 
-<nav class="toc">
-  <a href="#verify">Verification</a>
-  <a href="#decisions">Decisions (18)</a>
-  <a href="#repairs">Applied repairs (8 groups)</a>
-  <a href="#audits">Audit verdicts</a>
-  <a href="#log">Migration log</a>
-  <a href="#residual">Residuals</a>
-</nav>
+    <nav class="toc">
+        <a href="#verify">Verification</a>
+        <a href="#decisions">Decisions (18)</a>
+        <a href="#repairs">Applied repairs (8 groups)</a>
+        <a href="#audits">Audit verdicts</a>
+        <a href="#log">Migration log</a>
+        <a href="#residual">Residuals</a>
+    </nav>
 
-<h2 class="sec" id="outcome">Decisions returned — outcomes</h2>
+    <h2 class="sec" id="outcome">Decisions returned — outcomes</h2>
 
-<div class="note">
-  <b>All 26 verdicts processed (2026-08-19); commit <code>4d7d2c4</code> carries the decision batch.</b>
-  <ul>
-    <li><b>Approved as implemented</b> — D1–D7, D9, A1–A8. No further change.</li>
-    <li><b>D8 settled rm-free</b> — no delete grant; +Deliver now presents the sibling draft's removal command for the user to paste and run, and the finished condition names the presentation. Recorded as standing practice: skills never lean on rm grants.</li>
-    <li><b>D10 experiment ran</b> — a cold Sonnet read of +Assemble handled the media handover without a Handover declaration: the citation form, "Call every cited reference", the Terms entry and the handover's own variant preamble carried the whole reading model. The reader inferred a coherent pattern unprompted — the tag marks steps whose <i>whole job</i> is the handover; a mid-engagement conditional fold-in needs none. Looping-dominant stands, validated. One genuine ambiguity surfaced: the Looping catalogue string ("taking a different branch each pass") reads two ways — per-unit re-entry vs internal branching — resolvable only by cross-reference; a catalogue-wording observation for the spec's next pass.</li>
-    <li><b>D11 adopted</b> — the three setup-side classroom steps now start on the absence of their recorded course-state artifact; continuation runs stay out.</li>
-    <li><b>D12 adopted</b> — payload copy guarded: whole-payload command on bare roots only, every pre-existing config file preserved, a filled prior config excludes the step.</li>
-    <li><b>D13 done</b> — stamp removed from telegraphic-converter.md.</li>
-    <li><b>D14 / D15 settled, no change</b> — <code>user-invocable: false</code> keeps the <code>/</code> menu clean and that is the whole intent; Terms stay. Both recorded so future audits dismiss the findings.</li>
-    <li><b>D16 settled by your edits</b> — settled/not-contended entry states on +Review/+Deliver, the error step instructs the exit; verified and committed. One note: "End the build" now opens and closes the engagement — left as written.</li>
-    <li><b>D17 confirmed; investigation filed</b> — <a href="https://github.com/dilberryhoundog/agent-library/issues/46">issue #46</a>: the checker carries no standalone error step; settle the fold-vs-drain schools and amend.</li>
-    <li><b>D18 done</b> — git-box granted the GitHub MCP issue tools.</li>
-  </ul>
-</div>
+    <div class="note">
+        <b>All 26 verdicts processed (2026-08-19); commit <code>4d7d2c4</code> carries the decision batch.</b>
+        <ul>
+            <li><b>Approved as implemented</b> — D1–D7, D9, A1–A8. No further change.</li>
+            <li><b>D8 settled rm-free</b> — no delete grant; +Deliver now presents the sibling draft's removal command for the user to paste and run, and the finished condition names the presentation. Recorded as standing practice: skills never lean on rm grants.</li>
+            <li><b>D10 experiment ran</b> — a cold Sonnet read of +Assemble handled the media handover without a Handover declaration: the citation form, "Call every cited reference", the Terms entry and the handover's own variant preamble carried the whole reading model. The reader inferred a coherent pattern unprompted — the tag marks steps whose <i>whole job</i> is the handover; a mid-engagement conditional fold-in needs none. Looping-dominant stands, validated. One genuine ambiguity surfaced: the Looping catalogue string ("taking a different branch each pass") reads two ways — per-unit re-entry vs internal branching — resolvable only by cross-reference; a catalogue-wording observation for the spec's next pass.</li>
+            <li><b>D11 adopted</b> — the three setup-side classroom steps now start on the absence of their recorded course-state artifact; continuation runs stay out.</li>
+            <li><b>D12 adopted</b> — payload copy guarded: whole-payload command on bare roots only, every pre-existing config file preserved, a filled prior config excludes the step.</li>
+            <li><b>D13 done</b> — stamp removed from telegraphic-converter.md.</li>
+            <li><b>D14 / D15 settled, no change</b> — <code>user-invocable: false</code> keeps the <code>/</code> menu clean and that is the whole intent; Terms stay. Both recorded so future audits dismiss the findings.</li>
+            <li><b>D16 settled by your edits</b> — settled/not-contended entry states on +Review/+Deliver, the error step instructs the exit; verified and committed. One note: "End the build" now opens and closes the engagement — left as written.</li>
+            <li><b>D17 confirmed; investigation filed</b> — <a href="https://github.com/dilberryhoundog/agent-library/issues/46">issue #46</a>: the checker carries no standalone error step; settle the fold-vs-drain schools and amend.</li>
+            <li><b>D18 done</b> — git-box granted the GitHub MCP issue tools.</li>
+        </ul>
+    </div>
 
-<h2 class="sec" id="verify">Verification — the sweep held</h2>
+    <h2 class="sec" id="verify">Verification — the sweep held</h2>
 
-<div class="note">
-  <b>Corpus-wide checks, all green.</b>
-  <ul>
-    <li><code>#### Suggested next actions:</code> — zero live slots; the string survives only in the checker line that names the heading retired (spec-check + saddler copy).</li>
-    <li>"error drain" / "problem step" — zero across <code>extensions/</code> and <code>docs/drafthorse/</code>.</li>
-    <li>Universal preamble byte-exact in all 14 executable surfaces; handover-variant in the four classroom handovers. The known hazard — handovers taking the universal text — did not recur.</li>
-    <li>Saddler regenerated from the spec-check: bodies from <code># Agent Invariants</code> down diff empty; head untouched.</li>
-    <li>Session-limit interruptions forced re-runs that found run 1's edits in place and <b>byte-verified every hunk against the briefs</b> — an unplanned second pass over eight documents.</li>
-    <li>Full agent-recorded data: <code>dev/workspace/reviews/corpus-sweep-migration-results.json</code> and <code>corpus-sweep-audit-results.json</code>.</li>
-  </ul>
-</div>
+    <div class="note">
+        <b>Corpus-wide checks, all green.</b>
+        <ul>
+            <li><code>#### Suggested next actions:</code> — zero live slots; the string survives only in the checker line that names the heading retired (spec-check + saddler copy).</li>
+            <li>"error drain" / "problem step" — zero across <code>extensions/</code> and <code>docs/drafthorse/</code>.</li>
+            <li>Universal preamble byte-exact in all 14 executable surfaces; handover-variant in the four classroom handovers. The known hazard — handovers taking the universal text — did not recur.</li>
+            <li>Saddler regenerated from the spec-check: bodies from <code># Agent Invariants</code> down diff empty; head untouched.</li>
+            <li>Session-limit interruptions forced re-runs that found run 1's edits in place and <b>byte-verified every hunk against the briefs</b> — an unplanned second pass over eight documents.</li>
+            <li>Full agent-recorded data: <code>dev/workspace/reviews/corpus-sweep-migration-results.json</code> and <code>corpus-sweep-audit-results.json</code>.</li>
+        </ul>
+    </div>
 
-<h2 class="sec" id="decisions">Decisions — your call on each</h2>
+    <h2 class="sec" id="decisions">Decisions — your call on each</h2>
 
-<article>
-  <h3>D1 · git-box gains +Conclude<span class="chip applied">applied</span></h3>
-  <p class="why">Load-bearing slot repair (Gap 1). git-box had no success exit: on a plain full success no start condition held and nothing ended the run — the deleted slot was the only exit. A new success step now claims the recorded full-success outcome; +Save a Workflow and +Help already ended their own branches.</p>
-  <div class="diff">
-    <div class="add">+ ## +Conclude</div>
-    <div class="add">+ End the run on a plain success and hand the conversation back.</div>
-    <div class="add">+ **Success step** — Resolves the run's done state and exits.</div>
-    <div class="add">+ Start: the report has been presented · the run's outcome is recorded as a full success</div>
-    <div class="add">+ Finished: the user has the conversation back · the skill is complete</div>
-  </div>
-  <p class="why">Alternative considered: an OR'd terminating finished block on +Present Report — rejected as giving one step two functions (working + success exit).</p>
-  <div class="controls">
-    <label><input type="radio" name="D1" value="approved" checked> Approve</label>
-    <label><input type="radio" name="D1" value="alternative"> Prefer the finished-block shape</label>
-    <label><input type="radio" name="D1" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d1">Comments</label>
-  <textarea id="d1" data-label="D1 · git-box +Conclude" data-radio="D1"></textarea>
-</article>
+    <article>
+        <h3>D1 · git-box gains +Conclude<span class="chip applied">applied</span></h3>
+        <p class="why">Load-bearing slot repair (Gap 1). git-box had no success exit: on a plain full success no start condition held and nothing ended the run — the deleted slot was the only exit. A new success step now claims the recorded full-success outcome; +Save a Workflow and +Help already ended their own branches.</p>
+        <div class="diff">
+            <div class="add">+ ## +Conclude</div>
+            <div class="add">+ End the run on a plain success and hand the conversation back.</div>
+            <div class="add">+ **Success step** — Resolves the run's done state and exits.</div>
+            <div class="add">+ Start: the report has been presented · the run's outcome is recorded as a full success</div>
+            <div class="add">+ Finished: the user has the conversation back · the skill is complete</div>
+        </div>
+        <p class="why">Alternative considered: an OR'd terminating finished block on +Present Report — rejected as giving one step two functions (working + success exit).</p>
+        <div class="controls">
+            <label><input type="radio" name="D1" value="approved" checked> Approve</label>
+            <label><input type="radio" name="D1" value="alternative"> Prefer the finished-block shape</label>
+            <label><input type="radio" name="D1" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d1">Comments</label>
+        <textarea id="d1" data-label="D1 · git-box +Conclude" data-radio="D1"></textarea>
+    </article>
 
-<article>
-  <h3>D2 · agent-switch +Stash no-op ends the run<span class="chip applied">applied</span></h3>
-  <p class="why">The behaviour question the slot audit flagged. Decided: a clean-tree stash no-op ends the run, reported (Option A — preserves shipped slot behaviour). Reason: continuing into an unstashed switch would also arm a chained <code>pop</code> to restore some unrelated pre-existing stash entry onto the new branch. Encoded in conditions: +Read Procedure's guard and +Result's claim both name the no-op; +Result's invariant now admits the no-op note.</p>
-  <p class="why"><b>Auditor dissent, on record:</b> the Sonnet audit read this as the scenario-walk break — a chained <code>SWITCH(stash, switch, pop)</code> on a tree that happens to be clean no-ops the whole procedure instead of switching. Option B (no-op continues, pop guarded separately) would serve that intent but changes shipped behaviour. Your call stands either way.</p>
-  <div class="controls">
-    <label><input type="radio" name="D2" value="approved" checked> Keep Option A (no-op ends run)</label>
-    <label><input type="radio" name="D2" value="option-b"> Switch to Option B (no-op continues)</label>
-    <label><input type="radio" name="D2" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d2">Comments</label>
-  <textarea id="d2" data-label="D2 · +Stash no-op behaviour" data-radio="D2"></textarea>
-</article>
+    <article>
+        <h3>D2 · agent-switch +Stash no-op ends the run<span class="chip applied">applied</span></h3>
+        <p class="why">The behaviour question the slot audit flagged. Decided: a clean-tree stash no-op ends the run, reported (Option A — preserves shipped slot behaviour). Reason: continuing into an unstashed switch would also arm a chained <code>pop</code> to restore some unrelated pre-existing stash entry onto the new branch. Encoded in conditions: +Read Procedure's guard and +Result's claim both name the no-op; +Result's invariant now admits the no-op note.</p>
+        <p class="why"><b>Auditor dissent, on record:</b> the Sonnet audit read this as the scenario-walk break — a chained <code>SWITCH(stash, switch, pop)</code> on a tree that happens to be clean no-ops the whole procedure instead of switching. Option B (no-op continues, pop guarded separately) would serve that intent but changes shipped behaviour. Your call stands either way.</p>
+        <div class="controls">
+            <label><input type="radio" name="D2" value="approved" checked> Keep Option A (no-op ends run)</label>
+            <label><input type="radio" name="D2" value="option-b"> Switch to Option B (no-op continues)</label>
+            <label><input type="radio" name="D2" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d2">Comments</label>
+        <textarea id="d2" data-label="D2 · +Stash no-op behaviour" data-radio="D2"></textarea>
+    </article>
 
-<article>
-  <h3>D3 · versioning's ordering fact — global invariant, not step invariant<span class="chip applied">applied</span></h3>
-  <p class="why">Gap 2 rehome. The slot said "Release the chosen units one at a time, in the order chosen." The plan suggested a +Range step invariant — but +Range finishes before the release loop begins, and a step invariant lapses with its step. Landed global instead:</p>
-  <div class="diff"><div class="add">+ **ALWAYS** release the chosen units one at a time, in the order the user chose.</div></div>
-  <div class="controls">
-    <label><input type="radio" name="D3" value="approved" checked> Approve global</label>
-    <label><input type="radio" name="D3" value="step"> Per the plan — step invariant on +Range</label>
-    <label><input type="radio" name="D3" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d3">Comments</label>
-  <textarea id="d3" data-label="D3 · ordering invariant scope" data-radio="D3"></textarea>
-</article>
+    <article>
+        <h3>D3 · versioning's ordering fact — global invariant, not step invariant<span class="chip applied">applied</span></h3>
+        <p class="why">Gap 2 rehome. The slot said "Release the chosen units one at a time, in the order chosen." The plan suggested a +Range step invariant — but +Range finishes before the release loop begins, and a step invariant lapses with its step. Landed global instead:</p>
+        <div class="diff">
+            <div class="add">+ **ALWAYS** release the chosen units one at a time, in the order the user chose.</div>
+        </div>
+        <div class="controls">
+            <label><input type="radio" name="D3" value="approved" checked> Approve global</label>
+            <label><input type="radio" name="D3" value="step"> Per the plan — step invariant on +Range</label>
+            <label><input type="radio" name="D3" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d3">Comments</label>
+        <textarea id="d3" data-label="D3 · ordering invariant scope" data-radio="D3"></textarea>
+    </article>
 
-<article>
-  <h3>D4 · versioning +Execute drops its half-applied exclusion clause<span class="chip applied">applied</span></h3>
-  <p class="why">#40's Fix 4 endorsed "no part of that release has been applied yet" as a self-de-holding guard. #45 then retired de-hold, and the regenerated checker flags exactly that shape: "a start condition carrying a half-applied exclusion clause — a permanent hold no step can lift, and the disposition in the wrong home." The clause went; safety is carried by the NEVER-re-apply step invariant, the new NEVER-resume global, and the error step's half-applied disposition (inventory moved there per Fix 4's own text).</p>
-  <div class="diff">
-    <div class="del">- the user has approved … and no part of that release — commit, tag, push, GitHub release — has been applied yet, or a release that stopped partway has been surfaced … and they have decided to complete it</div>
-    <div class="add">+ - the user has approved a proposed bump and changelog for the unit, with any edits applied</div>
-  </div>
-  <div class="controls">
-    <label><input type="radio" name="D4" value="approved" checked> Approve</label>
-    <label><input type="radio" name="D4" value="restore"> Restore the exclusion clause</label>
-    <label><input type="radio" name="D4" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d4">Comments</label>
-  <textarea id="d4" data-label="D4 · +Execute exclusion clause" data-radio="D4"></textarea>
-</article>
+    <article>
+        <h3>D4 · versioning +Execute drops its half-applied exclusion clause<span class="chip applied">applied</span></h3>
+        <p class="why">#40's Fix 4 endorsed "no part of that release has been applied yet" as a self-de-holding guard. #45 then retired de-hold, and the regenerated checker flags exactly that shape: "a start condition carrying a half-applied exclusion clause — a permanent hold no step can lift, and the disposition in the wrong home." The clause went; safety is carried by the NEVER-re-apply step invariant, the new NEVER-resume global, and the error step's half-applied disposition (inventory moved there per Fix 4's own text).</p>
+        <div class="diff">
+            <div class="del">- the user has approved … and no part of that release — commit, tag, push, GitHub release — has been applied yet, or a release that stopped partway has been surfaced … and they have decided to complete it</div>
+            <div class="add">+ - the user has approved a proposed bump and changelog for the unit, with any edits applied</div>
+        </div>
+        <div class="controls">
+            <label><input type="radio" name="D4" value="approved" checked> Approve</label>
+            <label><input type="radio" name="D4" value="restore"> Restore the exclusion clause</label>
+            <label><input type="radio" name="D4" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d4">Comments</label>
+        <textarea id="d4" data-label="D4 · +Execute exclusion clause" data-radio="D4"></textarea>
+    </article>
 
-<article>
-  <h3>D5 · #40 interpretation — Fix 12 wholesale; Borderline 8 kept<span class="chip applied">applied</span></h3>
-  <p class="why">The ticked plan boxes (1–7, 9, 12) applied. Fixes 10 and 11 were unticked, but ticked Fix 12's own deletion list names both ("+Range — already covered by Fix 10") and ticked Fix 4 moves the inventory to the error step ("see Fix 11") — so their substance landed through the fixes you did tick: +Range's path-error disposition reports and drains; the error step gained the <code>#### Half-applied release</code> sub-heading with the inventory as accounting. Borderline 8 (the zsh pathspec rationale) stayed, per the unticked box — the audit's why-prose finding against it is dismissed as your decision of record.</p>
-  <div class="controls">
-    <label><input type="radio" name="D5" value="approved" checked> Approve the interpretation</label>
-    <label><input type="radio" name="D5" value="adjust"> Adjust (say which fix)</label>
-    <label><input type="radio" name="D5" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d5">Comments</label>
-  <textarea id="d5" data-label="D5 · #40 fix interpretation" data-radio="D5"></textarea>
-</article>
+    <article>
+        <h3>D5 · #40 interpretation — Fix 12 wholesale; Borderline 8 kept<span class="chip applied">applied</span></h3>
+        <p class="why">The ticked plan boxes (1–7, 9, 12) applied. Fixes 10 and 11 were unticked, but ticked Fix 12's own deletion list names both ("+Range — already covered by Fix 10") and ticked Fix 4 moves the inventory to the error step ("see Fix 11") — so their substance landed through the fixes you did tick: +Range's path-error disposition reports and drains; the error step gained the <code>#### Half-applied release</code> sub-heading with the inventory as accounting. Borderline 8 (the zsh pathspec rationale) stayed, per the unticked box — the audit's why-prose finding against it is dismissed as your decision of record.</p>
+        <div class="controls">
+            <label><input type="radio" name="D5" value="approved" checked> Approve the interpretation</label>
+            <label><input type="radio" name="D5" value="adjust"> Adjust (say which fix)</label>
+            <label><input type="radio" name="D5" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d5">Comments</label>
+        <textarea id="d5" data-label="D5 · #40 fix interpretation" data-radio="D5"></textarea>
+    </article>
 
-<article>
-  <h3>D6 · #39 — set-level checks become a separately-reported pass<span class="chip applied">applied</span></h3>
-  <p class="why">The failure on record: set-level judgment degrades into notation pattern-matching, and silence on a set-level check is indistinguishable from a pass. Minimal shape, no new rule-per-state: +Audit the Steps' trailing sentence became its own <code>#### Judge the set:</code> sub-heading naming the five set-level checks and requiring an explicit verdict each; its finished conditions gain "every set-level check has an explicit recorded verdict"; the Report Format gains a SET-LEVEL line. Saddler regenerated in lockstep. The phase-2 audits ran this shape — every one returned explicit set-level verdicts.</p>
-  <div class="controls">
-    <label><input type="radio" name="D6" value="approved" checked> Approve</label>
-    <label><input type="radio" name="D6" value="revert"> Revert (#39 stays open)</label>
-    <label><input type="radio" name="D6" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d6">Comments</label>
-  <textarea id="d6" data-label="D6 · #39 set-level pass" data-radio="D6"></textarea>
-</article>
+    <article>
+        <h3>D6 · #39 — set-level checks become a separately-reported pass<span class="chip applied">applied</span></h3>
+        <p class="why">The failure on record: set-level judgment degrades into notation pattern-matching, and silence on a set-level check is indistinguishable from a pass. Minimal shape, no new rule-per-state: +Audit the Steps' trailing sentence became its own <code>#### Judge the set:</code> sub-heading naming the five set-level checks and requiring an explicit verdict each; its finished conditions gain "every set-level check has an explicit recorded verdict"; the Report Format gains a SET-LEVEL line. Saddler regenerated in lockstep. The phase-2 audits ran this shape — every one returned explicit set-level verdicts.</p>
+        <div class="controls">
+            <label><input type="radio" name="D6" value="approved" checked> Approve</label>
+            <label><input type="radio" name="D6" value="revert"> Revert (#39 stays open)</label>
+            <label><input type="radio" name="D6" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d6">Comments</label>
+        <textarea id="d6" data-label="D6 · #39 set-level pass" data-radio="D6"></textarea>
+    </article>
 
-<article>
-  <h3>D7 · spec-check's own steps — six de-hold trims, not the estimated two<span class="chip applied">applied</span></h3>
-  <p class="why">All six candidate clauses ("the frame has not been checked", "the steps have not been audited", …) are negated copies of their own step's finished state on one-shot steps — pure class-1 de-hold, none hiding a dependency, nothing destructive to re-run. Post-trim the four audit steps share one start condition ("the document set is assembled") — deliberate multi-in-play the preamble sanctions; +Walk the Scenarios still waits on the four completion states. #37's rough count said 2 of 7; the judgment says 6, each recorded.</p>
-  <div class="controls">
-    <label><input type="radio" name="D7" value="approved" checked> Approve all six</label>
-    <label><input type="radio" name="D7" value="partial"> Restore some (name them)</label>
-    <label><input type="radio" name="D7" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d7">Comments</label>
-  <textarea id="d7" data-label="D7 · spec-check de-hold trims" data-radio="D7"></textarea>
-</article>
+    <article>
+        <h3>D7 · spec-check's own steps — six de-hold trims, not the estimated two<span class="chip applied">applied</span></h3>
+        <p class="why">All six candidate clauses ("the frame has not been checked", "the steps have not been audited", …) are negated copies of their own step's finished state on one-shot steps — pure class-1 de-hold, none hiding a dependency, nothing destructive to re-run. Post-trim the four audit steps share one start condition ("the document set is assembled") — deliberate multi-in-play the preamble sanctions; +Walk the Scenarios still waits on the four completion states. #37's rough count said 2 of 7; the judgment says 6, each recorded.</p>
+        <div class="controls">
+            <label><input type="radio" name="D7" value="approved" checked> Approve all six</label>
+            <label><input type="radio" name="D7" value="partial"> Restore some (name them)</label>
+            <label><input type="radio" name="D7" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d7">Comments</label>
+        <textarea id="d7" data-label="D7 · spec-check de-hold trims" data-radio="D7"></textarea>
+    </article>
 
-<article>
-  <h3>D8 · #42 — conversion writes to a sibling draft, swapped at +Deliver<span class="chip applied">applied</span><span class="chip ok" style="color:var(--ok);border-color:var(--ok)">settled rm-free</span></h3>
-  <p class="why">Mode is now consumed: destination captured as source-vs-output path; +Draft writes conversions to <code>&lt;destination&gt;.draft.md</code>, never overwriting the source pre-acceptance; +Deliver swaps the accepted draft over the original, checked by a mode-qualified finished condition. Executor Document defined in Terms and glossed at the invocation-surface choice. Gate marking (#42 item 4) verified already closed by wave 4.</p>
-  <p class="why"><b>Open (Opus audit):</b> the skill's grants are <code>Read, Write, Edit, Agent(...)</code> — nothing can <i>delete</i> the sibling file, so "no sibling draft remains" is unreachable as granted. Options: (a) add a narrow <code>Bash(rm *.draft.md)</code> grant; (b) soften the condition to "the sibling draft is superseded and may be removed by the user". Recommend (a).</p>
-  <div class="controls">
-    <label><input type="radio" name="D8" value="approved-a" checked> Approve + add the narrow rm grant</label>
-    <label><input type="radio" name="D8" value="approved-b"> Approve + soften the condition</label>
-    <label><input type="radio" name="D8" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d8">Comments</label>
-  <textarea id="d8" data-label="D8 · conversion convention + delete grant" data-radio="D8"></textarea>
-</article>
+    <article>
+        <h3>D8 · #42 — conversion writes to a sibling draft, swapped at +Deliver<span class="chip applied">applied</span><span class="chip ok" style="color:var(--ok);border-color:var(--ok)">settled rm-free</span></h3>
+        <p class="why">Mode is now consumed: destination captured as source-vs-output path; +Draft writes conversions to <code>&lt;destination&gt;.draft.md</code>, never overwriting the source pre-acceptance; +Deliver swaps the accepted draft over the original, checked by a mode-qualified finished condition. Executor Document defined in Terms and glossed at the invocation-surface choice. Gate marking (#42 item 4) verified already closed by wave 4.</p>
+        <p class="why"><b>Open (Opus audit):</b> the skill's grants are <code>Read, Write, Edit, Agent(...)</code> — nothing can <i>delete</i> the sibling file, so "no sibling draft remains" is unreachable as granted. Options: (a) add a narrow <code>Bash(rm *.draft.md)</code> grant; (b) soften the condition to "the sibling draft is superseded and may be removed by the user". Recommend (a).</p>
+        <div class="controls">
+            <label><input type="radio" name="D8" value="approved-a" checked> Approve + add the narrow rm grant</label>
+            <label><input type="radio" name="D8" value="approved-b"> Approve + soften the condition</label>
+            <label><input type="radio" name="D8" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d8">Comments</label>
+        <textarea id="d8" data-label="D8 · conversion convention + delete grant" data-radio="D8"></textarea>
+    </article>
 
-<article>
-  <h3>D9 · Wave 6b — examples in the reference, template to a skeleton<span class="chip applied">applied</span></h3>
-  <p class="why">All six catalogue entries in <code>step-functions.md</code> now carry machinery examples harvested from the freshly migrated corpus (looping from versioning, dormant from +Setup, handover from classroom, success from git-box's +Conclude, the folded-error executor variant from agent-switch); routing is composed with placeholder text — the corpus genuinely has no routing step, and the example says the shape is rare. The template lost its shipped error and success blocks; +Draft the Skill sends the builder to the reference for them, and The Template's description follows. A template copied without that instruction now lacks exit steps by design — the citation is load-bearing.</p>
-  <div class="controls">
-    <label><input type="radio" name="D9" value="approved" checked> Approve</label>
-    <label><input type="radio" name="D9" value="keep-blocks"> Keep blocks in the template too</label>
-    <label><input type="radio" name="D9" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d9">Comments</label>
-  <textarea id="d9" data-label="D9 · 6b template extraction" data-radio="D9"></textarea>
-</article>
+    <article>
+        <h3>D9 · Wave 6b — examples in the reference, template to a skeleton<span class="chip applied">applied</span></h3>
+        <p class="why">All six catalogue entries in <code>step-functions.md</code> now carry machinery examples harvested from the freshly migrated corpus (looping from versioning, dormant from +Setup, handover from classroom, success from git-box's +Conclude, the folded-error executor variant from agent-switch); routing is composed with placeholder text — the corpus genuinely has no routing step, and the example says the shape is rare. The template lost its shipped error and success blocks; +Draft the Skill sends the builder to the reference for them, and The Template's description follows. A template copied without that instruction now lacks exit steps by design — the citation is load-bearing.</p>
+        <div class="controls">
+            <label><input type="radio" name="D9" value="approved" checked> Approve</label>
+            <label><input type="radio" name="D9" value="keep-blocks"> Keep blocks in the template too</label>
+            <label><input type="radio" name="D9" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d9">Comments</label>
+        <textarea id="d9" data-label="D9 · 6b template extraction" data-radio="D9"></textarea>
+    </article>
 
-<article>
-  <h3>D10 · classroom +Assemble declares Looping; the media handover parent goes undeclared<span class="chip applied">applied</span><span class="chip ok" style="color:var(--ok);border-color:var(--ok)">validated by cold read</span></h3>
-  <p class="why">One step, two catalogued shapes: +Assemble a Unit's Documents re-enters per unit (Looping) and folds in Media Processing — Handover (Handover). One function per step — Looping was declared as dominant, so the media parent carries no Handover declaration anywhere. The audit flagged the same collision independently. Option: lift the media fold-in into its own <code>+Source the Unit's Media</code> handover step whose finished condition reads the media state — cleaner but a structural change to the biggest skill.</p>
-  <div class="controls">
-    <label><input type="radio" name="D10" value="approved" checked> Accept Looping-dominant as is</label>
-    <label><input type="radio" name="D10" value="split"> Split a media handover step</label>
-    <label><input type="radio" name="D10" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d10">Comments</label>
-  <textarea id="d10" data-label="D10 · +Assemble function collision" data-radio="D10"></textarea>
-</article>
+    <article>
+        <h3>D10 · classroom +Assemble declares Looping; the media handover parent goes undeclared<span class="chip applied">applied</span><span class="chip ok" style="color:var(--ok);border-color:var(--ok)">validated by cold read</span></h3>
+        <p class="why">One step, two catalogued shapes: +Assemble a Unit's Documents re-enters per unit (Looping) and folds in Media Processing — Handover (Handover). One function per step — Looping was declared as dominant, so the media parent carries no Handover declaration anywhere. The audit flagged the same collision independently. Option: lift the media fold-in into its own <code>+Source the Unit's Media</code> handover step whose finished condition reads the media state — cleaner but a structural change to the biggest skill.</p>
+        <div class="controls">
+            <label><input type="radio" name="D10" value="approved" checked> Accept Looping-dominant as is</label>
+            <label><input type="radio" name="D10" value="split"> Split a media handover step</label>
+            <label><input type="radio" name="D10" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d10">Comments</label>
+        <textarea id="d10" data-label="D10 · +Assemble function collision" data-radio="D10"></textarea>
+    </article>
 
-<article>
-  <h3>D11 · classroom — continuation runs re-enter the setup steps<span class="chip applied">adopted · applied</span></h3>
-  <p class="why">Opus audit: intent settled as "continuing a course" matches no start condition — a continuation is just "the run is a build", so +Collect Subject Matter, +Align the Build and +Choose Course and Lesson Shapes all re-hold in a fresh session and re-ask what a prior session recorded in <code>CLAUDE.md</code>. Proposed: condition the three setup-side steps on the absence of the recorded artifact ("no saved subject matter for this course", "no recorded structure", "no chosen shapes") — durable-state naming, not de-hold, since a continuation run HAS the recorded state and stays out.</p>
-  <div class="controls">
-    <label><input type="radio" name="D11" value="adopt" checked> Adopt the proposal</label>
-    <label><input type="radio" name="D11" value="skip"> Leave as is</label>
-    <label><input type="radio" name="D11" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d11">Comments</label>
-  <textarea id="d11" data-label="D11 · continuation re-entry" data-radio="D11"></textarea>
-</article>
+    <article>
+        <h3>D11 · classroom — continuation runs re-enter the setup steps<span class="chip applied">adopted · applied</span></h3>
+        <p class="why">Opus audit: intent settled as "continuing a course" matches no start condition — a continuation is just "the run is a build", so +Collect Subject Matter, +Align the Build and +Choose Course and Lesson Shapes all re-hold in a fresh session and re-ask what a prior session recorded in <code>CLAUDE.md</code>. Proposed: condition the three setup-side steps on the absence of the recorded artifact ("no saved subject matter for this course", "no recorded structure", "no chosen shapes") — durable-state naming, not de-hold, since a continuation run HAS the recorded state and stays out.</p>
+        <div class="controls">
+            <label><input type="radio" name="D11" value="adopt" checked> Adopt the proposal</label>
+            <label><input type="radio" name="D11" value="skip"> Leave as is</label>
+            <label><input type="radio" name="D11" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d11">Comments</label>
+        <textarea id="d11" data-label="D11 · continuation re-entry" data-radio="D11"></textarea>
+    </article>
 
-<article>
-  <h3>D12 · setup-handover's payload copy can overwrite a family's filled config<span class="chip applied">adopted · applied</span></h3>
-  <p class="why">The sharpest audit catch. <code>+Copy the Init Payload</code> guards <code>CLAUDE.md</code> alone, but <code>cp -a "${CLAUDE_PLUGIN_ROOT}/templates/." .</code> writes the whole payload over whatever is at the root. A re-bootstrap — or a project whose signal rule was removed while its config survived — silently overwrites a filled <code>global-requirements.md</code> and the <code>students/</code> contents with starter placeholders. Proposed: extend the preservation rule to every pre-existing config file (copy only what is absent, merge what exists), and exclude an already-configured root from the step's start condition so that state falls to the parent's error step.</p>
-  <div class="controls">
-    <label><input type="radio" name="D12" value="adopt" checked> Adopt the guard</label>
-    <label><input type="radio" name="D12" value="skip"> Leave as is</label>
-    <label><input type="radio" name="D12" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d12">Comments</label>
-  <textarea id="d12" data-label="D12 · setup-handover cp -a guard" data-radio="D12"></textarea>
-</article>
+    <article>
+        <h3>D12 · setup-handover's payload copy can overwrite a family's filled config<span class="chip applied">adopted · applied</span></h3>
+        <p class="why">The sharpest audit catch. <code>+Copy the Init Payload</code> guards <code>CLAUDE.md</code> alone, but <code>cp -a "${CLAUDE_PLUGIN_ROOT}/templates/." .</code> writes the whole payload over whatever is at the root. A re-bootstrap — or a project whose signal rule was removed while its config survived — silently overwrites a filled <code>global-requirements.md</code> and the <code>students/</code> contents with starter placeholders. Proposed: extend the preservation rule to every pre-existing config file (copy only what is absent, merge what exists), and exclude an already-configured root from the step's start condition so that state falls to the parent's error step.</p>
+        <div class="controls">
+            <label><input type="radio" name="D12" value="adopt" checked> Adopt the guard</label>
+            <label><input type="radio" name="D12" value="skip"> Leave as is</label>
+            <label><input type="radio" name="D12" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d12">Comments</label>
+        <textarea id="d12" data-label="D12 · setup-handover cp -a guard" data-radio="D12"></textarea>
+    </article>
 
-<article>
-  <h3>D13 · telegraphic-converter carries the DraftHorse stamp with no scaffold<span class="chip applied">stamp removed</span></h3>
-  <p class="why"><code>extensions/agents/telegraphic-converter.md</code> declares <code>harness-format: DraftHorse</code> but has no dividers, no steps, no invariants — by the checker's own rule it is not reviewable as a DraftHorse document. It sat in no plan, so it was flagged rather than touched. Recommend: remove the stamp (the document is a plain agent prompt and works as one). Alternative: convert it properly via the drafthorse skill.</p>
-  <div class="controls">
-    <label><input type="radio" name="D13" value="remove-stamp" checked> Remove the stamp</label>
-    <label><input type="radio" name="D13" value="convert"> Convert it to DraftHorse</label>
-    <label><input type="radio" name="D13" value="leave"> Leave as is</label>
-  </div>
-  <label class="cmt" for="d13">Comments</label>
-  <textarea id="d13" data-label="D13 · telegraphic-converter stamp" data-radio="D13"></textarea>
-</article>
+    <article>
+        <h3>D13 · telegraphic-converter carries the DraftHorse stamp with no scaffold<span class="chip applied">stamp removed</span></h3>
+        <p class="why"><code>extensions/agents/telegraphic-converter.md</code> declares <code>harness-format: DraftHorse</code> but has no dividers, no steps, no invariants — by the checker's own rule it is not reviewable as a DraftHorse document. It sat in no plan, so it was flagged rather than touched. Recommend: remove the stamp (the document is a plain agent prompt and works as one). Alternative: convert it properly via the drafthorse skill.</p>
+        <div class="controls">
+            <label><input type="radio" name="D13" value="remove-stamp" checked> Remove the stamp</label>
+            <label><input type="radio" name="D13" value="convert"> Convert it to DraftHorse</label>
+            <label><input type="radio" name="D13" value="leave"> Leave as is</label>
+        </div>
+        <label class="cmt" for="d13">Comments</label>
+        <textarea id="d13" data-label="D13 · telegraphic-converter stamp" data-radio="D13"></textarea>
+    </article>
 
-<article>
-  <h3>D14 · <code>disable-model-invocation</code> on the three verb skills<span class="chip info">settled — no change</span></h3>
-  <p class="why">Two audits: the verb skills are executor-only (invariant + description say so) yet carry only <code>user-invocable: false</code>, leaving them model-reachable sideways. Not applied because of a live pipeline risk: git-robot invokes them via its <code>Skill(agent-commit)</code> grants, and whether <code>disable-model-invocation: true</code> would block that explicit Skill-tool path needs a hands-on test before it ships — a wrong guess breaks git-box end to end.</p>
-  <div class="controls">
-    <label><input type="radio" name="D14" value="test-first" checked> Test, then apply if safe</label>
-    <label><input type="radio" name="D14" value="skip"> Leave as is</label>
-    <label><input type="radio" name="D14" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d14">Comments</label>
-  <textarea id="d14" data-label="D14 · disable-model-invocation on verb skills" data-radio="D14"></textarea>
-</article>
+    <article>
+        <h3>D14 · <code>disable-model-invocation</code> on the three verb skills<span class="chip info">settled — no change</span></h3>
+        <p class="why">Two audits: the verb skills are executor-only (invariant + description say so) yet carry only <code>user-invocable: false</code>, leaving them model-reachable sideways. Not applied because of a live pipeline risk: git-robot invokes them via its <code>Skill(agent-commit)</code> grants, and whether <code>disable-model-invocation: true</code> would block that explicit Skill-tool path needs a hands-on test before it ships — a wrong guess breaks git-box end to end.</p>
+        <div class="controls">
+            <label><input type="radio" name="D14" value="test-first" checked> Test, then apply if safe</label>
+            <label><input type="radio" name="D14" value="skip"> Leave as is</label>
+            <label><input type="radio" name="D14" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d14">Comments</label>
+        <textarea id="d14" data-label="D14 · disable-model-invocation on verb skills" data-radio="D14"></textarea>
+    </article>
 
-<article>
-  <h3>D15 · verb skills lean on git-robot vocabulary their Terms never define<span class="chip info">settled — no change</span></h3>
-  <p class="why">All three carry <code>Terms: **None at this time**</code> while leaning on <code>Brief</code>, <code>Result</code>, <code>Output Directive</code> — cold-unreadable alone, though they only ever run under git-robot, which defines all three. Two findings pull opposite ways (delete the empty section vs add entries). Proposal closes both: one Terms line per skill — "<b>Brief / Result / Output Directive</b> — supplied by the invoking git-robot agent; this skill is never run without them in context."</p>
-  <div class="controls">
-    <label><input type="radio" name="D15" value="adopt" checked> Add the one-line Terms</label>
-    <label><input type="radio" name="D15" value="delete-section"> Delete the empty Terms sections instead</label>
-    <label><input type="radio" name="D15" value="skip"> Leave as is</label>
-  </div>
-  <label class="cmt" for="d15">Comments</label>
-  <textarea id="d15" data-label="D15 · verb-skill Terms" data-radio="D15"></textarea>
-</article>
+    <article>
+        <h3>D15 · verb skills lean on git-robot vocabulary their Terms never define<span class="chip info">settled — no change</span></h3>
+        <p class="why">All three carry <code>Terms: **None at this time**</code> while leaning on <code>Brief</code>, <code>Result</code>, <code>Output Directive</code> — cold-unreadable alone, though they only ever run under git-robot, which defines all three. Two findings pull opposite ways (delete the empty section vs add entries). Proposal closes both: one Terms line per skill — "<b>Brief / Result / Output Directive</b> — supplied by the invoking git-robot agent; this skill is never run without them in context."</p>
+        <div class="controls">
+            <label><input type="radio" name="D15" value="adopt" checked> Add the one-line Terms</label>
+            <label><input type="radio" name="D15" value="delete-section"> Delete the empty Terms sections instead</label>
+            <label><input type="radio" name="D15" value="skip"> Leave as is</label>
+        </div>
+        <label class="cmt" for="d15">Comments</label>
+        <textarea id="d15" data-label="D15 · verb-skill Terms" data-radio="D15"></textarea>
+    </article>
 
-<article>
-  <h3>D16 · drafthorse pilot — the ended build, and stale steps after a restart<span class="chip applied">settled by your edits</span></h3>
-  <p class="why">Two related Opus findings on the pilot, both framework-adjacent, neither improvised on: (1) +Handle a Problem's finished conditions never state the ended build, so a failed step's start condition still holds after the error step closes; (2) on the withdrawn-approval restart, +Review and +Deliver stay in play against the superseded draft, since their start conditions name the draft's existence rather than a currently-approved upstream artifact. Both touch how the framework models an ended run — the same question versioning answered with +Finish's "the user has ended a failed run" claim. Worth settling once, at the framework level, then propagating.</p>
-  <div class="controls">
-    <label><input type="radio" name="D16" value="settle-framework" checked> Settle at the framework, next branch</label>
-    <label><input type="radio" name="D16" value="patch-pilot"> Patch the pilot now</label>
-    <label><input type="radio" name="D16" value="dismiss"> Dismiss</label>
-  </div>
-  <label class="cmt" for="d16">Comments</label>
-  <textarea id="d16" data-label="D16 · ended-build modelling" data-radio="D16"></textarea>
-</article>
+    <article>
+        <h3>D16 · drafthorse pilot — the ended build, and stale steps after a restart<span class="chip applied">settled by your edits</span></h3>
+        <p class="why">Two related Opus findings on the pilot, both framework-adjacent, neither improvised on: (1) +Handle a Problem's finished conditions never state the ended build, so a failed step's start condition still holds after the error step closes; (2) on the withdrawn-approval restart, +Review and +Deliver stay in play against the superseded draft, since their start conditions name the draft's existence rather than a currently-approved upstream artifact. Both touch how the framework models an ended run — the same question versioning answered with +Finish's "the user has ended a failed run" claim. Worth settling once, at the framework level, then propagating.</p>
+        <div class="controls">
+            <label><input type="radio" name="D16" value="settle-framework" checked> Settle at the framework, next branch</label>
+            <label><input type="radio" name="D16" value="patch-pilot"> Patch the pilot now</label>
+            <label><input type="radio" name="D16" value="dismiss"> Dismiss</label>
+        </div>
+        <label class="cmt" for="d16">Comments</label>
+        <textarea id="d16" data-label="D16 · ended-build modelling" data-radio="D16"></textarea>
+    </article>
 
-<article>
-  <h3>D17 · versioning +Preflight ends by draining, not by an OR block<span class="chip info">confirmed · issue #46 filed</span></h3>
-  <p class="why">The audit wanted a failing-precondition OR block on +Preflight's finished conditions. Kept as designed instead: under #40's clean-run recovery, a failed precondition leaves the step unable to finish and the error step claims it — the plan's own consequence note calls that the intended path. The checker's +Assemble models the other school (an explicit unable-to-proceed OR block); both are legitimate, versioning chose draining. Recorded so the choice is visible, not silent.</p>
-  <div class="controls">
-    <label><input type="radio" name="D17" value="confirmed" checked> Confirm the drain design</label>
-    <label><input type="radio" name="D17" value="or-block"> Add the OR block instead</label>
-    <label><input type="radio" name="D17" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d17">Comments</label>
-  <textarea id="d17" data-label="D17 · +Preflight drain design" data-radio="D17"></textarea>
-</article>
+    <article>
+        <h3>D17 · versioning +Preflight ends by draining, not by an OR block<span class="chip info">confirmed · issue #46 filed</span></h3>
+        <p class="why">The audit wanted a failing-precondition OR block on +Preflight's finished conditions. Kept as designed instead: under #40's clean-run recovery, a failed precondition leaves the step unable to finish and the error step claims it — the plan's own consequence note calls that the intended path. The checker's +Assemble models the other school (an explicit unable-to-proceed OR block); both are legitimate, versioning chose draining. Recorded so the choice is visible, not silent.</p>
+        <div class="controls">
+            <label><input type="radio" name="D17" value="confirmed" checked> Confirm the drain design</label>
+            <label><input type="radio" name="D17" value="or-block"> Add the OR block instead</label>
+            <label><input type="radio" name="D17" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d17">Comments</label>
+        <textarea id="d17" data-label="D17 · +Preflight drain design" data-radio="D17"></textarea>
+    </article>
 
-<article>
-  <h3>D18 · git-box creates GitHub issues with no MCP grant<span class="chip applied">grant added</span></h3>
-  <p class="why">+Save a Workflow and +Help create issues via the gh MCP per the Issue Creation reference, but <code>allowed-tools</code> carries no GitHub MCP grant — execution degrades to a permission prompt. Options: add the issue-creation tool grant, or record that prompting is deliberate (an issue is outward-facing; a prompt is arguably the right gate).</p>
-  <div class="controls">
-    <label><input type="radio" name="D18" value="prompt-deliberate" checked> Prompting is deliberate — record it</label>
-    <label><input type="radio" name="D18" value="add-grant"> Add the MCP grant</label>
-    <label><input type="radio" name="D18" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="d18">Comments</label>
-  <textarea id="d18" data-label="D18 · git-box issue-creation grant" data-radio="D18"></textarea>
-</article>
+    <article>
+        <h3>D18 · git-box creates GitHub issues with no MCP grant<span class="chip applied">grant added</span></h3>
+        <p class="why">+Save a Workflow and +Help create issues via the gh MCP per the Issue Creation reference, but <code>allowed-tools</code> carries no GitHub MCP grant — execution degrades to a permission prompt. Options: add the issue-creation tool grant, or record that prompting is deliberate (an issue is outward-facing; a prompt is arguably the right gate).</p>
+        <div class="controls">
+            <label><input type="radio" name="D18" value="prompt-deliberate" checked> Prompting is deliberate — record it</label>
+            <label><input type="radio" name="D18" value="add-grant"> Add the MCP grant</label>
+            <label><input type="radio" name="D18" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="d18">Comments</label>
+        <textarea id="d18" data-label="D18 · git-box issue-creation grant" data-radio="D18"></textarea>
+    </article>
 
-<h2 class="sec" id="repairs">Applied audit repairs — approve or revert per group</h2>
+    <h2 class="sec" id="repairs">Applied audit repairs — approve or revert per group</h2>
 
-<div class="note"><b>What these are.</b> Clear-cut findings from the 11 audits, applied in commit <code>cc863e7</code>. Each group lists its edits; the diffs shown are the load-bearing ones. Revert requests are one-commit surgical.</div>
+    <div class="note"><b>What these are.</b> Clear-cut findings from the 11 audits, applied in commit <code>cc863e7</code>. Each group lists its edits; the diffs shown are the load-bearing ones. Revert requests are one-commit surgical.</div>
 
-<article>
-  <h3>A1 · versioning<span class="chip applied">5 repairs</span></h3>
-  <ul>
-    <li><b>One home for repairable path state</b> — the error step's examples dropped "an unresolvable config, an unresolvable unit path"; dormant +Setup claims config repair (matches Fix 12's dividing line), the remainder still catches the rest.</li>
-    <li><b>Scan-outcome vocabulary unified</b> — a skipped or failed scan visibly satisfies +Propose's start:</li>
-  </ul>
-  <div class="diff">
-    <div class="del">- no breaking-change verdict is recorded for it&nbsp;&nbsp;·&nbsp;&nbsp;a breaking-change verdict is recorded for it</div>
-    <div class="add">+ no scan outcome is recorded for it&nbsp;&nbsp;·&nbsp;&nbsp;a scan outcome is recorded for it — a verdict, a skip, or a failure</div>
-  </div>
-  <ul>
-    <li><b>State terms on +Finish's abandoned claim</b> — "the user has ended the run at the error step" → "the user has ended a failed run" (a step names no other step).</li>
-    <li><b>Re-tagging rule to one home</b> — the error-step restatement trimmed; the global invariant carries it.</li>
-    <li><b>Chosen Unit defined in Terms</b> — a named unit counts as chosen; closes the cold-readability gap the audit found.</li>
-  </ul>
-  <div class="controls">
-    <label><input type="radio" name="A1" value="approved" checked> Approve</label>
-    <label><input type="radio" name="A1" value="revert"> Revert (say which)</label>
-    <label><input type="radio" name="A1" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="a1">Comments</label>
-  <textarea id="a1" data-label="A1 · versioning repairs" data-radio="A1"></textarea>
-</article>
+    <article>
+        <h3>A1 · versioning<span class="chip applied">5 repairs</span></h3>
+        <ul>
+            <li><b>One home for repairable path state</b> — the error step's examples dropped "an unresolvable config, an unresolvable unit path"; dormant +Setup claims config repair (matches Fix 12's dividing line), the remainder still catches the rest.</li>
+            <li><b>Scan-outcome vocabulary unified</b> — a skipped or failed scan visibly satisfies +Propose's start:</li>
+        </ul>
+        <div class="diff">
+            <div class="del">- no breaking-change verdict is recorded for it&nbsp;&nbsp;·&nbsp;&nbsp;a breaking-change verdict is recorded for it</div>
+            <div class="add">+ no scan outcome is recorded for it&nbsp;&nbsp;·&nbsp;&nbsp;a scan outcome is recorded for it — a verdict, a skip, or a failure</div>
+        </div>
+        <ul>
+            <li><b>State terms on +Finish's abandoned claim</b> — "the user has ended the run at the error step" → "the user has ended a failed run" (a step names no other step).</li>
+            <li><b>Re-tagging rule to one home</b> — the error-step restatement trimmed; the global invariant carries it.</li>
+            <li><b>Chosen Unit defined in Terms</b> — a named unit counts as chosen; closes the cold-readability gap the audit found.</li>
+        </ul>
+        <div class="controls">
+            <label><input type="radio" name="A1" value="approved" checked> Approve</label>
+            <label><input type="radio" name="A1" value="revert"> Revert (say which)</label>
+            <label><input type="radio" name="A1" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="a1">Comments</label>
+        <textarea id="a1" data-label="A1 · versioning repairs" data-radio="A1"></textarea>
+    </article>
 
-<article>
-  <h3>A2 · git-box<span class="chip applied">5 repairs</span></h3>
-  <ul>
-    <li><b>Out-of-scope requests close the step</b> — +Gather Context gains an OR finished block (told, offered main-chat help, skill complete); previously a declined request had no contractual stopping point. Scenario-walk break, now closed.</li>
-    <li><b>A failed invocation closes +Call Agent</b> — OR finished block; the no-mutation invariant now lapses when +Help takes over.</li>
-    <li><b>Agent decision back in the machinery</b> — moved above Step invariants; its trailing task-overview instruction moved into the engagement.</li>
-    <li><b>Git Robot Agent cited at its moments</b> — the scope test and the brief-writing both link it; the inline procedure restatement now derives from the reference.</li>
-    <li><b>Workflow table links</b> — bare <code>workflows/…</code> paths became derived-text links.</li>
-  </ul>
-  <div class="controls">
-    <label><input type="radio" name="A2" value="approved" checked> Approve</label>
-    <label><input type="radio" name="A2" value="revert"> Revert (say which)</label>
-    <label><input type="radio" name="A2" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="a2">Comments</label>
-  <textarea id="a2" data-label="A2 · git-box repairs" data-radio="A2"></textarea>
-</article>
+    <article>
+        <h3>A2 · git-box<span class="chip applied">5 repairs</span></h3>
+        <ul>
+            <li><b>Out-of-scope requests close the step</b> — +Gather Context gains an OR finished block (told, offered main-chat help, skill complete); previously a declined request had no contractual stopping point. Scenario-walk break, now closed.</li>
+            <li><b>A failed invocation closes +Call Agent</b> — OR finished block; the no-mutation invariant now lapses when +Help takes over.</li>
+            <li><b>Agent decision back in the machinery</b> — moved above Step invariants; its trailing task-overview instruction moved into the engagement.</li>
+            <li><b>Git Robot Agent cited at its moments</b> — the scope test and the brief-writing both link it; the inline procedure restatement now derives from the reference.</li>
+            <li><b>Workflow table links</b> — bare <code>workflows/…</code> paths became derived-text links.</li>
+        </ul>
+        <div class="controls">
+            <label><input type="radio" name="A2" value="approved" checked> Approve</label>
+            <label><input type="radio" name="A2" value="revert"> Revert (say which)</label>
+            <label><input type="radio" name="A2" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="a2">Comments</label>
+        <textarea id="a2" data-label="A2 · git-box repairs" data-radio="A2"></textarea>
+    </article>
 
-<article>
-  <h3>A3 · agent-commit<span class="chip applied">5 repairs</span></h3>
-  <ul>
-    <li><b>A failed commit command is claimed end to end</b> — the audit's broken edge: no condition claimed a <code>git commit</code> failure (hook rejection, git error). +Commit New gains a failure OR block; +Commit Amend's refusal branch covers a failed command; +Result's claim and +Read Procedure's guard both name failure.</li>
-    <li><b>Duplicate anchors renamed</b> — the two <code>#### Commit:</code> engagements became <code>Commit Each Group:</code> / <code>Apply the Amend:</code>.</li>
-    <li><b>Negative mirror trimmed</b> — "Do not guess from filenames…" dropped; the affirmative carries it.</li>
-    <li><b>Reference headings Title Case</b> — five headings aligned with their citation text.</li>
-    <li><b>Typo invariant corrected</b> — stray space and lowercase sentence start.</li>
-  </ul>
-  <div class="controls">
-    <label><input type="radio" name="A3" value="approved" checked> Approve</label>
-    <label><input type="radio" name="A3" value="revert"> Revert (say which)</label>
-    <label><input type="radio" name="A3" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="a3">Comments</label>
-  <textarea id="a3" data-label="A3 · agent-commit repairs" data-radio="A3"></textarea>
-</article>
+    <article>
+        <h3>A3 · agent-commit<span class="chip applied">5 repairs</span></h3>
+        <ul>
+            <li><b>A failed commit command is claimed end to end</b> — the audit's broken edge: no condition claimed a <code>git commit</code> failure (hook rejection, git error). +Commit New gains a failure OR block; +Commit Amend's refusal branch covers a failed command; +Result's claim and +Read Procedure's guard both name failure.</li>
+            <li><b>Duplicate anchors renamed</b> — the two <code>#### Commit:</code> engagements became <code>Commit Each Group:</code> / <code>Apply the Amend:</code>.</li>
+            <li><b>Negative mirror trimmed</b> — "Do not guess from filenames…" dropped; the affirmative carries it.</li>
+            <li><b>Reference headings Title Case</b> — five headings aligned with their citation text.</li>
+            <li><b>Typo invariant corrected</b> — stray space and lowercase sentence start.</li>
+        </ul>
+        <div class="controls">
+            <label><input type="radio" name="A3" value="approved" checked> Approve</label>
+            <label><input type="radio" name="A3" value="revert"> Revert (say which)</label>
+            <label><input type="radio" name="A3" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="a3">Comments</label>
+        <textarea id="a3" data-label="A3 · agent-commit repairs" data-radio="A3"></textarea>
+    </article>
 
-<article>
-  <h3>A4 · agent-switch + agent-push<span class="chip applied">7 repairs</span></h3>
-  <ul>
-    <li>Unused tool grants dropped — <code>rev-parse</code> from switch; <code>rev-parse</code> and <code>branch</code> from push (their invariants forbid improvised commands anyway).</li>
-    <li>switch's three identical <code>### Run:</code> headings renamed (<code>Run the Stash/Switch/Pop:</code>).</li>
-    <li><code>Actions</code>, <code>Switch Outcomes</code>, <code>Push Outcomes</code> cited at their moments of use.</li>
-    <li>+Result's invariant admits the no-op note Option A made load-bearing.</li>
-    <li>Reference headings Title Case; push's "do not force" restatement trimmed to the global invariant's one home.</li>
-  </ul>
-  <div class="controls">
-    <label><input type="radio" name="A4" value="approved" checked> Approve</label>
-    <label><input type="radio" name="A4" value="revert"> Revert (say which)</label>
-    <label><input type="radio" name="A4" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="a4">Comments</label>
-  <textarea id="a4" data-label="A4 · switch/push repairs" data-radio="A4"></textarea>
-</article>
+    <article>
+        <h3>A4 · agent-switch + agent-push<span class="chip applied">7 repairs</span></h3>
+        <ul>
+            <li>Unused tool grants dropped — <code>rev-parse</code> from switch; <code>rev-parse</code> and <code>branch</code> from push (their invariants forbid improvised commands anyway).</li>
+            <li>switch's three identical <code>### Run:</code> headings renamed (<code>Run the Stash/Switch/Pop:</code>).</li>
+            <li><code>Actions</code>, <code>Switch Outcomes</code>, <code>Push Outcomes</code> cited at their moments of use.</li>
+            <li>+Result's invariant admits the no-op note Option A made load-bearing.</li>
+            <li>Reference headings Title Case; push's "do not force" restatement trimmed to the global invariant's one home.</li>
+        </ul>
+        <div class="controls">
+            <label><input type="radio" name="A4" value="approved" checked> Approve</label>
+            <label><input type="radio" name="A4" value="revert"> Revert (say which)</label>
+            <label><input type="radio" name="A4" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="a4">Comments</label>
+        <textarea id="a4" data-label="A4 · switch/push repairs" data-radio="A4"></textarea>
+    </article>
 
-<article>
-  <h3>A5 · git-robot<span class="chip applied">5 repairs</span></h3>
-  <ul>
-    <li>+Report states run completion (<code>- the run is complete</code>) — the audit's forced-revise finding.</li>
-    <li>A failed skill load claims its own finished branch on +Dispatch, matching the engagement's 🚫 path.</li>
-    <li><code>Output Directives</code> cited at Compose the Report.</li>
-    <li>Two comma-splice/capitalisation invariant typos corrected.</li>
-  </ul>
-  <div class="controls">
-    <label><input type="radio" name="A5" value="approved" checked> Approve</label>
-    <label><input type="radio" name="A5" value="revert"> Revert (say which)</label>
-    <label><input type="radio" name="A5" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="a5">Comments</label>
-  <textarea id="a5" data-label="A5 · git-robot repairs" data-radio="A5"></textarea>
-</article>
+    <article>
+        <h3>A5 · git-robot<span class="chip applied">5 repairs</span></h3>
+        <ul>
+            <li>+Report states run completion (<code>- the run is complete</code>) — the audit's forced-revise finding.</li>
+            <li>A failed skill load claims its own finished branch on +Dispatch, matching the engagement's 🚫 path.</li>
+            <li><code>Output Directives</code> cited at Compose the Report.</li>
+            <li>Two comma-splice/capitalisation invariant typos corrected.</li>
+        </ul>
+        <div class="controls">
+            <label><input type="radio" name="A5" value="approved" checked> Approve</label>
+            <label><input type="radio" name="A5" value="revert"> Revert (say which)</label>
+            <label><input type="radio" name="A5" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="a5">Comments</label>
+        <textarea id="a5" data-label="A5 · git-robot repairs" data-radio="A5"></textarea>
+    </article>
 
-<article>
-  <h3>A6 · doc-reviewer · course-researcher · breaking-change-detector<span class="chip applied">6 repairs</span></h3>
-  <ul>
-    <li>doc-reviewer: "dummy run" aligned to the body's "cold run" (description + verdict rule); +Report's start reworded so it reads as a precondition, not the step's own work.</li>
-    <li>course-researcher: the error step's remainder claim made generic; its two examples moved to the engagement (the pilot's shape).</li>
-    <li>breaking-change-detector: the all-uncertain case now has a defined verdict (defaults internal, findings carried for the caller — mirrors the existing no-surface default); negative-mirror clause trimmed from the read-only invariant.</li>
-  </ul>
-  <div class="controls">
-    <label><input type="radio" name="A6" value="approved" checked> Approve</label>
-    <label><input type="radio" name="A6" value="revert"> Revert (say which)</label>
-    <label><input type="radio" name="A6" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="a6">Comments</label>
-  <textarea id="a6" data-label="A6 · small-agent repairs" data-radio="A6"></textarea>
-</article>
+    <article>
+        <h3>A6 · doc-reviewer · course-researcher · breaking-change-detector<span class="chip applied">6 repairs</span></h3>
+        <ul>
+            <li>doc-reviewer: "dummy run" aligned to the body's "cold run" (description + verdict rule); +Report's start reworded so it reads as a precondition, not the step's own work.</li>
+            <li>course-researcher: the error step's remainder claim made generic; its two examples moved to the engagement (the pilot's shape).</li>
+            <li>breaking-change-detector: the all-uncertain case now has a defined verdict (defaults internal, findings carried for the caller — mirrors the existing no-surface default); negative-mirror clause trimmed from the read-only invariant.</li>
+        </ul>
+        <div class="controls">
+            <label><input type="radio" name="A6" value="approved" checked> Approve</label>
+            <label><input type="radio" name="A6" value="revert"> Revert (say which)</label>
+            <label><input type="radio" name="A6" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="a6">Comments</label>
+        <textarea id="a6" data-label="A6 · small-agent repairs" data-radio="A6"></textarea>
+    </article>
 
-<article>
-  <h3>A7 · classroom + its templates<span class="chip applied">12 repairs</span></h3>
-  <ul>
-    <li><b>Setup-only and stopped runs close +Establish Learner and Intent</b> — OR block dovetailing +Conclude's existing claims; previously the step stayed in play against a finished run.</li>
-    <li><b>Single-lesson builds claimed</b> — +Assemble's start no longer enumerates "the sample or a subsequent one"; a lone lesson no longer drops to the error step.</li>
-    <li><b>Prose out of the condition block</b> — the error-class sentence moved from +Handle a Problem's start block into its engagement.</li>
-    <li><b>Acceptance criteria bound by citation</b> — both build steps' conversion-report criteria now cite the Document Pipeline (which defines every field); the three-place standard is one-place.</li>
-    <li><b>Signal pointer corrected</b> — the marker is emitted by <code>classroom-signal.md</code>, not <code>classroom.md</code>; both rule files now listed by their real jobs. Verified against the installed payload.</li>
-    <li><b>Numbered-invariant citations removed</b> — six template files cited "(Agent Invariant N)" against a numbering scheme that exists nowhere; each rule now stands inline.</li>
-    <li><b>Nested paths resolve from the citing file</b> — ten skill-root-relative citations across lesson-structures, course-structures, blocks and references rewritten as <code>../</code> links.</li>
-  </ul>
-  <div class="controls">
-    <label><input type="radio" name="A7" value="approved" checked> Approve</label>
-    <label><input type="radio" name="A7" value="revert"> Revert (say which)</label>
-    <label><input type="radio" name="A7" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="a7">Comments</label>
-  <textarea id="a7" data-label="A7 · classroom repairs" data-radio="A7"></textarea>
-</article>
+    <article>
+        <h3>A7 · classroom + its templates<span class="chip applied">12 repairs</span></h3>
+        <ul>
+            <li><b>Setup-only and stopped runs close +Establish Learner and Intent</b> — OR block dovetailing +Conclude's existing claims; previously the step stayed in play against a finished run.</li>
+            <li><b>Single-lesson builds claimed</b> — +Assemble's start no longer enumerates "the sample or a subsequent one"; a lone lesson no longer drops to the error step.</li>
+            <li><b>Prose out of the condition block</b> — the error-class sentence moved from +Handle a Problem's start block into its engagement.</li>
+            <li><b>Acceptance criteria bound by citation</b> — both build steps' conversion-report criteria now cite the Document Pipeline (which defines every field); the three-place standard is one-place.</li>
+            <li><b>Signal pointer corrected</b> — the marker is emitted by <code>classroom-signal.md</code>, not <code>classroom.md</code>; both rule files now listed by their real jobs. Verified against the installed payload.</li>
+            <li><b>Numbered-invariant citations removed</b> — six template files cited "(Agent Invariant N)" against a numbering scheme that exists nowhere; each rule now stands inline.</li>
+            <li><b>Nested paths resolve from the citing file</b> — ten skill-root-relative citations across lesson-structures, course-structures, blocks and references rewritten as <code>../</code> links.</li>
+        </ul>
+        <div class="controls">
+            <label><input type="radio" name="A7" value="approved" checked> Approve</label>
+            <label><input type="radio" name="A7" value="revert"> Revert (say which)</label>
+            <label><input type="radio" name="A7" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="a7">Comments</label>
+        <textarea id="a7" data-label="A7 · classroom repairs" data-radio="A7"></textarea>
+    </article>
 
-<article>
-  <h3>A8 · drafthorse skill set<span class="chip applied">6 repairs</span></h3>
-  <ul>
-    <li>+Draft's finished condition is mode-aware ("— in conversion mode, to the sibling draft path") — closes the conversion contradiction.</li>
-    <li>+Draft's completion covers mapped handover docs (vacuously true when none).</li>
-    <li>+Review closes the independent-review offer explicitly (taken and folded in, declined, or unavailable); the stray "approved fix" became "every fix the walk found".</li>
-    <li><code>step-splitting.md</code>'s template pointer resolves from its own folder as a link; <code>collecting-references.md</code>'s guide pointer became a citation.</li>
-    <li>The malformed conjunction sentence in <code>condition-writing.md</code> restated plainly — the one place that teaches the AND rule.</li>
-  </ul>
-  <div class="controls">
-    <label><input type="radio" name="A8" value="approved" checked> Approve</label>
-    <label><input type="radio" name="A8" value="revert"> Revert (say which)</label>
-    <label><input type="radio" name="A8" value="discuss"> Discuss</label>
-  </div>
-  <label class="cmt" for="a8">Comments</label>
-  <textarea id="a8" data-label="A8 · drafthorse-set repairs" data-radio="A8"></textarea>
-</article>
+    <article>
+        <h3>A8 · drafthorse skill set<span class="chip applied">6 repairs</span></h3>
+        <ul>
+            <li>+Draft's finished condition is mode-aware ("— in conversion mode, to the sibling draft path") — closes the conversion contradiction.</li>
+            <li>+Draft's completion covers mapped handover docs (vacuously true when none).</li>
+            <li>+Review closes the independent-review offer explicitly (taken and folded in, declined, or unavailable); the stray "approved fix" became "every fix the walk found".</li>
+            <li><code>step-splitting.md</code>'s template pointer resolves from its own folder as a link; <code>collecting-references.md</code>'s guide pointer became a citation.</li>
+            <li>The malformed conjunction sentence in <code>condition-writing.md</code> restated plainly — the one place that teaches the AND rule.</li>
+        </ul>
+        <div class="controls">
+            <label><input type="radio" name="A8" value="approved" checked> Approve</label>
+            <label><input type="radio" name="A8" value="revert"> Revert (say which)</label>
+            <label><input type="radio" name="A8" value="discuss"> Discuss</label>
+        </div>
+        <label class="cmt" for="a8">Comments</label>
+        <textarea id="a8" data-label="A8 · drafthorse-set repairs" data-radio="A8"></textarea>
+    </article>
 
-<h2 class="sec" id="audits">Audit verdicts — 11 sets, by hand against the spec-check</h2>
+    <h2 class="sec" id="audits">Audit verdicts — 11 sets, by hand against the spec-check</h2>
 
-<div class="note">
-  <b>Verdicts as returned</b> (pre-repair; every forced-revise finding above is either repaired in <code>cc863e7</code> or carded).
-  <ul>
-    <li><b>versioning</b> <span class="chip revise">revise</span> — 9 findings: 2 routing edges (repaired), 7 borderline (repaired or carded). Withdrawn-approval walk held.</li>
-    <li><b>classroom set</b> <span class="chip revise">revise</span> — 14 findings across the set incl. the cp&nbsp;-a guard (D12) and continuation re-entry (D11); 9 repaired.</li>
-    <li><b>git-box</b> <span class="chip revise">revise</span> — 8 findings; the 2 walk-breaks repaired, permissions carded (D18), identity why-prose left (yours to keep).</li>
-    <li><b>agent-commit</b> <span class="chip revise">revise</span> — 8 findings; failure edge repaired; frontmatter carded (D14); Terms carded (D15); Agent-decision placement recorded below.</li>
-    <li><b>agent-switch</b> <span class="chip revise">revise</span> — walk-break claim is the D2 dissent; the rest repaired or carded.</li>
-    <li><b>git-robot</b> <span class="chip revise">revise</span> — termination + failed-load repaired; Bash-grant finding dismissed (below).</li>
-    <li><b>breaking-change-detector</b> <span class="chip revise">revise</span> — both findings repaired.</li>
-    <li><b>drafthorse set</b> <span class="chip revise">revise</span> — 12 findings; 6 repaired, ended-build modelling carded (D16), 3 structural notes in residuals.</li>
-    <li><b>agent-push</b> <span class="chip pass">pass</span> · <b>doc-reviewer</b> <span class="chip pass">pass</span> · <b>course-researcher</b> <span class="chip pass">pass</span> — borderline items repaired or recorded.</li>
-  </ul>
-</div>
+    <div class="note">
+        <b>Verdicts as returned</b> (pre-repair; every forced-revise finding above is either repaired in <code>cc863e7</code> or carded).
+        <ul>
+            <li><b>versioning</b> <span class="chip revise">revise</span> — 9 findings: 2 routing edges (repaired), 7 borderline (repaired or carded). Withdrawn-approval walk held.</li>
+            <li><b>classroom set</b> <span class="chip revise">revise</span> — 14 findings across the set incl. the cp&nbsp;-a guard (D12) and continuation re-entry (D11); 9 repaired.</li>
+            <li><b>git-box</b> <span class="chip revise">revise</span> — 8 findings; the 2 walk-breaks repaired, permissions carded (D18), identity why-prose left (yours to keep).</li>
+            <li><b>agent-commit</b> <span class="chip revise">revise</span> — 8 findings; failure edge repaired; frontmatter carded (D14); Terms carded (D15); Agent-decision placement recorded below.</li>
+            <li><b>agent-switch</b> <span class="chip revise">revise</span> — walk-break claim is the D2 dissent; the rest repaired or carded.</li>
+            <li><b>git-robot</b> <span class="chip revise">revise</span> — termination + failed-load repaired; Bash-grant finding dismissed (below).</li>
+            <li><b>breaking-change-detector</b> <span class="chip revise">revise</span> — both findings repaired.</li>
+            <li><b>drafthorse set</b> <span class="chip revise">revise</span> — 12 findings; 6 repaired, ended-build modelling carded (D16), 3 structural notes in residuals.</li>
+            <li><b>agent-push</b> <span class="chip pass">pass</span> · <b>doc-reviewer</b> <span class="chip pass">pass</span> · <b>course-researcher</b> <span class="chip pass">pass</span> — borderline items repaired or recorded.</li>
+        </ul>
+    </div>
 
-<div class="note">
-  <b>Findings dismissed, with reasons.</b>
-  <ul>
-    <li><b>git-robot's Bash grant "unused"</b> — the grant is load-bearing infrastructure: the verb skills' <code>Bash(git …)</code> permissions transfer through Skill invocation and need the base tool present on the agent. Removing it breaks the pipeline. (The cheap-model miss the tier drop predicted; caught on triage.)</li>
-    <li><b>+Stash no-op as walk-break</b> — a behaviour disagreement with the decided Option A, not a defect; carried as D2's dissent.</li>
-    <li><b>zsh pathspec rationale as why-prose</b> — kept by your #40 Borderline-8 decision of record.</li>
-    <li><b>Known false positives</b> — template assets as signal-mismatched handovers, uncited <code>references/README.md</code> as dead weight, adapted declaration tails on folded error steps: all sanctioned shapes, excluded by the audit brief.</li>
-  </ul>
-</div>
+    <div class="note">
+        <b>Findings dismissed, with reasons.</b>
+        <ul>
+            <li><b>git-robot's Bash grant "unused"</b> — the grant is load-bearing infrastructure: the verb skills' <code>Bash(git …)</code> permissions transfer through Skill invocation and need the base tool present on the agent. Removing it breaks the pipeline. (The cheap-model miss the tier drop predicted; caught on triage.)</li>
+            <li><b>+Stash no-op as walk-break</b> — a behaviour disagreement with the decided Option A, not a defect; carried as D2's dissent.</li>
+            <li><b>zsh pathspec rationale as why-prose</b> — kept by your #40 Borderline-8 decision of record.</li>
+            <li><b>Known false positives</b> — template assets as signal-mismatched handovers, uncited <code>references/README.md</code> as dead weight, adapted declaration tails on folded error steps: all sanctioned shapes, excluded by the audit brief.</li>
+        </ul>
+    </div>
 
-<h2 class="sec" id="log">Migration log — per document</h2>
+    <h2 class="sec" id="log">Migration log — per document</h2>
 
-<details><summary>versioning/SKILL.md <span class="chip info">49 changes</span></summary><div class="body">
-Preamble; 4 slots out (+Range's rehomed to the ordering invariant, Gap-3 OR block on +Finish); all 20 condition blocks to lists; de-hold: 4 trims (+Dispatch, +Preflight, +Range, +Verify), per-unit discriminators kept on the 4 Looping steps; functions: Dormant +Setup, Looping ×4, Success +Finish, Error +Handle a Problem; #40 fixes 1–7, 9, 12 landed (approval-gate invariant deleted, +Execute's resume machinery deleted whole, inventory moved to the error step's new Half-applied release sub-heading, Propose gate compound); 12 citations to links. Flags worth eyes: the <code>#preflight</code> anchor collision (reference wins, links resolve as intended); the error step says nothing about withdrawn approval — +Propose's start re-claims it naturally, so nothing was added.
-</div></details>
+    <details>
+        <summary>versioning/SKILL.md <span class="chip info">49 changes</span></summary>
+        <div class="body">
+            Preamble; 4 slots out (+Range's rehomed to the ordering invariant, Gap-3 OR block on +Finish); all 20 condition blocks to lists; de-hold: 4 trims (+Dispatch, +Preflight, +Range, +Verify), per-unit discriminators kept on the 4 Looping steps; functions: Dormant +Setup, Looping ×4, Success +Finish, Error +Handle a Problem; #40 fixes 1–7, 9, 12 landed (approval-gate invariant deleted, +Execute's resume machinery deleted whole, inventory moved to the error step's new Half-applied release sub-heading, Propose gate compound); 12 citations to links. Flags worth eyes: the <code>#preflight</code> anchor collision (reference wins, links resolve as intended); the error step says nothing about withdrawn approval — +Propose's start re-claims it naturally, so nothing was added.
+        </div>
+    </details>
 
-<details><summary>classroom/SKILL.md <span class="chip info">32 changes</span></summary><div class="body">
-Preamble; all 8 slots verified HINT and deleted; de-hold: 9 trims, 4 discriminators/guards kept ("the approved format has not since been revised" kept as a class-3-style guard); functions: 3 Handover parents (setup, mark-review, deliver-without-renderer), 2 Looping (+Assemble, +Present and Record State — the latter by judgment beyond the brief), Success +Conclude, Error; +Build Remaining Units left undeclared as the supervisory span (the loop iterates inside it). Handover citations verified in exact form. Conditions were already lists. K-flag: error step says nothing about withdrawn approval while the sample-format approval is revocable — compounds with D11; if D11 is adopted the revised-format state gets a claimant.
-</div></details>
+    <details>
+        <summary>classroom/SKILL.md <span class="chip info">32 changes</span></summary>
+        <div class="body">
+            Preamble; all 8 slots verified HINT and deleted; de-hold: 9 trims, 4 discriminators/guards kept ("the approved format has not since been revised" kept as a class-3-style guard); functions: 3 Handover parents (setup, mark-review, deliver-without-renderer), 2 Looping (+Assemble, +Present and Record State — the latter by judgment beyond the brief), Success +Conclude, Error; +Build Remaining Units left undeclared as the supervisory span (the loop iterates inside it). Handover citations verified in exact form. Conditions were already lists. K-flag: error step says nothing about withdrawn approval while the sample-format approval is revocable — compounds with D11; if D11 is adopted the revised-format state gets a claimant.
+        </div>
+    </details>
 
-<details><summary>classroom handovers ×4 <span class="chip info">19 changes</span></summary><div class="body">
-Variant preamble byte-exact in all four (the prior sweep's wrong-preamble hazard did not recur); de-hold: mark-review carried 2 (both trimmed — one more than the inherited count), setup and media-processing 1 each, deliver-without-renderer's negative clause judged a class-2 discriminator and kept with <b>Looping step</b> declared. Flags: mark-review cites the parent's <code>Document Pipeline</code> reference (pre-existing, one-way-rule borderline); setup's <code>Warm the PDF Engine</code> heading collides with its step's anchor; setup's copy-payload invariant restates its engagement — all recorded, none touched.
-</div></details>
+    <details>
+        <summary>classroom handovers ×4 <span class="chip info">19 changes</span></summary>
+        <div class="body">
+            Variant preamble byte-exact in all four (the prior sweep's wrong-preamble hazard did not recur); de-hold: mark-review carried 2 (both trimmed — one more than the inherited count), setup and media-processing 1 each, deliver-without-renderer's negative clause judged a class-2 discriminator and kept with <b>Looping step</b> declared. Flags: mark-review cites the parent's <code>Document Pipeline</code> reference (pre-existing, one-way-rule borderline); setup's <code>Warm the PDF Engine</code> heading collides with its step's anchor; setup's copy-payload invariant restates its engagement — all recorded, none touched.
+        </div>
+    </details>
 
-<details><summary>git-box/SKILL.md <span class="chip info">18 changes</span></summary><div class="body">
-Preamble; 5 de-hold trims; 3 slots out with +Conclude added (D1); dovetail vocabulary aligned to +Present Report's three recorded outcome classes; functions: Success +Conclude, Dormant +Save a Workflow, Error +Help. Flags: "the brief will be written fresh" is future-shaped intent in a finished condition (left); the global invariant names +Call Agent from scaffold level (left); identity-paragraph why-prose (left — your text).
-</div></details>
+    <details>
+        <summary>git-box/SKILL.md <span class="chip info">18 changes</span></summary>
+        <div class="body">
+            Preamble; 5 de-hold trims; 3 slots out with +Conclude added (D1); dovetail vocabulary aligned to +Present Report's three recorded outcome classes; functions: Success +Conclude, Dormant +Save a Workflow, Error +Help. Flags: "the brief will be written fresh" is future-shaped intent in a finished condition (left); the global invariant names +Call Agent from scaffold level (left); identity-paragraph why-prose (left — your text).
+        </div>
+    </details>
 
-<details><summary>agent-commit · agent-push · agent-switch <span class="chip info">22 · 15 · 21 changes</span></summary><div class="body">
-Preamble ×3; 24 prose condition blocks to lists; 12 slots out with the three +Result Gap-1 repairs (final-message emission + "the skill is complete"); folded <b>Error step</b> declarations per the executor exception on each +Result; <b>Looping step</b> on each +Read Procedure; de-hold: commit's two made-clauses trimmed, push's attempted-clause trimmed, run-ended guards kept and (switch) extended per D2. The "Never invent or force an empty commit" instruction moved from a finished condition to a step invariant — recorded judgment. Agent-decision placement anomalies (inside engagements, two of them arguably bounded forks) recorded in residuals, untouched.
-</div></details>
+    <details>
+        <summary>agent-commit · agent-push · agent-switch <span class="chip info">22 · 15 · 21 changes</span></summary>
+        <div class="body">
+            Preamble ×3; 24 prose condition blocks to lists; 12 slots out with the three +Result Gap-1 repairs (final-message emission + "the skill is complete"); folded <b>Error step</b> declarations per the executor exception on each +Result; <b>Looping step</b> on each +Read Procedure; de-hold: commit's two made-clauses trimmed, push's attempted-clause trimmed, run-ended guards kept and (switch) extended per D2. The "Never invent or force an empty commit" instruction moved from a finished condition to a step invariant — recorded judgment. Agent-decision placement anomalies (inside engagements, two of them arguably bounded forks) recorded in residuals, untouched.
+        </div>
+    </details>
 
-<details><summary>git-robot.md <span class="chip info">17 changes</span></summary><div class="body">
-Preamble; 6 blocks to lists; 3 slots out; "as the final message text" adopted on +Report (the ambiguous-site settlement); Looping ×2 declared; folded Error on +Report. Flags: +Dispatch may re-hold for the next procedure while one executes — the bound lives in engagement prose ("complete the first procedure before moving down"); pre-existing, recorded.
-</div></details>
+    <details>
+        <summary>git-robot.md <span class="chip info">17 changes</span></summary>
+        <div class="body">
+            Preamble; 6 blocks to lists; 3 slots out; "as the final message text" adopted on +Report (the ambiguous-site settlement); Looping ×2 declared; folded Error on +Report. Flags: +Dispatch may re-hold for the next procedure while one executes — the bound lives in engagement prose ("complete the first procedure before moving down"); pre-existing, recorded.
+        </div>
+    </details>
 
-<details><summary>doc-reviewer · course-researcher · breaking-change-detector <span class="chip info">17 · 17 · 15 changes</span></summary><div class="body">
-Preamble ×3; ~22 blocks to lists; 4 slots out; folded-error declarations on the reporting exits; de-hold: 3 + 2 + 2 trims — each file carried more than the inherited one-per-file count, all class-1, all recorded with judgment (course-researcher's set-level clause considered as a loop recast and rejected). Residual: doc-reviewer's "seven asks" count couples the directive to the Defect Classes list.
-</div></details>
+    <details>
+        <summary>doc-reviewer · course-researcher · breaking-change-detector <span class="chip info">17 · 17 · 15 changes</span></summary>
+        <div class="body">
+            Preamble ×3; ~22 blocks to lists; 4 slots out; folded-error declarations on the reporting exits; de-hold: 3 + 2 + 2 trims — each file carried more than the inherited one-per-file count, all class-1, all recorded with judgment (course-researcher's set-level clause considered as a loop recast and rejected). Residual: doc-reviewer's "seven asks" count couples the directive to the Defect Classes list.
+        </div>
+    </details>
 
-<details><summary>spec-check + saddler <span class="chip info">10 changes</span></summary><div class="body">
-Six de-hold trims in the checker's own steps (D7); #39's set-level pass (D6); saddler regenerated — head byte-identical to HEAD, bodies diff empty before and after (the double-check that the regeneration rule held). The retired-slot check line is the only surviving slot string, by design.
-</div></details>
+    <details>
+        <summary>spec-check + saddler <span class="chip info">10 changes</span></summary>
+        <div class="body">
+            Six de-hold trims in the checker's own steps (D7); #39's set-level pass (D6); saddler regenerated — head byte-identical to HEAD, bodies diff empty before and after (the double-check that the regeneration rule held). The retired-slot check line is the only surviving slot string, by design.
+        </div>
+    </details>
 
-<details><summary>drafthorse/SKILL.md + templates + references <span class="chip info">7 + 10 changes</span></summary><div class="body">
-#42's three items (D8) in six precise sites; wave 6b (D9) across the reference, the template and the citation. Gate marking verified closed: exactly five approval-bearing gates, none ambiguous. Flags: the handover definition lives in three homes (Scaffold, Terms, step-splitting) — structural note; The Scaffold reference is cited by no step — recorded, not culled.
-</div></details>
+    <details>
+        <summary>drafthorse/SKILL.md + templates + references <span class="chip info">7 + 10 changes</span></summary>
+        <div class="body">
+            #42's three items (D8) in six precise sites; wave 6b (D9) across the reference, the template and the citation. Gate marking verified closed: exactly five approval-bearing gates, none ambiguous. Flags: the handover definition lives in three homes (Scaffold, Terms, step-splitting) — structural note; The Scaffold reference is cited by no step — recorded, not culled.
+        </div>
+    </details>
 
-<h2 class="sec" id="residual">Residuals — recorded, no action taken</h2>
+    <h2 class="sec" id="residual">Residuals — recorded, no action taken</h2>
 
-<div class="note">
-  <ul>
-    <li><b>Agent-decision placement</b> in the three verb skills: agent-commit's sits mid-engagement (it depends on the Check-for-Push result), push's is arguably a bounded fork belonging in prose, switch's sits after the H3. Pre-existing shapes; moving them blind risks reading-order bugs, so they're held for a deliberate pass. Note: distinct from the known-deliberate <code>#### Decision:</code>-above-H3 quirk.</li>
-    <li><b>Anchor collisions</b> — versioning's <code>## Preflight</code> / <code>## +Preflight</code> and setup-handover's Warm-the-PDF-Engine pair slug identically; first-in-document wins and every live link resolves to its intended target.</li>
-    <li><b>breaking-change-detector frontmatter carries <code>model: sonnet</code></b> — commit <code>219046f</code> removed sonnet from agents; the DraftHorse conversion reintroduced it. One-line change whenever you want it.</li>
-    <li><b>git-box's Git Robot Agent reference</b> lists no actions under PUSH while the format section implies procedures carry actions — data gap in the reference.</li>
-    <li><b>Hard line-wrap and a "Record — Record" splice</b> in versioning's +Propose/+Breaking Changes engagements were repaired as typos; single-line formatting otherwise held.</li>
-    <li><b>Wave 7 (releases)</b> is deliberately not in this branch: agent-tools, chat-tools, dev-tools and classroom all carry affected documents, cut via <code>/dev-tools:versioning</code> after merge. The predecessor branch's uncut classroom release still needs checking first.</li>
-  </ul>
-</div>
+    <div class="note">
+        <ul>
+            <li><b>Agent-decision placement</b> in the three verb skills: agent-commit's sits mid-engagement (it depends on the Check-for-Push result), push's is arguably a bounded fork belonging in prose, switch's sits after the H3. Pre-existing shapes; moving them blind risks reading-order bugs, so they're held for a deliberate pass. Note: distinct from the known-deliberate <code>#### Decision:</code>-above-H3 quirk.</li>
+            <li><b>Anchor collisions</b> — versioning's <code>## Preflight</code> / <code>## +Preflight</code> and setup-handover's Warm-the-PDF-Engine pair slug identically; first-in-document wins and every live link resolves to its intended target.</li>
+            <li><b>breaking-change-detector frontmatter carries <code>model: sonnet</code></b> — commit <code>219046f</code> removed sonnet from agents; the DraftHorse conversion reintroduced it. One-line change whenever you want it.</li>
+            <li><b>git-box's Git Robot Agent reference</b> lists no actions under PUSH while the format section implies procedures carry actions — data gap in the reference.</li>
+            <li><b>Hard line-wrap and a "Record — Record" splice</b> in versioning's +Propose/+Breaking Changes engagements were repaired as typos; single-line formatting otherwise held.</li>
+            <li><b>Wave 7 (releases)</b> is deliberately not in this branch: agent-tools, chat-tools, dev-tools and classroom all carry affected documents, cut via <code>/dev-tools:versioning</code> after merge. The predecessor branch's uncut classroom release still needs checking first.</li>
+        </ul>
+    </div>
 
-<div class="bar">
-  <button id="copy">Copy decisions</button>
-  <button class="ghost" id="show">Show as text</button>
-  <button class="ghost" id="allyes">First option for all</button>
-  <span id="status"></span>
-</div>
+    <div class="bar">
+        <button id="copy">Copy decisions</button>
+        <button class="ghost" id="show">Show as text</button>
+        <button class="ghost" id="allyes">First option for all</button>
+        <span id="status"></span>
+    </div>
 
-<textarea id="out" readonly aria-label="Decisions as text"></textarea>
+    <textarea id="out" readonly aria-label="Decisions as text"></textarea>
 
 </div>
 <script>
-function assemble() {
-  var boxes = document.querySelectorAll('textarea[data-label]');
-  var lines = ['# Corpus sweep review — decisions', ''];
-  boxes.forEach(function (b) {
-    var name = b.dataset.radio;
-    var picked = document.querySelector('input[name="' + name + '"]:checked');
-    var verdict = picked ? picked.value.toUpperCase() : 'NO ANSWER';
-    var v = b.value.trim();
-    lines.push('## ' + b.dataset.label + ' — ' + verdict);
-    lines.push('');
-    if (v) { lines.push(v, ''); }
-  });
-  return lines.join('\n');
-}
-document.getElementById('copy').addEventListener('click', function () {
-  var text = assemble(), status = document.getElementById('status');
-  navigator.clipboard.writeText(text).then(function () {
-    status.textContent = 'Copied. Paste it back into the session.';
-  }).catch(function () {
-    var out = document.getElementById('out');
-    out.value = text; out.style.display = 'block'; out.select();
-    status.textContent = 'Clipboard blocked — select the text below and copy manually.';
-  });
-});
-document.getElementById('show').addEventListener('click', function () {
-  var out = document.getElementById('out');
-  out.value = assemble();
-  out.style.display = out.style.display === 'block' ? 'none' : 'block';
-  document.getElementById('status').textContent = '';
-});
-document.getElementById('allyes').addEventListener('click', function () {
-  document.querySelectorAll('article').forEach(function (a) {
-    var first = a.querySelector('input[type="radio"]');
-    if (first) first.checked = true;
-  });
-  document.getElementById('status').textContent = 'All set to the first option.';
-});
+    function assemble() {
+        var boxes = document.querySelectorAll('textarea[data-label]');
+        var lines = ['# Corpus sweep review — decisions', ''];
+        boxes.forEach(function (b) {
+            var name = b.dataset.radio;
+            var picked = document.querySelector('input[name="' + name + '"]:checked');
+            var verdict = picked ? picked.value.toUpperCase() : 'NO ANSWER';
+            var v = b.value.trim();
+            lines.push('## ' + b.dataset.label + ' — ' + verdict);
+            lines.push('');
+            if (v) {
+                lines.push(v, '');
+            }
+        });
+        return lines.join('\n');
+    }
+
+    document.getElementById('copy').addEventListener('click', function () {
+        var text = assemble(), status = document.getElementById('status');
+        navigator.clipboard.writeText(text).then(function () {
+            status.textContent = 'Copied. Paste it back into the session.';
+        }).catch(function () {
+            var out = document.getElementById('out');
+            out.value = text;
+            out.style.display = 'block';
+            out.select();
+            status.textContent = 'Clipboard blocked — select the text below and copy manually.';
+        });
+    });
+    document.getElementById('show').addEventListener('click', function () {
+        var out = document.getElementById('out');
+        out.value = assemble();
+        out.style.display = out.style.display === 'block' ? 'none' : 'block';
+        document.getElementById('status').textContent = '';
+    });
+    document.getElementById('allyes').addEventListener('click', function () {
+        document.querySelectorAll('article').forEach(function (a) {
+            var first = a.querySelector('input[type="radio"]');
+            if (first) first.checked = true;
+        });
+        document.getElementById('status').textContent = 'All set to the first option.';
+    });
 </script>
