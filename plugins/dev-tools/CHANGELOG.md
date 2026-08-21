@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-08-21
+
+### Changed
+
+- `versioning` skill no longer auto-resumes a failed release on re-invocation. A half-applied release now ends the run and reports exactly what state the repository is in and which manual commands would complete it — the user repairs by hand rather than the skill inventorying and finishing automatically.
+- `agent-push` and `agent-switch` skills had unused `git rev-parse`/`git branch` tool grants removed (dead weight — neither command was invoked in either skill).
+- `git-box` skill gained `issue_write`/`search_issues` GitHub tool grants for workflow-proposal issue creation.
+- `git-box`, `agent-commit`, `agent-push`, `agent-switch`, `versioning`, `breaking-change-detector`, and `git-robot` documents migrated to the upgraded DraftHorse step-anatomy spec (internal authoring format only — no invocation surface changed).
+
+### Fixed
+
+- Audit repairs applied across the corpus swept to the upgraded step-anatomy spec (review decisions D8, D11, D12, D13, D16, D18).
+
 ## [0.9.2] - 2026-08-09
 
 ### Fixed
