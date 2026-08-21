@@ -106,7 +106,8 @@ button.ghost { background:transparent; color:var(--accent); }
   <div class="stats">
     <div class="stat"><b>8</b><span>phases</span></div>
     <div class="stat"><b>2</b><span>workflows kept</span></div>
-    <div class="stat"><b>12</b><span>decisions</span></div>
+    <div class="stat"><b>12</b><span>settled</span></div>
+    <div class="stat"><b>4</b><span>round 2 open</span></div>
     <div class="stat"><b>2.4M</b><span>tokens last run</span></div>
     <div class="stat"><b>13/13</b><span>docs migrated</span></div>
   </div>
@@ -123,6 +124,8 @@ button.ghost { background:transparent; color:var(--accent); }
   <a href="#failure">8 · failure recovery</a>
   <a href="#review">9 · the review loop</a>
   <a href="#scope">10 · scope</a>
+  <a href="#topology">11 · topology</a>
+  <a href="#git">12 · git</a>
 </nav>
 
 <div class="note">
@@ -720,6 +723,156 @@ assignments:
   <textarea id="d12" data-label="D12 · Tool scope and naming" data-radio="D12"></textarea>
 </article>
 
+
+<h2 class="sec" id="round2">Round 2 · raised after the first verdicts</h2>
+
+<div class="note">
+  <b>Round 1 is settled</b> — D1–D11 as answered, recorded in <code>dev/workspace/context/sweep-tool-decisions.md</code>. Two adjustments landed with them: the review page moves to <code>dev/workspace/reviews/</code>, and tier <code>high</code> now resolves to an explicit <code>opus</code> rather than inheriting the session model. That second one is the better call — a sweep authored in a Fable session would otherwise silently reintroduce the exact cost blowout the tiering exists to prevent. No tier is left unset anywhere.
+  <br><br>
+  <b>D12 reopens.</b> The case for a universal tool was that a second corpus does not exist. dev-workspace makes it exist. Four questions follow.
+</div>
+
+<h2 class="sec" id="topology">11 · Two topologies, one process</h2>
+
+<p>dev-workspace is a genuinely different shape from DraftHorse, and the difference is worth seeing before deciding whether one tool covers both. DraftHorse sweeps <b>documents inside one repository</b>. dev-workspace sweeps <b>repositories</b> — each holding its own copy of config, rules and CLAUDE.md, each drifting from the current skill version.</p>
+
+<div class="fig">
+<svg viewBox="0 0 900 250" role="img" aria-label="Document topology versus repository topology">
+  <text class="lanelbl" x="14" y="18">A · DOCUMENTS IN ONE REPO — DRAFTHORSE</text>
+  <rect class="box ml" x="14" y="28" width="120" height="76" rx="4"/>
+  <text class="t" x="24" y="50">one repo</text>
+  <text class="ts" x="24" y="66">one working tree</text>
+  <text class="ts" x="24" y="80">one branch</text>
+  <text class="ts" x="24" y="94">one PR</text>
+  <rect class="box wf" x="178" y="28" width="94" height="22" rx="3"/><text class="ts" x="186" y="43">SKILL.md</text>
+  <rect class="box wf" x="178" y="55" width="94" height="22" rx="3"/><text class="ts" x="186" y="70">agent.md</text>
+  <rect class="box wf" x="178" y="82" width="94" height="22" rx="3"/><text class="ts" x="186" y="97">handover.md</text>
+  <text class="ts" x="292" y="46">agents share the tree → they must never run git</text>
+  <text class="ts" x="292" y="64">disjoint file sets are what make that safe</text>
+  <text class="ts" x="292" y="82">audit authority: drafthorse-spec-check.md</text>
+  <text class="ts" x="292" y="100">set-level checks span documents → one audit pass</text>
+
+  <text class="lanelbl" x="14" y="140">B · REPOSITORIES — DEV-WORKSPACE</text>
+  <rect class="box ml" x="14" y="150" width="120" height="22" rx="3"/><text class="ts" x="22" y="165">repo-one</text>
+  <rect class="box ml" x="14" y="177" width="120" height="22" rx="3"/><text class="ts" x="22" y="192">repo-two</text>
+  <rect class="box ml" x="14" y="204" width="120" height="22" rx="3"/><text class="ts" x="22" y="219">repo-three</text>
+  <rect class="box wf" x="178" y="150" width="94" height="76" rx="4"/>
+  <text class="ts" x="186" y="170">workspace-</text><text class="ts" x="186" y="184">config.yml</text>
+  <text class="ts" x="186" y="200">.claude/rules</text><text class="ts" x="186" y="216">CLAUDE.md</text>
+  <text class="ts" x="292" y="166">separate trees → no concurrency hazard at all</text>
+  <text class="ts" x="292" y="184">each repo takes its own branch and its own PR</text>
+  <text class="ts" x="292" y="202">audit authority: dev-workspace init --check</text>
+  <text class="ts" x="292" y="220">pilot is the source repo's own template payload</text>
+</svg>
+<p class="cap">Everything else is shared: manifest, brief template, editing fan-out, structured change records, tiering, failure reset, triage, review page.</p>
+</div>
+
+<p>The apparent blocker — dev-workspace cannot audit itself — dissolves on inspection. It has a conformance check; the check is a <b>command</b>, not a document. So the audit phase does not need removing for the second corpus, it needs generalising from "read the checker and execute it" to "establish conformance by whatever authority this corpus has".</p>
+
+<pre class="code"># manifest — the two new seams
+scope: documents          # documents | repos
+audit:
+  mode: spec-check        # spec-check | command | canonical-diff | none
+  authority: docs/drafthorse/drafthorse-spec-check.md
+
+# the dev-workspace profile of the same file
+scope: repos
+audit:
+  mode: command
+  authority: dev-workspace init --check
+canonical: <path to the source repo's template payload>   # stands in for 'pilot'</pre>
+
+<article>
+  <h3>E1 · Build it as a universal corpus-sweep skill with profiles<span class="chip proposed">reopens D12</span></h3>
+  <p class="why">Ship as <code>corpus-sweep</code>, with DraftHorse as the first profile and dev-workspace as the second when you need it. The argument that killed this in D12 was that no second corpus existed; it does now, and renaming a released plugin skill later is the expensive move — symlink, manifest, tag, changelog, and every install path. Build the DraftHorse path fully; leave the repos path named and unimplemented until a real dev-workspace sweep calls for it. The counter-position stands if you would rather two focused skills that share nothing but a family resemblance.</p>
+  <div class="controls">
+    <label><input type="radio" name="E1" value="universal"> Universal corpus-sweep, DraftHorse profile first (recommended)</label>
+    <label><input type="radio" name="E1" value="drafthorse"> DraftHorse-only, as D12 answered</label>
+    <label><input type="radio" name="E1" value="twoskills"> Two separate skills</label>
+    <label><input type="radio" name="E1" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="e1">Comment</label>
+  <textarea id="e1" data-label="E1 · Universal corpus-sweep skill" data-radio="E1"></textarea>
+</article>
+
+<article>
+  <h3>E2 · Audit becomes a mode, not a fixed procedure<span class="chip proposed">proposed</span></h3>
+  <p class="why">Four modes. <b>spec-check</b> — read a checker document and execute it, exactly as DraftHorse does now. <b>command</b> — run a conformance command per assignment and report its output as findings, which is dev-workspace's <code>init --check</code>. <b>canonical-diff</b> — diff each target against a canonical source and report drift, for corpora with neither checker nor command. <b>none</b> — skip the phase; the verification pass from D7 is then the only safety net, and the skill should say so rather than pretend the sweep was audited.</p>
+  <div class="controls">
+    <label><input type="radio" name="E2" value="fourmodes"> Four modes as described (recommended)</label>
+    <label><input type="radio" name="E2" value="twomodes"> spec-check and none only, add others when needed</label>
+    <label><input type="radio" name="E2" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="e2">Comment</label>
+  <textarea id="e2" data-label="E2 · Audit as a mode" data-radio="E2"></textarea>
+</article>
+
+<h2 class="sec" id="git">12 · Git — who commits, and when</h2>
+
+<p>Your instinct is right and the constraint is sharper than it looks. Under D10 the migration agents share one working tree. Thirteen agents cannot each cut a branch in one tree — the first checkout would drag every other agent's in-flight edits with it. So in the document topology, <b>agents must never run git at all</b>. What makes per-assignment commits possible anyway is the same property that made worktrees unnecessary: the manifest already declares exactly which files each assignment owns.</p>
+
+<div class="fig">
+<svg viewBox="0 0 900 270" role="img" aria-label="Commit provenance classes across the sweep">
+  <text class="lanelbl" x="14" y="18">BRIEFED — WHAT WE PLANNED</text>
+  <rect class="box wf" x="14" y="28" width="150" height="46" rx="4"/>
+  <text class="t" x="24" y="48">migrate workflow</text><text class="ts" x="24" y="64">agents edit, no git</text>
+  <rect class="box ml" x="200" y="28" width="180" height="46" rx="4"/>
+  <text class="t" x="210" y="48">reset · verify · commit</text><text class="ts" x="210" y="64">one commit per assignment</text>
+  <rect class="box ml" x="416" y="28" width="150" height="46" rx="4"/>
+  <text class="t" x="426" y="48">harvest commit</text><text class="ts" x="426" y="64">separately briefed</text>
+  <rect class="box usr" x="602" y="28" width="150" height="46" rx="4"/>
+  <text class="t" x="612" y="48">PR 1</text><text class="ts" x="612" y="64">N+1 clean commits</text>
+  <path class="arw" d="M164 51 L200 51" marker-end="url(#f)"/>
+  <path class="arw" d="M380 51 L416 51" marker-end="url(#f)"/>
+  <path class="arw" d="M566 51 L602 51" marker-end="url(#f)"/>
+
+  <text class="lanelbl" x="14" y="122">FOUND — WHAT THE SWEEP TURNED UP</text>
+  <rect class="box wf" x="14" y="132" width="150" height="46" rx="4"/>
+  <text class="t" x="24" y="152">audit workflow</text><text class="ts" x="24" y="168">read-only, no git</text>
+  <rect class="box ml" x="200" y="132" width="180" height="46" rx="4"/>
+  <text class="t" x="210" y="152">triage · repair commits</text><text class="ts" x="210" y="168">unbriefed, ~30 last run</text>
+  <rect class="box ml" x="416" y="132" width="150" height="46" rx="4"/>
+  <text class="t" x="426" y="152">verdict commits</text><text class="ts" x="426" y="168">your decisions applied</text>
+  <rect class="box usr" x="602" y="132" width="150" height="46" rx="4"/>
+  <text class="t" x="612" y="152">PR 2</text><text class="ts" x="612" y="168">follows PR 1</text>
+  <path class="arw" d="M164 155 L200 155" marker-end="url(#f)"/>
+  <path class="arw" d="M380 155 L416 155" marker-end="url(#f)"/>
+  <path class="arw" d="M566 155 L602 155" marker-end="url(#f)"/>
+
+  <text class="ts" x="14" y="212">Last run collapsed all four classes into two commits, which is the clump you noticed — scoped and unscoped work indistinguishable in the diff.</text>
+  <text class="ts" x="14" y="230">Splitting by provenance makes the diff self-documenting: every commit answers "was this briefed, or did we find it?" without reading the review page.</text>
+  <text class="ts" x="14" y="248">In the repos topology this collapses to the obvious thing — one branch and one PR per repo, still cut by the main loop after verification.</text>
+  <defs><marker id="f" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="var(--muted)"/></marker></defs>
+</svg>
+</div>
+
+<article>
+  <h3>E3 · Agents never touch git; the main loop commits per assignment<span class="chip proposed">proposed</span></h3>
+  <p class="why">Immediately after the migrate workflow returns — and after the reset and the D7 verification pass, so a half-migrated file never gets committed — the main loop stages each assignment's manifest file list and commits it on its own. Thirteen assignments, thirteen reviewable commits, each traceable to its brief. The alternative you floated, PR-per-agent-run, is not available in the document topology for the concurrency reason above; it becomes available and natural in the repos topology, where every assignment is its own tree.</p>
+  <div class="controls">
+    <label><input type="radio" name="E3" value="mainloop"> Main loop commits per assignment, after verify (recommended)</label>
+    <label><input type="radio" name="E3" value="afteraudit"> Commit once after the audit instead</label>
+    <label><input type="radio" name="E3" value="agentgit"> Agents commit their own work</label>
+    <label><input type="radio" name="E3" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="e3">Comment</label>
+  <textarea id="e3" data-label="E3 · Who commits and when" data-radio="E3"></textarea>
+</article>
+
+<article>
+  <h3>E4 · Two sequential PRs, split by provenance<span class="chip proposed">proposed</span></h3>
+  <p class="why">This is the direct answer to the unscoped changes you spotted. <b>PR 1 — briefed work</b>: the per-assignment migration commits plus any separately briefed one-off like the 6b harvest. Everything in it was planned and approved before an agent ran. <b>PR 2 — found work</b>: clear-cut repairs from the audit, then the verdicts you return from the review page. Nothing in it was scoped in advance. PR 2 depends on PR 1, so they stack rather than run parallel, and the set-level audit needs the whole migrated corpus in place before it can judge anything — which fixes the ordering anyway.</p>
+  <div class="controls">
+    <label><input type="radio" name="E4" value="twoprs"> Two sequential PRs, briefed then found (recommended)</label>
+    <label><input type="radio" name="E4" value="onepr"> One PR, provenance carried by commit messages only</label>
+    <label><input type="radio" name="E4" value="threeprs"> Three — migration, repairs, verdicts</label>
+    <label><input type="radio" name="E4" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="e4">Comment</label>
+  <textarea id="e4" data-label="E4 · PR split by provenance" data-radio="E4"></textarea>
+</article>
+
 <h2 class="sec">Carried forward without a decision</h2>
 
 <details>
@@ -761,7 +914,7 @@ assignments:
 <script>
 function assemble() {
   var boxes = document.querySelectorAll('textarea[data-label]');
-  var lines = ['# Corpus sweep tool — decisions', ''];
+  var lines = ['# Corpus sweep tool — round 2 decisions', ''];
   boxes.forEach(function (b) {
     var name = b.dataset.radio;
     var picked = document.querySelector('input[name="' + name + '"]:checked');
