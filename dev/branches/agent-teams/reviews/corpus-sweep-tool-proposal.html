@@ -1,0 +1,952 @@
+<meta charset="utf-8">
+<title>Corpus Sweep Tool — Proposal</title>
+<style>
+:root { --bg:#fbfaf8; --panel:#fff; --ink:#1c1b19; --muted:#6b6862; --line:#e2ded7;
+  --del-bg:#fdecec; --del-ink:#8a1f1f; --add-bg:#e9f6ec; --add-ink:#14622c;
+  --accent:#7a5c2e; --warn:#8a1f1f; --ok:#14622c; --prop:#3f5873; --chipbg:#f4f0e9;
+  --lane:#f4f0e9; --wf:#3f5873; --usr:#7a5c2e; --ml:#14622c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6; --line:#33313c;
+  --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab;
+  --accent:#d5b27a; --warn:#ff9c9c; --ok:#8fe3ab; --prop:#9fb8d8; --chipbg:#26242e;
+  --lane:#26242e; --wf:#9fb8d8; --usr:#d5b27a; --ml:#8fe3ab; } }
+:root[data-theme="dark"] { --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6;
+  --line:#33313c; --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab;
+  --accent:#d5b27a; --warn:#ff9c9c; --ok:#8fe3ab; --prop:#9fb8d8; --chipbg:#26242e;
+  --lane:#26242e; --wf:#9fb8d8; --usr:#d5b27a; --ml:#8fe3ab; }
+* { box-sizing:border-box; }
+body { margin:0; padding:2rem 1.25rem 7rem; background:var(--bg); color:var(--ink);
+  font:16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width:64rem; margin:0 auto; }
+header { border-bottom:2px solid var(--line); padding-bottom:1.25rem; margin-bottom:1rem; }
+h1 { font-size:1.5rem; margin:0 0 .4rem; letter-spacing:-.01em; text-wrap:balance; }
+.sub { color:var(--muted); font-size:.9rem; margin:.2rem 0; }
+code { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:.9em; }
+nav.toc { display:flex; flex-wrap:wrap; gap:.5rem; margin:1rem 0 2rem; }
+nav.toc a { font:12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--accent);
+  text-decoration:none; border:1px solid var(--line); border-radius:999px; padding:.45rem .8rem; background:var(--panel); }
+nav.toc a:hover { border-color:var(--accent); }
+h2.sec { font-size:.8rem; letter-spacing:.09em; text-transform:uppercase; color:var(--accent);
+  margin:2.75rem 0 1rem; padding-bottom:.4rem; border-bottom:1px solid var(--line);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+.note { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
+  padding:.9rem 1.1rem; margin:1.25rem 0 1.5rem; font-size:.9rem; }
+.note b { color:var(--accent); }
+.note ul, article ul, .fig ul { margin:.5rem 0 0; padding-left:1.2rem; }
+p { margin:.8rem 0; }
+article { background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:1.1rem 1.25rem 1.25rem; margin-bottom:1.25rem; border-left:3px solid var(--prop); }
+h3 { font-size:1rem; margin:0 0 .3rem; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+h4 { font-size:.9rem; margin:1.6rem 0 .4rem; }
+.chip { display:inline-block; font-size:.66rem; letter-spacing:.07em; text-transform:uppercase;
+  border-radius:3px; padding:.14rem .45rem; margin-left:.45rem; vertical-align:middle; border:1px solid; }
+.chip.applied { color:var(--accent); border-color:var(--accent); background:var(--chipbg); }
+.chip.proposed { color:var(--prop); border-color:var(--prop); }
+.chip.pass { color:var(--ok); border-color:var(--ok); }
+.chip.revise { color:var(--warn); border-color:var(--warn); }
+.chip.info { color:var(--muted); border-color:var(--line); }
+.why { color:var(--muted); font-size:.875rem; margin:.35rem 0 .9rem; }
+.field { font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin:.9rem 0 .3rem; }
+.diff { border:1px solid var(--line); border-radius:4px; overflow-x:auto;
+  font:13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; margin:.25rem 0; }
+.diff div { padding:.3rem .7rem; white-space:pre-wrap; word-break:break-word; }
+.del { background:var(--del-bg); color:var(--del-ink); }
+.add { background:var(--add-bg); color:var(--add-ink); }
+.ctx { color:var(--muted); }
+pre.code { border:1px solid var(--line); border-radius:4px; background:var(--panel);
+  overflow-x:auto; padding:.8rem 1rem; margin:.5rem 0;
+  font:13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.fig { background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:1rem 1.1rem; margin:1.1rem 0; overflow-x:auto; }
+.fig .cap { font-size:.78rem; color:var(--muted); margin:.7rem 0 0; }
+.fig svg { display:block; min-width:640px; max-width:100%; height:auto; }
+svg text { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; fill:var(--ink); }
+svg .lanebg { fill:var(--lane); }
+svg .lanelbl { font-size:10px; letter-spacing:.09em; fill:var(--muted); }
+svg .box { fill:var(--panel); stroke:var(--line); stroke-width:1.5; }
+svg .box.wf { stroke:var(--wf); }
+svg .box.ml { stroke:var(--ml); }
+svg .box.usr { stroke:var(--usr); }
+svg .t { font-size:11px; }
+svg .ts { font-size:9.5px; fill:var(--muted); }
+svg .arw { stroke:var(--muted); stroke-width:1.4; fill:none; }
+svg .arw.hot { stroke:var(--warn); stroke-dasharray:4 3; }
+.controls { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:1rem;
+  padding-top:.9rem; border-top:1px solid var(--line); }
+.controls label { font-size:.85rem; display:inline-flex; align-items:center; gap:.3rem; cursor:pointer; }
+label.cmt { display:block; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--muted); margin:.9rem 0 .35rem; }
+textarea { width:100%; min-height:3rem; resize:vertical; padding:.6rem .7rem; background:var(--bg);
+  color:var(--ink); border:1px solid var(--line); border-radius:4px;
+  font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+textarea:focus, button:focus-visible, nav.toc a:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
+details { background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:.75rem 1.1rem; margin-bottom:.8rem; }
+details summary { cursor:pointer; font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+details .body { padding-top:.6rem; font-size:.9rem; }
+.stats { display:flex; flex-wrap:wrap; gap:.6rem; margin:1rem 0 0; }
+.stat { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:.55rem .9rem; }
+.stat b { display:block; font-size:1.15rem; font-variant-numeric:tabular-nums; }
+.stat span { font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+.bar { position:sticky; bottom:0; background:var(--panel); border-top:1px solid var(--line);
+  padding:.9rem 1.25rem; margin:2rem -1.25rem -7rem; display:flex; gap:.75rem; align-items:center; flex-wrap:wrap; }
+button { font:inherit; font-size:.9rem; padding:.5rem 1rem; border-radius:4px; cursor:pointer;
+  border:1px solid var(--accent); background:var(--accent); color:var(--panel); }
+button.ghost { background:transparent; color:var(--accent); }
+#status { color:var(--muted); font-size:.85rem; }
+#out { width:100%; min-height:14rem; margin-top:1rem; display:none; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto !important; } }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>DraftHorse Corpus Sweep — proposed tool structure</h1>
+  <p class="sub">Turning the one-off sweep on <code>drafthorse-corpus-sweep</code> into a reusable skill. Branch <code>agent-teams</code>.</p>
+  <p class="sub">Every section shows the mechanism, then asks for a verdict. Answer what you care about, hit <b>Copy decisions</b>, paste it back.</p>
+  <div class="stats">
+    <div class="stat"><b>8</b><span>phases</span></div>
+    <div class="stat"><b>2</b><span>workflows kept</span></div>
+    <div class="stat"><b>12</b><span>settled</span></div>
+    <div class="stat"><b>4</b><span>round 2 open</span></div>
+    <div class="stat"><b>2.4M</b><span>tokens last run</span></div>
+    <div class="stat"><b>13/13</b><span>docs migrated</span></div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#shape">1 · shape</a>
+  <a href="#home">2 · where it lives</a>
+  <a href="#steps">3 · step map</a>
+  <a href="#manifest">4 · the manifest</a>
+  <a href="#briefs">5 · the briefs</a>
+  <a href="#workflows">6 · the workflows</a>
+  <a href="#tiers">7 · model tiers</a>
+  <a href="#failure">8 · failure recovery</a>
+  <a href="#review">9 · the review loop</a>
+  <a href="#scope">10 · scope</a>
+  <a href="#topology">11 · topology</a>
+  <a href="#git">12 · git</a>
+</nav>
+
+<div class="note">
+  <b>The premise.</b> The two workflow scripts were never the whole tool — they are phases 5 and 6 of an eight-phase process. Everything expensive and everything judgment-bearing happened in the main loop around them. So the tool is a skill; the workflows survive inside it as separate, unchanged-in-spirit assets. What follows proposes the skill's shape and asks you to settle twelve calls.
+</div>
+
+<h2 class="sec" id="shape">1 · The shape at a glance</h2>
+
+<p>The executed sweep ran eight phases across three actors. Reading the lanes tells you where cost and judgment actually sat: the two workflow bars are the only places agents fanned out, and they sit between four main-loop phases that did the thinking.</p>
+
+<div class="fig">
+<svg viewBox="0 0 960 258" role="img" aria-label="Eight sweep phases across user, main loop, and workflow lanes">
+  <rect class="lanebg" x="72" y="18" width="880" height="52" rx="4"/>
+  <rect class="lanebg" x="72" y="96" width="880" height="52" rx="4"/>
+  <rect class="lanebg" x="72" y="174" width="880" height="52" rx="4"/>
+  <text class="lanelbl" x="8" y="48">USER</text>
+  <text class="lanelbl" x="8" y="126">MAIN LOOP</text>
+  <text class="lanelbl" x="8" y="204">WORKFLOW</text>
+
+  <rect class="box ml" x="80" y="100" width="100" height="44" rx="4"/>
+  <text class="t" x="90" y="120">1 Scope</text><text class="ts" x="90" y="134">spec diff, issues</text>
+
+  <rect class="box ml" x="188" y="100" width="100" height="44" rx="4"/>
+  <text class="t" x="198" y="120">2 Inventory</text><text class="ts" x="198" y="134">stamped docs</text>
+
+  <rect class="box ml" x="296" y="100" width="100" height="44" rx="4"/>
+  <text class="t" x="306" y="120">3 Briefs</text><text class="ts" x="306" y="134">571 lines</text>
+  <rect class="box usr" x="296" y="22" width="100" height="44" rx="4"/>
+  <text class="t" x="306" y="42">approve</text><text class="ts" x="306" y="56">briefs + tiers</text>
+  <path class="arw" d="M346 100 L346 70" marker-end="url(#a)"/>
+
+  <rect class="box wf" x="404" y="178" width="100" height="44" rx="4"/>
+  <text class="t" x="414" y="198">4 Migrate</text><text class="ts" x="414" y="212">N agents</text>
+
+  <rect class="box wf" x="512" y="178" width="100" height="44" rx="4"/>
+  <text class="t" x="522" y="198">5 Audit</text><text class="ts" x="522" y="212">harvest + N</text>
+
+  <rect class="box ml" x="620" y="100" width="100" height="44" rx="4"/>
+  <text class="t" x="630" y="120">6 Triage</text><text class="ts" x="630" y="134">fix vs card</text>
+
+  <rect class="box ml" x="728" y="100" width="100" height="44" rx="4"/>
+  <text class="t" x="738" y="120">7 Review</text><text class="ts" x="738" y="134">this page</text>
+  <rect class="box usr" x="728" y="22" width="100" height="44" rx="4"/>
+  <text class="t" x="738" y="42">verdicts</text><text class="ts" x="738" y="56">18 cards</text>
+  <path class="arw" d="M778 100 L778 70" marker-end="url(#a)"/>
+  <path class="arw" d="M806 70 L806 100" marker-end="url(#a)"/>
+
+  <rect class="box ml" x="836" y="100" width="100" height="44" rx="4"/>
+  <text class="t" x="846" y="120">8 Apply</text><text class="ts" x="846" y="134">then release</text>
+
+  <path class="arw" d="M180 122 L188 122" marker-end="url(#a)"/>
+  <path class="arw" d="M288 122 L296 122" marker-end="url(#a)"/>
+  <path class="arw" d="M396 122 Q400 122 400 150 Q400 178 404 190" marker-end="url(#a)"/>
+  <path class="arw" d="M504 200 L512 200" marker-end="url(#a)"/>
+  <path class="arw" d="M612 190 Q616 178 616 150 Q616 122 620 122" marker-end="url(#a)"/>
+  <path class="arw" d="M720 122 L728 122" marker-end="url(#a)"/>
+  <path class="arw" d="M828 122 L836 122" marker-end="url(#a)"/>
+  <defs><marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="var(--muted)"/></marker></defs>
+</svg>
+<p class="cap">Phases 4 and 5 are the existing scripts. Phases 1–3 and 6–8 are main-loop work the skill has to encode, because that is where the judgment and the cost concentrated.</p>
+</div>
+
+<h2 class="sec" id="home">2 · Where it lives</h2>
+
+<p>Two homes, and they do different jobs. The <b>skill</b> is a durable asset in the library, versioned and shipped in a plugin. The <b>sweep working set</b> — manifest, briefs, results, review page — is throwaway per-sweep state, and dev-workspace already guarantees a place for it on any branch.</p>
+
+<pre class="code">extensions/skills/drafthorse-corpus-sweep/
+├── SKILL.md                          the eight-phase procedure
+├── assets/
+│   ├── manifest-template.yml         the sweep's assignment table
+│   ├── brief-common-template.md      reusable spine + payload slots
+│   ├── brief-assignment-template.md  per-target shape
+│   ├── brief-audit-template.md       near-verbatim from the last run
+│   └── review-template.html          the decision page shell
+├── references/
+│   ├── model-tiering.md              the policy the last run paid to learn
+│   ├── failure-recovery.md           partial edits, resume, classifier stalls
+│   └── writing-briefs.md             what makes a brief tight enough to downtier
+└── workflows/
+    ├── migrate.js                    manifest-driven, no hardcoded targets
+    └── audit.js                      manifest-driven, no hardcoded targets
+
+plugins/agent-tools/skills/drafthorse-corpus-sweep -> ../../../extensions/skills/drafthorse-corpus-sweep
+
+dev/workspace/tasks/&lt;sweep-name&gt;/       per-sweep, throwaway, any branch
+├── manifest.yml
+├── brief-common.md
+├── brief-&lt;assignment&gt;.md  × N
+├── brief-audit.md
+└── results/{migrate,audit}.json
+
+dev/workspace/artifacts/&lt;sweep-name&gt;-review.html</pre>
+
+<div class="note">
+  <b>Why agent-tools.</b> The DraftHorse skill and the saddler agent already ship there. A sweep tool that migrates DraftHorse documents belongs beside the framework it serves, and it inherits the same release unit — one <code>agent-tools</code> version covers a spec change and the sweep that propagates it.
+</div>
+
+<article>
+  <h3>D1 · The skill is itself a DraftHorse document<span class="chip proposed">proposed</span></h3>
+  <p class="why">A skill that migrates DraftHorse documents, written as a DraftHorse document: steps with start and finished conditions, an error step, a success exit. It dogfoods the framework and it makes the skill a corpus member — so the next sweep migrates the sweep tool too, which is a genuine test of the spec. Cost: sweep phases are long-running and interruptible, and DraftHorse conditions have to carry resume semantics honestly rather than pretending the run is atomic.</p>
+  <div class="controls">
+    <label><input type="radio" name="D1" value="drafthorse"> DraftHorse document (recommended)</label>
+    <label><input type="radio" name="D1" value="plain"> Plain procedural skill</label>
+    <label><input type="radio" name="D1" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d1">Comment</label>
+  <textarea id="d1" data-label="D1 · Skill is a DraftHorse document" data-radio="D1"></textarea>
+</article>
+
+<article>
+  <h3>D2 · Home and working set as drawn above<span class="chip proposed">proposed</span></h3>
+  <p class="why">Skill in <code>extensions/skills/drafthorse-corpus-sweep/</code>, symlinked into <code>agent-tools</code>. Per-sweep state under <code>dev/workspace/tasks/&lt;sweep-name&gt;/</code>, which the last run already used and which survives any branch. Review page to <code>dev/workspace/artifacts/</code>. The alternative is a standalone plugin, which buys independent versioning at the cost of splitting the framework from its migration tool.</p>
+  <div class="controls">
+    <label><input type="radio" name="D2" value="agent-tools"> agent-tools, layout as drawn (recommended)</label>
+    <label><input type="radio" name="D2" value="own-plugin"> Its own plugin</label>
+    <label><input type="radio" name="D2" value="dev-tools"> dev-tools instead</label>
+    <label><input type="radio" name="D2" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d2">Comment</label>
+  <textarea id="d2" data-label="D2 · Home and working set" data-radio="D2"></textarea>
+</article>
+
+<h2 class="sec" id="steps">3 · The skill's step map</h2>
+
+<p>Eight working steps plus the two exits. Solid arrows are the happy path; each step's start conditions are what actually route, so the diagram is a reading aid, not the contract. The two shaded steps are the ones that invoke workflows.</p>
+
+<div class="fig">
+<svg viewBox="0 0 960 300" role="img" aria-label="Step map of the proposed corpus sweep skill">
+  <rect class="box ml" x="14" y="24" width="128" height="46" rx="4"/>
+  <text class="t" x="24" y="44">+Scope the Sweep</text><text class="ts" x="24" y="58">reads spec change</text>
+
+  <rect class="box ml" x="166" y="24" width="128" height="46" rx="4"/>
+  <text class="t" x="176" y="44">+Inventory</text><text class="ts" x="176" y="58">writes manifest</text>
+
+  <rect class="box ml" x="318" y="24" width="128" height="46" rx="4"/>
+  <text class="t" x="328" y="44">+Write Briefs</text><text class="ts" x="328" y="58">user approves</text>
+
+  <rect class="box wf" x="470" y="24" width="128" height="46" rx="4"/>
+  <text class="t" x="480" y="44">+Migrate</text><text class="ts" x="480" y="58">workflow · looping</text>
+
+  <rect class="box wf" x="622" y="24" width="128" height="46" rx="4"/>
+  <text class="t" x="632" y="44">+Audit</text><text class="ts" x="632" y="58">workflow · looping</text>
+
+  <rect class="box ml" x="774" y="24" width="128" height="46" rx="4"/>
+  <text class="t" x="784" y="44">+Triage</text><text class="ts" x="784" y="58">fix vs card</text>
+
+  <rect class="box ml" x="318" y="124" width="128" height="46" rx="4"/>
+  <text class="t" x="328" y="144">+Compose Review</text><text class="ts" x="328" y="158">decision page</text>
+
+  <rect class="box ml" x="470" y="124" width="128" height="46" rx="4"/>
+  <text class="t" x="480" y="144">+Apply Verdicts</text><text class="ts" x="480" y="158">dormant if none</text>
+
+  <rect class="box usr" x="622" y="124" width="128" height="46" rx="4"/>
+  <text class="t" x="632" y="144">+Conclude</text><text class="ts" x="632" y="158">success step</text>
+
+  <rect class="box" x="774" y="124" width="128" height="46" rx="4" style="stroke:var(--warn)"/>
+  <text class="t" x="784" y="144">+Handle a Problem</text><text class="ts" x="784" y="158">error step</text>
+
+  <path class="arw" d="M142 47 L166 47" marker-end="url(#b)"/>
+  <path class="arw" d="M294 47 L318 47" marker-end="url(#b)"/>
+  <path class="arw" d="M446 47 L470 47" marker-end="url(#b)"/>
+  <path class="arw" d="M598 47 L622 47" marker-end="url(#b)"/>
+  <path class="arw" d="M750 47 L774 47" marker-end="url(#b)"/>
+  <path class="arw" d="M838 70 Q838 97 700 97 Q400 97 388 124" marker-end="url(#b)"/>
+  <path class="arw" d="M446 147 L470 147" marker-end="url(#b)"/>
+  <path class="arw" d="M598 147 L622 147" marker-end="url(#b)"/>
+
+  <path class="arw hot" d="M534 70 Q534 100 534 118" marker-end="url(#b)"/>
+  <text class="ts" x="540" y="100" style="fill:var(--warn)">re-enter on partial failure</text>
+  <path class="arw hot" d="M686 70 Q700 96 838 118" marker-end="url(#b)"/>
+
+  <text class="ts" x="14" y="212">Looping — +Migrate and +Audit re-enter while any assignment lacks a recorded result.</text>
+  <text class="ts" x="14" y="230">Dormant — +Apply Verdicts activates only when the returned decisions ask for a change.</text>
+  <text class="ts" x="14" y="248">Handover — none proposed; the workflows are tool calls, not handover documents.</text>
+  <text class="ts" x="14" y="266">Dashed — routes to the error step, or back into the same step for the unfinished remainder.</text>
+  <defs><marker id="b" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="var(--muted)"/></marker></defs>
+</svg>
+<p class="cap">The looping declaration on +Migrate is what makes interruption survivable: an assignment with no recorded result is the per-item discriminator, which is the sanctioned loop shape under the current spec.</p>
+</div>
+
+<article>
+  <h3>D3 · Step map as drawn<span class="chip proposed">proposed</span></h3>
+  <p class="why">Eight working steps, two exits, no handover documents. The judgment calls inside it: <code>+Migrate</code> and <code>+Audit</code> declared <b>Looping</b> so a partial run re-enters for the remainder rather than restarting; <code>+Apply Verdicts</code> declared <b>Dormant</b> so an all-approved review skips it; releases deliberately excluded — <code>+Conclude</code> reports and hands off to <code>/dev-tools:versioning</code>. Possible trims: fold <code>+Inventory</code> into <code>+Scope</code>, or fold <code>+Apply Verdicts</code> into <code>+Triage</code>.</p>
+  <div class="controls">
+    <label><input type="radio" name="D3" value="asdrawn"> As drawn (recommended)</label>
+    <label><input type="radio" name="D3" value="fold-inventory"> Fold +Inventory into +Scope</label>
+    <label><input type="radio" name="D3" value="fold-apply"> Fold +Apply Verdicts into +Triage</label>
+    <label><input type="radio" name="D3" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d3">Comment</label>
+  <textarea id="d3" data-label="D3 · Step map" data-radio="D3"></textarea>
+</article>
+
+<h2 class="sec" id="manifest">4 · The manifest — one interface, two consumers</h2>
+
+<p>This is the load-bearing idea. Both workflow scripts currently carry hardcoded arrays of targets and brief filenames, which is the single reason they are one-off. Replace both arrays with one file the skill writes and both scripts read, and the scripts never need editing again.</p>
+
+<div class="fig">
+<svg viewBox="0 0 900 210" role="img" aria-label="Manifest feeding both workflows and the recovery path">
+  <rect class="box ml" x="20" y="76" width="150" height="58" rx="4"/>
+  <text class="t" x="30" y="98">manifest.yml</text>
+  <text class="ts" x="30" y="112">assignments, files,</text>
+  <text class="ts" x="30" y="124">tiers, brief paths</text>
+
+  <rect class="box wf" x="290" y="16" width="150" height="50" rx="4"/>
+  <text class="t" x="300" y="36">migrate.js</text><text class="ts" x="300" y="50">fan-out per assignment</text>
+
+  <rect class="box wf" x="290" y="86" width="150" height="50" rx="4"/>
+  <text class="t" x="300" y="106">audit.js</text><text class="ts" x="300" y="120">fan-out per doc set</text>
+
+  <rect class="box" x="290" y="156" width="150" height="42" rx="4" style="stroke:var(--warn)"/>
+  <text class="t" x="300" y="176">reset on failure</text><text class="ts" x="300" y="189">files owned per assignment</text>
+
+  <rect class="box ml" x="560" y="16" width="150" height="50" rx="4"/>
+  <text class="t" x="570" y="36">results/migrate.json</text><text class="ts" x="570" y="50">change records</text>
+
+  <rect class="box ml" x="560" y="86" width="150" height="50" rx="4"/>
+  <text class="t" x="570" y="106">results/audit.json</text><text class="ts" x="570" y="120">findings + verdicts</text>
+
+  <rect class="box usr" x="760" y="51" width="120" height="50" rx="4"/>
+  <text class="t" x="770" y="71">review.html</text><text class="ts" x="770" y="85">decision cards</text>
+
+  <path class="arw" d="M170 96 Q230 96 230 41 L290 41" marker-end="url(#c)"/>
+  <path class="arw" d="M170 105 L290 108" marker-end="url(#c)"/>
+  <path class="arw hot" d="M170 120 Q230 120 230 177 L290 177" marker-end="url(#c)"/>
+  <path class="arw" d="M440 41 L560 41" marker-end="url(#c)"/>
+  <path class="arw" d="M440 111 L560 111" marker-end="url(#c)"/>
+  <path class="arw" d="M710 41 Q740 41 740 66 L760 66" marker-end="url(#c)"/>
+  <path class="arw" d="M710 111 Q740 111 740 86 L760 86" marker-end="url(#c)"/>
+  <defs><marker id="c" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="var(--muted)"/></marker></defs>
+</svg>
+<p class="cap">One file drives fan-out, model tiering, and failure recovery. Nothing in either script mentions a document name.</p>
+</div>
+
+<p class="field">Proposed manifest</p>
+<pre class="code">sweep: drafthorse-2026-08          # names the working directory and the review page
+pilot: extensions/skills/drafthorse/SKILL.md   # the worked reference every brief points at
+spec_docs:                          # read-first list, injected into every brief
+  - docs/drafthorse/framework/steps.md
+  - extensions/skills/drafthorse/references/step-functions.md
+  - extensions/skills/drafthorse/references/condition-writing.md
+
+assignments:
+  - name: versioning
+    brief: brief-versioning.md
+    tier: high                      # high | standard | mechanical
+    files:                          # authoritative — drives reset on failure
+      - extensions/skills/versioning/SKILL.md
+    audit_as: set                   # set | single — picks the audit tier
+  - name: classroom
+    brief: brief-classroom.md
+    tier: high
+    files:
+      - extensions/skills/classroom/SKILL.md
+      - extensions/skills/classroom/setup-handover.md
+      - extensions/skills/classroom/mark-review-handover.md
+      - extensions/skills/classroom/media-processing-handover.md
+    audit_as: set
+  - name: agent-push
+    brief: brief-agent-push.md
+    tier: standard
+    files:
+      - extensions/skills/git/agent-push/SKILL.md
+    audit_as: single</pre>
+
+<article>
+  <h3>D4 · Manifest as the sole interface<span class="chip proposed">proposed</span></h3>
+  <p class="why">The skill writes it in <code>+Inventory</code>; both workflows read it and nothing else sweep-specific; the reset procedure reads <code>files</code> to know exactly what a dead agent touched. Format shown is YAML for hand-editability — you will be reading and adjusting this file, since it is where you set tiers. JSON would save the workflows a parser, at the cost of being unpleasant to edit.</p>
+  <div class="controls">
+    <label><input type="radio" name="D4" value="yaml"> Manifest as drawn, YAML (recommended)</label>
+    <label><input type="radio" name="D4" value="json"> Same, but JSON</label>
+    <label><input type="radio" name="D4" value="args"> No file — pass as workflow args</label>
+    <label><input type="radio" name="D4" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d4">Comment</label>
+  <textarea id="d4" data-label="D4 · Manifest as sole interface" data-radio="D4"></textarea>
+</article>
+
+<h2 class="sec" id="briefs">5 · The briefs — spine and payload</h2>
+
+<p>The last run's <code>brief-common.md</code> is 66 lines and splits about half and half. The half that generalises is a spine; the half that does not is this sweep's payload. The template makes that split explicit with named slots.</p>
+
+<p class="field">brief-common.md — what stays and what becomes a slot</p>
+<div class="diff">
+<div class="ctx">## Read first, in order</div>
+<div class="del">− 1. docs/drafthorse/framework/steps.md — step anatomy, the function catalogue…</div>
+<div class="del">− 2. …references/step-functions.md — the six shapes and their fixed strings.</div>
+<div class="del">− 3. …references/condition-writing.md — condition rules.</div>
+<div class="del">− 4. …drafthorse/SKILL.md — the migrated pilot.</div>
+<div class="add">+ {{SPEC_DOCS}} — from the manifest, numbered, in order.</div>
+<div class="add">+ Last: {{PILOT}} — the migrated pilot. The worked reference for every shape below.</div>
+<div class="ctx">&nbsp;</div>
+<div class="ctx">Then read your target file(s) whole. Edit with the Edit tool, site by site.</div>
+<div class="ctx">Never edit via script or sed. Never edit any file outside your assignment.</div>
+<div class="ctx">Framework docs are frozen — where your target disagrees, the target changes;</div>
+<div class="ctx">where the migration seems to demand a framework change, flag it instead.</div>
+<div class="ctx">&nbsp;</div>
+<div class="ctx">## Fixed texts — byte-exact</div>
+<div class="del">− Universal preamble. Replaces the old quote-block preamble…</div>
+<div class="del">− Steps are universal and standalone. Marked ## +&lt;Step Name&gt;. Work, instructions…</div>
+<div class="del">− Function declaration strings — **Error step** — Handles recovery and bails. …</div>
+<div class="add">+ {{FIXED_TEXTS}} — every string this sweep requires byte-exact, with the</div>
+<div class="add">+ text it replaces. Empty when the sweep introduces no fixed strings.</div>
+<div class="ctx">&nbsp;</div>
+<div class="ctx">## Checklist, applied per step in one pass</div>
+<div class="del">− A. Preamble … L. Out-of-scope defects (twelve lettered items, sweep-specific)</div>
+<div class="add">+ {{CHECKLIST}} — lettered items, one per class of change this sweep makes.</div>
+<div class="add">+ The last item is always: out-of-scope defects go to flags, never fixed.</div>
+<div class="ctx">&nbsp;</div>
+<div class="del">− ## De-hold judgment  (issue #45's three classes)</div>
+<div class="add">+ {{JUDGMENT}} — where a rule changed and each site needs a call, name the</div>
+<div class="add">+ classes and say what to do with each. Omitted when the sweep is mechanical.</div>
+<div class="ctx">&nbsp;</div>
+<div class="ctx">## Register — match the target's prose. Fixed strings byte-exact.</div>
+<div class="ctx">## Output — return ONLY the structured object the schema demands.</div>
+</div>
+
+<p class="why">Unchanged lines are the spine: read-order with the pilot last, Edit-tool-only, frozen-framework precedence, flag-never-fix, register, output contract. Four slots carry everything sweep-specific.</p>
+
+<div class="note">
+  <b>Why this matters more than it looks.</b> Brief tightness is what bought the model downtier. The last run's own accounting: roughly 8 of 13 assignments were Sonnet-safe <i>because the briefs pre-decided the judgment</i>. A loose brief forces a strong model on every assignment. That makes brief authoring the one phase where spending a strong model pays for itself several times over — and it argues against generating briefs cheaply.
+</div>
+
+<article>
+  <h3>D5 · Briefs stay main-loop authored<span class="chip proposed">proposed</span></h3>
+  <p class="why">Three ways to get briefs. <b>Main-loop authored</b> — as last time: the strong model reads the spec change and writes all N briefs, you approve them, downstream agents run cheap. <b>Agent-generated</b> — one agent per target writes its own brief then migrates; cheapest to build, but the brief and the migration share a head, so nothing pre-decides the judgment and the tier cannot drop. <b>Hybrid</b> — a cheap agent drafts each brief from the manifest and the spec diff, main loop tightens and you approve; saves main-loop tokens, adds a review burden.</p>
+  <div class="controls">
+    <label><input type="radio" name="D5" value="mainloop"> Main-loop authored, user-approved (recommended)</label>
+    <label><input type="radio" name="D5" value="hybrid"> Hybrid — agent drafts, main loop tightens</label>
+    <label><input type="radio" name="D5" value="agent"> Agent-generated per target</label>
+    <label><input type="radio" name="D5" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d5">Comment</label>
+  <textarea id="d5" data-label="D5 · Brief provenance" data-radio="D5"></textarea>
+</article>
+
+<h2 class="sec" id="workflows">6 · The workflows — what actually changes</h2>
+
+<p>Structurally both scripts survive. The fan-out, the schemas, the phase layout, and the one audit deliberately sequenced behind the harvest are all good. Three things come out: the hardcoded target array, the hardcoded brief filenames, and the model tiers that are either absent or fossilised.</p>
+
+<p class="field">migrate.js — the head of the script</p>
+<div class="diff">
+<div class="del">− const TARGETS = [</div>
+<div class="del">−   ['versioning', 'brief-versioning.md'],</div>
+<div class="del">−   ['classroom', 'brief-classroom.md'],</div>
+<div class="del">−   ['classroom-handovers', 'brief-classroom-handovers.md'],</div>
+<div class="del">−   … 10 more hardcoded rows …</div>
+<div class="del">− ]</div>
+<div class="add">+ const M = args.manifest            // parsed manifest, passed in by the skill</div>
+<div class="add">+ const TIER = { high: {}, standard: { model:'sonnet', effort:'medium' },</div>
+<div class="add">+               mechanical: { model:'haiku', effort:'low' } }</div>
+<div class="ctx">&nbsp;</div>
+<div class="del">− const results = await parallel(TARGETS.map(function (t) {</div>
+<div class="del">−   return function () { return agent(</div>
+<div class="del">−     '… Read ' + BRIEFS + '/brief-common.md first, then ' + BRIEFS + '/' + t[1] + '. …',</div>
+<div class="del">−     { label: 'migrate:' + t[0], phase: 'Migrate', schema: SCHEMA })</div>
+<div class="del">−   }</div>
+<div class="del">− }))</div>
+<div class="add">+ const todo = M.assignments.filter(function (a) { return !done(a.name) })</div>
+<div class="add">+ const results = await parallel(todo.map(function (a) {</div>
+<div class="add">+   return function () { return agent(</div>
+<div class="add">+     migratePrompt(M, a),          // brief paths and file list from the manifest</div>
+<div class="add">+     Object.assign({ label:'migrate:'+a.name, phase:'Migrate', schema:SCHEMA },</div>
+<div class="add">+                   TIER[a.tier]))  // tier: high leaves model unset → session model</div>
+<div class="add">+   }</div>
+<div class="add">+ }))</div>
+</div>
+
+<p class="field">audit.js — the fossil that has to go</p>
+<div class="diff">
+<div class="ctx">// First three keep their original opts shape so their completed results replay from cache.</div>
+<div class="del">− const AUDITS = [</div>
+<div class="del">−   ['versioning', 'extensions/skills/versioning/SKILL.md', null, null],       ← inherits session model</div>
+<div class="del">−   ['classroom-set', '…SKILL.md (with its four handover documents…)', 'opus', 'high'],</div>
+<div class="del">−   ['git-box', 'extensions/skills/git-box/SKILL.md', null, null],             ← inherits session model</div>
+<div class="del">−   ['agent-commit', '…/agent-commit/SKILL.md', 'sonnet', 'medium'],</div>
+<div class="del">−   … 6 more …</div>
+<div class="del">− ]</div>
+<div class="add">+ const AUDITS = M.assignments.map(function (a) {</div>
+<div class="add">+   return { name: a.name, files: a.files,</div>
+<div class="add">+            tier: a.audit_as === 'set' ? 'set' : 'single' }</div>
+<div class="add">+ })</div>
+<div class="add">+ const AUDIT_TIER = { set:    { model:'opus',   effort:'high' },</div>
+<div class="add">+                      single: { model:'sonnet', effort:'medium' } }</div>
+</div>
+
+<p class="why">Those two <code>null, null</code> rows are the sharpest lesson in the whole archive. They exist only so a mid-run resume replayed them from cache. On a fresh run they silently take the most expensive tier available — the exact failure the pivot was supposed to fix, preserved in the code that fixed it.</p>
+
+<article>
+  <h3>D6 · Two workflow files, invoked by the skill<span class="chip proposed">proposed</span></h3>
+  <p class="why">Keep <code>migrate.js</code> and <code>audit.js</code> as separate assets under the skill. They run at different phases, have different schemas, and one is destructive while the other is read-only — which is a real safety boundary worth keeping visible. The alternative is one script with a mode flag, which halves the shared boilerplate.</p>
+  <div class="controls">
+    <label><input type="radio" name="D6" value="two"> Two files, as now (recommended)</label>
+    <label><input type="radio" name="D6" value="one"> One script, mode flag</label>
+    <label><input type="radio" name="D6" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d6">Comment</label>
+  <textarea id="d6" data-label="D6 · One workflow or two" data-radio="D6"></textarea>
+</article>
+
+<article>
+  <h3>D7 · Promote the accidental verification pass<span class="chip proposed">proposed</span></h3>
+  <p class="why">When the last run was interrupted, replacement agents found their predecessors' edits already in place and <i>byte-verified every hunk against the brief</i> instead of re-editing. The interruption bought a free second pass, and it was the assistant's own note that this was a silver lining. Proposal: make it deliberate — a cheap verify stage inside the migrate pipeline, one agent per assignment at <code>haiku</code>/<code>low</code>, that re-reads the edited files against the brief and reports mismatches without touching anything. Cost is small; it catches the class of error the audit is not looking for, because the audit judges the document as shipped and never sees the brief.</p>
+  <div class="controls">
+    <label><input type="radio" name="D7" value="add"> Add a cheap verify stage (recommended)</label>
+    <label><input type="radio" name="D7" value="skip"> Skip — the audit is enough</label>
+    <label><input type="radio" name="D7" value="optional"> Add it, but manifest-gated per sweep</label>
+    <label><input type="radio" name="D7" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d7">Comment</label>
+  <textarea id="d7" data-label="D7 · Deliberate verification pass" data-radio="D7"></textarea>
+</article>
+
+<h2 class="sec" id="tiers">7 · Model tiers — the policy the last run paid to learn</h2>
+
+<p>The run began with every agent on the session model at maximum effort, and ended after you said it was about to blow a week of credits. The policy it converged on is recorded in the transcript and nowhere in the code. Encoding it is most of the value of doing this at all.</p>
+
+<div class="fig">
+<svg viewBox="0 0 900 250" role="img" aria-label="Model tier ladder across sweep phases">
+  <text class="lanelbl" x="14" y="20">PHASE</text>
+  <text class="lanelbl" x="300" y="20">TIER</text>
+  <text class="lanelbl" x="470" y="20">WHY</text>
+
+  <rect class="box usr" x="14" y="30" width="270" height="34" rx="4"/>
+  <text class="t" x="24" y="51">3 · Brief authoring</text>
+  <rect class="box usr" x="300" y="30" width="150" height="34" rx="4"/>
+  <text class="t" x="310" y="51">strongest</text>
+  <text class="ts" x="470" y="51">pre-decides all downstream judgment</text>
+
+  <rect class="box wf" x="14" y="74" width="270" height="34" rx="4"/>
+  <text class="t" x="24" y="95">4 · Migrate — tier: high</text>
+  <rect class="box wf" x="300" y="74" width="150" height="34" rx="4"/>
+  <text class="t" x="310" y="95">session model</text>
+  <text class="ts" x="470" y="95">largest doc, interacting fixes, design work</text>
+
+  <rect class="box wf" x="14" y="118" width="270" height="34" rx="4"/>
+  <text class="t" x="24" y="139">4 · Migrate — tier: standard</text>
+  <rect class="box wf" x="300" y="118" width="150" height="34" rx="4"/>
+  <text class="t" x="310" y="139">sonnet / medium</text>
+  <text class="ts" x="470" y="139">~8 of 13 last run, given tight briefs</text>
+
+  <rect class="box ml" x="14" y="162" width="270" height="34" rx="4"/>
+  <text class="t" x="24" y="183">4b · Verify (D7)</text>
+  <rect class="box ml" x="300" y="162" width="150" height="34" rx="4"/>
+  <text class="t" x="310" y="183">haiku / low</text>
+  <text class="ts" x="470" y="183">mechanical hunk-vs-brief comparison</text>
+
+  <rect class="box" x="14" y="206" width="270" height="34" rx="4" style="stroke:var(--warn)"/>
+  <text class="t" x="24" y="227">5 · Audit — set-level</text>
+  <rect class="box" x="300" y="206" width="150" height="34" rx="4" style="stroke:var(--warn)"/>
+  <text class="t" x="310" y="227">opus / high</text>
+  <text class="ts" x="470" y="227">set-level judgment degrades first — issue #39</text>
+</svg>
+<p class="cap">Cheaper to migrate on Sonnet and audit strong than the reverse. Single-file audits sit at sonnet/medium; only multi-document sets earn the top tier.</p>
+</div>
+
+<article>
+  <h3>D8 · Tier defaults baked into the workflows<span class="chip proposed">proposed</span></h3>
+  <p class="why">Three named tiers in the manifest — <code>high</code>, <code>standard</code>, <code>mechanical</code> — mapping to model and effort inside the script, with <code>standard</code> as the default so an unmarked assignment is never accidentally expensive. Audits tier off <code>audit_as</code> rather than off the migration tier, because a document can be easy to migrate and hard to judge as a set. The counter-position: leave every tier explicit in the manifest and let the skill propose values you approve at brief time, so nothing is ever implicit.</p>
+  <div class="controls">
+    <label><input type="radio" name="D8" value="defaults"> Named tiers, standard as default (recommended)</label>
+    <label><input type="radio" name="D8" value="explicit"> Explicit model+effort per assignment, no defaults</label>
+    <label><input type="radio" name="D8" value="ask"> Skill proposes tiers, you approve at brief time</label>
+    <label><input type="radio" name="D8" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d8">Comment</label>
+  <textarea id="d8" data-label="D8 · Tier defaults" data-radio="D8"></textarea>
+</article>
+
+<h2 class="sec" id="failure">8 · Failure recovery</h2>
+
+<p>Five of thirteen migration agents died mid-run — three connection drops, two session limits — and eight of twelve audit agents died on a limit. Recovery worked, but it was hand-reconstructed. The manifest makes it mechanical.</p>
+
+<div class="fig">
+<svg viewBox="0 0 900 230" role="img" aria-label="Failure recovery: partial edits reset from the manifest before resume">
+  <text class="lanelbl" x="14" y="18">RUN 1</text>
+  <rect class="box ml" x="14" y="28" width="110" height="38" rx="4"/>
+  <text class="t" x="24" y="52">8 complete</text>
+  <rect class="box" x="14" y="76" width="110" height="38" rx="4" style="stroke:var(--warn)"/>
+  <text class="t" x="24" y="94">5 dead</text><text class="ts" x="24" y="107">partial edits left</text>
+
+  <rect class="box" x="176" y="52" width="180" height="62" rx="4" style="stroke:var(--warn)"/>
+  <text class="t" x="186" y="74">reset from manifest</text>
+  <text class="ts" x="186" y="90">git checkout -- $(files of</text>
+  <text class="ts" x="186" y="103">every unrecorded assignment)</text>
+
+  <rect class="box wf" x="408" y="52" width="180" height="62" rx="4"/>
+  <text class="t" x="418" y="74">resume, same run id</text>
+  <text class="ts" x="418" y="90">completed replay from cache</text>
+  <text class="ts" x="418" y="103">dead agents re-run clean</text>
+
+  <rect class="box ml" x="640" y="52" width="180" height="62" rx="4"/>
+  <text class="t" x="650" y="74">13 / 13 recorded</text>
+  <text class="ts" x="650" y="90">second pass byte-verified</text>
+  <text class="ts" x="650" y="103">the first pass for free</text>
+
+  <path class="arw hot" d="M124 95 L176 90" marker-end="url(#d)"/>
+  <path class="arw" d="M124 47 Q150 47 150 70 Q150 83 408 83" marker-end="url(#d)"/>
+  <path class="arw" d="M356 83 L408 83" marker-end="url(#d)"/>
+  <path class="arw" d="M588 83 L640 83" marker-end="url(#d)"/>
+
+  <text class="ts" x="14" y="150">Without the manifest this was hand work: read the failure list, guess which files each dead agent owned, reset those.</text>
+  <text class="ts" x="14" y="168">With it: an assignment with no recorded result is unfinished by definition, and its file list is already written down.</text>
+  <text class="ts" x="14" y="186">Auditors need no reset — they are read-only, which is the second argument for keeping the two workflows apart.</text>
+  <text class="ts" x="14" y="204">Known stall: the scriptPath form of resume was refused by the safety classifier; the identical script inline worked.</text>
+  <defs><marker id="d" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="var(--muted)"/></marker></defs>
+</svg>
+</div>
+
+<article>
+  <h3>D9 · Manifest-driven reset before every resume<span class="chip proposed">proposed</span></h3>
+  <p class="why">A rule in the skill's <code>+Migrate</code> step: before resuming, reset the files of every assignment with no recorded result. Because the manifest owns the file list, this is one command built from data, not a reconstruction. It also makes the loop honest — an assignment is unfinished exactly when its result is missing, which is the per-item discriminator the Looping declaration needs.</p>
+  <div class="controls">
+    <label><input type="radio" name="D9" value="reset"> Reset from manifest before resume (recommended)</label>
+    <label><input type="radio" name="D9" value="commit"> Commit after each successful assignment instead</label>
+    <label><input type="radio" name="D9" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d9">Comment</label>
+  <textarea id="d9" data-label="D9 · Failure reset mechanism" data-radio="D9"></textarea>
+</article>
+
+<article>
+  <h3>D10 · No worktree isolation<span class="chip proposed">proposed</span></h3>
+  <p class="why">The Workflow tool can give each agent its own git worktree. Proposal: do not. Migration agents edit disjoint file sets by construction — the manifest guarantees it — so there is nothing to conflict over, and worktrees add setup cost per agent plus a merge-back step that becomes its own failure surface. The manifest-driven reset covers the case worktrees would have covered. The counter-argument is that a misbehaving agent editing outside its assignment would be contained; last run, none did.</p>
+  <div class="controls">
+    <label><input type="radio" name="D10" value="none"> No isolation, rely on disjoint file sets (recommended)</label>
+    <label><input type="radio" name="D10" value="worktree"> Worktree per agent</label>
+    <label><input type="radio" name="D10" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d10">Comment</label>
+  <textarea id="d10" data-label="D10 · Worktree isolation" data-radio="D10"></textarea>
+</article>
+
+<h2 class="sec" id="review">9 · The review loop</h2>
+
+<p>The page you are reading is the mechanism, and it worked: 18 decision cards went out, verdicts came back as one markdown block, and the main loop applied them in a batch. Worth keeping exactly as it is, with one open question about where the file lands.</p>
+
+<div class="fig">
+<svg viewBox="0 0 900 130" role="img" aria-label="The review loop from findings to applied verdicts">
+  <rect class="box ml" x="14" y="40" width="140" height="50" rx="4"/>
+  <text class="t" x="24" y="62">findings</text><text class="ts" x="24" y="76">audit + migration flags</text>
+  <rect class="box ml" x="192" y="40" width="140" height="50" rx="4"/>
+  <text class="t" x="202" y="62">triage</text><text class="ts" x="202" y="76">clear-cut fix, or card</text>
+  <rect class="box usr" x="370" y="40" width="140" height="50" rx="4"/>
+  <text class="t" x="380" y="62">review.html</text><text class="ts" x="380" y="76">radio + comment + copy</text>
+  <rect class="box usr" x="548" y="40" width="140" height="50" rx="4"/>
+  <text class="t" x="558" y="62">paste back</text><text class="ts" x="558" y="76">one markdown block</text>
+  <rect class="box ml" x="726" y="40" width="140" height="50" rx="4"/>
+  <text class="t" x="736" y="62">apply batch</text><text class="ts" x="736" y="76">dormant if all approved</text>
+  <path class="arw" d="M154 65 L192 65" marker-end="url(#e)"/>
+  <path class="arw" d="M332 65 L370 65" marker-end="url(#e)"/>
+  <path class="arw" d="M510 65 L548 65" marker-end="url(#e)"/>
+  <path class="arw" d="M688 65 L726 65" marker-end="url(#e)"/>
+  <path class="arw" d="M262 40 Q262 14 796 14 L796 40" marker-end="url(#e)"/>
+  <text class="ts" x="470" y="10">clear-cut repairs bypass the review entirely — ~30 last run</text>
+  <defs><marker id="e" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="var(--muted)"/></marker></defs>
+</svg>
+</div>
+
+<article>
+  <h3>D11 · Review page as a local workspace file<span class="chip proposed">proposed</span></h3>
+  <p class="why">Written to <code>dev/workspace/artifacts/&lt;sweep&gt;-review.html</code> from a template asset, as last run and as this page. It stays with the branch, archives with the workspace, and needs no network. The alternative is publishing it as an Artifact — shareable link, comment threads, no local file to open — at the cost of leaving the workspace's own history.</p>
+  <div class="controls">
+    <label><input type="radio" name="D11" value="local"> Local workspace file (recommended)</label>
+    <label><input type="radio" name="D11" value="artifact"> Published Artifact</label>
+    <label><input type="radio" name="D11" value="both"> Local file, published on request</label>
+    <label><input type="radio" name="D11" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d11">Comment</label>
+  <textarea id="d11" data-label="D11 · Review page home" data-radio="D11"></textarea>
+</article>
+
+<h2 class="sec" id="scope">10 · Scope of the tool</h2>
+
+<p>Everything above is written for DraftHorse. Almost none of the machinery is DraftHorse-specific: a manifest of assignments, briefs from a template, a fan-out that edits, a read-only fan-out that audits against a checker document, and a decision page. That describes any spec-driven bulk document migration.</p>
+
+<div class="note">
+  <b>The DraftHorse-specific parts</b> are exactly four: the pilot-document convention, the spec-docs read list, the audit's authority being <code>drafthorse-spec-check.md</code>, and the sanctioned-shapes list that suppresses known false findings. All four are already manifest fields or brief slots in the proposal above — which means the generic version is nearly free, and the question is only whether to name it generically now or later.
+</div>
+
+<article>
+  <h3>D12 · Name it for DraftHorse, keep the seams generic<span class="chip proposed">proposed</span></h3>
+  <p class="why">Ship as <code>drafthorse-corpus-sweep</code> with DraftHorse defaults baked into the templates, but keep every spec-specific value in the manifest rather than in the scripts. If a second corpus ever needs sweeping, the rename is cheap and the internals already fit. Naming it generically today means writing documentation for a use case that does not exist, which is the more expensive mistake.</p>
+  <div class="controls">
+    <label><input type="radio" name="D12" value="drafthorse"> DraftHorse-named, generic seams (recommended)</label>
+    <label><input type="radio" name="D12" value="generic"> Generic corpus-sweep tool from the start</label>
+    <label><input type="radio" name="D12" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="d12">Comment</label>
+  <textarea id="d12" data-label="D12 · Tool scope and naming" data-radio="D12"></textarea>
+</article>
+
+
+<h2 class="sec" id="round2">Round 2 · raised after the first verdicts</h2>
+
+<div class="note">
+  <b>Round 1 is settled</b> — D1–D11 as answered, recorded in <code>dev/workspace/context/sweep-tool-decisions.md</code>. Two adjustments landed with them: the review page moves to <code>dev/workspace/reviews/</code>, and tier <code>high</code> now resolves to an explicit <code>opus</code> rather than inheriting the session model. That second one is the better call — a sweep authored in a Fable session would otherwise silently reintroduce the exact cost blowout the tiering exists to prevent. No tier is left unset anywhere.
+  <br><br>
+  <b>D12 reopens.</b> The case for a universal tool was that a second corpus does not exist. dev-workspace makes it exist. Four questions follow.
+</div>
+
+<h2 class="sec" id="topology">11 · Two topologies, one process</h2>
+
+<p>dev-workspace is a genuinely different shape from DraftHorse, and the difference is worth seeing before deciding whether one tool covers both. DraftHorse sweeps <b>documents inside one repository</b>. dev-workspace sweeps <b>repositories</b> — each holding its own copy of config, rules and CLAUDE.md, each drifting from the current skill version.</p>
+
+<div class="fig">
+<svg viewBox="0 0 900 250" role="img" aria-label="Document topology versus repository topology">
+  <text class="lanelbl" x="14" y="18">A · DOCUMENTS IN ONE REPO — DRAFTHORSE</text>
+  <rect class="box ml" x="14" y="28" width="120" height="76" rx="4"/>
+  <text class="t" x="24" y="50">one repo</text>
+  <text class="ts" x="24" y="66">one working tree</text>
+  <text class="ts" x="24" y="80">one branch</text>
+  <text class="ts" x="24" y="94">one PR</text>
+  <rect class="box wf" x="178" y="28" width="94" height="22" rx="3"/><text class="ts" x="186" y="43">SKILL.md</text>
+  <rect class="box wf" x="178" y="55" width="94" height="22" rx="3"/><text class="ts" x="186" y="70">agent.md</text>
+  <rect class="box wf" x="178" y="82" width="94" height="22" rx="3"/><text class="ts" x="186" y="97">handover.md</text>
+  <text class="ts" x="292" y="46">agents share the tree → they must never run git</text>
+  <text class="ts" x="292" y="64">disjoint file sets are what make that safe</text>
+  <text class="ts" x="292" y="82">audit authority: drafthorse-spec-check.md</text>
+  <text class="ts" x="292" y="100">set-level checks span documents → one audit pass</text>
+
+  <text class="lanelbl" x="14" y="140">B · REPOSITORIES — DEV-WORKSPACE</text>
+  <rect class="box ml" x="14" y="150" width="120" height="22" rx="3"/><text class="ts" x="22" y="165">repo-one</text>
+  <rect class="box ml" x="14" y="177" width="120" height="22" rx="3"/><text class="ts" x="22" y="192">repo-two</text>
+  <rect class="box ml" x="14" y="204" width="120" height="22" rx="3"/><text class="ts" x="22" y="219">repo-three</text>
+  <rect class="box wf" x="178" y="150" width="94" height="76" rx="4"/>
+  <text class="ts" x="186" y="170">workspace-</text><text class="ts" x="186" y="184">config.yml</text>
+  <text class="ts" x="186" y="200">.claude/rules</text><text class="ts" x="186" y="216">CLAUDE.md</text>
+  <text class="ts" x="292" y="166">separate trees → no concurrency hazard at all</text>
+  <text class="ts" x="292" y="184">each repo takes its own branch and its own PR</text>
+  <text class="ts" x="292" y="202">audit authority: dev-workspace init --check</text>
+  <text class="ts" x="292" y="220">pilot is the source repo's own template payload</text>
+</svg>
+<p class="cap">Everything else is shared: manifest, brief template, editing fan-out, structured change records, tiering, failure reset, triage, review page.</p>
+</div>
+
+<p>The apparent blocker — dev-workspace cannot audit itself — dissolves on inspection. It has a conformance check; the check is a <b>command</b>, not a document. So the audit phase does not need removing for the second corpus, it needs generalising from "read the checker and execute it" to "establish conformance by whatever authority this corpus has".</p>
+
+<pre class="code"># manifest — the two new seams
+scope: documents          # documents | repos
+audit:
+  mode: spec-check        # spec-check | command | canonical-diff | none
+  authority: docs/drafthorse/drafthorse-spec-check.md
+
+# the dev-workspace profile of the same file
+scope: repos
+audit:
+  mode: command
+  authority: dev-workspace init --check
+canonical: <path to the source repo's template payload>   # stands in for 'pilot'</pre>
+
+<article>
+  <h3>E1 · Build it as a universal corpus-sweep skill with profiles<span class="chip proposed">reopens D12</span></h3>
+  <p class="why">Ship as <code>corpus-sweep</code>, with DraftHorse as the first profile and dev-workspace as the second when you need it. The argument that killed this in D12 was that no second corpus existed; it does now, and renaming a released plugin skill later is the expensive move — symlink, manifest, tag, changelog, and every install path. Build the DraftHorse path fully; leave the repos path named and unimplemented until a real dev-workspace sweep calls for it. The counter-position stands if you would rather two focused skills that share nothing but a family resemblance.</p>
+  <div class="controls">
+    <label><input type="radio" name="E1" value="universal"> Universal corpus-sweep, DraftHorse profile first (recommended)</label>
+    <label><input type="radio" name="E1" value="drafthorse"> DraftHorse-only, as D12 answered</label>
+    <label><input type="radio" name="E1" value="twoskills"> Two separate skills</label>
+    <label><input type="radio" name="E1" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="e1">Comment</label>
+  <textarea id="e1" data-label="E1 · Universal corpus-sweep skill" data-radio="E1"></textarea>
+</article>
+
+<article>
+  <h3>E2 · Audit becomes a mode, not a fixed procedure<span class="chip proposed">proposed</span></h3>
+  <p class="why">Four modes. <b>spec-check</b> — read a checker document and execute it, exactly as DraftHorse does now. <b>command</b> — run a conformance command per assignment and report its output as findings, which is dev-workspace's <code>init --check</code>. <b>canonical-diff</b> — diff each target against a canonical source and report drift, for corpora with neither checker nor command. <b>none</b> — skip the phase; the verification pass from D7 is then the only safety net, and the skill should say so rather than pretend the sweep was audited.</p>
+  <div class="controls">
+    <label><input type="radio" name="E2" value="fourmodes"> Four modes as described (recommended)</label>
+    <label><input type="radio" name="E2" value="twomodes"> spec-check and none only, add others when needed</label>
+    <label><input type="radio" name="E2" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="e2">Comment</label>
+  <textarea id="e2" data-label="E2 · Audit as a mode" data-radio="E2"></textarea>
+</article>
+
+<h2 class="sec" id="git">12 · Git — who commits, and when</h2>
+
+<p>Your instinct is right and the constraint is sharper than it looks. Under D10 the migration agents share one working tree. Thirteen agents cannot each cut a branch in one tree — the first checkout would drag every other agent's in-flight edits with it. So in the document topology, <b>agents must never run git at all</b>. What makes per-assignment commits possible anyway is the same property that made worktrees unnecessary: the manifest already declares exactly which files each assignment owns.</p>
+
+<div class="fig">
+<svg viewBox="0 0 900 270" role="img" aria-label="Commit provenance classes across the sweep">
+  <text class="lanelbl" x="14" y="18">BRIEFED — WHAT WE PLANNED</text>
+  <rect class="box wf" x="14" y="28" width="150" height="46" rx="4"/>
+  <text class="t" x="24" y="48">migrate workflow</text><text class="ts" x="24" y="64">agents edit, no git</text>
+  <rect class="box ml" x="200" y="28" width="180" height="46" rx="4"/>
+  <text class="t" x="210" y="48">reset · verify · commit</text><text class="ts" x="210" y="64">one commit per assignment</text>
+  <rect class="box ml" x="416" y="28" width="150" height="46" rx="4"/>
+  <text class="t" x="426" y="48">harvest commit</text><text class="ts" x="426" y="64">separately briefed</text>
+  <rect class="box usr" x="602" y="28" width="150" height="46" rx="4"/>
+  <text class="t" x="612" y="48">PR 1</text><text class="ts" x="612" y="64">N+1 clean commits</text>
+  <path class="arw" d="M164 51 L200 51" marker-end="url(#f)"/>
+  <path class="arw" d="M380 51 L416 51" marker-end="url(#f)"/>
+  <path class="arw" d="M566 51 L602 51" marker-end="url(#f)"/>
+
+  <text class="lanelbl" x="14" y="122">FOUND — WHAT THE SWEEP TURNED UP</text>
+  <rect class="box wf" x="14" y="132" width="150" height="46" rx="4"/>
+  <text class="t" x="24" y="152">audit workflow</text><text class="ts" x="24" y="168">read-only, no git</text>
+  <rect class="box ml" x="200" y="132" width="180" height="46" rx="4"/>
+  <text class="t" x="210" y="152">triage · repair commits</text><text class="ts" x="210" y="168">unbriefed, ~30 last run</text>
+  <rect class="box ml" x="416" y="132" width="150" height="46" rx="4"/>
+  <text class="t" x="426" y="152">verdict commits</text><text class="ts" x="426" y="168">your decisions applied</text>
+  <rect class="box usr" x="602" y="132" width="150" height="46" rx="4"/>
+  <text class="t" x="612" y="152">PR 2</text><text class="ts" x="612" y="168">follows PR 1</text>
+  <path class="arw" d="M164 155 L200 155" marker-end="url(#f)"/>
+  <path class="arw" d="M380 155 L416 155" marker-end="url(#f)"/>
+  <path class="arw" d="M566 155 L602 155" marker-end="url(#f)"/>
+
+  <text class="ts" x="14" y="212">Last run collapsed all four classes into two commits, which is the clump you noticed — scoped and unscoped work indistinguishable in the diff.</text>
+  <text class="ts" x="14" y="230">Splitting by provenance makes the diff self-documenting: every commit answers "was this briefed, or did we find it?" without reading the review page.</text>
+  <text class="ts" x="14" y="248">In the repos topology this collapses to the obvious thing — one branch and one PR per repo, still cut by the main loop after verification.</text>
+  <defs><marker id="f" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="var(--muted)"/></marker></defs>
+</svg>
+</div>
+
+<article>
+  <h3>E3 · Agents never touch git; the main loop commits per assignment<span class="chip proposed">proposed</span></h3>
+  <p class="why">Immediately after the migrate workflow returns — and after the reset and the D7 verification pass, so a half-migrated file never gets committed — the main loop stages each assignment's manifest file list and commits it on its own. Thirteen assignments, thirteen reviewable commits, each traceable to its brief. The alternative you floated, PR-per-agent-run, is not available in the document topology for the concurrency reason above; it becomes available and natural in the repos topology, where every assignment is its own tree.</p>
+  <div class="controls">
+    <label><input type="radio" name="E3" value="mainloop"> Main loop commits per assignment, after verify (recommended)</label>
+    <label><input type="radio" name="E3" value="afteraudit"> Commit once after the audit instead</label>
+    <label><input type="radio" name="E3" value="agentgit"> Agents commit their own work</label>
+    <label><input type="radio" name="E3" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="e3">Comment</label>
+  <textarea id="e3" data-label="E3 · Who commits and when" data-radio="E3"></textarea>
+</article>
+
+<article>
+  <h3>E4 · Two sequential PRs, split by provenance<span class="chip proposed">proposed</span></h3>
+  <p class="why">This is the direct answer to the unscoped changes you spotted. <b>PR 1 — briefed work</b>: the per-assignment migration commits plus any separately briefed one-off like the 6b harvest. Everything in it was planned and approved before an agent ran. <b>PR 2 — found work</b>: clear-cut repairs from the audit, then the verdicts you return from the review page. Nothing in it was scoped in advance. PR 2 depends on PR 1, so they stack rather than run parallel, and the set-level audit needs the whole migrated corpus in place before it can judge anything — which fixes the ordering anyway.</p>
+  <div class="controls">
+    <label><input type="radio" name="E4" value="twoprs"> Two sequential PRs, briefed then found (recommended)</label>
+    <label><input type="radio" name="E4" value="onepr"> One PR, provenance carried by commit messages only</label>
+    <label><input type="radio" name="E4" value="threeprs"> Three — migration, repairs, verdicts</label>
+    <label><input type="radio" name="E4" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="e4">Comment</label>
+  <textarea id="e4" data-label="E4 · PR split by provenance" data-radio="E4"></textarea>
+</article>
+
+<h2 class="sec">Carried forward without a decision</h2>
+
+<details>
+  <summary>Techniques kept as-is from the executed sweep<span class="chip info">no change proposed</span></summary>
+  <div class="body">
+  <ul>
+    <li><b>The pilot as worked reference.</b> Every brief pointed at one already-migrated document as the exemplar for every shape, read last. Cheaper and more reliable than describing target shapes in prose. Becomes the <code>pilot</code> manifest field.</li>
+    <li><b>Agent self-verification.</b> Each migration agent grepped its own targets for the retired strings its brief named and returned the results inside its structured record. Kept verbatim.</li>
+    <li><b>Audit independence.</b> Auditors run read-only, from a cold read, against the checker document, and never see the migration briefs — so findings judge the document as shipped rather than as intended.</li>
+    <li><b>Sanctioned-shapes list.</b> A short list of known false positives handed to every auditor kept findings signal-dense. Becomes a brief slot.</li>
+    <li><b>The cold-read experiment.</b> One contested design question was settled by handing the disputed step to a fresh cheap agent and watching whether it got confused. Worth naming in the skill as an available move during triage.</li>
+    <li><b>Structured returns, not prose.</b> Both workflows force a schema and tell agents their output is data for an orchestrator. Kept.</li>
+  </ul>
+  </div>
+</details>
+
+<details>
+  <summary>Known hazards recorded, no fix proposed<span class="chip info">for awareness</span></summary>
+  <div class="body">
+  <ul>
+    <li>The <code>scriptPath</code> form of workflow resume was refused by the safety classifier; the identical script passed inline with the same run id worked. Recorded in the failure-recovery reference.</li>
+    <li>One migration agent's work returned with the reviewing classifier unreachable. Its full diff was read by hand before the edits were trusted. The skill should say this out loud rather than leave it to chance.</li>
+    <li>Session limits hit both workflows. Nothing prevents this; the manifest-driven resume makes it cheap rather than rare.</li>
+    <li>Last run's totals for scale: migration 1,047,757 subagent tokens on the partial run plus 886,617 on the resume; audit 514,383 before the limit, plus its resume.</li>
+  </ul>
+  </div>
+</details>
+
+<div class="bar">
+  <button id="copy">Copy decisions</button>
+  <button class="ghost" id="show">Show as text</button>
+  <button class="ghost" id="allyes">First option for all</button>
+  <span id="status"></span>
+</div>
+
+<textarea id="out" readonly aria-label="Decisions as text"></textarea>
+
+</div>
+<script>
+function assemble() {
+  var boxes = document.querySelectorAll('textarea[data-label]');
+  var lines = ['# Corpus sweep tool — round 2 decisions', ''];
+  boxes.forEach(function (b) {
+    var name = b.dataset.radio;
+    var picked = document.querySelector('input[name="' + name + '"]:checked');
+    var verdict = picked ? picked.value.toUpperCase() : 'NO ANSWER';
+    var v = b.value.trim();
+    lines.push('## ' + b.dataset.label + ' — ' + verdict);
+    lines.push('');
+    if (v) { lines.push(v, ''); }
+  });
+  return lines.join('\n');
+}
+document.getElementById('copy').addEventListener('click', function () {
+  var text = assemble(), status = document.getElementById('status');
+  navigator.clipboard.writeText(text).then(function () {
+    status.textContent = 'Copied. Paste it back into the session.';
+  }).catch(function () {
+    var out = document.getElementById('out');
+    out.value = text; out.style.display = 'block'; out.select();
+    status.textContent = 'Clipboard blocked — select the text below and copy manually.';
+  });
+});
+document.getElementById('show').addEventListener('click', function () {
+  var out = document.getElementById('out');
+  out.value = assemble();
+  out.style.display = out.style.display === 'block' ? 'none' : 'block';
+  document.getElementById('status').textContent = '';
+});
+document.getElementById('allyes').addEventListener('click', function () {
+  document.querySelectorAll('article').forEach(function (a) {
+    var first = a.querySelector('input[type="radio"]');
+    if (first) first.checked = true;
+  });
+  document.getElementById('status').textContent = 'All set to the first option.';
+});
+</script>

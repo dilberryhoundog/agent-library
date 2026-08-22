@@ -1,0 +1,397 @@
+<meta charset="utf-8">
+<title>Corpus Sweep — Landed Design</title>
+<style>
+:root { --bg:#fbfaf8; --panel:#fff; --ink:#1c1b19; --muted:#6b6862; --line:#e2ded7;
+  --del-bg:#fdecec; --del-ink:#8a1f1f; --add-bg:#e9f6ec; --add-ink:#14622c;
+  --accent:#7a5c2e; --warn:#8a1f1f; --ok:#14622c; --prop:#3f5873; --chipbg:#f4f0e9;
+  --lane:#f4f0e9; --wf:#3f5873; --usr:#7a5c2e; --ml:#14622c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6; --line:#33313c;
+  --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab;
+  --accent:#d5b27a; --warn:#ff9c9c; --ok:#8fe3ab; --prop:#9fb8d8; --chipbg:#26242e;
+  --lane:#26242e; --wf:#9fb8d8; --usr:#d5b27a; --ml:#8fe3ab; } }
+:root[data-theme="dark"] { --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6;
+  --line:#33313c; --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab;
+  --accent:#d5b27a; --warn:#ff9c9c; --ok:#8fe3ab; --prop:#9fb8d8; --chipbg:#26242e;
+  --lane:#26242e; --wf:#9fb8d8; --usr:#d5b27a; --ml:#8fe3ab; }
+* { box-sizing:border-box; }
+body { margin:0; padding:2rem 1.25rem 7rem; background:var(--bg); color:var(--ink);
+  font:16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width:62rem; margin:0 auto; }
+header { border-bottom:2px solid var(--line); padding-bottom:1.25rem; margin-bottom:1rem; }
+h1 { font-size:1.5rem; margin:0 0 .4rem; letter-spacing:-.01em; text-wrap:balance; }
+.sub { color:var(--muted); font-size:.9rem; margin:.2rem 0; }
+code { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:.9em; }
+nav.toc { display:flex; flex-wrap:wrap; gap:.5rem; margin:1rem 0 2rem; }
+nav.toc a { font:12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--accent);
+  text-decoration:none; border:1px solid var(--line); border-radius:999px; padding:.45rem .8rem; background:var(--panel); }
+nav.toc a:hover { border-color:var(--accent); }
+h2.sec { font-size:.8rem; letter-spacing:.09em; text-transform:uppercase; color:var(--accent);
+  margin:2.75rem 0 1rem; padding-bottom:.4rem; border-bottom:1px solid var(--line);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+.note { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
+  padding:.9rem 1.1rem; margin:1.25rem 0 1.5rem; font-size:.9rem; }
+.note b { color:var(--accent); }
+.note ul, article ul, .fig ul, .body ul { margin:.5rem 0 0; padding-left:1.2rem; }
+p { margin:.8rem 0; }
+article { background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:1.1rem 1.25rem 1.25rem; margin-bottom:1.25rem; border-left:3px solid var(--prop); }
+h3 { font-size:1rem; margin:0 0 .3rem; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+.chip { display:inline-block; font-size:.66rem; letter-spacing:.07em; text-transform:uppercase;
+  border-radius:3px; padding:.14rem .45rem; margin-left:.45rem; vertical-align:middle; border:1px solid; }
+.chip.settled { color:var(--ok); border-color:var(--ok); }
+.chip.flip { color:var(--warn); border-color:var(--warn); }
+.chip.proposed { color:var(--prop); border-color:var(--prop); }
+.chip.info { color:var(--muted); border-color:var(--line); }
+.why { color:var(--muted); font-size:.875rem; margin:.35rem 0 .9rem; }
+pre.code { border:1px solid var(--line); border-radius:4px; background:var(--panel);
+  overflow-x:auto; padding:.8rem 1rem; margin:.5rem 0;
+  font:13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.fig { background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:1rem 1.1rem; margin:1.1rem 0; overflow-x:auto; }
+.fig .cap { font-size:.78rem; color:var(--muted); margin:.7rem 0 0; }
+.fig svg { display:block; min-width:640px; max-width:100%; height:auto; }
+svg text { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; fill:var(--ink); }
+svg .lanebg { fill:var(--lane); }
+svg .lanelbl { font-size:10px; letter-spacing:.09em; fill:var(--muted); }
+svg .box { fill:var(--panel); stroke:var(--line); stroke-width:1.5; }
+svg .box.wf { stroke:var(--wf); } svg .box.ml { stroke:var(--ml); } svg .box.usr { stroke:var(--usr); }
+svg .t { font-size:11px; } svg .ts { font-size:9.5px; fill:var(--muted); }
+svg .arw { stroke:var(--muted); stroke-width:1.4; fill:none; }
+svg .rail { stroke:var(--line); stroke-width:2; }
+svg .dot { fill:var(--panel); stroke-width:2; }
+.controls { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:1rem;
+  padding-top:.9rem; border-top:1px solid var(--line); }
+.controls label { font-size:.85rem; display:inline-flex; align-items:center; gap:.3rem; cursor:pointer; }
+label.cmt { display:block; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--muted); margin:.9rem 0 .35rem; }
+textarea { width:100%; min-height:3rem; resize:vertical; padding:.6rem .7rem; background:var(--bg);
+  color:var(--ink); border:1px solid var(--line); border-radius:4px;
+  font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+textarea:focus, button:focus-visible, nav.toc a:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
+details { background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:.75rem 1.1rem; margin-bottom:.8rem; }
+details summary { cursor:pointer; font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+details .body { padding-top:.6rem; font-size:.9rem; }
+.stats { display:flex; flex-wrap:wrap; gap:.6rem; margin:1rem 0 0; }
+.stat { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:.55rem .9rem; }
+.stat b { display:block; font-size:1.15rem; font-variant-numeric:tabular-nums; }
+.stat span { font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+.bar { position:sticky; bottom:0; background:var(--panel); border-top:1px solid var(--line);
+  padding:.9rem 1.25rem; margin:2rem -1.25rem -7rem; display:flex; gap:.75rem; align-items:center; flex-wrap:wrap; }
+button { font:inherit; font-size:.9rem; padding:.5rem 1rem; border-radius:4px; cursor:pointer;
+  border:1px solid var(--accent); background:var(--accent); color:var(--panel); }
+button.ghost { background:transparent; color:var(--accent); }
+#status { color:var(--muted); font-size:.85rem; }
+#out { width:100%; min-height:12rem; margin-top:1rem; display:none; }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Corpus Sweep — how the design landed</h1>
+  <p class="sub">Branch <code>agent-teams</code>. Supersedes the proposal page; that file stays as the round-1 and round-2 record.</p>
+  <div class="stats">
+    <div class="stat"><b>16</b><span>settled</span></div>
+    <div class="stat"><b>4</b><span>reversals</span></div>
+    <div class="stat"><b>5</b><span>open</span></div>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#shape">1 · shape</a>
+  <a href="#run">2 · the run</a>
+  <a href="#git">3 · git model</a>
+  <a href="#reversals">4 · reversals</a>
+  <a href="#open">5 · open</a>
+</nav>
+
+<h2 class="sec" id="shape">1 · Shape — one skill, prebuilt profiles</h2>
+
+<p>The skill holds the pattern. Each corpus gets a profile built and reviewed here, in advance. At sweep time the main loop <b>selects</b> a profile — it never authors one.</p>
+
+<pre class="code">extensions/skills/corpus-sweep/
+├── SKILL.md                       eight steps, a DraftHorse document
+├── references/
+│   ├── writing-briefs.md          what makes a brief tight enough to downtier
+│   ├── model-tiering.md           the policy the last sweep paid to learn
+│   └── failure-recovery.md        worktree discard, resume, classifier stalls
+└── profiles/
+    ├── drafthorse/
+    │   ├── manifest.yml           assignments, tiers, file ownership
+    │   ├── migrate.js             worktree per agent, destructive
+    │   ├── audit.js               read-only, spec-check authority
+    │   ├── brief-common.md        spine + slots for this sweep's payload
+    │   ├── brief-assignment.md    per-target template
+    │   └── brief-audit.md         near-verbatim from the executed sweep
+    └── dev-workspace/
+        ├── manifest.yml           one assignment per repo
+        ├── migrate.js             no worktrees — repos are separate trees
+        ├── audit.js               authority is `dev-workspace init --check`
+        └── brief-*.md</pre>
+
+<div class="note">
+  <b>Why profiles beat one parameterised script.</b> The two corpora differ where it matters. DraftHorse edits documents inside one tree, isolates agents with worktrees, integrates locally, and ships two PRs. dev-workspace rewrites a payload across separate repositories, needs no worktrees because each repo is already its own tree, and ships a PR per repo. A single script serving both would branch on topology through setup, git handling, and audit invocation — two programs wearing one costume. Separate profiles stay readable, and each is reviewed once here rather than generated under pressure at sweep time.
+</div>
+
+<h2 class="sec" id="run">2 · The run</h2>
+
+<p>Seven stages. The only network is at the end.</p>
+
+<div class="fig">
+<svg viewBox="0 0 920 250" role="img" aria-label="Seven stages of a sweep across you, the main tree, and agent worktrees">
+  <rect class="lanebg" x="72" y="18" width="840" height="58" rx="4"/>
+  <rect class="lanebg" x="72" y="82" width="840" height="58" rx="4"/>
+  <rect class="lanebg" x="72" y="146" width="840" height="58" rx="4"/>
+  <text class="lanelbl" x="6" y="52">YOU</text>
+  <text class="lanelbl" x="6" y="116">MAIN TREE</text>
+  <text class="lanelbl" x="6" y="180">WORKTREES</text>
+
+  <rect class="box ml" x="80" y="88" width="106" height="46" rx="4"/>
+  <text class="t" x="88" y="108">1 Select</text><text class="ts" x="88" y="122">profile · manifest</text>
+
+  <rect class="box usr" x="198" y="24" width="106" height="46" rx="4"/>
+  <text class="t" x="206" y="44">2 Approve</text><text class="ts" x="206" y="58">briefs · tiers</text>
+
+  <rect class="box wf" x="316" y="152" width="106" height="46" rx="4"/>
+  <text class="t" x="324" y="172">3 Migrate</text><text class="ts" x="324" y="186">N agents commit</text>
+
+  <rect class="box ml" x="434" y="88" width="106" height="46" rx="4"/>
+  <text class="t" x="442" y="108">4 Integrate</text><text class="ts" x="442" y="122">cherry-pick · verify</text>
+
+  <rect class="box ml" x="552" y="88" width="106" height="46" rx="4"/>
+  <text class="t" x="560" y="108">5 Audit</text><text class="ts" x="560" y="122">read-only · triage</text>
+
+  <rect class="box usr" x="670" y="24" width="106" height="46" rx="4"/>
+  <text class="t" x="678" y="44">6 Review</text><text class="ts" x="678" y="58">decision cards</text>
+
+  <rect class="box ml" x="788" y="88" width="106" height="46" rx="4"/>
+  <text class="t" x="796" y="108">7 Push</text><text class="ts" x="796" y="122">two PRs</text>
+
+  <path class="arw" d="M186 105 Q192 105 192 47 L198 47" marker-end="url(#m)"/>
+  <path class="arw" d="M304 47 Q310 47 310 175 L316 175" marker-end="url(#m)"/>
+  <path class="arw" d="M422 175 Q428 175 428 111 L434 111" marker-end="url(#m)"/>
+  <path class="arw" d="M540 111 L552 111" marker-end="url(#m)"/>
+  <path class="arw" d="M658 111 Q664 111 664 47 L670 47" marker-end="url(#m)"/>
+  <path class="arw" d="M776 47 Q782 47 782 111 L788 111" marker-end="url(#m)"/>
+
+  <text class="ts" x="80" y="228">Worktrees share one .git — an agent's branch is visible from the main tree with no push, no fetch, no remote.</text>
+  <text class="ts" x="80" y="244">So integration is local, and audit agents read ordinary files at stage 5 and see the whole migrated corpus.</text>
+  <defs><marker id="m" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="var(--muted)"/></marker></defs>
+</svg>
+</div>
+
+<details>
+  <summary>Stage detail<span class="chip info">settled</span></summary>
+  <div class="body">
+  <ul>
+    <li><b>1 Select.</b> Main loop reads the spec change, picks the profile, fills its manifest — assignments, file ownership, tier per assignment — and writes briefs from the profile's templates. Strong model; this is where all downstream judgment is pre-decided.</li>
+    <li><b>2 Approve.</b> You read briefs and tiers before a single agent runs. Nothing is spawned until you say so.</li>
+    <li><b>3 Migrate.</b> One agent per assignment, each in its own worktree, each committing its own work there. Agents never push and never touch <code>gh</code>. A dead agent's partial work dies with its worktree — no reset procedure, no file-ownership bookkeeping.</li>
+    <li><b>4 Integrate.</b> Main loop cherry-picks each assignment's commit onto the sweep branch, giving a linear history of one commit per site. After each pick, the commit's changed-file list must equal that assignment's manifest file list — any extra path means the agent wandered outside its brief, and that routes to the error step. Then the cheap verification pass re-reads the integrated tree against the briefs.</li>
+    <li><b>5 Audit.</b> Read-only agents against the integrated sweep branch, no worktrees, authority set by the profile. Main loop triages findings into clear-cut repairs and decision cards.</li>
+    <li><b>6 Review.</b> A page like this one. You answer, copy, paste back.</li>
+    <li><b>7 Push.</b> Main loop pushes once and opens two PRs. Releases stay out of scope — the skill hands off to <code>/dev-tools:versioning</code>.</li>
+  </ul>
+  </div>
+</details>
+
+<h2 class="sec" id="git">3 · Git model</h2>
+
+<p>Every commit is a self-contained, reviewable diff on GitHub. That is what makes a single PR per provenance sufficient — the per-site granularity lives in the commits, not in the PR count.</p>
+
+<div class="fig">
+<svg viewBox="0 0 900 210" role="img" aria-label="Linear sweep branch with commits grouped into two pull requests by provenance">
+  <line class="rail" x1="40" y1="118" x2="860" y2="118"/>
+
+  <circle class="dot" cx="80"  cy="118" r="7" style="stroke:var(--ml)"/>
+  <circle class="dot" cx="140" cy="118" r="7" style="stroke:var(--ml)"/>
+  <circle class="dot" cx="200" cy="118" r="7" style="stroke:var(--ml)"/>
+  <circle class="dot" cx="260" cy="118" r="7" style="stroke:var(--ml)"/>
+  <circle class="dot" cx="320" cy="118" r="7" style="stroke:var(--ml)"/>
+  <circle class="dot" cx="380" cy="118" r="7" style="stroke:var(--ml)"/>
+
+  <circle class="dot" cx="520" cy="118" r="7" style="stroke:var(--warn)"/>
+  <circle class="dot" cx="580" cy="118" r="7" style="stroke:var(--warn)"/>
+  <circle class="dot" cx="640" cy="118" r="7" style="stroke:var(--warn)"/>
+  <circle class="dot" cx="700" cy="118" r="7" style="stroke:var(--usr)"/>
+  <circle class="dot" cx="760" cy="118" r="7" style="stroke:var(--usr)"/>
+
+  <path class="arw" d="M60 88 L60 74 L400 74 L400 88" style="stroke:var(--ml)"/>
+  <text class="t" x="60" y="64" style="fill:var(--ml)">PR 1 · briefed work</text>
+  <text class="ts" x="200" y="64">everything approved before an agent ran</text>
+
+  <path class="arw" d="M500 88 L500 74 L780 74 L780 88" style="stroke:var(--warn)"/>
+  <text class="t" x="500" y="64" style="fill:var(--warn)">PR 2 · found work</text>
+  <text class="ts" x="640" y="64">nothing scoped in advance</text>
+
+  <text class="ts" x="52"  y="142">migrate</text><text class="ts" x="52"  y="154">versioning</text>
+  <text class="ts" x="112" y="142">migrate</text><text class="ts" x="112" y="154">classroom</text>
+  <text class="ts" x="172" y="142">migrate</text><text class="ts" x="172" y="154">git-box</text>
+  <text class="ts" x="232" y="142">…</text>
+  <text class="ts" x="292" y="142">migrate</text><text class="ts" x="292" y="154">× 13 sites</text>
+  <text class="ts" x="352" y="142">harvest</text>
+
+  <text class="ts" x="492" y="142">repair</text><text class="ts" x="492" y="154">versioning</text>
+  <text class="ts" x="552" y="142">repair</text><text class="ts" x="552" y="154">git-box</text>
+  <text class="ts" x="612" y="142">…</text>
+  <text class="ts" x="672" y="142">verdict</text><text class="ts" x="672" y="154">D-cards</text>
+  <text class="ts" x="732" y="142">verdict</text>
+
+  <text class="ts" x="40" y="184">Cherry-pick rather than merge — thirteen merge commits tangled with thirteen work commits stops being readable history.</text>
+  <text class="ts" x="40" y="200">PR 2 stacks on PR 1; the set-level audit needs the whole migrated corpus in place before it can judge anything anyway.</text>
+</svg>
+</div>
+
+<h2 class="sec" id="reversals">4 · What reversed, and why</h2>
+
+<p>Four calls from the first round did not survive contact with the second. Recording them because the reasons matter more than the verdicts.</p>
+
+<details>
+  <summary>Worktree per migration agent<span class="chip flip">reversed</span></summary>
+  <div class="body">Originally rejected on the grounds that disjoint file sets make conflict impossible. True, and beside the point — conflict was never the real risk. <b>Unobservable partial failure</b> was: five dead agents last run left half-applied edits in a shared tree, and recovery meant guessing which files each had touched. A worktree makes that vanish with the worktree. Setup runs a few hundred milliseconds against agents that work for minutes.</div>
+</details>
+
+<details>
+  <summary>Prebuilt per-corpus profiles, not one parameterised pair<span class="chip flip">reversed</span></summary>
+  <div class="body">A generic script serving unknown future corpora accretes conditionals for cases nobody has. The durable asset is the pattern — fan-out shape, schemas, tiering, provenance — and that belongs in the skill and its references. Profiles are cheap to build and cheap to read.</div>
+</details>
+
+<details>
+  <summary>Manifest is per-corpus, not a universal schema<span class="chip flip">loosened</span></summary>
+  <div class="body">With a bespoke script reading it, the manifest needs no <code>scope:</code> or <code>audit.mode:</code> seams. Each profile shapes its own. The four audit modes survive as authoring guidance in a reference, not as an enum.</div>
+</details>
+
+<details>
+  <summary>Failure recovery simplifies to discard-and-rerun<span class="chip flip">superseded</span></summary>
+  <div class="body">The manifest-driven reset was solving a problem worktrees remove. The manifest's file list keeps a better job: asserting after integration that a commit touched exactly the files its assignment owns.</div>
+</details>
+
+<details>
+  <summary>Carried unchanged from round 1<span class="chip settled">settled</span></summary>
+  <div class="body">
+  <ul>
+    <li>Skill is a DraftHorse document, drafted by invoking the DraftHorse skill.</li>
+    <li>Briefs authored in the main loop from profile templates, approved by you before any agent runs.</li>
+    <li>Two workflows per profile — destructive and read-only kept apart as a visible safety boundary.</li>
+    <li>The verification pass, promoted from the accidental second pass the last sweep got for free.</li>
+    <li>Tiers <code>high</code> / <code>standard</code> / <code>mechanical</code> resolving to explicit models. <code>high</code> is <code>opus</code>, never inherit — a Fable-authored sweep would otherwise reintroduce the blowout.</li>
+    <li>Eight-step map; integration folds into <code>+Migrate</code> rather than earning its own step.</li>
+    <li>Working set under <code>dev/workspace/tasks/&lt;sweep&gt;/</code>; review pages in <code>dev/workspace/reviews/</code>.</li>
+    <li>The pilot convention, agent self-verification, audit independence, the sanctioned-shapes list, the cold-read experiment, structured returns.</li>
+  </ul>
+  </div>
+</details>
+
+<h2 class="sec" id="open">5 · Still open</h2>
+
+<article>
+  <h3>N1 · Skill name<span class="chip proposed">needs a call</span></h3>
+  <p class="why"><code>corpus-sweep</code> reads right for a tool with profiles and matches the vocabulary already in use. It is also short enough to invoke. Alternatives worth a moment: <code>corpus-migrate</code> names the destructive half only; <code>sweep</code> is briefer but collides with nothing and means nothing.</p>
+  <div class="controls">
+    <label><input type="radio" name="N1" value="corpus-sweep"> corpus-sweep (recommended)</label>
+    <label><input type="radio" name="N1" value="corpus-migrate"> corpus-migrate</label>
+    <label><input type="radio" name="N1" value="sweep"> sweep</label>
+    <label><input type="radio" name="N1" value="change"> Something else</label>
+  </div>
+  <label class="cmt" for="n1">Comment</label>
+  <textarea id="n1" data-label="N1 · Skill name" data-radio="N1"></textarea>
+</article>
+
+<article>
+  <h3>N2 · Which profiles ship in this build<span class="chip proposed">needs a call</span></h3>
+  <p class="why">DraftHorse can be built from evidence — the executed sweep gives real briefs, a real manifest, and two working scripts. dev-workspace would be built from a sketch: no sweep has run, so its brief templates and its <code>init --check</code> audit path are guesses until one does. Building both now risks shipping a profile that turns out wrong on first contact.</p>
+  <div class="controls">
+    <label><input type="radio" name="N2" value="drafthorse"> DraftHorse only; add dev-workspace on its first real sweep (recommended)</label>
+    <label><input type="radio" name="N2" value="both"> Both now</label>
+    <label><input type="radio" name="N2" value="skeleton"> DraftHorse full, dev-workspace as an unfilled skeleton</label>
+    <label><input type="radio" name="N2" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="n2">Comment</label>
+  <textarea id="n2" data-label="N2 · Profiles in this build" data-radio="N2"></textarea>
+</article>
+
+<article>
+  <h3>N3 · Does the skill create its branch via dev-workspace<span class="chip proposed">needs a call</span></h3>
+  <p class="why">A sweep needs a branch and a working directory. <code>dev-workspace new &lt;sweep-name&gt;</code> already produces both, with the workspace folders the manifest and briefs want to live in, and the archive behaviour that keeps a finished sweep readable later. The cost is a hard dependency: the skill stops working in any repo without dev-workspace installed — which matters exactly for the dev-workspace profile, whose targets are repos that may not have it yet.</p>
+  <div class="controls">
+    <label><input type="radio" name="N3" value="use"> Use dev-workspace to create the sweep branch (recommended)</label>
+    <label><input type="radio" name="N3" value="plain"> Plain git branch, no dependency</label>
+    <label><input type="radio" name="N3" value="detect"> Use it when present, fall back to plain git</label>
+    <label><input type="radio" name="N3" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="n3">Comment</label>
+  <textarea id="n3" data-label="N3 · Branch creation via dev-workspace" data-radio="N3"></textarea>
+</article>
+
+<article>
+  <h3>N4 · Fate of the two scripts in <code>.claude/workflows/</code><span class="chip proposed">needs a call</span></h3>
+  <p class="why">They are the source material for the DraftHorse profile and they carry a live hazard: hardcoded targets, brief paths that exist only in an archive, and two audit rows that silently inherit the session model on a fresh run. Once the profile exists they are strictly worse copies. Deleting them is clean; keeping them means someone eventually runs the expensive fossil by accident.</p>
+  <div class="controls">
+    <label><input type="radio" name="N4" value="delete"> Delete once the profile lands (recommended)</label>
+    <label><input type="radio" name="N4" value="keep"> Keep as reference</label>
+    <label><input type="radio" name="N4" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="n4">Comment</label>
+  <textarea id="n4" data-label="N4 · Existing workflow scripts" data-radio="N4"></textarea>
+</article>
+
+<article>
+  <h3>N5 · Build order<span class="chip proposed">needs a call</span></h3>
+  <p class="why">Proposed: references first, since the tiering and failure-recovery knowledge is the part that would be lost if this stalls; then the DraftHorse profile's workflows and manifest, which can be tested against the already-migrated corpus without editing anything; then brief templates; then the SKILL.md last, via the DraftHorse skill, once its steps describe something that exists. The alternative is SKILL.md first as a spine to hang the rest on.</p>
+  <div class="controls">
+    <label><input type="radio" name="N5" value="refsfirst"> References, profile, templates, SKILL.md last (recommended)</label>
+    <label><input type="radio" name="N5" value="skillfirst"> SKILL.md first as the spine</label>
+    <label><input type="radio" name="N5" value="change"> Change / discuss</label>
+  </div>
+  <label class="cmt" for="n5">Comment</label>
+  <textarea id="n5" data-label="N5 · Build order" data-radio="N5"></textarea>
+</article>
+
+<div class="bar">
+  <button id="copy">Copy decisions</button>
+  <button class="ghost" id="show">Show as text</button>
+  <button class="ghost" id="allyes">First option for all</button>
+  <span id="status"></span>
+</div>
+
+<textarea id="out" readonly aria-label="Decisions as text"></textarea>
+
+</div>
+<script>
+function assemble() {
+  var boxes = document.querySelectorAll('textarea[data-label]');
+  var lines = ['# Corpus sweep — landed design decisions', ''];
+  boxes.forEach(function (b) {
+    var picked = document.querySelector('input[name="' + b.dataset.radio + '"]:checked');
+    var v = b.value.trim();
+    lines.push('## ' + b.dataset.label + ' — ' + (picked ? picked.value.toUpperCase() : 'NO ANSWER'));
+    lines.push('');
+    if (v) { lines.push(v, ''); }
+  });
+  return lines.join('\n');
+}
+document.getElementById('copy').addEventListener('click', function () {
+  var text = assemble(), status = document.getElementById('status');
+  navigator.clipboard.writeText(text).then(function () {
+    status.textContent = 'Copied. Paste it back into the session.';
+  }).catch(function () {
+    var out = document.getElementById('out');
+    out.value = text; out.style.display = 'block'; out.select();
+    status.textContent = 'Clipboard blocked — select the text below and copy manually.';
+  });
+});
+document.getElementById('show').addEventListener('click', function () {
+  var out = document.getElementById('out');
+  out.value = assemble();
+  out.style.display = out.style.display === 'block' ? 'none' : 'block';
+  document.getElementById('status').textContent = '';
+});
+document.getElementById('allyes').addEventListener('click', function () {
+  document.querySelectorAll('article').forEach(function (a) {
+    var first = a.querySelector('input[type="radio"]');
+    if (first) first.checked = true;
+  });
+  document.getElementById('status').textContent = 'All set to the first option.';
+});
+</script>
