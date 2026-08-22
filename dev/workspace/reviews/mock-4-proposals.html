@@ -1,0 +1,986 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock 4 Proposals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+	:root {
+		--paper:        #F4F6F6;
+		--surface:      #FFFFFF;
+		--surface-sunk: #ECF0EF;
+		--ink:          #14191A;
+		--ink-soft:     #4E5B5C;
+		--ink-faint:    #78878A;
+		--rule:         #D6DEDD;
+		--accent:       #0D6B64;
+		--accent-soft:  #E2EFED;
+		--warn:         #8A5B00;
+		--warn-soft:    #F6EBD6;
+		--stop:         #93332A;
+		--stop-soft:    #F7E5E2;
+		--shadow:       0 1px 2px rgba(20, 25, 26, .05), 0 8px 24px rgba(20, 25, 26, .05);
+		--serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+		--disp:  Bitter, "Source Serif 4", Georgia, serif;
+		--mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--paper: #0E1313; --surface: #161C1C; --surface-sunk: #1D2525;
+			--ink: #E7EDEC; --ink-soft: #A9B6B5; --ink-faint: #7D8B8A; --rule: #293333;
+			--accent: #59C5B9; --accent-soft: #16302E; --warn: #D9A44F; --warn-soft: #2E2617;
+			--stop: #E08277; --stop-soft: #331C19;
+			--shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+		}
+	}
+	:root[data-theme="dark"] {
+		--paper: #0E1313; --surface: #161C1C; --surface-sunk: #1D2525;
+		--ink: #E7EDEC; --ink-soft: #A9B6B5; --ink-faint: #7D8B8A; --rule: #293333;
+		--accent: #59C5B9; --accent-soft: #16302E; --warn: #D9A44F; --warn-soft: #2E2617;
+		--stop: #E08277; --stop-soft: #331C19;
+		--shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+	}
+
+	* { box-sizing: border-box; }
+	body {
+		margin: 0; background: var(--paper); color: var(--ink);
+		font-family: var(--serif); font-size: 17px; line-height: 1.6;
+		-webkit-font-smoothing: antialiased;
+	}
+	h1, h2, h3, h4, h5 { font-family: var(--disp); text-wrap: balance; }
+	code, .mono, kbd { font-family: var(--mono); }
+	code { font-size: .87em; background: var(--surface-sunk); padding: 1px 5px; border-radius: 2px; }
+	a { color: var(--accent); }
+
+	.shell { max-width: 880px; margin: 0 auto; padding: 0 20px 60px; }
+
+	.masthead { border-bottom: 1px solid var(--rule); padding: 40px 0 26px; margin-bottom: 34px; }
+	.eyebrow {
+		font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+		color: var(--ink-faint); display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center;
+	}
+	.eyebrow .spacer { margin-left: auto; }
+	h1 { font-size: clamp(30px, 4.4vw, 44px); line-height: 1.1; font-weight: 600; margin: 16px 0 10px; letter-spacing: -.015em; }
+	.standfirst { max-width: 62ch; color: var(--ink-soft); font-size: 19px; margin: 0; }
+	.tally { display: flex; flex-wrap: wrap; gap: 10px 26px; margin-top: 20px; font-size: 14px; color: var(--ink-soft); }
+	.tally b { color: var(--ink); font-weight: 600; }
+
+	.item {
+		background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--accent);
+		border-radius: 3px; box-shadow: var(--shadow); padding: 22px 24px; margin-bottom: 22px;
+	}
+	.item.defer { border-left-color: var(--ink-faint); }
+	.item.decide { border-left-color: var(--warn); }
+	.item h3 { font-size: 20px; margin: 0 0 8px; font-weight: 600; line-height: 1.3; }
+	.item p { max-width: 66ch; }
+	.item > p:last-of-type { margin-bottom: 0; }
+	.item ul { max-width: 66ch; padding-left: 20px; }
+	.item li { margin-bottom: 5px; }
+
+	.chiprow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+	.chip {
+		font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+		padding: 3px 8px; border-radius: 2px; background: var(--surface-sunk); color: var(--ink-soft); white-space: nowrap;
+	}
+	.chip.id { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); }
+	.chip.go { background: var(--accent-soft); color: var(--accent); }
+	.chip.hold { background: var(--warn-soft); color: var(--warn); }
+	.chip.later { background: transparent; border: 1px dashed var(--rule); color: var(--ink-faint); }
+
+	/* ---------- live demo strip ---------- */
+
+	.demo {
+		border: 1px dashed var(--rule); border-radius: 3px; background: var(--surface-sunk);
+		padding: 16px 18px; margin: 18px 0;
+	}
+	.demo > .tag {
+		display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
+		text-transform: uppercase; color: var(--accent); margin-bottom: 12px;
+	}
+	.demo .sub { font-size: 14px; color: var(--ink-soft); margin: 0 0 12px; max-width: 62ch; }
+	.readout {
+		font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--ink-soft);
+		background: var(--surface); border: 1px solid var(--rule); border-left: 2px solid var(--accent);
+		border-radius: 2px; padding: 9px 11px; margin-top: 12px; white-space: pre-wrap; word-break: break-word;
+	}
+	.readout .muted { color: var(--ink-faint); font-style: italic; }
+
+	.picks { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+	.picks label {
+		font-family: var(--mono); font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase;
+		border: 1px solid var(--rule); border-radius: 2px; padding: 5px 11px; cursor: pointer;
+		color: var(--ink-soft); user-select: none; background: var(--surface);
+	}
+	.picks input { position: absolute; opacity: 0; width: 0; height: 0; }
+	.picks label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+	.picks label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+	.picks label.rich::after { content: "+"; font-size: 10px; margin-left: 6px; opacity: .5; }
+
+	.editing label.pk {
+		border-style: dashed; border-color: var(--warn); color: var(--warn);
+		background: var(--warn-soft); display: inline-flex; gap: 8px; align-items: center;
+	}
+	.editing label.pk .kill {
+		border: 0; background: transparent; color: var(--warn); cursor: pointer;
+		font-family: var(--mono); font-size: 13px; padding: 0; line-height: 1;
+	}
+
+	.kv { display: grid; gap: 8px; margin-top: 10px; }
+	@media (min-width: 620px) { .kv { grid-template-columns: 190px minmax(0, 1fr) auto; align-items: start; } }
+	.kv input { width: 100%; }
+
+	input[type="text"], textarea {
+		background: var(--surface); color: var(--ink); border: 1px solid var(--rule);
+		border-radius: 2px; padding: 8px 10px; font-family: var(--serif); font-size: 15px; width: 100%;
+	}
+	textarea { min-height: 74px; resize: vertical; line-height: 1.5; }
+	input[type="text"]:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+	::placeholder { color: var(--ink-faint); font-style: italic; }
+	input.mono { font-family: var(--mono); font-size: 13px; }
+
+	/* ---------- ordered rows ---------- */
+
+	.rows { display: flex; flex-direction: column; gap: 7px; }
+	.brow {
+		display: flex; gap: 9px; align-items: center; background: var(--surface);
+		border: 1px solid var(--rule); border-left: 2px solid var(--accent); border-radius: 2px; padding: 7px 10px;
+	}
+	.brow.off { border-left-color: var(--rule); opacity: .55; }
+	.brow.dragging { opacity: .35; }
+	.brow.over { border-top: 2px solid var(--accent); }
+	.brow:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+	.brow .handle { cursor: grab; color: var(--ink-faint); font-family: var(--mono); font-size: 13px; user-select: none; }
+	.brow .n { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); width: 20px; font-variant-numeric: tabular-nums; }
+	.brow .nm { font-size: 15.5px; flex: 1 1 auto; }
+	.brow .mv, .brow .tg {
+		border: 1px solid var(--rule); background: transparent; color: var(--ink-faint);
+		font-family: var(--mono); font-size: 11px; height: 28px; border-radius: 2px; cursor: pointer; flex: none;
+	}
+	.brow .mv { width: 28px; }
+	.brow .tg { padding: 0 10px; letter-spacing: .08em; text-transform: uppercase; }
+	.brow .mv:hover, .brow .tg:hover { border-color: var(--accent); color: var(--accent); }
+	.brow.on .tg { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+	/* ---------- dialog ---------- */
+
+	.dialog {
+		border: 1px solid var(--warn); border-left: 3px solid var(--warn); background: var(--warn-soft);
+		border-radius: 2px; padding: 14px 16px; margin-top: 12px;
+	}
+	.dialog h5 { margin: 0 0 6px; font-size: 15px; }
+	.dialog p { margin: 0 0 12px; font-size: 14.5px; color: var(--ink); max-width: 60ch; }
+
+	/* ---------- capability line ---------- */
+
+	.caps { display: flex; flex-wrap: wrap; gap: 8px 16px; font-family: var(--mono); font-size: 12px; }
+	.cap { display: inline-flex; gap: 6px; align-items: center; color: var(--ink-faint); }
+	.cap b { font-weight: 500; color: var(--ink-soft); }
+	.cap .y { color: var(--accent); }
+	.cap .n { color: var(--stop); }
+
+	/* ---------- naming preview ---------- */
+
+	.side { display: grid; gap: 12px; }
+	@media (min-width: 620px) { .side { grid-template-columns: 1fr 1fr; } }
+	.mini {
+		background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 13px 15px;
+	}
+	.mini h5 {
+		font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+		color: var(--ink-faint); margin: 0 0 10px; font-weight: 500;
+	}
+	.mini .line { font-size: 15px; margin: 0 0 5px; }
+	.mini .line:last-child { margin-bottom: 0; }
+	.mini .k { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: .06em; text-transform: uppercase; }
+
+	/* ---------- buttons ---------- */
+
+	button {
+		font-family: var(--mono); font-size: 12px; letter-spacing: .07em; text-transform: uppercase;
+		padding: 8px 14px; border-radius: 2px; border: 1px solid var(--accent);
+		background: var(--accent); color: var(--paper); cursor: pointer;
+	}
+	button.ghost { background: transparent; color: var(--accent); }
+	button.quiet { background: transparent; color: var(--ink-faint); border-color: var(--rule); }
+	button.quiet:hover { color: var(--accent); border-color: var(--accent); }
+	button.danger { background: transparent; color: var(--stop); border-color: var(--stop); }
+	button:hover { filter: brightness(1.08); }
+	button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+	button.tiny { padding: 5px 10px; font-size: 11px; }
+	.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+	.btnrow + .btnrow { margin-top: 10px; }
+	.note { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); }
+
+	/* ---------- response ---------- */
+
+	.respond { margin-top: 18px; border-top: 1px dashed var(--rule); padding-top: 14px; }
+	.verdicts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+	.verdicts label {
+		font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+		border: 1px solid var(--rule); border-radius: 2px; padding: 4px 10px; cursor: pointer;
+		color: var(--ink-soft); user-select: none; background: var(--surface);
+	}
+	.verdicts input { position: absolute; opacity: 0; width: 0; height: 0; }
+	.verdicts label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+	.verdicts label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+	.respond textarea { background: var(--surface-sunk); }
+
+	.actions {
+		position: sticky; bottom: 0; background: linear-gradient(to top, var(--paper) 62%, transparent);
+		padding: 20px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; z-index: 5;
+	}
+	#out { width: 100%; min-height: 280px; font-family: var(--mono); font-size: 12.5px; line-height: 1.5; margin-top: 10px; }
+	#outwrap[hidden] { display: none; }
+
+	.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin: 46px 0 20px; }
+	.sec-head h2 { font-size: 24px; margin: 0; font-weight: 600; }
+	.sec-head .count { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+
+	footer { border-top: 1px solid var(--rule); margin-top: 40px; padding-top: 16px; color: var(--ink-faint); font-size: 14px; }
+	@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+	<header class="masthead">
+		<div class="eyebrow">
+			<span>Prompt builder</span>
+			<span>·</span>
+			<span>mock 4 proposals</span>
+			<span>·</span>
+			<span>working demos, not screenshots</span>
+			<span class="spacer"></span>
+			<button class="quiet tiny" id="themeBtn" type="button">Theme</button>
+		</div>
+		<h1>Mock 4 Proposals</h1>
+		<p class="standfirst">Eight changes, each one running here in miniature with throwaway data. Drive them, then mark each integrate, revise, or defer at the bottom of its card.</p>
+		<div class="tally">
+			<span><b>To integrate</b> 6</span>
+			<span><b>Your call</b> 2</span>
+			<span><b>Deferred</b> 2</span>
+		</div>
+	</header>
+
+	<div class="sec-head">
+		<h2>Proposals</h2>
+		<span class="count">8</span>
+	</div>
+
+	<!-- 01 ------------------------------------------------------------- -->
+	<article class="item" id="p1">
+		<div class="chiprow"><span class="chip id">01</span><span class="chip go">Integrate</span><span class="chip">edit mode</span></div>
+		<h3>Edit mode, resetting on entry</h3>
+		<p>A toggle turns every pick field editable in place. Chips stop selecting and start editing — dashed and amber, so the mode is never in doubt. Each carries a delete, each opens a key-and-value pair, and a new option can be added at the end.</p>
+		<p>Entering clears what you filled in, which is what removes every orphaned-selection problem. One plain warning before it happens.</p>
+
+		<div class="demo" id="d1">
+			<span class="tag">live · a Depth field with three options</span>
+			<p class="sub">Pick something, then turn editing on and watch the selection go. Rename a key, change its value, add an option, delete one.</p>
+			<div class="btnrow">
+				<button class="ghost tiny" id="d1toggle" type="button">Edit options</button>
+				<span class="note" id="d1mode">selecting</span>
+			</div>
+			<div style="margin-top:12px" id="d1picks"></div>
+			<div id="d1editor"></div>
+			<div class="readout" id="d1out"></div>
+		</div>
+
+		<p>The warning wording, exactly as it would read: <code>Edit will reset current builders.</code></p>
+	</article>
+
+	<!-- 02 ------------------------------------------------------------- -->
+	<article class="item" id="p2">
+		<div class="chiprow"><span class="chip id">02</span><span class="chip go">Integrate</span><span class="chip">builders panel</span></div>
+		<h3>Order and visibility in one panel</h3>
+		<p>Drag to reorder, or focus a row and press <kbd>Alt</kbd> with the arrow keys. The toggle takes a builder out of the dashboard and out of the prompt without losing its place in the order, so switching it back on returns it where it was.</p>
+		<p>Stored as the full ordered list plus a separate list of what is off. Both travel with the loadout.</p>
+
+		<div class="demo" id="d2">
+			<span class="tag">live · six builders</span>
+			<p class="sub">Reorder them, switch a couple off, and watch the emitted order below.</p>
+			<div class="rows" id="d2rows"></div>
+			<div class="readout" id="d2out"></div>
+		</div>
+	</article>
+
+	<!-- 03 ------------------------------------------------------------- -->
+	<article class="item" id="p3">
+		<div class="chiprow"><span class="chip id">03</span><span class="chip go">Integrate</span><span class="chip">loadouts</span></div>
+		<h3>Import replaces everything</h3>
+		<p>This is the correction. Import currently patches key by key, so a smaller file leaves the previous options sitting underneath it. A loadout is a whole tool — options, keys, values, order, visibility — and loading one has to leave nothing of the last behind.</p>
+		<p>A loadout names itself in the file, and the name shows in the masthead so you can tell which one is loaded at a glance.</p>
+
+		<div class="demo" id="d3">
+			<span class="tag">live · two loadouts over the same three fields</span>
+			<p class="sub">Swap between them. The counter reports what was replaced and what disappeared entirely — that second number is the one merge would leave behind.</p>
+			<div class="btnrow" id="d3buttons"></div>
+			<div class="readout" id="d3out"></div>
+		</div>
+
+		<p>One guard: a file with a handful of keys and no order is a fragment, not a loadout. The page should say so and offer to merge it rather than wiping fourteen builders.</p>
+	</article>
+
+	<!-- 04 ------------------------------------------------------------- -->
+	<article class="item decide" id="p4">
+		<div class="chiprow"><span class="chip id">04</span><span class="chip hold">Your call</span><span class="chip">save warning</span></div>
+		<h3>Warn once, or warn every time</h3>
+		<p>Save rewrites the option block inside the page's own file. You asked whether a backup warning is the way — here are both, running. Press Save twice in each.</p>
+
+		<div class="demo" id="d4">
+			<span class="tag">live · the same button under two policies</span>
+			<div class="side">
+				<div class="mini">
+					<h5>Warn once per session</h5>
+					<div class="btnrow"><button class="ghost tiny" id="d4a" type="button">Save</button></div>
+					<div id="d4aslot"></div>
+					<div class="readout" id="d4alog"></div>
+				</div>
+				<div class="mini">
+					<h5>Warn every time</h5>
+					<div class="btnrow"><button class="ghost tiny" id="d4b" type="button">Save</button></div>
+					<div id="d4bslot"></div>
+					<div class="readout" id="d4blog"></div>
+				</div>
+			</div>
+		</div>
+
+		<p>My reading: a dialog you see on every save becomes one you dismiss without reading, which leaves you less protected than no dialog. Warn once, name the file, and put Export in the dialog so a backup is one click from the moment of risk. But it is your file and your risk appetite.</p>
+	</article>
+
+	<!-- 05 ------------------------------------------------------------- -->
+	<article class="item" id="p5">
+		<div class="chiprow"><span class="chip id">05</span><span class="chip go">Integrate</span><span class="chip">copy or write</span></div>
+		<h3>Copy and write, side by side</h3>
+		<p>The correction in your two-paths plan: a typed path cannot be written to. Writing needs a folder you pick once through a dialog, which the page then remembers. So the two settings are different kinds of thing, and only one of them is a text field.</p>
+		<ul>
+			<li><b>Project path</b> — text. Only ever substituted into <code>{{path}}</code> in recipes and utilities.</li>
+			<li><b>Prompt folder</b> — a picked folder, remembered. Cannot be typed, because a string carries no permission.</li>
+		</ul>
+
+		<div class="demo" id="d5">
+			<span class="tag">live · the rail buttons and the folder row</span>
+			<p class="sub">Choose folder opens the real dialog and nothing is written — this only proves the grant works and shows what the row looks like once bound.</p>
+			<div class="btnrow">
+				<button class="ghost tiny" type="button" id="d5copy">Copy</button>
+				<button class="ghost tiny" type="button" id="d5write">Write to file</button>
+				<span class="note" id="d5note"></span>
+			</div>
+			<div class="btnrow">
+				<button class="quiet tiny" type="button" id="d5pick">Choose folder</button>
+				<span class="note" id="d5bound">no folder bound</span>
+			</div>
+			<div style="margin-top:10px"><input type="text" class="mono" id="d5name"></div>
+			<div class="readout" id="d5out"></div>
+		</div>
+	</article>
+
+	<!-- 06 ------------------------------------------------------------- -->
+	<article class="item" id="p6">
+		<div class="chiprow"><span class="chip id">06</span><span class="chip go">Integrate</span><span class="chip">capability line</span></div>
+		<h3>Report what this browser can do, rather than claiming Chrome</h3>
+		<p>A static "Chrome only" label would be wrong in both directions and would go stale. The page already knows exactly what it has, so it should say so — and it explains why a button is missing instead of leaving you guessing.</p>
+
+		<div class="demo">
+			<span class="tag">live · this browser, right now</span>
+			<div class="caps" id="d6"></div>
+			<p class="sub" style="margin:12px 0 0" id="d6note"></p>
+		</div>
+	</article>
+
+	<!-- 07 ------------------------------------------------------------- -->
+	<article class="item" id="p7">
+		<div class="chiprow"><span class="chip id">07</span><span class="chip go">Integrate</span><span class="chip">recipes</span></div>
+		<h3>Recipes editable in place</h3>
+		<p>Same mechanism as the options, pointed at the text database. Name, position, and body — and the slot stays highlighted while you edit so you can see it survive.</p>
+
+		<div class="demo" id="d7">
+			<span class="tag">live · one recipe card</span>
+			<div class="btnrow">
+				<button class="ghost tiny" id="d7toggle" type="button">Edit recipe</button>
+				<span class="note" id="d7mode">reading</span>
+			</div>
+			<div style="margin-top:12px" id="d7body"></div>
+		</div>
+	</article>
+
+	<!-- 08 ------------------------------------------------------------- -->
+	<article class="item decide" id="p8">
+		<div class="chiprow"><span class="chip id">08</span><span class="chip hold">Your call</span><span class="chip">vocabulary</span></div>
+		<h3>Builder or section</h3>
+		<p>You are right that each one builds a part of the prompt, and that the tab is already called Build. The single objection is overloading — the page is the Prompt Builder, so "builder" would name both the whole and the parts.</p>
+		<p>In practice context carries it. Nobody misreads "the Skills builder". Here is the same copy both ways.</p>
+
+		<div class="demo">
+			<span class="tag">live · the same four surfaces, two vocabularies</span>
+			<div class="side">
+				<div class="mini">
+					<h5>Builder</h5>
+					<p class="line"><span class="k">tab</span> Build</p>
+					<p class="line"><span class="k">panel</span> Builders — order and visibility</p>
+					<p class="line"><span class="k">count</span> 9 of 16 builders filled</p>
+					<p class="line"><span class="k">warning</span> Edit will reset current builders.</p>
+				</div>
+				<div class="mini">
+					<h5>Section</h5>
+					<p class="line"><span class="k">tab</span> Build</p>
+					<p class="line"><span class="k">panel</span> Sections — order and visibility</p>
+					<p class="line"><span class="k">count</span> 9 of 16 sections filled</p>
+					<p class="line"><span class="k">warning</span> Edit will reset current sections.</p>
+				</div>
+			</div>
+		</div>
+
+		<p>Reading them side by side, <b>builder</b> is the better word — it is yours, it is specific to this tool, and the warning sentence you already wrote uses it. I would take it. The one place to keep "section" is the emitted prompt's own structure, where <code>##</code> headings are sections in the plain markdown sense.</p>
+	</article>
+
+	<!-- deferred ------------------------------------------------------- -->
+	<div class="sec-head">
+		<h2>Deferred</h2>
+		<span class="count">2</span>
+	</div>
+
+	<article class="item defer" id="p9">
+		<div class="chiprow"><span class="chip id">09</span><span class="chip later">Defer</span><span class="chip">prompt library</span></div>
+		<h3>Prompt library</h3>
+		<p>To answer the question directly — it replaces nothing. It would list the same JSON files Export already writes, so you pick from names instead of a file dialog. Import and export stay exactly as they are.</p>
+		<p>It is the weakest of the five and it duplicates something that already works, so it waits until you miss it.</p>
+	</article>
+
+	<article class="item defer" id="p10">
+		<div class="chiprow"><span class="chip id">10</span><span class="chip later">Defer</span><span class="chip">repo browser</span></div>
+		<h3>Repo browser — yes, it is a working-directory memory</h3>
+		<p>Bind the project root the same way the prompt folder gets bound. The page then remembers it, and the Context "files to read first" and References fields stop being boxes you type paths into and become lists you pick from. No typos, no guessing at a path from memory.</p>
+		<p>Cost is a permission grant over the whole repository and a file-tree widget, which is the largest single piece of UI on the list. The folder-handle machinery lands with proposal 05 regardless, so adding this later is small. Waiting.</p>
+	</article>
+
+	<!-- responses ------------------------------------------------------ -->
+	<div class="sec-head">
+		<h2>Your call</h2>
+		<span class="count">10 items</span>
+	</div>
+	<p style="color:var(--ink-soft);max-width:66ch">Every card above has a verdict row and a comment box. Nothing is required — silence on an item means I build the recommendation.</p>
+
+	<div class="actions">
+		<button id="copy" type="button">Copy responses</button>
+		<button id="show" class="ghost" type="button">Show as text</button>
+		<span class="note" id="status"></span>
+	</div>
+	<div id="outwrap" hidden>
+		<textarea id="out" readonly aria-label="Responses as plain text"></textarea>
+	</div>
+
+	<footer>
+		Demos run on throwaway data and touch nothing. The folder picker in 05 asks for a real grant and writes nothing. Nothing here is wired to <code>prompt-builder.html</code>.
+	</footer>
+</div>
+
+<script>
+(function () {
+	"use strict";
+
+	function node(t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; }
+	function btn(c, x, f) { var b = node("button", c, x); b.type = "button"; b.addEventListener("click", f); return b; }
+	function pad(n) { return String(n).padStart(2, "0"); }
+
+	// =====================================================================
+	// 01 — edit mode
+	// =====================================================================
+
+	var d1 = {
+		editing: false,
+		open: -1,
+		picked: "",
+		opts: [
+			{ key: "Terse",  value: "Terse. The artefact only — no preamble, no closing summary." },
+			{ key: "Normal", value: "A short rationale before the artefact, then the artefact." },
+			{ key: "Full",   value: "Show the reasoning. Alternatives considered and why they lost." }
+		]
+	};
+	var d1picks  = document.getElementById("d1picks");
+	var d1editor = document.getElementById("d1editor");
+	var d1out    = document.getElementById("d1out");
+	var d1mode   = document.getElementById("d1mode");
+
+	document.getElementById("d1toggle").addEventListener("click", function () {
+		if (!d1.editing) {
+			if (d1.picked && !confirm("Edit will reset current builders.")) return;
+			d1.picked = "";
+			d1.editing = true;
+			this.textContent = "Done editing";
+		} else {
+			d1.editing = false;
+			d1.open = -1;
+			this.textContent = "Edit options";
+		}
+		drawD1();
+	});
+
+	function drawD1() {
+		d1mode.textContent = d1.editing ? "editing — selection is off" : "selecting";
+		d1picks.className = d1.editing ? "editing" : "";
+		d1picks.innerHTML = "";
+		d1editor.innerHTML = "";
+
+		var box = node("div", "picks");
+		d1.opts.forEach(function (o, i) {
+			var lab = document.createElement("label");
+			lab.className = "pk" + (o.value !== o.key ? " rich" : "");
+			if (!d1.editing) {
+				var inp = document.createElement("input");
+				inp.type = "checkbox";
+				inp.checked = d1.picked === o.key;
+				inp.addEventListener("change", function () {
+					d1.picked = inp.checked ? o.key : "";
+					drawD1();
+				});
+				lab.title = o.value;
+				lab.appendChild(inp);
+				lab.appendChild(document.createTextNode(o.key));
+			} else {
+				lab.appendChild(document.createTextNode(o.key));
+				var kill = node("button", "kill", "×");
+				kill.type = "button";
+				kill.addEventListener("click", function (e) {
+					e.stopPropagation();
+					d1.opts.splice(i, 1);
+					if (d1.open === i) d1.open = -1;
+					drawD1();
+				});
+				lab.appendChild(kill);
+				lab.addEventListener("click", function () { d1.open = d1.open === i ? -1 : i; drawD1(); });
+			}
+			box.appendChild(lab);
+		});
+		if (d1.editing) {
+			box.appendChild(btn("quiet tiny", "+ Add option", function () {
+				d1.opts.push({ key: "New option", value: "New option" });
+				d1.open = d1.opts.length - 1;
+				drawD1();
+			}));
+		}
+		d1picks.appendChild(box);
+
+		if (d1.editing && d1.open > -1 && d1.opts[d1.open]) {
+			var o = d1.opts[d1.open];
+			var kv = node("div", "kv");
+			var k = document.createElement("input");
+			k.type = "text"; k.className = "mono"; k.value = o.key; k.placeholder = "key — what the button says";
+			k.addEventListener("input", function () { o.key = k.value; paintD1(); });
+			var v = document.createElement("input");
+			v.type = "text"; v.value = o.value; v.placeholder = "value — what the prompt gets";
+			v.addEventListener("input", function () { o.value = v.value; paintD1(); });
+			kv.appendChild(k);
+			kv.appendChild(v);
+			kv.appendChild(btn("quiet tiny", "Close", function () { d1.open = -1; drawD1(); }));
+			d1editor.appendChild(kv);
+		}
+		paintD1();
+	}
+	function paintD1() {
+		d1out.innerHTML = "";
+		if (d1.editing) {
+			d1out.appendChild(node("span", "muted", "Editing. " + d1.opts.length + " options defined — nothing is selected while the mode is on."));
+			return;
+		}
+		if (!d1.picked) { d1out.appendChild(node("span", "muted", "Nothing picked, so Output emits nothing at all.")); return; }
+		var hit = d1.opts.filter(function (o) { return o.key === d1.picked; })[0];
+		d1out.textContent = "## Output\n- Depth: " + (hit ? hit.value : d1.picked);
+	}
+	drawD1();
+
+	// =====================================================================
+	// 02 — builders panel
+	// =====================================================================
+
+	var d2 = [
+		{ id: "task", name: "Task", on: true },
+		{ id: "problem", name: "Problem", on: true },
+		{ id: "features", name: "Features", on: true },
+		{ id: "architecture", name: "Architecture", on: true },
+		{ id: "process", name: "Process", on: false },
+		{ id: "guardrails", name: "Guardrails", on: true }
+	];
+	var d2rows = document.getElementById("d2rows");
+	var d2out  = document.getElementById("d2out");
+	var dragAt = null;
+
+	function moveD2(from, to) {
+		if (to < 0 || to >= d2.length) return;
+		d2.splice(to, 0, d2.splice(from, 1)[0]);
+		drawD2();
+		var rows = d2rows.querySelectorAll(".brow");
+		if (rows[to]) rows[to].focus();
+	}
+
+	function drawD2() {
+		d2rows.innerHTML = "";
+		d2.forEach(function (b, i) {
+			var row = node("div", "brow" + (b.on ? " on" : " off"));
+			row.draggable = true;
+			row.tabIndex = 0;
+			row.addEventListener("dragstart", function () { dragAt = i; row.classList.add("dragging"); });
+			row.addEventListener("dragend",   function () { dragAt = null; row.classList.remove("dragging"); });
+			row.addEventListener("dragover",  function (e) { e.preventDefault(); row.classList.add("over"); });
+			row.addEventListener("dragleave", function () { row.classList.remove("over"); });
+			row.addEventListener("drop", function (e) {
+				e.preventDefault(); row.classList.remove("over");
+				if (dragAt !== null && dragAt !== i) moveD2(dragAt, i);
+			});
+			row.addEventListener("keydown", function (e) {
+				if (!e.altKey) return;
+				if (e.key === "ArrowUp")   { e.preventDefault(); moveD2(i, i - 1); }
+				if (e.key === "ArrowDown") { e.preventDefault(); moveD2(i, i + 1); }
+			});
+			row.appendChild(node("span", "handle", "⠿"));
+			row.appendChild(node("span", "n", b.on ? pad(d2.filter(function (x, j) { return x.on && j <= i; }).length) : "—"));
+			row.appendChild(node("span", "nm", b.name));
+			row.appendChild(btn("mv", "↑", function () { moveD2(i, i - 1); }));
+			row.appendChild(btn("mv", "↓", function () { moveD2(i, i + 1); }));
+			row.appendChild(btn("tg", b.on ? "on" : "off", function () { b.on = !b.on; drawD2(); }));
+			d2rows.appendChild(row);
+		});
+		var live = d2.filter(function (b) { return b.on; });
+		d2out.innerHTML = "";
+		if (!live.length) { d2out.appendChild(node("span", "muted", "Everything is off. The prompt would be empty.")); return; }
+		d2out.textContent = "_order  " + d2.map(function (b) { return b.id; }).join(", ") +
+			"\n_off    " + (d2.filter(function (b) { return !b.on; }).map(function (b) { return b.id; }).join(", ") || "—") +
+			"\n\nemits   " + live.map(function (b) { return b.name; }).join("  →  ");
+	}
+	drawD2();
+
+	// =====================================================================
+	// 03 — loadouts
+	// =====================================================================
+
+	var LOADOUTS = {
+		rails: {
+			_meta: { name: "Rails + Hotwire" },
+			"architecture.framework": ["Rails", "Hotwire / Turbo", "Stimulus", "Tailwind CSS"],
+			"architecture.storage": ["PostgreSQL", "Active Record", "Solid Queue"],
+			"architecture.patterns": ["Service objects", "Plain old Ruby objects", "Convention over configuration"],
+			"deploy.target": ["Kamal", "Docker"]
+		},
+		ts: {
+			_meta: { name: "TypeScript + Node" },
+			"architecture.framework": ["Express", "Next.js", "React"],
+			"architecture.storage": ["SQLite", "Prisma", "Redis"],
+			"architecture.patterns": ["Composition over inheritance", "Single-page app"],
+			"test.runner": ["Vitest", "Playwright"]
+		}
+	};
+	var d3loaded = null;
+	var d3out = document.getElementById("d3out");
+	var d3buttons = document.getElementById("d3buttons");
+
+	Object.keys(LOADOUTS).forEach(function (id) {
+		d3buttons.appendChild(btn("ghost tiny", "Load " + LOADOUTS[id]._meta.name, function () { loadD3(id); }));
+	});
+	d3buttons.appendChild(btn("quiet tiny", "Unload", function () { d3loaded = null; paintD3(null); }));
+
+	function keysOf(db) { return Object.keys(db).filter(function (k) { return k.charAt(0) !== "_"; }); }
+
+	function loadD3(id) {
+		var was = d3loaded ? keysOf(LOADOUTS[d3loaded]) : [];
+		var now = keysOf(LOADOUTS[id]);
+		var gone = was.filter(function (k) { return now.indexOf(k) === -1; });
+		d3loaded = id;
+		paintD3({ replaced: now.filter(function (k) { return was.indexOf(k) !== -1; }).length, added: now.filter(function (k) { return was.indexOf(k) === -1; }).length, gone: gone });
+	}
+
+	function paintD3(delta) {
+		d3out.innerHTML = "";
+		if (!d3loaded) { d3out.appendChild(node("span", "muted", "No loadout. The page would be running its built-in options.")); return; }
+		var db = LOADOUTS[d3loaded];
+		var lines = ["loadout  " + db._meta.name, ""];
+		keysOf(db).forEach(function (k) { lines.push(k.padEnd(26) + db[k].join(", ")); });
+		if (delta) {
+			lines.push("");
+			lines.push("replaced " + delta.replaced + " keys · added " + delta.added +
+				" · removed " + delta.gone.length + (delta.gone.length ? " (" + delta.gone.join(", ") + ")" : ""));
+			if (delta.gone.length) lines.push("merge would have left those " + delta.gone.length + " behind");
+		}
+		d3out.textContent = lines.join("\n");
+	}
+	paintD3(null);
+
+	// =====================================================================
+	// 04 — save warning policies
+	// =====================================================================
+
+	function savePolicy(btnId, slotId, logId, once) {
+		var warned = false, saves = 0;
+		var b = document.getElementById(btnId);
+		var slot = document.getElementById(slotId);
+		var log = document.getElementById(logId);
+		function paint(msg) {
+			log.textContent = msg;
+		}
+		function commit() {
+			saves++;
+			slot.innerHTML = "";
+			paint("Saved " + saves + (saves === 1 ? " time." : " times.") + (once && warned ? " No further warnings this session." : ""));
+		}
+		b.addEventListener("click", function () {
+			if (slot.firstChild) return;
+			if (once && warned) { commit(); return; }
+			warned = true;
+			var d = node("div", "dialog");
+			d.appendChild(node("h5", null, "This writes into prompt-builder.html"));
+			d.appendChild(node("p", null, "The option block inside the file is replaced. Export a copy first if you want one."));
+			var r = node("div", "btnrow");
+			r.appendChild(btn("tiny", "Save", commit));
+			r.appendChild(btn("ghost tiny", "Export first", function () { paint("Exported, nothing written."); slot.innerHTML = ""; }));
+			r.appendChild(btn("quiet tiny", "Cancel", function () { slot.innerHTML = ""; paint("Cancelled."); }));
+			d.appendChild(r);
+			slot.appendChild(d);
+		});
+		paint("Never saved.");
+	}
+	savePolicy("d4a", "d4aslot", "d4alog", true);
+	savePolicy("d4b", "d4bslot", "d4blog", false);
+
+	// =====================================================================
+	// 05 — copy or write
+	// =====================================================================
+
+	var d5dir = null;
+	var d5out   = document.getElementById("d5out");
+	var d5bound = document.getElementById("d5bound");
+	var d5note  = document.getElementById("d5note");
+	var d5name  = document.getElementById("d5name");
+
+	function stamp() {
+		var d = new Date();
+		return "prompt-" + d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) +
+			"-" + pad(d.getHours()) + pad(d.getMinutes()) + ".md";
+	}
+	d5name.value = stamp();
+
+	function paintD5(msg) {
+		d5out.innerHTML = "";
+		if (msg) { d5out.textContent = msg; return; }
+		d5out.appendChild(node("span", "muted", d5dir
+			? "Ready. Write to file would put " + d5name.value + " into " + d5dir.name + "/."
+			: "No folder bound, so Write to file is unavailable and Copy is the only route."));
+	}
+	function syncD5() {
+		document.getElementById("d5write").disabled = !d5dir;
+		d5bound.textContent = d5dir ? "bound · " + d5dir.name + "/" : "no folder bound";
+		paintD5("");
+	}
+
+	document.getElementById("d5pick").addEventListener("click", function () {
+		if (typeof window.showDirectoryPicker !== "function") {
+			paintD5("This browser has no directory picker, so writing is unavailable here.");
+			return;
+		}
+		window.showDirectoryPicker({ mode: "read" }).then(function (dir) {
+			d5dir = dir;
+			syncD5();
+			paintD5("Bound to " + dir.name + "/ — remembered across reloads in the real page. Nothing was written.");
+		}).catch(function (e) {
+			if (e && e.name !== "AbortError") paintD5(e.message || "Could not open that folder.");
+		});
+	});
+	document.getElementById("d5copy").addEventListener("click", function () {
+		paintD5("Copied. This is what the rail does today.");
+	});
+	document.getElementById("d5write").addEventListener("click", function () {
+		paintD5("In the real page this writes " + d5name.value + " into " + (d5dir ? d5dir.name : "the bound folder") + "/. Here it does nothing.");
+	});
+	d5name.addEventListener("input", function () { paintD5(""); });
+	syncD5();
+
+	// =====================================================================
+	// 06 — capability line
+	// =====================================================================
+
+	var CAPS = [
+		{ label: "save to file",     ok: typeof window.showOpenFilePicker === "function" },
+		{ label: "remember folders", ok: typeof window.showDirectoryPicker === "function" && !!window.indexedDB },
+		{ label: "local storage",    ok: (function () { try { localStorage.setItem("__c", "1"); localStorage.removeItem("__c"); return true; } catch (e) { return false; } })() },
+		{ label: "export files",     ok: typeof URL.createObjectURL === "function" }
+	];
+	var d6 = document.getElementById("d6");
+	CAPS.forEach(function (c) {
+		var s = node("span", "cap");
+		s.appendChild(node("b", null, c.label));
+		s.appendChild(node("span", c.ok ? "y" : "n", c.ok ? "✓" : "✕"));
+		d6.appendChild(s);
+	});
+	document.getElementById("d6note").textContent = CAPS.every(function (c) { return c.ok; })
+		? "Everything available here — " + location.protocol + " on this browser. The full page would show Save and remember your folders."
+		: "Some capabilities are missing, so the page would hide those buttons and fall back to export and import.";
+
+	// =====================================================================
+	// 07 — recipe editing
+	// =====================================================================
+
+	var d7 = {
+		editing: false,
+		name: "Update this tool",
+		position: "first",
+		text: "Open {{path}} and bring it up to date.\n\nRefresh the skills list from the installed plugins, then fold in any option edits I have exported. Show me the diff before writing."
+	};
+	var d7body = document.getElementById("d7body");
+	var d7mode = document.getElementById("d7mode");
+
+	document.getElementById("d7toggle").addEventListener("click", function () {
+		d7.editing = !d7.editing;
+		this.textContent = d7.editing ? "Done editing" : "Edit recipe";
+		drawD7();
+	});
+
+	function slotted(text) {
+		var pre = node("div", "readout");
+		var re = /\{\{\s*[a-z]+\s*\}\}/g, last = 0, m;
+		while ((m = re.exec(text)) !== null) {
+			if (m.index > last) pre.appendChild(document.createTextNode(text.slice(last, m.index)));
+			var s = node("span", null, m[0]);
+			s.style.color = "var(--accent)";
+			s.style.background = "var(--accent-soft)";
+			s.style.padding = "0 3px";
+			pre.appendChild(s);
+			last = m.index + m[0].length;
+		}
+		pre.appendChild(document.createTextNode(text.slice(last)));
+		return pre;
+	}
+
+	function drawD7() {
+		d7mode.textContent = d7.editing ? "editing" : "reading";
+		d7body.innerHTML = "";
+		if (!d7.editing) {
+			var head = node("div", "btnrow");
+			head.appendChild(node("span", "chip", d7.name));
+			head.appendChild(node("span", "chip", "position " + d7.position));
+			d7body.appendChild(head);
+			d7body.appendChild(slotted(d7.text));
+			return;
+		}
+		var kv = node("div", "kv");
+		var n = document.createElement("input");
+		n.type = "text"; n.value = d7.name; n.placeholder = "name";
+		n.addEventListener("input", function () { d7.name = n.value; });
+		kv.appendChild(n);
+		var posBox = node("div", "picks");
+		["first", "last"].forEach(function (p) {
+			var lab = document.createElement("label");
+			var inp = document.createElement("input");
+			inp.type = "checkbox";
+			inp.checked = d7.position === p;
+			inp.addEventListener("change", function () { d7.position = p; drawD7(); });
+			lab.appendChild(inp);
+			lab.appendChild(document.createTextNode(p));
+			posBox.appendChild(lab);
+		});
+		kv.appendChild(posBox);
+		kv.appendChild(node("span"));
+		d7body.appendChild(kv);
+
+		var ta = document.createElement("textarea");
+		ta.value = d7.text;
+		ta.style.marginTop = "10px";
+		ta.style.minHeight = "120px";
+		ta.addEventListener("input", function () { d7.text = ta.value; });
+		d7body.appendChild(ta);
+	}
+	drawD7();
+
+	// =====================================================================
+	// Response surface — generated so every card gets one
+	// =====================================================================
+
+	var PICKS = {
+		"01": ["Integrate", "Revise", "Drop"],
+		"02": ["Integrate", "Revise", "Drop"],
+		"03": ["Integrate", "Revise", "Drop"],
+		"04": ["Warn once", "Warn every time", "No warning"],
+		"05": ["Integrate", "Revise", "Drop"],
+		"06": ["Integrate", "Revise", "Drop"],
+		"07": ["Integrate", "Revise", "Drop"],
+		"08": ["Builder", "Section"],
+		"09": ["Defer", "Build it now"],
+		"10": ["Defer", "Build it now"]
+	};
+
+	document.querySelectorAll("article.item").forEach(function (item) {
+		var id = (item.querySelector(".chip.id") || {}).textContent || "";
+		var title = (item.querySelector("h3") || {}).textContent || "";
+		var label = id.trim() + " · " + title.trim();
+		var picks = PICKS[id.trim()] || ["Integrate", "Revise", "Drop"];
+
+		var box = node("div", "respond");
+		var row = node("div", "verdicts");
+		picks.forEach(function (p) {
+			var lab = document.createElement("label");
+			var inp = document.createElement("input");
+			inp.type = "radio";
+			inp.name = "v" + id.trim();
+			inp.value = p;
+			lab.appendChild(inp);
+			lab.appendChild(document.createTextNode(p));
+			row.appendChild(lab);
+		});
+		box.appendChild(row);
+		var ta = document.createElement("textarea");
+		ta.dataset.item = label;
+		ta.placeholder = "Comment on " + id.trim() + "…";
+		box.appendChild(ta);
+		item.appendChild(box);
+	});
+
+	function collect() {
+		var lines = ["## Mock 4 proposals — responses", ""];
+		var any = false;
+		document.querySelectorAll("article.item").forEach(function (item) {
+			var ta = item.querySelector(".respond textarea");
+			var picked = item.querySelector(".respond input:checked");
+			var note = ta.value.trim();
+			if (!picked && !note) return;
+			lines.push("**" + ta.dataset.item + "**");
+			if (picked) lines.push("- Verdict: " + picked.value);
+			if (note) lines.push("- " + note.replace(/\s*\n+\s*/g, " "));
+			lines.push("");
+			any = true;
+		});
+		if (!any) lines.push("_No responses entered._");
+		return lines.join("\n").trim();
+	}
+
+	var status = document.getElementById("status");
+	var outwrap = document.getElementById("outwrap");
+	var outta = document.getElementById("out");
+
+	document.getElementById("copy").addEventListener("click", function () {
+		var text = collect();
+		function fallback() {
+			outta.value = text; outwrap.hidden = false; outta.select();
+			status.textContent = "Clipboard blocked — select the text below.";
+		}
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).then(function () { status.textContent = "Copied."; }, fallback);
+		} else { fallback(); }
+	});
+	document.getElementById("show").addEventListener("click", function () {
+		outta.value = collect();
+		outwrap.hidden = !outwrap.hidden;
+		status.textContent = outwrap.hidden ? "" : "Select all and copy.";
+		if (!outwrap.hidden) outta.focus();
+	});
+
+	document.getElementById("themeBtn").addEventListener("click", function () {
+		var root = document.documentElement;
+		var now = root.getAttribute("data-theme");
+		var dark = now ? now === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+		root.setAttribute("data-theme", dark ? "light" : "dark");
+	});
+})();
+</script>
+</body>
+</html>
