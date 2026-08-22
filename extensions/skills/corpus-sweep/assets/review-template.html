@@ -1,0 +1,183 @@
+<meta charset="utf-8">
+<title>{{SWEEP_NAME}} — Review</title>
+<!--
+  Review page template. The skill fills every {{SLOT}} and writes the result to
+  the review directory named in the skill's Host Bindings reference.
+
+  {{SWEEP_NAME}}   the sweep's name, in the title and the heading
+  {{SUBTITLE}}     one line: the branch, and what the reader is deciding
+  {{STATS}}        zero or more <div class="stat"><b>N</b><span>label</span></div>
+  {{SUMMARY}}      what landed without needing a decision — the repairs applied,
+                   the assignments that passed clean. Keeps the cards honest by
+                   showing what is NOT being asked about.
+  {{CARDS}}        one <article> per decision, from the card pattern below
+  {{APPENDIX}}     optional <details> blocks: flags raised and not acted on,
+                   audit findings judged borderline, hazards recorded
+
+  Card pattern — the radio name and the textarea's data-radio must match, and
+  data-label becomes the heading in the copied text. First option is the
+  recommendation.
+
+  <article>
+    <h3>ID · one-line claim<span class="chip proposed">proposed</span></h3>
+    <p class="why">What was found, what is proposed, and the cost of the
+       alternative. Diffs go in a .diff block below this.</p>
+    <div class="controls">
+      <label><input type="radio" name="ID" value="approve"> Approve (recommended)</label>
+      <label><input type="radio" name="ID" value="reject"> Reject</label>
+      <label><input type="radio" name="ID" value="change"> Change / discuss</label>
+    </div>
+    <label class="cmt" for="id">Comment</label>
+    <textarea id="id" data-label="ID · one-line claim" data-radio="ID"></textarea>
+  </article>
+
+  Diff block, for showing a change inside a card:
+
+  <div class="diff">
+    <div class="del">− old line</div>
+    <div class="add">+ new line</div>
+    <div class="ctx">  unchanged line</div>
+  </div>
+
+  Delete this comment when filling the template.
+-->
+<style>
+:root { --bg:#fbfaf8; --panel:#fff; --ink:#1c1b19; --muted:#6b6862; --line:#e2ded7;
+  --del-bg:#fdecec; --del-ink:#8a1f1f; --add-bg:#e9f6ec; --add-ink:#14622c;
+  --accent:#7a5c2e; --warn:#8a1f1f; --ok:#14622c; --prop:#3f5873; --chipbg:#f4f0e9; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6; --line:#33313c;
+  --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab;
+  --accent:#d5b27a; --warn:#ff9c9c; --ok:#8fe3ab; --prop:#9fb8d8; --chipbg:#26242e; } }
+:root[data-theme="dark"] { --bg:#16151a; --panel:#1e1d23; --ink:#eceaf2; --muted:#9c98a6;
+  --line:#33313c; --del-bg:#3a1e21; --del-ink:#ff9c9c; --add-bg:#1a3324; --add-ink:#8fe3ab;
+  --accent:#d5b27a; --warn:#ff9c9c; --ok:#8fe3ab; --prop:#9fb8d8; --chipbg:#26242e; }
+* { box-sizing:border-box; }
+body { margin:0; padding:2rem 1.25rem 7rem; background:var(--bg); color:var(--ink);
+  font:16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+.wrap { max-width:62rem; margin:0 auto; }
+header { border-bottom:2px solid var(--line); padding-bottom:1.25rem; margin-bottom:1rem; }
+h1 { font-size:1.5rem; margin:0 0 .4rem; letter-spacing:-.01em; text-wrap:balance; }
+.sub { color:var(--muted); font-size:.9rem; margin:.2rem 0; }
+code { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:.9em; }
+h2.sec { font-size:.8rem; letter-spacing:.09em; text-transform:uppercase; color:var(--accent);
+  margin:2.75rem 0 1rem; padding-bottom:.4rem; border-bottom:1px solid var(--line);
+  font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+.note { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
+  padding:.9rem 1.1rem; margin:1.25rem 0 1.5rem; font-size:.9rem; }
+.note b { color:var(--accent); }
+.note ul, article ul, .body ul { margin:.5rem 0 0; padding-left:1.2rem; }
+p { margin:.8rem 0; }
+article { background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:1.1rem 1.25rem 1.25rem; margin-bottom:1.25rem; border-left:3px solid var(--prop); }
+h3 { font-size:1rem; margin:0 0 .3rem; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+.chip { display:inline-block; font-size:.66rem; letter-spacing:.07em; text-transform:uppercase;
+  border-radius:3px; padding:.14rem .45rem; margin-left:.45rem; vertical-align:middle; border:1px solid; }
+.chip.applied { color:var(--accent); border-color:var(--accent); background:var(--chipbg); }
+.chip.proposed { color:var(--prop); border-color:var(--prop); }
+.chip.pass { color:var(--ok); border-color:var(--ok); }
+.chip.revise { color:var(--warn); border-color:var(--warn); }
+.chip.info { color:var(--muted); border-color:var(--line); }
+.why { color:var(--muted); font-size:.875rem; margin:.35rem 0 .9rem; }
+.diff { border:1px solid var(--line); border-radius:4px; overflow-x:auto;
+  font:13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; margin:.5rem 0; }
+.diff div { padding:.3rem .7rem; white-space:pre-wrap; word-break:break-word; }
+.del { background:var(--del-bg); color:var(--del-ink); }
+.add { background:var(--add-bg); color:var(--add-ink); }
+.ctx { color:var(--muted); }
+pre.code { border:1px solid var(--line); border-radius:4px; background:var(--panel);
+  overflow-x:auto; padding:.8rem 1rem; margin:.5rem 0;
+  font:13px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.fig { background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:1rem 1.1rem; margin:1.1rem 0; overflow-x:auto; }
+.fig .cap { font-size:.78rem; color:var(--muted); margin:.7rem 0 0; }
+.fig svg { display:block; min-width:640px; max-width:100%; height:auto; }
+svg text { font-family:ui-monospace, SFMono-Regular, Menlo, monospace; fill:var(--ink); }
+.controls { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-top:1rem;
+  padding-top:.9rem; border-top:1px solid var(--line); }
+.controls label { font-size:.85rem; display:inline-flex; align-items:center; gap:.3rem; cursor:pointer; }
+label.cmt { display:block; font-size:.72rem; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--muted); margin:.9rem 0 .35rem; }
+textarea { width:100%; min-height:3rem; resize:vertical; padding:.6rem .7rem; background:var(--bg);
+  color:var(--ink); border:1px solid var(--line); border-radius:4px;
+  font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+textarea:focus, button:focus-visible { outline:2px solid var(--accent); outline-offset:-1px; }
+details { background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:.75rem 1.1rem; margin-bottom:.8rem; }
+details summary { cursor:pointer; font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+details .body { padding-top:.6rem; font-size:.9rem; }
+.stats { display:flex; flex-wrap:wrap; gap:.6rem; margin:1rem 0 0; }
+.stat { background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:.55rem .9rem; }
+.stat b { display:block; font-size:1.15rem; font-variant-numeric:tabular-nums; }
+.stat span { font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+.bar { position:sticky; bottom:0; background:var(--panel); border-top:1px solid var(--line);
+  padding:.9rem 1.25rem; margin:2rem -1.25rem -7rem; display:flex; gap:.75rem; align-items:center; flex-wrap:wrap; }
+button { font:inherit; font-size:.9rem; padding:.5rem 1rem; border-radius:4px; cursor:pointer;
+  border:1px solid var(--accent); background:var(--accent); color:var(--panel); }
+button.ghost { background:transparent; color:var(--accent); }
+#status { color:var(--muted); font-size:.85rem; }
+#out { width:100%; min-height:12rem; margin-top:1rem; display:none; }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>{{SWEEP_NAME}} — review</h1>
+  <p class="sub">{{SUBTITLE}}</p>
+  <div class="stats">{{STATS}}</div>
+</header>
+
+<h2 class="sec">Landed without a decision</h2>
+{{SUMMARY}}
+
+<h2 class="sec">Decisions</h2>
+{{CARDS}}
+
+{{APPENDIX}}
+
+<div class="bar">
+  <button id="copy">Copy decisions</button>
+  <button class="ghost" id="show">Show as text</button>
+  <button class="ghost" id="allyes">First option for all</button>
+  <span id="status"></span>
+</div>
+
+<textarea id="out" readonly aria-label="Decisions as text"></textarea>
+
+</div>
+<script>
+function assemble() {
+  var boxes = document.querySelectorAll('textarea[data-label]');
+  var lines = ['# {{SWEEP_NAME}} — review decisions', ''];
+  boxes.forEach(function (b) {
+    var picked = document.querySelector('input[name="' + b.dataset.radio + '"]:checked');
+    var v = b.value.trim();
+    lines.push('## ' + b.dataset.label + ' — ' + (picked ? picked.value.toUpperCase() : 'NO ANSWER'));
+    lines.push('');
+    if (v) { lines.push(v, ''); }
+  });
+  return lines.join('\n');
+}
+document.getElementById('copy').addEventListener('click', function () {
+  var text = assemble(), status = document.getElementById('status');
+  navigator.clipboard.writeText(text).then(function () {
+    status.textContent = 'Copied. Paste it back into the session.';
+  }).catch(function () {
+    var out = document.getElementById('out');
+    out.value = text; out.style.display = 'block'; out.select();
+    status.textContent = 'Clipboard blocked — select the text below and copy manually.';
+  });
+});
+document.getElementById('show').addEventListener('click', function () {
+  var out = document.getElementById('out');
+  out.value = assemble();
+  out.style.display = out.style.display === 'block' ? 'none' : 'block';
+  document.getElementById('status').textContent = '';
+});
+document.getElementById('allyes').addEventListener('click', function () {
+  document.querySelectorAll('article').forEach(function (a) {
+    var first = a.querySelector('input[type="radio"]');
+    if (first) first.checked = true;
+  });
+  document.getElementById('status').textContent = 'All set to the first option.';
+});
+</script>
