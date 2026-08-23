@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-08-21
+
+### Added
+
+- `classroom` skill and `course-researcher` agent migrated to the upgraded DraftHorse step-anatomy spec, gaining `harness-format: DraftHorse` metadata.
+
+### Changed
+
+- Skill-internal reference docs renamed to the handover convention: `setup.md` → `setup-handover.md`, `mark-review.md` → `mark-review-handover.md`, `media-processing.md` → `media-processing-handover.md`, `deliver-without-renderer.md` → `deliver-without-renderer-handover.md`. Project template pointers (`CLAUDE.md`, `.claude/rules/classroom.md`) updated to match.
+- Terminology renamed "house geometry" → "page geometry" throughout templates and references.
+
+### Fixed
+
+- Audit repairs applied across the corpus swept to the upgraded step-anatomy spec (review decisions D8, D11, D12, D13, D16, D18).
+
 ## [0.4.1] - 2026-07-16
 
 ### Fixed

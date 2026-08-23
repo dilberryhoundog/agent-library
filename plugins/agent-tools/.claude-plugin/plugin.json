@@ -1,7 +1,7 @@
 {
   "name": "agent-tools",
-  "version": "0.6.0",
-  "description": "Tools for building agent harness extensions; DraftHorse skill builder",
+  "version": "0.7.0",
+  "description": "Tools for building and maintaining agent harness extensions; DraftHorse skill builder and corpus sweeper",
   "author": {
     "name": "dilberryhoundog",
     "email": "tech@grahams.coffee"

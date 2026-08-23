@@ -1,0 +1,60 @@
+# DraftHorse corpus profile
+#
+# Durable policy for sweeping the DraftHorse corpus. Holds no assignment list:
+# the corpus changes whenever a skill is added, a handover is split, or an agent
+# is converted, so assignments are discovered at the start of every sweep.
+#
+# The skill reads this file and builds the sweep manifest from it. See
+# assets/manifest-template.yml for the manifest's shape.
+
+corpus: drafthorse
+
+# How a corpus member is recognised. A document belongs to the corpus when its
+# frontmatter carries this key and value.
+discovery:
+  stamp_key: harness-format
+  stamp_value: DraftHorse
+  search_paths:
+    - extensions
+    - docs
+
+# How discovered documents group into assignments. One assignment is one agent.
+grouping:
+  # A stamped document plus every handover document it owns is one assignment —
+  # a parent and its children must stay consistent, and splitting them across
+  # agents means neither can see the other's decisions.
+  parent_owns_handovers: true
+  # A stamped document's cited references travel with it. They are not stamped
+  # themselves; resolve them from the document's citations.
+  cited_references_follow_parent: true
+  # Unstamped files that must move in lockstep with a stamped document. Each
+  # entry pairs a stamped document with the files that mirror it.
+  lockstep:
+    - document: extensions/agents/drafthorse-saddler.md
+      with:
+        - docs/drafthorse/drafthorse-spec-check.md
+
+audit_authority: docs/drafthorse/drafthorse-spec-check.md
+
+# Tier heuristics for this corpus. The skill proposes a tier per assignment from
+# these and the user approves it with the briefs. See the skill's Tiers reference.
+tier_hints:
+  high:
+    - the largest document in the corpus
+    - a document whose changes interact, where fixing one site changes what a later site should say
+    - a checker document and the agent that runs it
+    - any assignment carrying design work rather than application of a decided rule
+    - a parent document with its handovers
+  standard:
+    - a single document whose brief has pre-decided its judgment calls
+  mechanical:
+    - inventories, retired-string greps, citation conversion
+
+# Known audit false positives for this corpus. Handed to every auditor so
+# findings stay signal-dense. Grows as false positives are confirmed.
+sanctioned_shapes:
+  - An adapted declaration tail on a folded error step follows the checker's own model; the fixed catalogue string applies to standalone declarations only.
+  - An uncited README.md inside a cited references/ folder is not dead weight.
+  - Handover documents carry the handover-variant preamble; check them against the variant, not the universal text.
+  - In the drafthorse skill set, assets/HANDOVER-template.md and assets/SKILL-template.md are template assets a step instructs copying; the handover-signal-mismatch and embedded-work findings they trigger are known false positives.
+  - A `#### Decision:` heading above the H3 engagement is deliberate step-scope machinery.

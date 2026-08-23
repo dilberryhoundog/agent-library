@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.2] - 2026-08-21
+
+### Changed
+
+- `doc-reviewer` agent updated to the upgraded DraftHorse step-anatomy spec (internal step structure, terminology rename "dummy run" → "cold run"). No change to its inputs, tools, model, or report format.
+
 ## [2.1.1] - 2026-08-09
 
 ### Changed
