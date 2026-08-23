@@ -47,3 +47,6 @@ If selected please read the file at the start of the session before starting wor
 ## Discoveries
 
 - %% Claude: record discoveries here as you work %%
+- 2026-08-23 prompt-builder: `claude --effort` accepts only low/medium/high/xhigh/max; ultracode is its own boolean flag `--ultracode` (absent from `claude --help`, documented at code.claude.com/docs/en/settings-reference#ultracode). Presets use it; `ultracode` is also a prompt keyword, kept as an Execution strategy option.
+- 2026-08-23 prompt-builder: browser edits are an overlay on the file's JSON blocks, fingerprinted against the file (`prompt-builder.base` in localStorage). A file edited on disk (e.g. by the "Update this tool" prompt) wins on reload and the overlay is discarded with a notice.
+- 2026-08-23 prompt-builder: verify in a browser over http (Playwright blocks `file:`); `python3 -m http.server` from the repo root works, add a cache-busting query when reloading after edits.
