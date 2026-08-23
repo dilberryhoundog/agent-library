@@ -1,0 +1,2343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Builder</title>
+
+<!-- Fonts load when online. Every stack below falls back to a system face, so
+     the page stays readable opened offline from disk. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+	:root {
+		--paper:        #F4F6F6;
+		--surface:      #FFFFFF;
+		--surface-sunk: #ECF0EF;
+		--ink:          #14191A;
+		--ink-soft:     #4E5B5C;
+		--ink-faint:    #78878A;
+		--rule:         #D6DEDD;
+		--accent:       #0D6B64;
+		--accent-soft:  #E2EFED;
+		--warn:         #8A5B00;
+		--warn-soft:    #F6EBD6;
+		--stop:         #93332A;
+		--stop-soft:    #F7E5E2;
+		--shadow:       0 1px 2px rgba(20, 25, 26, .05), 0 8px 24px rgba(20, 25, 26, .05);
+
+		--serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+		--disp:  Bitter, "Source Serif 4", Georgia, serif;
+		--mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--paper:        #0E1313;
+			--surface:      #161C1C;
+			--surface-sunk: #1D2525;
+			--ink:          #E7EDEC;
+			--ink-soft:     #A9B6B5;
+			--ink-faint:    #7D8B8A;
+			--rule:         #293333;
+			--accent:       #59C5B9;
+			--accent-soft:  #16302E;
+			--warn:         #D9A44F;
+			--warn-soft:    #2E2617;
+			--stop:         #E08277;
+			--stop-soft:    #331C19;
+			--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+		}
+	}
+	:root[data-theme="dark"] {
+		--paper:        #0E1313;
+		--surface:      #161C1C;
+		--surface-sunk: #1D2525;
+		--ink:          #E7EDEC;
+		--ink-soft:     #A9B6B5;
+		--ink-faint:    #7D8B8A;
+		--rule:         #293333;
+		--accent:       #59C5B9;
+		--accent-soft:  #16302E;
+		--warn:         #D9A44F;
+		--warn-soft:    #2E2617;
+		--stop:         #E08277;
+		--stop-soft:    #331C19;
+		--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+	}
+
+	* { box-sizing: border-box; }
+
+	body {
+		margin:                 0;
+		background:             var(--paper);
+		color:                  var(--ink);
+		font-family:            var(--serif);
+		font-size:              17px;
+		line-height:            1.6;
+		-webkit-font-smoothing: antialiased;
+	}
+
+	h1, h2, h3, h4, h5 { font-family: var(--disp); text-wrap: balance; }
+	code, .mono, kbd { font-family: var(--mono); }
+	a { color: var(--accent); }
+
+	.shell { max-width: 1340px; margin: 0 auto; padding: 0 22px 80px; }
+
+	/* ---------- masthead + tabs ---------- */
+
+	.masthead { padding: 30px 0 0; }
+	.eyebrow {
+		font-family:    var(--mono);
+		font-size:      12px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		display:        flex;
+		flex-wrap:      wrap;
+		gap:            8px 18px;
+		align-items:    center;
+	}
+	.eyebrow .spacer { margin-left: auto; }
+	h1 { font-size: clamp(26px, 3.6vw, 36px); line-height: 1.1; font-weight: 600; margin: 12px 0 6px; letter-spacing: -.015em; }
+	.standfirst { max-width: 66ch; color: var(--ink-soft); font-size: 17px; margin: 0 0 22px; }
+
+	.tabs { display: flex; flex-wrap: wrap; gap: 2px; border-bottom: 1px solid var(--rule); margin-bottom: 30px; }
+	.tabs button {
+		font-family:    var(--mono);
+		font-size:      12px;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+		background:     transparent;
+		border:         0;
+		border-bottom:  2px solid transparent;
+		color:          var(--ink-faint);
+		padding:        11px 16px;
+		cursor:         pointer;
+		margin-bottom:  -1px;
+	}
+	.tabs button:hover { color: var(--accent); }
+	.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+	.tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+	.tabs .tally { margin-left: auto; align-self: center; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); padding-right: 4px; }
+
+	/* ---------- layout ---------- */
+
+	.board { display: grid; grid-template-columns: 1fr; gap: 34px; }
+	@media (min-width: 1060px) {
+		.board { grid-template-columns: minmax(0, 1fr) 430px; gap: 44px; }
+	}
+
+	.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 6px; }
+	.sec-head h2 { font-size: 22px; margin: 0; font-weight: 600; letter-spacing: -.01em; }
+	.sec-head .count { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+	.gloss { color: var(--ink-soft); font-size: 14.5px; margin: 0 0 16px; max-width: 70ch; }
+
+	/* ---------- tiles ---------- */
+
+	.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(248px, 1fr)); gap: 14px; margin-bottom: 40px; }
+	.tile {
+		background:     var(--surface);
+		border:         1px solid var(--rule);
+		border-left:    2px solid var(--rule);
+		border-radius:  3px;
+		box-shadow:     var(--shadow);
+		padding:        15px 17px 14px;
+		text-align:     left;
+		font:           inherit;
+		color:          inherit;
+		cursor:         pointer;
+		display:        flex;
+		flex-direction: column;
+		gap:            6px;
+		min-height:     126px;
+	}
+	.tile:hover { border-color: var(--accent); }
+	.tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+	.tile.filled { border-left-color: var(--accent); }
+	.tile-top { display: flex; align-items: center; gap: 8px; }
+	.tile h3 { font-size: 17.5px; margin: 0; font-weight: 600; line-height: 1.25; }
+	.tile .blurb { color: var(--ink-soft); font-size: 14.5px; line-height: 1.4; margin: 0; }
+	.tile .fill {
+		margin-top:     auto;
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .08em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+	}
+	.tile.filled .fill { color: var(--accent); }
+
+	.chip {
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .08em;
+		text-transform: uppercase;
+		padding:        3px 8px;
+		border-radius:  2px;
+		background:     var(--surface-sunk);
+		color:          var(--ink-soft);
+		white-space:    nowrap;
+	}
+	.chip.id { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+
+	/* ---------- section page ---------- */
+
+	.pagehead { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+	.pagehead h2 { font-size: 27px; margin: 0; font-weight: 600; letter-spacing: -.015em; }
+	.pagehead .chip { margin-left: auto; }
+	.page-blurb { color: var(--ink-soft); max-width: 68ch; margin: 0 0 18px; }
+
+	.agentnote {
+		border-left: 2px solid var(--warn);
+		background:  var(--warn-soft);
+		border-radius: 2px;
+		padding:     10px 14px;
+		margin:      0 0 26px;
+		max-width:   72ch;
+	}
+	.agentnote .who {
+		display:        block;
+		font-family:    var(--mono);
+		font-size:      10px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--warn);
+		margin-bottom:  4px;
+	}
+	.agentnote p { margin: 0; font-size: 15px; color: var(--ink); }
+
+	.field { margin-bottom: 30px; }
+	.field .lab {
+		display:        block;
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		margin-bottom:  9px;
+		font-weight:    500;
+	}
+	.field .help { color: var(--ink-soft); font-size: 14.5px; margin: -4px 0 10px; max-width: 68ch; }
+
+	textarea, input[type="text"] {
+		width:         100%;
+		background:    var(--surface-sunk);
+		color:         var(--ink);
+		border:        1px solid var(--rule);
+		border-radius: 2px;
+		padding:       10px 12px;
+		font-family:   var(--serif);
+		font-size:     15.5px;
+		line-height:   1.5;
+	}
+	textarea { min-height: 108px; resize: vertical; }
+	textarea:focus-visible, input[type="text"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+	::placeholder { color: var(--ink-faint); font-style: italic; }
+
+	.picks { display: flex; flex-wrap: wrap; gap: 7px; }
+	.picks label {
+		font-family:    var(--mono);
+		font-size:      11.5px;
+		letter-spacing: .05em;
+		text-transform: uppercase;
+		border:         1px solid var(--rule);
+		border-radius:  2px;
+		padding:        5px 11px;
+		cursor:         pointer;
+		color:          var(--ink-soft);
+		user-select:    none;
+		background:     var(--surface);
+	}
+	.picks label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+	.picks label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+	.picks input { position: absolute; opacity: 0; width: 0; height: 0; }
+	.picks label.rich::after {
+		content:     "+";
+		font-size:   10px;
+		margin-left: 6px;
+		opacity:     .5;
+	}
+
+	.subgroup { margin-bottom: 16px; }
+	.subgroup h5 {
+		font-family:    var(--mono);
+		font-size:      10.5px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		margin:         0 0 8px;
+		font-weight:    500;
+	}
+
+	.rows { display: flex; flex-direction: column; gap: 8px; }
+	.row { display: flex; gap: 8px; align-items: flex-start; }
+	.row .grip { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); padding-top: 11px; width: 22px; flex: none; font-variant-numeric: tabular-nums; }
+	.row .x, .row .mv {
+		flex:          none;
+		border:        1px solid var(--rule);
+		background:    transparent;
+		color:         var(--ink-faint);
+		font-family:   var(--mono);
+		font-size:     13px;
+		width:         34px;
+		height:        40px;
+		border-radius: 2px;
+		cursor:        pointer;
+	}
+	.row .x:hover { border-color: var(--stop); color: var(--stop); }
+	.row .mv:hover { border-color: var(--accent); color: var(--accent); }
+	.row .narrow { flex: 0 0 34%; }
+
+	/* ---------- ordered list widget (process stages, section order) ---------- */
+
+	.palette { display: grid; gap: 14px; margin-bottom: 22px; }
+	@media (min-width: 640px) { .palette { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); } }
+	.pal h5 {
+		font-family:    var(--mono);
+		font-size:      10.5px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		margin:         0 0 8px;
+		font-weight:    500;
+	}
+	.pal .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+	.opt {
+		font-family:    var(--mono);
+		font-size:      11.5px;
+		letter-spacing: .04em;
+		border:         1px solid var(--rule);
+		background:     var(--surface);
+		color:          var(--ink-soft);
+		border-radius:  2px;
+		padding:        5px 10px;
+		cursor:         pointer;
+	}
+	.opt:hover { border-color: var(--accent); color: var(--accent); }
+	.opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+	.stages { display: flex; flex-direction: column; gap: 8px; }
+	.stage {
+		display:       flex;
+		gap:           8px;
+		align-items:   center;
+		background:    var(--surface);
+		border:        1px solid var(--rule);
+		border-left:   2px solid var(--accent);
+		border-radius: 2px;
+		padding:       8px 10px;
+	}
+	.stage:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+	.stage.dragging { opacity: .4; }
+	.stage.over { border-top: 2px solid var(--accent); }
+	.stage .n { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); width: 22px; flex: none; font-variant-numeric: tabular-nums; }
+	.stage .name { font-family: var(--mono); font-size: 12.5px; color: var(--accent); flex: 0 0 auto; letter-spacing: .03em; }
+	.stage .grow { flex: 1 1 auto; min-width: 0; }
+	.stage input[type="text"] { background: transparent; border: 0; border-bottom: 1px dashed var(--rule); border-radius: 0; padding: 4px 6px; font-size: 14.5px; }
+	.stage input[type="text"]:focus-visible { outline: 0; border-bottom-color: var(--accent); }
+	.stage .handle { cursor: grab; color: var(--ink-faint); font-family: var(--mono); font-size: 13px; padding: 0 2px; user-select: none; }
+	.stage .x, .stage .mv {
+		border:        1px solid var(--rule);
+		background:    transparent;
+		color:         var(--ink-faint);
+		font-family:   var(--mono);
+		font-size:     12px;
+		width:         30px;
+		height:        30px;
+		border-radius: 2px;
+		cursor:        pointer;
+		flex:          none;
+	}
+	.stage .x:hover { border-color: var(--stop); color: var(--stop); }
+	.stage .mv:hover { border-color: var(--accent); color: var(--accent); }
+	.stage.quiet { border-left-color: var(--rule); }
+	.emptynote { color: var(--ink-faint); font-style: italic; font-size: 15px; }
+
+	/* ---------- cards (recipes, utilities, sessions) ---------- */
+
+	.cards { display: flex; flex-direction: column; gap: 12px; }
+	.card {
+		background:    var(--surface);
+		border:        1px solid var(--rule);
+		border-left:   2px solid var(--rule);
+		border-radius: 3px;
+		box-shadow:    var(--shadow);
+		padding:       15px 17px;
+	}
+	.card.on { border-left-color: var(--accent); }
+	.card-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+	.card-top h3 { font-size: 17px; margin: 0; font-weight: 600; }
+	.card-top .chip { margin-left: auto; }
+	.card pre {
+		font-family: var(--mono);
+		font-size:   12px;
+		line-height: 1.55;
+		color:       var(--ink-soft);
+		background:  var(--surface-sunk);
+		border-left: 2px solid var(--rule);
+		border-radius: 0 2px 2px 0;
+		padding:     10px 12px;
+		margin:      0;
+		white-space: pre-wrap;
+		word-break:  break-word;
+		max-height:  190px;
+		overflow-y:  auto;
+		user-select: text;
+	}
+	.card .slot { color: var(--accent); background: var(--accent-soft); padding: 0 3px; border-radius: 2px; }
+
+	.sessions { display: flex; flex-direction: column; gap: 8px; }
+	.session {
+		display:       flex;
+		gap:           12px;
+		align-items:   baseline;
+		background:    var(--surface);
+		border:        1px solid var(--rule);
+		border-left:   2px solid var(--rule);
+		border-radius: 2px;
+		padding:       10px 12px;
+		text-align:    left;
+		font:          inherit;
+		color:         inherit;
+		cursor:        pointer;
+		width:         100%;
+	}
+	.session:hover { border-color: var(--accent); }
+	.session.on { border-left-color: var(--accent); }
+	.session:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+	.session .when { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); flex: none; width: 108px; font-variant-numeric: tabular-nums; }
+	.session .what { font-size: 15px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 auto; min-width: 0; }
+	.session .sid { font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint); flex: none; }
+
+	/* ---------- buttons ---------- */
+
+	button {
+		font-family:    var(--mono);
+		font-size:      12px;
+		letter-spacing: .07em;
+		text-transform: uppercase;
+		padding:        9px 15px;
+		border-radius:  2px;
+		border:         1px solid var(--accent);
+		background:     var(--accent);
+		color:          var(--paper);
+		cursor:         pointer;
+	}
+	button.ghost { background: transparent; color: var(--accent); }
+	button.quiet { background: transparent; color: var(--ink-faint); border-color: var(--rule); }
+	button.quiet:hover { color: var(--accent); border-color: var(--accent); }
+	button:hover { filter: brightness(1.08); }
+	button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+	button.tiny { padding: 6px 11px; font-size: 11px; }
+
+	.btnrow { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+	.btnrow + .btnrow { margin-top: 12px; }
+	.rowlab {
+		font-family:    var(--mono);
+		font-size:      10.5px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		width:          74px;
+		flex:           none;
+	}
+
+	/* ---------- output rail ---------- */
+
+	.rail { min-width: 0; }
+	@media (min-width: 1060px) {
+		.rail { position: sticky; top: 20px; align-self: start; max-height: calc(100vh - 40px); display: flex; flex-direction: column; }
+	}
+	.rail-head { display: flex; align-items: baseline; gap: 12px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 12px; }
+	.rail-head h2 { font-size: 19px; margin: 0; font-weight: 600; }
+	.rail-head .meter { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); margin-left: auto; font-variant-numeric: tabular-nums; }
+
+	#out {
+		background:    var(--surface);
+		border:        1px solid var(--rule);
+		border-left:   2px solid var(--accent);
+		border-radius: 3px;
+		box-shadow:    var(--shadow);
+		font-family:   var(--mono);
+		font-size:     12.5px;
+		line-height:   1.55;
+		padding:       9px 4px 9px 0;
+		margin:        0 0 12px;
+		overflow-y:    auto;
+		flex:          1 1 auto;
+		min-height:    240px;
+		max-height:    56vh;
+		color:         var(--ink-soft);
+		scroll-behavior: smooth;
+	}
+	#out .blk {
+		white-space:   pre-wrap;
+		word-break:    break-word;
+		padding:       5px 12px 5px 12px;
+		border-left:   2px solid transparent;
+		margin-bottom: 12px;
+	}
+	#out .blk:last-child { margin-bottom: 0; }
+	#out .blk.active { background: var(--accent-soft); border-left-color: var(--accent); }
+	#out .empty { color: var(--ink-faint); font-style: italic; display: block; padding: 5px 12px; }
+	@media (prefers-reduced-motion: reduce) { #out { scroll-behavior: auto; } }
+
+	.status { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); }
+
+	footer { border-top: 1px solid var(--rule); margin-top: 54px; padding-top: 16px; color: var(--ink-faint); font-size: 14px; max-width: 82ch; }
+
+	[hidden] { display: none !important; }
+	@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- =========================================================================
+     OPTION DATABASE
+
+     Sections are fixed in the page. Everything they offer comes from here.
+     Keys are "<sectionId>.<fieldKey>", plus two specials:
+       "<sectionId>._note"  one line the agent reads under the heading
+       "_order"             the order sections appear in the emitted prompt
+       "_settings"          values the page itself uses
+
+     An option is either a plain string, or {"key","value"} when the button
+     should read shorter than the text it emits.
+
+     Editable three ways: change this block, use Import options to merge a
+     file in at runtime, or Export options to write the current state back
+     out. Runtime edits persist in this browser until Reset options.
+     ========================================================================= -->
+<script type="application/json" id="option-db">
+{
+  "_order": ["task", "problem", "context", "goals", "features", "architecture", "references", "scope", "constraints", "output", "verify", "tone", "process", "skills", "exec", "guardrails"],
+
+  "_settings": {
+    "projectPath": "",
+    "sessionDir": "~/.claude/projects/"
+  },
+
+  "process._note": "Ordered. Finish each stage before starting the next, and stop at every gate.",
+  "exec._note": "This is about how to organise the work, not what the work is.",
+  "verify._note": "Acceptance criteria are binary. Gates are pass or fail. Checks are the procedure that produces the evidence.",
+  "architecture._note": "Prescriptive. Build with these; do not survey the codebase and infer something else.",
+
+  "task.text": {
+    "help": "One paragraph, imperative. Leave it empty if you are opening with a problem instead.",
+    "placeholder": "Add a --dry-run flag to the sync command that reports what would change without writing anything."
+  },
+
+  "problem.text": {
+    "help": "What is happening now, who it costs, and how you noticed. No proposed fix — that is Task.",
+    "placeholder": "Sync restores protected paths after merging and nobody sees the list until it has already happened."
+  },
+
+  "context.text": {
+    "help": "Background the agent cannot read off the code.",
+    "placeholder": "The restore step started as a two-line safeguard and has never had a preview."
+  },
+  "context.files": { "help": "Files and directories worth opening first." },
+
+  "goals.items": {
+    "help": "Outcomes — the effect, not the artefact. What is true afterwards that is not true now.",
+    "options": [
+      "The behaviour is previewable before it runs",
+      "Nothing about the default path changes",
+      "A newcomer can tell what the command will do without reading its source"
+    ]
+  },
+
+  "features.items": {
+    "help": "The artefacts — the discrete things to build. Name each one, note anything the name does not carry."
+  },
+
+  "architecture.language": {
+    "help": "What to build it with. An unset field is an invitation to guess.",
+    "options": ["Ruby", "JavaScript", "TypeScript", "Python", "Go", "Rust", "PHP", "Bash", "SQL", "HTML", "CSS"]
+  },
+  "architecture.framework": {
+    "options": ["Rails", "Hotwire / Turbo", "Stimulus", "Sinatra", "React", "Vue", "Svelte", "Next.js", "Express", "Django", "FastAPI", "Tailwind CSS", "Vanilla CSS", "Bootstrap", "No framework"]
+  },
+  "architecture.storage": {
+    "options": ["PostgreSQL", "MySQL", "SQLite", "Redis", "Active Record", "Solid Queue", "S3", "Local files", "JSON on disk", "localStorage", "No persistence"]
+  },
+  "architecture.patterns": {
+    "options": [
+      {"key": "Follow existing", "value": "Follow the patterns already in the codebase rather than introducing new ones."},
+      {"key": "Server-rendered", "value": "Server-rendered HTML. No client-side routing."},
+      {"key": "Progressive enhancement", "value": "Works without JavaScript, improved by it."},
+      {"key": "Single-page app", "value": "Single-page app with client-side routing."},
+      {"key": "No build step", "value": "One file, no build step, no bundler, no dependencies to install."},
+      "Component-based",
+      "Service objects",
+      "Plain old Ruby objects",
+      "Composition over inheritance",
+      "Convention over configuration"
+    ]
+  },
+  "architecture.infra": {
+    "options": ["Kamal", "Docker", "GitHub Actions", "Fly.io", "Heroku", "Static hosting", "Local only", "No deploy step"]
+  },
+  "architecture.text": { "placeholder": "Versions, house patterns, anything the lists do not carry." },
+
+  "references.items": { "help": "Paths, URLs, issue numbers. Label each so the agent knows why it matters." },
+
+  "scope.inside": { "help": "Explicitly in play." },
+  "scope.outside": {
+    "help": "Explicitly off limits. The most load-bearing field on the page.",
+    "options": ["The test harness", "Documentation", "Anything on the release path", "Dependency upgrades", "Unrelated files"]
+  },
+
+  "constraints.text": { "help": "Rules the work must obey while it happens.", "placeholder": "One per line." },
+  "constraints.picked": {
+    "options": [
+      "Match surrounding code style",
+      "No new dependencies",
+      "No refactors outside the touched files",
+      "Preserve the public interface",
+      {"key": "Reviewable in one sitting", "value": "Keep the change small enough to review in one sitting."},
+      "Ask before deleting anything",
+      {"key": "No premature abstraction", "value": "Do not introduce an abstraction for a single caller."},
+      {"key": "Match comment density", "value": "Match the comment density of the surrounding file."}
+    ]
+  },
+
+  "output.deliverable": {
+    "help": "What you want handed back.",
+    "options": ["Working code", "Patch / diff", "Implementation plan", "Architecture proposal", "Review", "Explanation", "Research brief", "Single file", "Command to run", "Artifact"]
+  },
+  "output.depth": {
+    "help": "How much prose you want around the deliverable.",
+    "options": [
+      {"key": "Terse", "value": "Terse. The artefact only — no preamble, no closing summary."},
+      {"key": "Normal", "value": "A short rationale before the artefact, then the artefact."},
+      {"key": "Full", "value": "Show the reasoning. Alternatives considered and why they lost."}
+    ]
+  },
+
+  "verify.criteria": {
+    "help": "Binary and checkable. No judgement call needed to say whether each one passed.",
+    "options": ["The flag writes zero bytes", "Exit code is unchanged", "Output fits 80 columns"]
+  },
+  "verify.gates": {
+    "options": ["Tests must pass", "Linter clean", "No new warnings", "Manual smoke test described", "Works offline"]
+  },
+  "verify.items": {
+    "help": "The procedure that produces the evidence.",
+    "options": ["Run the command and paste the output", "Show the diff before applying", "State which files changed and why"]
+  },
+
+  "tone.pick": {
+    "help": "How the reply should read.",
+    "options": [
+      {"key": "Telegraphic", "value": "Telegraphic. Drop function words, one claim per sentence, no hedging."},
+      {"key": "Plain", "value": "Plain and direct. Short sentences, no throat-clearing."},
+      "Explanatory",
+      "Conversational"
+    ]
+  },
+  "tone.text": { "placeholder": "House style notes, banned phrasings, formatting rules." },
+
+  "process.stages": {
+    "help": "Click a stage to append it. Drag to reorder, or focus a stage and press Alt with the arrow keys. Stages repeat — a run with three approval gates is a normal shape.",
+    "options": {
+      "Discover": ["Investigate", "Interview", "Research", "Scope", "Reproduce"],
+      "Design": [
+        "Concept",
+        "Tech Plan",
+        "Spike",
+        {"key": "User Approval", "value": "User Approval — stop, present the work, and wait for my explicit go before continuing"}
+      ],
+      "Build": ["Implement", "Refactor", "Document", "Changelog"],
+      "Check": [
+        "Test",
+        "Self-review",
+        "Code Review",
+        "Spec Check",
+        {"key": "User Approval", "value": "User Approval — stop, present the work, and wait for my explicit go before continuing"}
+      ],
+      "Ship": ["Commit Work", "Push", "Github PR", "Sync Branch", "Merge", "Version Bump", "Archive Workspace", "Handover"]
+    }
+  },
+
+  "skills.picked": {
+    "help": "Skills the agent can invoke itself. Anything unlisted goes in the row below.",
+    "options": {
+      "dev-workspace": ["dev-workspace", "discover", "health", "research", "workspace-PR", "conversation-capture"],
+      "dev-tools": ["versioning", "git-box", "agent-commit", "agent-push", "agent-switch"],
+      "chat-tools": ["markdown", "magic-reply"],
+      "agent-tools": ["drafthorse"],
+      "plugin-dev": ["plugin-structure", "skill-development", "agent-development", "command-development", "hook-development", "mcp-integration", "plugin-settings"],
+      "Built-in": ["artifact-design", "artifact-diagramming", "artifact-capabilities", "dataviz", "design", "code-review", "simplify", "security-review", "run", "claude-api"]
+    }
+  },
+  "skills.other": { "help": "Unlisted skills, by name." },
+
+  "exec.strategy": {
+    "help": "How the work gets carried out.",
+    "options": [
+      "Solo",
+      {"key": "Agent team", "value": "Agent team — split the work across subagents and synthesise their results."},
+      {"key": "Workflow — prebuilt", "value": "Run a prebuilt dynamic workflow."},
+      {"key": "Workflow — custom", "value": "Author a dynamic workflow for this task, then run it."},
+      "/batch",
+      "/goal"
+    ]
+  },
+  "exec.economy": {
+    "help": "How much capability to spend per unit of work.",
+    "options": [
+      {"key": "Optimal per task", "value": "Judge the cheapest model that can do each task well, and use that one."},
+      {"key": "Mirror session", "value": "Use the session model throughout — do not economise."},
+      {"key": "Cheapest viable", "value": "Cheapest model that clears the bar, everywhere."},
+      {"key": "Max capability", "value": "Highest capability model at every step regardless of cost."}
+    ]
+  },
+  "exec.roster": {
+    "help": "Named agents, when the strategy calls for specific ones.",
+    "options": {
+      "Built-in": ["Explore", "Plan", "general-purpose", "claude-code-guide"],
+      "This marketplace": ["doc-reviewer", "drafthorse-saddler", "breaking-change-detector", "git-robot", "course-researcher"],
+      "plugin-dev": ["agent-creator", "plugin-validator", "skill-reviewer"]
+    }
+  },
+  "exec.text": { "placeholder": "Fan-out width, verification rounds, anything the picks do not carry." },
+
+  "guardrails.text": { "help": "What must not happen.", "placeholder": "One per line." },
+  "guardrails.picked": {
+    "options": [
+      "Do not commit",
+      "Do not push",
+      "Do not open a pull request",
+      "Do not touch unrelated files",
+      "Do not install anything",
+      "Do not run destructive commands",
+      {"key": "Stop if blocked", "value": "Stop and ask if blocked rather than guessing."},
+      {"key": "Report omissions", "value": "Report anything you skipped and why."}
+    ]
+  },
+
+  "launch.presets": {
+    "help": "Named commands. Click one to fill the line, click again to clear it.",
+    "options": [
+      {"key": "cheap quick", "value": "--model sonnet --effort low"},
+      {"key": "deep", "value": "--model opus --effort high"},
+      {"key": "deepest", "value": "--model opus --effort max"},
+      {"key": "plan first", "value": "--permission-mode plan"},
+      {"key": "worktree", "value": "--worktree"},
+      {"key": "clean room", "value": "--safe-mode"},
+      {"key": "background", "value": "--background"}
+    ]
+  },
+  "launch.model": {
+    "help": "Overrides the session model.",
+    "options": ["fable", "opus", "sonnet", "haiku"]
+  },
+  "launch.effort": {
+    "help": "Reasoning effort for the session.",
+    "options": ["low", "medium", "high", "xhigh", "max"]
+  },
+  "launch.mode": {
+    "help": "Permission mode.",
+    "options": ["manual", "auto", "acceptEdits", "dontAsk", "plan", "bypassPermissions"]
+  },
+  "launch.flags": {
+    "options": [
+      {"key": "continue", "value": "--continue"},
+      {"key": "fork session", "value": "--fork-session"},
+      {"key": "worktree", "value": "--worktree"},
+      {"key": "background", "value": "--background"},
+      {"key": "safe mode", "value": "--safe-mode"},
+      {"key": "bare", "value": "--bare"},
+      {"key": "verbose", "value": "--verbose"},
+      {"key": "ide", "value": "--ide"},
+      {"key": "chrome", "value": "--chrome"}
+    ]
+  },
+  "launch.extra": { "help": "Anything else, appended verbatim.", "placeholder": "--add-dir ../sibling-repo" }
+}
+</script>
+
+<!-- =========================================================================
+     TEXT DATABASE
+     Recipes join the built prompt at the position they declare. Utilities
+     replace it — each is a whole prompt on its own. {{path}} is substituted
+     from the project path in Utilities.
+     ========================================================================= -->
+<script type="application/json" id="text-db">
+{
+  "recipes": [
+    {
+      "name": "Example — delete me",
+      "position": "last",
+      "text": "This is a placeholder so the machinery is visible. Recipes emit verbatim at the position they declare, and {{path}} is substituted before they land."
+    }
+  ],
+  "utilities": [
+    {
+      "name": "Update this tool",
+      "text": "Open {{path}} and bring it up to date.\n\nTwo jobs:\n\n1. Refresh the skills list. Walk the installed plugins and the built-in skills available in this session. Rewrite the `skills.picked` options object in the page's option database so each plugin is a group and its agent-invocable skills are the entries. Drop anything no longer installed. Leave the free-text Other row alone.\n\n2. Fold in any option edits I have made at runtime. If I have handed you an exported options file, merge it into the inline JSON block so the changes survive a browser reset.\n\nRules for the edit:\n\n- The two JSON blocks at the top of the file are the only things you change unless I say otherwise.\n- Keep them hand-editable — two-space indent, one option per line where the list is short, no minifying.\n- Options are either a plain string or a {key, value} object. Use the object form only where the button should read shorter than the text it emits.\n- Do not touch the section definitions, the widgets, or the styles.\n- Show me the diff before writing."
+    }
+  ]
+}
+</script>
+
+<div class="shell">
+
+	<header class="masthead">
+		<div class="eyebrow">
+			<span>Prompt builder</span>
+			<span>·</span>
+			<span>mock 3.1</span>
+			<span>·</span>
+			<span>local file, no server</span>
+			<span class="spacer"></span>
+			<button class="quiet tiny" id="themeBtn" type="button">Theme</button>
+		</div>
+		<h1>Prompt Builder</h1>
+		<p class="standfirst">Sixteen sections, all optional. Fill what this session needs; the rest stay out of the prompt entirely.</p>
+	</header>
+
+	<nav class="tabs" role="tablist" id="tabs"></nav>
+
+	<div class="board">
+		<main id="stage"></main>
+
+		<aside class="rail">
+			<div class="rail-head">
+				<h2 id="railTitle">Prompt</h2>
+				<span class="meter" id="meter"></span>
+			</div>
+			<div id="out"></div>
+			<div class="btnrow">
+				<button id="copyBtn" type="button">Copy</button>
+				<span class="status" id="copyStatus"></span>
+			</div>
+		</aside>
+	</div>
+
+	<footer>
+		Mock 3. Sections are fixed in the page; their options live in the JSON blocks at the top of the source and can be replaced at runtime from Utilities. Nothing leaves the browser — no network calls beyond the font stylesheet, and runtime edits are held in this browser only.
+	</footer>
+</div>
+
+<script>
+(function () {
+	"use strict";
+
+	// =======================================================================
+	// Databases — inline defaults plus an optional runtime overlay
+	// =======================================================================
+
+	var STORE_KEY = "prompt-builder.options";
+	var DEFAULTS  = JSON.parse(document.getElementById("option-db").textContent);
+	var TEXTS     = JSON.parse(document.getElementById("text-db").textContent);
+	var CFG       = clone(DEFAULTS);
+
+	function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+	// localStorage is unavailable in some browsers on file:// — every access is
+	// guarded so a refusal degrades to inline defaults rather than a dead page.
+	function readStore()  { try { return JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { return null; } }
+	function writeStore(v){ try { localStorage.setItem(STORE_KEY, JSON.stringify(v)); return true; } catch (e) { return false; } }
+	function dropStore()  { try { localStorage.removeItem(STORE_KEY); } catch (e) { /* nothing to undo */ } }
+
+	function applyOverlay(patch) { Object.keys(patch).forEach(function (k) { CFG[k] = patch[k]; }); }
+	function persist() { return writeStore(CFG); }
+
+	var stored = readStore();
+	if (stored) applyOverlay(stored);
+
+	// =======================================================================
+	// Durable handles — File System Access, remembered in IndexedDB
+	//
+	// Chrome grants both from a file:// page, so this page can rewrite its own
+	// option block and remember your sessions folder. Every branch below is
+	// feature-detected: where the API is missing the page falls back to
+	// export-and-import and a folder picked afresh each time.
+	// =======================================================================
+
+	var CAN_PICK  = typeof window.showOpenFilePicker === "function";
+	var CAN_DIR   = typeof window.showDirectoryPicker === "function";
+	var HANDLES   = { self: null, sessions: null };
+	var savedMark = JSON.stringify(CFG);
+
+	function unsaved() { return JSON.stringify(CFG) !== savedMark; }
+	function markSaved() { savedMark = JSON.stringify(CFG); }
+
+	function idbOpen() {
+		return new Promise(function (res, rej) {
+			if (!window.indexedDB) { rej(new Error("no IndexedDB")); return; }
+			var r = indexedDB.open("prompt-builder", 1);
+			r.onupgradeneeded = function () { r.result.createObjectStore("handles"); };
+			r.onsuccess = function () { res(r.result); };
+			r.onerror   = function () { rej(r.error || new Error("open failed")); };
+		});
+	}
+	function idbPut(key, val) {
+		return idbOpen().then(function (db) {
+			return new Promise(function (res, rej) {
+				var tx = db.transaction("handles", "readwrite");
+				tx.objectStore("handles").put(val, key);
+				tx.oncomplete = function () { db.close(); res(true); };
+				tx.onerror    = function () { db.close(); rej(tx.error); };
+			});
+		}).catch(function () { return false; });
+	}
+	function idbGet(key) {
+		return idbOpen().then(function (db) {
+			return new Promise(function (res) {
+				var tx = db.transaction("handles", "readonly");
+				var q = tx.objectStore("handles").get(key);
+				q.onsuccess = function () { db.close(); res(q.result || null); };
+				q.onerror   = function () { db.close(); res(null); };
+			});
+		}).catch(function () { return null; });
+	}
+
+	// A stored handle keeps its grant across reloads but can lapse when the
+	// browser restarts, so every use re-checks and asks again if needed.
+	function allowed(handle, mode) {
+		if (!handle || !handle.queryPermission) return Promise.resolve(false);
+		return handle.queryPermission({ mode: mode }).then(function (p) {
+			if (p === "granted") return true;
+			return handle.requestPermission({ mode: mode }).then(function (q) { return q === "granted"; });
+		}).catch(function () { return false; });
+	}
+
+	var MARK_OPEN  = '<script type="application/json" id="option-db">';
+	var MARK_CLOSE = "<" + "/script>";
+
+	// Replaces the option block inside this page's own source. Refuses to
+	// return anything it cannot re-parse, so a bad splice never reaches disk.
+	function spliceOptions(source, json) {
+		var a = source.indexOf(MARK_OPEN);
+		if (a === -1) throw new Error("no option block in that file — wrong file?");
+		var bodyAt = a + MARK_OPEN.length;
+		var b = source.indexOf(MARK_CLOSE, bodyAt);
+		if (b === -1) throw new Error("the option block is not closed");
+		var next = source.slice(0, bodyAt) + "\n" + json + "\n" + source.slice(b);
+		var checkAt = next.indexOf(MARK_OPEN) + MARK_OPEN.length;
+		JSON.parse(next.slice(checkAt, next.indexOf(MARK_CLOSE, checkAt)));
+		return next;
+	}
+
+	function bindSelf() {
+		return window.showOpenFilePicker({
+			multiple: false,
+			types: [{ description: "This page", accept: { "text/html": [".html", ".htm"] } }]
+		}).then(function (hs) {
+			return allowed(hs[0], "readwrite").then(function (ok) {
+				if (!ok) throw new Error("write access declined");
+				return hs[0].getFile().then(function (f) { return f.text(); }).then(function (src) {
+					if (src.indexOf(MARK_OPEN) === -1) throw new Error("that file has no option block");
+					HANDLES.self = hs[0];
+					return idbPut("self", hs[0]).then(function () { return hs[0].name; });
+				});
+			});
+		});
+	}
+
+	function saveOptions() {
+		var h = HANDLES.self;
+		if (!h) return Promise.reject(new Error("no file bound"));
+		return allowed(h, "readwrite").then(function (ok) {
+			if (!ok) throw new Error("write access declined");
+			return h.getFile();
+		}).then(function (f) {
+			return f.text();
+		}).then(function (src) {
+			var next = spliceOptions(src, JSON.stringify(CFG, null, 2));
+			return h.createWritable().then(function (w) {
+				return w.write(next).then(function () { return w.close(); });
+			});
+		}).then(function () {
+			markSaved();
+			return h.name;
+		});
+	}
+
+	function cfg(key) {
+		var v = CFG[key];
+		return (v && typeof v === "object" && !Array.isArray(v)) ? v : {};
+	}
+	function noteFor(id) {
+		var n = CFG[id + "._note"];
+		return typeof n === "string" ? n.trim() : "";
+	}
+	function settings() {
+		return (CFG._settings && typeof CFG._settings === "object") ? CFG._settings : {};
+	}
+
+	// An option is a string, or {key, value} when the button should read
+	// shorter than the text it emits. State always stores the key.
+	function norm(list) {
+		return (list || []).map(function (o) {
+			if (typeof o === "string") return { key: o, value: o, rich: false };
+			var k = String(o.key);
+			var v = o.value === undefined ? k : String(o.value);
+			return { key: k, value: v, rich: v !== k };
+		});
+	}
+	function opts(key) {
+		var o = cfg(key).options;
+		return norm(Array.isArray(o) ? o : []);
+	}
+	function groupedOpts(key) {
+		var o = cfg(key).options;
+		if (!o || Array.isArray(o) || typeof o !== "object") return {};
+		var out = {};
+		Object.keys(o).forEach(function (g) { out[g] = norm(o[g]); });
+		return out;
+	}
+	// Keys are what state holds; values are what the prompt gets.
+	function valueOf(key, k) {
+		var hit = null;
+		opts(key).forEach(function (o) { if (o.key === k) hit = o; });
+		if (!hit) {
+			var g = groupedOpts(key);
+			Object.keys(g).forEach(function (name) {
+				g[name].forEach(function (o) { if (o.key === k && !hit) hit = o; });
+			});
+		}
+		return hit ? hit.value : k;
+	}
+	function valuesOf(key, keys) {
+		return (keys || []).map(function (k) { return valueOf(key, k); });
+	}
+
+	function fillSlots(text) {
+		var p = settings().projectPath || "";
+		return String(text || "").replace(/\{\{\s*path\s*\}\}/g, p || "{{path}}");
+	}
+
+	// =======================================================================
+	// Sections — fixed. `_order` in the database drives the prompt.
+	// Kinds: textarea · multi · single · list · pairlist · grouped · pipeline
+	// =======================================================================
+
+	var SECTIONS = [
+		// ---- Write ----
+		{ id: "task", title: "Task", heading: "Task", group: "write",
+			blurb: "The single thing you want done.",
+			fields: [ { key: "text", kind: "textarea", label: "The ask", tall: true } ] },
+
+		{ id: "problem", title: "Problem", heading: "Problem", group: "write",
+			blurb: "The symptom and its cost. Use this alone when you have a complaint but not yet a plan.",
+			fields: [ { key: "text", kind: "textarea", label: "What is going wrong", tall: true } ] },
+
+		{ id: "context", title: "Context", heading: "Context", group: "write",
+			blurb: "What the agent needs to know that reading the code will not tell it.",
+			fields: [
+				{ key: "text",  kind: "textarea", label: "Background" },
+				{ key: "files", kind: "pairlist", label: "Files to read first", a: "path", b: "why it matters" }
+			] },
+
+		{ id: "goals", title: "Goals", heading: "Goals", group: "write",
+			blurb: "The effect. What is true afterwards that is not true now.",
+			fields: [ { key: "items", kind: "list", label: "Outcomes", ph: "One outcome per line", picks: true } ] },
+
+		{ id: "features", title: "Features", heading: "Features", group: "write",
+			blurb: "The artefacts. The discrete things to build, each with a note if the name needs one.",
+			fields: [ { key: "items", kind: "pairlist", label: "To build", a: "name", b: "note" } ] },
+
+		{ id: "references", title: "References", heading: "References", group: "write",
+			blurb: "Source material. Paths, URLs, issue numbers.",
+			fields: [ { key: "items", kind: "pairlist", label: "Sources", a: "label", b: "path, URL, or #issue" } ] },
+
+		{ id: "scope", title: "Scope", heading: "Scope", group: "write",
+			blurb: "Draw the boundary. Out-of-scope earns its keep more than in-scope does.",
+			fields: [
+				{ key: "inside",  kind: "list", label: "In scope",     ph: "Area, file, or behaviour" },
+				{ key: "outside", kind: "list", label: "Out of scope", ph: "Area, file, or behaviour", picks: true }
+			] },
+
+		{ id: "constraints", title: "Constraints", heading: "Constraints", group: "write",
+			blurb: "Rules the work must obey while it happens.",
+			fields: [
+				{ key: "text",   kind: "textarea", label: "Your constraints" },
+				{ key: "picked", kind: "multi",    label: "Standing constraints" }
+			] },
+
+		{ id: "verify", title: "Verification", heading: "Verification", group: "write",
+			blurb: "What counts as passing, and how it gets shown.",
+			fields: [
+				{ key: "criteria", kind: "list",  label: "Acceptance criteria", ph: "Binary and checkable", picks: true },
+				{ key: "gates",    kind: "multi", label: "Gates" },
+				{ key: "items",    kind: "list",  label: "How to check", ph: "One step per line", picks: true }
+			] },
+
+		{ id: "guardrails", title: "Guardrails", heading: "Guardrails", group: "write",
+			blurb: "What must not happen. Stated plainly, these hold better than anything else here.",
+			fields: [
+				{ key: "text",   kind: "textarea", label: "Your guardrails" },
+				{ key: "picked", kind: "multi",    label: "Standing guardrails" }
+			] },
+
+		// ---- Choose ----
+		{ id: "architecture", title: "Architecture", heading: "Architecture", group: "choose",
+			blurb: "What to build it with. Unset fields are an invitation to guess.",
+			fields: [
+				{ key: "language",  kind: "multi",    label: "Language / runtime" },
+				{ key: "framework", kind: "multi",    label: "Framework & styling" },
+				{ key: "storage",   kind: "multi",    label: "Storage & data" },
+				{ key: "patterns",  kind: "multi",    label: "Patterns" },
+				{ key: "infra",     kind: "multi",    label: "Deploy & infrastructure" },
+				{ key: "text",      kind: "textarea", label: "Notes" }
+			] },
+
+		{ id: "output", title: "Output", heading: "Output", group: "choose",
+			blurb: "The shape of what comes back.",
+			fields: [
+				{ key: "deliverable", kind: "single", label: "Deliverable" },
+				{ key: "depth",       kind: "single", label: "Depth" }
+			] },
+
+		{ id: "tone", title: "Tone", heading: "Tone", group: "choose",
+			blurb: "Register and house style for the reply.",
+			fields: [
+				{ key: "pick", kind: "single",   label: "Register" },
+				{ key: "text", kind: "textarea", label: "Style notes" }
+			] },
+
+		{ id: "process", title: "Process", heading: "Process", group: "choose",
+			blurb: "The run, as an ordered sequence. This is where approval gates go.",
+			fields: [ { key: "stages", kind: "pipeline", label: "Stages" } ] },
+
+		{ id: "skills", title: "Skills", heading: "Skills", group: "choose",
+			blurb: "Skills the agent should read or run.",
+			fields: [
+				{ key: "picked", kind: "grouped", label: "Installed skills" },
+				{ key: "other",  kind: "list",    label: "Other", ph: "Skill name" }
+			] },
+
+		{ id: "exec", title: "Execution", heading: "Execution", group: "choose",
+			blurb: "How the work is carried out, and how much capability to spend doing it.",
+			fields: [
+				{ key: "strategy", kind: "single",   label: "Strategy" },
+				{ key: "economy",  kind: "single",   label: "Token economy" },
+				{ key: "roster",   kind: "grouped",  label: "Roster" },
+				{ key: "text",     kind: "textarea", label: "Notes" }
+			] }
+	];
+
+	var GROUPS = [
+		{ id: "write",  title: "Write",  gloss: "You compose these. Sentences and a minute of thought." },
+		{ id: "choose", title: "Choose", gloss: "You pick these. Chips, lists, and a few clicks." }
+	];
+
+	var TABS = [
+		{ id: "build",     title: "Build" },
+		{ id: "launch",    title: "Launch" },
+		{ id: "recipes",   title: "Recipes" },
+		{ id: "utilities", title: "Utilities" }
+	];
+
+	function byId(id) { return SECTIONS.filter(function (s) { return s.id === id; })[0]; }
+
+	// Order comes from the database; anything missing falls to the end.
+	function orderedSections() {
+		var want = Array.isArray(CFG._order) ? CFG._order : [];
+		var out = [];
+		want.forEach(function (id) { var s = byId(id); if (s && out.indexOf(s) === -1) out.push(s); });
+		SECTIONS.forEach(function (s) { if (out.indexOf(s) === -1) out.push(s); });
+		return out;
+	}
+	function positionOf(s) { return orderedSections().indexOf(s) + 1; }
+
+	// =======================================================================
+	// State
+	// =======================================================================
+
+	var STATE, LAUNCH, RECIPES, stageSeq = 0;
+
+	function blankValue(f) {
+		var listy = ["multi", "grouped", "list", "pairlist", "pipeline"];
+		return listy.indexOf(f.kind) !== -1 ? [] : "";
+	}
+	function resetPrompt() {
+		STATE = {};
+		SECTIONS.forEach(function (s) {
+			STATE[s.id] = {};
+			s.fields.forEach(function (f) { STATE[s.id][f.key] = blankValue(f); });
+		});
+		RECIPES = [];
+	}
+	function resetLaunch() {
+		LAUNCH = { preset: "", model: "", effort: "", mode: "", flags: [], extra: "", resume: "" };
+	}
+	resetPrompt();
+	resetLaunch();
+
+	function fieldKey(s, f) { return s.id + "." + f.key; }
+
+	function liveCount(v) {
+		if (!Array.isArray(v)) return String(v || "").trim() ? 1 : 0;
+		return v.filter(function (x) {
+			if (typeof x === "string") return x.trim();
+			if (!x) return false;
+			if (x.label !== undefined) return true;
+			return (x.a || "").trim() || (x.b || "").trim();
+		}).length;
+	}
+	function isEmpty(v) { return liveCount(v) === 0; }
+	function sectionFilled(s) { return s.fields.some(function (f) { return !isEmpty(STATE[s.id][f.key]); }); }
+	function fillLabel(s) {
+		var bits = [];
+		s.fields.forEach(function (f) {
+			var v = STATE[s.id][f.key];
+			if (isEmpty(v)) return;
+			bits.push(Array.isArray(v) ? liveCount(v) + " " + f.label.toLowerCase() : f.label.toLowerCase());
+		});
+		return bits.length ? bits.join(" · ") : "empty";
+	}
+
+	// =======================================================================
+	// Prompt assembly
+	// =======================================================================
+
+	function cleanList(a) { return (a || []).map(function (x) { return String(x).trim(); }).filter(Boolean); }
+	function cleanPairs(a) {
+		return (a || []).map(function (p) { return { a: String(p.a || "").trim(), b: String(p.b || "").trim() }; })
+			.filter(function (p) { return p.a || p.b; });
+	}
+	function bullets(a) { return cleanList(a).map(function (x) { return "- " + x; }); }
+	function pairBullets(a, tick) {
+		return cleanPairs(a).map(function (p) {
+			var head = tick ? "`" + p.a + "`" : p.a;
+			return (p.a && p.b) ? "- " + head + " — " + p.b : "- " + (p.a || p.b);
+		});
+	}
+	function para(v) { return String(v || "").trim(); }
+	function textLines(v) { return cleanList(para(v).split("\n")).map(function (l) { return "- " + l; }); }
+	function labelled(l, v) { return para(v) ? ["- " + l + ": " + para(v)] : []; }
+	function joined(l, a) { return cleanList(a).length ? ["- " + l + ": " + cleanList(a).join(", ")] : []; }
+	function sub(t, a) { return a.length ? ["**" + t + "**"].concat(a) : []; }
+	function spaced() {
+		var out = [];
+		for (var i = 0; i < arguments.length; i++) {
+			var b = arguments[i];
+			if (!b || !b.length) continue;
+			if (out.length) out.push("");
+			out = out.concat(b);
+		}
+		return out;
+	}
+
+	var BODY = {
+		task:    function (d) { return para(d.text) ? [para(d.text)] : []; },
+		problem: function (d) { return para(d.text) ? [para(d.text)] : []; },
+
+		context: function (d) {
+			return spaced(para(d.text) ? [para(d.text)] : [], sub("Read first", pairBullets(d.files, true)));
+		},
+
+		goals:      function (d) { return bullets(d.items); },
+		features:   function (d) { return pairBullets(d.items, false); },
+		references: function (d) { return pairBullets(d.items, true); },
+
+		architecture: function (d) {
+			return spaced([].concat(
+				joined("Language", d.language),
+				joined("Framework", d.framework),
+				joined("Storage", d.storage),
+				bullets(valuesOf("architecture.patterns", d.patterns)),
+				joined("Infrastructure", d.infra)
+			), textLines(d.text));
+		},
+
+		scope: function (d) {
+			return spaced(sub("In scope", bullets(d.inside)), sub("Out of scope", bullets(d.outside)));
+		},
+
+		constraints: function (d) { return textLines(d.text).concat(bullets(valuesOf("constraints.picked", d.picked))); },
+		guardrails:  function (d) { return textLines(d.text).concat(bullets(valuesOf("guardrails.picked", d.picked))); },
+
+		output: function (d) {
+			return [].concat(
+				labelled("Deliverable", valueOf("output.deliverable", d.deliverable)),
+				labelled("Depth", valueOf("output.depth", d.depth))
+			);
+		},
+
+		verify: function (d) {
+			return spaced(
+				sub("Acceptance criteria", bullets(d.criteria)),
+				sub("Gates", bullets(d.gates)),
+				sub("How to check", bullets(d.items))
+			);
+		},
+
+		tone: function (d) {
+			return [].concat(labelled("Register", valueOf("tone.pick", d.pick)), textLines(d.text));
+		},
+
+		process: function (d) {
+			return (d.stages || []).filter(function (s) { return s && s.label; }).map(function (s, i) {
+				var note = String(s.note || "").trim();
+				return (i + 1) + ". " + s.value + (note ? " — " + note : "");
+			});
+		},
+
+		skills: function (d) {
+			return bullets(valuesOf("skills.picked", d.picked)).concat(bullets(d.other));
+		},
+
+		exec: function (d) {
+			return spaced([].concat(
+				labelled("Strategy", valueOf("exec.strategy", d.strategy)),
+				labelled("Token economy", valueOf("exec.economy", d.economy)),
+				joined("Agents", valuesOf("exec.roster", d.roster))
+			), textLines(d.text));
+		}
+	};
+
+	// One list of {id, text}. Both the string and the rail are built from it.
+	function promptBlocks() {
+		var out = [];
+
+		function recipesAt(pos) {
+			(TEXTS.recipes || []).forEach(function (r, i) {
+				if (RECIPES.indexOf(i) === -1) return;
+				if ((r.position || "last") !== pos) return;
+				out.push({ id: "recipe-" + i, text: fillSlots(r.text).trim() });
+			});
+		}
+
+		recipesAt("first");
+		orderedSections().forEach(function (s) {
+			var body = BODY[s.id](STATE[s.id]);
+			while (body.length && !body[0].trim()) body.shift();
+			while (body.length && !body[body.length - 1].trim()) body.pop();
+			if (!body.length) return;
+			var note = noteFor(s.id);
+			var head = "## " + s.heading + (note ? "\n" + note + "\n" : "");
+			out.push({ id: s.id, text: head + "\n" + body.join("\n") });
+		});
+		recipesAt("last");
+
+		return out;
+	}
+
+	function launchCommand() {
+		var parts = ["claude"];
+		if (LAUNCH.preset) {
+			parts.push(valueOf("launch.presets", LAUNCH.preset));
+		} else {
+			if (LAUNCH.model)  parts.push("--model " + LAUNCH.model);
+			if (LAUNCH.effort) parts.push("--effort " + LAUNCH.effort);
+			if (LAUNCH.mode)   parts.push("--permission-mode " + LAUNCH.mode);
+			valuesOf("launch.flags", LAUNCH.flags).forEach(function (f) { parts.push(f); });
+		}
+		if (LAUNCH.resume) parts.push("--resume " + LAUNCH.resume);
+		if (para(LAUNCH.extra)) parts.push(para(LAUNCH.extra));
+		return parts.join(" ");
+	}
+
+	var activeUtility = -1;
+
+	function railBlocks() {
+		if (tab === "launch") return [{ id: "cmd", text: launchCommand() }];
+		if (tab === "utilities") {
+			var u = (TEXTS.utilities || [])[activeUtility];
+			return u ? [{ id: "util", text: fillSlots(u.text) }] : [];
+		}
+		return promptBlocks();
+	}
+	function railText() {
+		return railBlocks().map(function (b) { return b.text; }).join("\n\n");
+	}
+
+	// =======================================================================
+	// DOM helpers
+	// =======================================================================
+
+	var stage     = document.getElementById("stage");
+	var tabsHost  = document.getElementById("tabs");
+	var out       = document.getElementById("out");
+	var meter     = document.getElementById("meter");
+	var railTitle = document.getElementById("railTitle");
+	var copyState = document.getElementById("copyStatus");
+
+	function node(tag, cls, text) {
+		var n = document.createElement(tag);
+		if (cls) n.className = cls;
+		if (text != null) n.textContent = text;
+		return n;
+	}
+	function btn(cls, text, onClick) {
+		var b = node("button", cls, text);
+		b.type = "button";
+		b.addEventListener("click", onClick);
+		return b;
+	}
+	function pad(n) { return String(n).padStart(2, "0"); }
+	function flash(target, msg) {
+		target.textContent = msg;
+		setTimeout(function () { if (target.textContent === msg) target.textContent = ""; }, 2800);
+	}
+	function headed(title, count) {
+		var h = node("div", "sec-head");
+		h.appendChild(node("h2", null, title));
+		if (count) h.appendChild(node("span", "count", count));
+		return h;
+	}
+
+	// =======================================================================
+	// Field widgets
+	// =======================================================================
+
+	function buildTextarea(s, f, wrap) {
+		var ta = document.createElement("textarea");
+		ta.value = STATE[s.id][f.key];
+		ta.placeholder = cfg(fieldKey(s, f)).placeholder || "";
+		if (f.tall) ta.style.minHeight = "168px";
+		ta.addEventListener("input", function () { STATE[s.id][f.key] = ta.value; refresh(); });
+		wrap.appendChild(ta);
+	}
+
+	// Single-select uses checkboxes with enforced exclusivity, so a second click
+	// on the active option clears the field. Radios cannot do that.
+	function pickBox(list, isOn, multi, onToggle) {
+		var box = node("div", "picks");
+		var inputs = [];
+		list.forEach(function (o) {
+			var lab = document.createElement("label");
+			if (o.rich) {
+				lab.className = "rich";
+				lab.title = o.value;
+			}
+			var inp = document.createElement("input");
+			inp.type = "checkbox";
+			inp.checked = isOn(o.key);
+			inp.addEventListener("change", function () {
+				if (!multi) inputs.forEach(function (i) { if (i !== inp) i.checked = false; });
+				onToggle(o.key, inp.checked);
+			});
+			inputs.push(inp);
+			lab.appendChild(inp);
+			lab.appendChild(document.createTextNode(o.key));
+			box.appendChild(lab);
+		});
+		return box;
+	}
+
+	function toggleIn(arr, key, on) {
+		var cur = arr.slice();
+		var at = cur.indexOf(key);
+		if (on && at === -1) cur.push(key);
+		if (!on && at !== -1) cur.splice(at, 1);
+		return cur;
+	}
+
+	function buildMulti(s, f, wrap) {
+		var list = opts(fieldKey(s, f));
+		if (!list.length) return;
+		wrap.appendChild(pickBox(list,
+			function (k) { return STATE[s.id][f.key].indexOf(k) !== -1; }, true,
+			function (k, on) { STATE[s.id][f.key] = toggleIn(STATE[s.id][f.key], k, on); refresh(); }));
+	}
+
+	function buildSingle(s, f, wrap) {
+		var list = opts(fieldKey(s, f));
+		if (!list.length) return;
+		wrap.appendChild(pickBox(list,
+			function (k) { return STATE[s.id][f.key] === k; }, false,
+			function (k, on) { STATE[s.id][f.key] = on ? k : ""; refresh(); }));
+	}
+
+	function buildGrouped(s, f, wrap) {
+		var groups = groupedOpts(fieldKey(s, f));
+		Object.keys(groups).forEach(function (name) {
+			var g = node("div", "subgroup");
+			g.appendChild(node("h5", null, name));
+			g.appendChild(pickBox(groups[name],
+				function (k) { return STATE[s.id][f.key].indexOf(k) !== -1; }, true,
+				function (k, on) { STATE[s.id][f.key] = toggleIn(STATE[s.id][f.key], k, on); refresh(); }));
+			wrap.appendChild(g);
+		});
+	}
+
+	function buildList(s, f, wrap) {
+		var arr = STATE[s.id][f.key];
+		if (!arr.length) arr.push("");
+		var rows = node("div", "rows");
+
+		function focusRow(i) {
+			var inputs = rows.querySelectorAll("input[type=text]");
+			if (inputs[i]) inputs[i].focus();
+		}
+		function draw() {
+			rows.innerHTML = "";
+			arr.forEach(function (val, i) {
+				var row = node("div", "row");
+				row.appendChild(node("span", "grip", pad(i + 1)));
+				var inp = document.createElement("input");
+				inp.type = "text";
+				inp.value = val;
+				inp.placeholder = f.ph || "";
+				inp.addEventListener("input", function () { arr[i] = inp.value; refresh(); });
+				inp.addEventListener("keydown", function (e) {
+					if (e.key !== "Enter") return;
+					e.preventDefault();
+					arr.splice(i + 1, 0, "");
+					draw(); focusRow(i + 1); refresh();
+				});
+				row.appendChild(inp);
+				row.appendChild(btn("x", "×", function () {
+					arr.splice(i, 1);
+					if (!arr.length) arr.push("");
+					draw(); refresh();
+				}));
+				rows.appendChild(row);
+			});
+			var add = btn("quiet tiny", "+ Add", function () { arr.push(""); draw(); focusRow(arr.length - 1); refresh(); });
+			add.style.alignSelf = "flex-start";
+			rows.appendChild(add);
+		}
+		draw();
+		wrap.appendChild(rows);
+
+		if (f.picks && opts(fieldKey(s, f)).length) {
+			var sugg = node("div", "picks");
+			sugg.style.marginTop = "10px";
+			opts(fieldKey(s, f)).forEach(function (o) {
+				var b = btn("quiet tiny", "+ " + o.key, function () {
+					if (arr.length === 1 && !arr[0].trim()) arr[0] = o.value; else arr.push(o.value);
+					draw(); refresh();
+				});
+				b.style.textTransform = "none";
+				b.style.letterSpacing = "0";
+				if (o.rich) b.title = o.value;
+				sugg.appendChild(b);
+			});
+			wrap.appendChild(sugg);
+		}
+	}
+
+	function buildPairList(s, f, wrap) {
+		var arr = STATE[s.id][f.key];
+		if (!arr.length) arr.push({ a: "", b: "" });
+		var rows = node("div", "rows");
+
+		function draw() {
+			rows.innerHTML = "";
+			arr.forEach(function (pair, i) {
+				var row = node("div", "row");
+				row.appendChild(node("span", "grip", pad(i + 1)));
+				["a", "b"].forEach(function (side) {
+					var inp = document.createElement("input");
+					inp.type = "text";
+					if (side === "a") inp.className = "narrow";
+					inp.value = pair[side];
+					inp.placeholder = f[side] || "";
+					inp.addEventListener("input", function () { pair[side] = inp.value; refresh(); });
+					row.appendChild(inp);
+				});
+				row.appendChild(btn("x", "×", function () {
+					arr.splice(i, 1);
+					if (!arr.length) arr.push({ a: "", b: "" });
+					draw(); refresh();
+				}));
+				rows.appendChild(row);
+			});
+			var add = btn("quiet tiny", "+ Add", function () { arr.push({ a: "", b: "" }); draw(); refresh(); });
+			add.style.alignSelf = "flex-start";
+			rows.appendChild(add);
+		}
+		draw();
+		wrap.appendChild(rows);
+	}
+
+	// Ordered list with drag, arrow buttons, and an Alt+arrow keyboard path.
+	// Used for process stages and, in Utilities, for section order.
+	function orderedList(arr, host, spec) {
+		var dragFrom = null;
+		var list = node("div", "stages");
+
+		function move(from, to) {
+			if (to < 0 || to >= arr.length) return;
+			arr.splice(to, 0, arr.splice(from, 1)[0]);
+			draw();
+			spec.onChange();
+			var rows = list.querySelectorAll(".stage");
+			if (rows[to]) rows[to].focus();
+		}
+
+		function draw() {
+			list.innerHTML = "";
+			if (!arr.length) {
+				list.appendChild(node("p", "emptynote", spec.empty));
+				return;
+			}
+			arr.forEach(function (item, i) {
+				var row = node("div", "stage" + (spec.quiet ? " quiet" : ""));
+				row.draggable = true;
+				row.tabIndex = 0;
+
+				row.addEventListener("dragstart", function () { dragFrom = i; row.classList.add("dragging"); });
+				row.addEventListener("dragend",   function () { dragFrom = null; row.classList.remove("dragging"); });
+				row.addEventListener("dragover",  function (e) { e.preventDefault(); row.classList.add("over"); });
+				row.addEventListener("dragleave", function () { row.classList.remove("over"); });
+				row.addEventListener("drop", function (e) {
+					e.preventDefault();
+					row.classList.remove("over");
+					if (dragFrom !== null && dragFrom !== i) move(dragFrom, i);
+				});
+				row.addEventListener("keydown", function (e) {
+					if (!e.altKey) return;
+					if (e.key === "ArrowUp")   { e.preventDefault(); move(i, i - 1); }
+					if (e.key === "ArrowDown") { e.preventDefault(); move(i, i + 1); }
+				});
+
+				row.appendChild(node("span", "handle", "⠿"));
+				row.appendChild(node("span", "n", pad(i + 1)));
+				row.appendChild(node("span", "name", spec.label(item)));
+
+				if (spec.note) {
+					var note = document.createElement("input");
+					note.type = "text";
+					note.className = "grow";
+					note.value = item.note || "";
+					note.placeholder = "note — optional";
+					note.addEventListener("input", function () { item.note = note.value; spec.onChange(); });
+					row.appendChild(note);
+				} else {
+					row.appendChild(node("span", "grow"));
+				}
+
+				row.appendChild(btn("mv", "↑", function () { move(i, i - 1); }));
+				row.appendChild(btn("mv", "↓", function () { move(i, i + 1); }));
+				if (spec.removable) {
+					row.appendChild(btn("x", "×", function () { arr.splice(i, 1); draw(); spec.onChange(); }));
+				}
+				list.appendChild(row);
+			});
+		}
+
+		draw();
+		host.appendChild(list);
+		return draw;
+	}
+
+	function buildPipeline(s, f, wrap) {
+		var arr = STATE[s.id][f.key];
+		var groups = groupedOpts(fieldKey(s, f));
+		var redraw = null;
+
+		var pal = node("div", "palette");
+		Object.keys(groups).forEach(function (name) {
+			var col = node("div", "pal");
+			col.appendChild(node("h5", null, name));
+			var box = node("div", "opts");
+			groups[name].forEach(function (o) {
+				var b = btn("opt", o.key, function () {
+					arr.push({ id: ++stageSeq, label: o.key, value: o.value, note: "" });
+					if (redraw) redraw();
+					refresh();
+				});
+				if (o.rich) b.title = o.value;
+				box.appendChild(b);
+			});
+			col.appendChild(box);
+			pal.appendChild(col);
+		});
+		wrap.appendChild(pal);
+
+		redraw = orderedList(arr, wrap, {
+			label: function (st) { return st.label; },
+			note: true,
+			removable: true,
+			empty: "No stages yet. Click one above to start the sequence.",
+			onChange: refresh
+		});
+	}
+
+	var BUILDERS = {
+		textarea: buildTextarea, multi: buildMulti, single: buildSingle,
+		grouped: buildGrouped, list: buildList, pairlist: buildPairList, pipeline: buildPipeline
+	};
+
+	function buildField(s, f) {
+		var wrap = node("div", "field");
+		wrap.appendChild(node("div", "lab", f.label));
+		var help = cfg(fieldKey(s, f)).help;
+		if (help) wrap.appendChild(node("p", "help", help));
+		(BUILDERS[f.kind] || function () {})(s, f, wrap);
+		return wrap;
+	}
+
+	// =======================================================================
+	// Rail
+	// =======================================================================
+
+	var activeBlock = null;
+
+	function paintRail() {
+		var blocks = railBlocks().filter(function (b) { return b.text.trim(); });
+		// The rail repaints on every keystroke; without this it would jump back
+		// to the top each time you type.
+		var keep = out.scrollTop;
+		out.innerHTML = "";
+		if (!blocks.length) {
+			out.appendChild(node("span", "empty", tab === "launch"
+				? "Pick a preset or a flag."
+				: tab === "utilities"
+					? "Choose a utility to see its prompt."
+					: "Nothing yet. Open a section and start filling."));
+			return;
+		}
+		blocks.forEach(function (b) {
+			var div = node("div", "blk", b.text);
+			div.dataset.block = b.id;
+			if (b.id === activeBlock) div.classList.add("active");
+			out.appendChild(div);
+		});
+		out.scrollTop = keep;
+	}
+
+	// Scrolls inside the rail's own box, never the document — on narrow screens
+	// the rail sits below the fold and moving the page would fight the editor.
+	function railScrollTo(id) {
+		activeBlock = id;
+		paintRail();
+		var el = out.querySelector('[data-block="' + id + '"]');
+		if (!el) return;
+		var top = el.offsetTop - out.offsetTop - 8;
+		out.scrollTop = Math.max(0, top);
+	}
+
+	function refresh() {
+		var text = railText();
+		paintRail();
+		meter.textContent = text.length + " chars · ~" + Math.round(text.length / 4.2) + " tokens";
+		if (tab === "build" && !currentSection) drawBuild();
+		if (tab === "recipes") drawRecipes();
+	}
+
+	// =======================================================================
+	// Tab: Build
+	// =======================================================================
+
+	var currentSection = null;
+
+	function drawBuild() {
+		stage.innerHTML = "";
+		GROUPS.forEach(function (g) {
+			var members = SECTIONS.filter(function (s) { return s.group === g.id; });
+			var filled = members.filter(sectionFilled).length;
+			stage.appendChild(headed(g.title, filled + " of " + members.length + " filled"));
+			stage.appendChild(node("p", "gloss", g.gloss));
+
+			var grid = node("div", "tiles");
+			members.forEach(function (s) {
+				var on = sectionFilled(s);
+				var t = node("button", "tile" + (on ? " filled" : ""));
+				t.type = "button";
+				var top = node("div", "tile-top");
+				top.appendChild(node("span", "chip id", pad(positionOf(s))));
+				top.appendChild(node("h3", null, s.title));
+				t.appendChild(top);
+				t.appendChild(node("p", "blurb", s.blurb));
+				t.appendChild(node("div", "fill", fillLabel(s)));
+				t.addEventListener("click", function () { location.hash = "#/build/s/" + s.id; });
+				grid.appendChild(t);
+			});
+			stage.appendChild(grid);
+		});
+
+		stage.appendChild(headed("Session"));
+		stage.appendChild(node("p", "gloss", "Prompt is what you filled in. Options are the chips and lists the sections offer — those live in Utilities."));
+
+		var row = node("div", "btnrow");
+		row.appendChild(node("span", "rowlab", "Prompt"));
+		row.appendChild(btn("ghost", "Export", function () {
+			download("prompt.json", { version: 3, state: STATE, recipes: RECIPES });
+			flash(sessStatus, "Exported prompt.json");
+		}));
+		var pf = fileInput(function (parsed, name) {
+			var incoming = parsed && parsed.state ? parsed.state : parsed;
+			resetPrompt();
+			SECTIONS.forEach(function (s) {
+				var src = incoming[s.id];
+				if (!src) return;
+				s.fields.forEach(function (f) { if (src[f.key] !== undefined) STATE[s.id][f.key] = src[f.key]; });
+			});
+			// Placed stages arrive without live ids; reissue so reordering works.
+			(STATE.process.stages || []).forEach(function (st) {
+				st.id = ++stageSeq;
+				if (st.value === undefined) st.value = st.label;
+			});
+			if (Array.isArray(parsed.recipes)) RECIPES = parsed.recipes;
+			route();
+			flash(sessStatus, "Imported " + name);
+		}, function () { flash(sessStatus, "Could not read that file."); });
+		row.appendChild(btn("ghost", "Import", function () { pf.click(); }));
+		row.appendChild(btn("quiet", "Clear all", function () {
+			if (!confirm("Clear every section?")) return;
+			resetPrompt();
+			route();
+			flash(sessStatus, "Cleared.");
+		}));
+		row.appendChild(pf);
+		stage.appendChild(row);
+
+		var sessStatus = node("p", "status");
+		sessStatus.style.marginTop = "12px";
+		stage.appendChild(sessStatus);
+	}
+
+	function drawSection(id) {
+		var s = byId(id);
+		if (!s) { location.hash = "#/build"; return; }
+		currentSection = id;
+		stage.innerHTML = "";
+
+		var nav = node("div", "btnrow");
+		nav.style.marginBottom = "18px";
+		nav.appendChild(btn("quiet tiny", "← Dashboard", function () { location.hash = "#/build"; }));
+		nav.appendChild(btn("quiet tiny", "Previous", function () { step(-1); }));
+		nav.appendChild(btn("quiet tiny", "Next section", function () { step(1); }));
+		stage.appendChild(nav);
+
+		var head = node("div", "pagehead");
+		head.appendChild(node("h2", null, s.title));
+		head.appendChild(node("span", "chip id", "prompt position " + pad(positionOf(s))));
+		stage.appendChild(head);
+		stage.appendChild(node("p", "page-blurb", s.blurb));
+
+		var note = noteFor(s.id);
+		if (note) {
+			var box = node("div", "agentnote");
+			box.appendChild(node("span", "who", "the agent also reads"));
+			box.appendChild(node("p", null, note));
+			stage.appendChild(box);
+		}
+
+		s.fields.forEach(function (f) { stage.appendChild(buildField(s, f)); });
+
+		var first = stage.querySelector("textarea, input[type=text]");
+		if (first) first.focus();
+		railScrollTo(s.id);
+	}
+
+	function step(delta) {
+		var order = orderedSections();
+		var i = order.map(function (s) { return s.id; }).indexOf(currentSection);
+		if (i === -1) return;
+		location.hash = "#/build/s/" + order[(i + delta + order.length) % order.length].id;
+	}
+
+	// =======================================================================
+	// Tab: Launch
+	// =======================================================================
+
+	var sessions = [];
+	var sessionNote = "";
+
+	function ingest(files) {
+		var jsonl = files.filter(function (f) { return /\.jsonl$/.test(f.name); });
+		if (!jsonl.length) {
+			sessionNote = "No transcripts in that folder.";
+			return Promise.resolve();
+		}
+		jsonl.sort(function (a, b) { return b.lastModified - a.lastModified; });
+		return Promise.all(jsonl.slice(0, 40).map(readSession)).then(function (rows) {
+			sessions = rows.filter(Boolean);
+			sessionNote = sessions.length + " of " + jsonl.length + " shown, newest first";
+		});
+	}
+
+	function loadFromDir(dir) {
+		return (async function () {
+			var handles = [];
+			for await (var entry of dir.values()) {
+				if (entry.kind === "file" && /\.jsonl$/.test(entry.name)) handles.push(entry);
+				if (handles.length >= 400) break;
+			}
+			return ingest(await Promise.all(handles.map(function (h) { return h.getFile(); })));
+		})();
+	}
+
+	function pickSessionDir() {
+		return window.showDirectoryPicker({ mode: "read" }).then(function (dir) {
+			HANDLES.sessions = dir;
+			return idbPut("sessions", dir).then(function () { return loadFromDir(dir); });
+		});
+	}
+
+	function reloadSessions() {
+		if (!HANDLES.sessions) return Promise.resolve();
+		return allowed(HANDLES.sessions, "read").then(function (ok) {
+			if (!ok) { sessionNote = "Access to that folder was declined."; return; }
+			return loadFromDir(HANDLES.sessions);
+		});
+	}
+
+	function drawLaunch() {
+		stage.innerHTML = "";
+		stage.appendChild(headed("Presets", "one line, copy and run"));
+		stage.appendChild(node("p", "gloss", cfg("launch.presets").help || ""));
+		stage.appendChild(pickBox(opts("launch.presets"),
+			function (k) { return LAUNCH.preset === k; }, false,
+			function (k, on) {
+				LAUNCH.preset = on ? k : "";
+				if (on) { LAUNCH.model = LAUNCH.effort = LAUNCH.mode = ""; LAUNCH.flags = []; }
+				drawLaunch();
+				refresh();
+			}));
+
+		stage.appendChild(node("div", "gloss")).style.height = "18px";
+		stage.appendChild(headed("Manual", LAUNCH.preset ? "a preset is active" : ""));
+		stage.appendChild(node("p", "gloss", LAUNCH.preset
+			? "Picking anything here clears the preset."
+			: "Assembled left to right in the order below."));
+
+		[
+			{ key: "model",  label: "Model",           db: "launch.model" },
+			{ key: "effort", label: "Effort",          db: "launch.effort" },
+			{ key: "mode",   label: "Permission mode", db: "launch.mode" }
+		].forEach(function (spec) {
+			var wrap = node("div", "field");
+			wrap.appendChild(node("div", "lab", spec.label));
+			var help = cfg(spec.db).help;
+			if (help) wrap.appendChild(node("p", "help", help));
+			wrap.appendChild(pickBox(opts(spec.db),
+				function (k) { return LAUNCH[spec.key] === k; }, false,
+				function (k, on) { LAUNCH.preset = ""; LAUNCH[spec.key] = on ? k : ""; drawLaunch(); refresh(); }));
+			stage.appendChild(wrap);
+		});
+
+		var flags = node("div", "field");
+		flags.appendChild(node("div", "lab", "Flags"));
+		flags.appendChild(pickBox(opts("launch.flags"),
+			function (k) { return LAUNCH.flags.indexOf(k) !== -1; }, true,
+			function (k, on) { LAUNCH.preset = ""; LAUNCH.flags = toggleIn(LAUNCH.flags, k, on); drawLaunch(); refresh(); }));
+		stage.appendChild(flags);
+
+		var extra = node("div", "field");
+		extra.appendChild(node("div", "lab", "Extra arguments"));
+		extra.appendChild(node("p", "help", cfg("launch.extra").help || ""));
+		var ei = document.createElement("input");
+		ei.type = "text";
+		ei.value = LAUNCH.extra;
+		ei.placeholder = cfg("launch.extra").placeholder || "";
+		ei.addEventListener("input", function () { LAUNCH.extra = ei.value; refresh(); });
+		extra.appendChild(ei);
+		stage.appendChild(extra);
+
+		// ---- resume ----
+		stage.appendChild(headed("Resume", sessionNote));
+		stage.appendChild(node("p", "gloss",
+			CAN_DIR
+				? "Point this at a project folder under " + (settings().sessionDir || "~/.claude/projects/") +
+				  ". The folder is remembered, so you only choose it once. Each transcript is labelled by its opening message."
+				: "Point this at a project folder under " + (settings().sessionDir || "~/.claude/projects/") +
+				  ". This browser cannot remember the folder, so it needs choosing after every reload."));
+
+		var pickRow = node("div", "btnrow");
+		var sessStatus = node("span", "status");
+
+		function after(msg) {
+			return function () { drawLaunch(); refresh(); if (msg) flash(sessStatus, msg); };
+		}
+
+		if (CAN_DIR) {
+			pickRow.appendChild(btn("ghost", HANDLES.sessions ? "Change folder" : "Choose folder", function () {
+				pickSessionDir().then(after("Folder remembered.")).catch(function (e) {
+					if (e && e.name !== "AbortError") flash(sessStatus, e.message || "Could not read that folder.");
+				});
+			}));
+			if (HANDLES.sessions) {
+				pickRow.appendChild(btn("quiet", "Reload", function () {
+					reloadSessions().then(after(""));
+				}));
+			}
+		} else {
+			var dirInput = document.createElement("input");
+			dirInput.type = "file";
+			dirInput.hidden = true;
+			if ("webkitdirectory" in dirInput) dirInput.webkitdirectory = true;
+			dirInput.addEventListener("change", function () {
+				ingest([].slice.call(dirInput.files || [])).then(after(""));
+			});
+			pickRow.appendChild(btn("ghost", "Choose folder", function () { dirInput.click(); }));
+			pickRow.appendChild(dirInput);
+		}
+
+		if (LAUNCH.resume) {
+			pickRow.appendChild(btn("quiet", "Clear resume", function () { LAUNCH.resume = ""; drawLaunch(); refresh(); }));
+		}
+		pickRow.appendChild(sessStatus);
+		stage.appendChild(pickRow);
+
+		if (sessions.length) {
+			var list = node("div", "sessions");
+			list.style.marginTop = "14px";
+			sessions.forEach(function (s) {
+				var b = node("button", "session" + (LAUNCH.resume === s.id ? " on" : ""));
+				b.type = "button";
+				b.appendChild(node("span", "when", s.when));
+				b.appendChild(node("span", "what", s.label));
+				b.appendChild(node("span", "sid", s.id.slice(0, 8)));
+				b.addEventListener("click", function () {
+					LAUNCH.resume = LAUNCH.resume === s.id ? "" : s.id;
+					drawLaunch();
+					refresh();
+				});
+				list.appendChild(b);
+			});
+			stage.appendChild(list);
+		}
+	}
+
+	// Only the head of each transcript is read — enough for the opening turn,
+	// fast even when the folder holds hundreds of long sessions.
+	function readSession(file) {
+		return file.slice(0, 65536).text().then(function (head) {
+			var label = "";
+			head.split("\n").some(function (line) {
+				if (!line || line.indexOf('"type":"user"') === -1) return false;
+				var rec;
+				try { rec = JSON.parse(line); } catch (e) { return false; }
+				// Genuine user turns carry a promptId; hook output and slash-command
+				// echoes do not, and they would otherwise win the race to be first.
+				if (!rec.promptId || !rec.message) return false;
+				var c = rec.message.content;
+				if (typeof c !== "string") return false;
+				label = c.replace(/\s+/g, " ").trim().slice(0, 120);
+				return !!label;
+			});
+			var d = new Date(file.lastModified);
+			return {
+				id: file.name.replace(/\.jsonl$/, ""),
+				label: label || "(no opening message found)",
+				when: d.toISOString().slice(0, 10) + " " + d.toTimeString().slice(0, 5)
+			};
+		}).catch(function () { return null; });
+	}
+
+	// =======================================================================
+	// Tab: Recipes
+	// =======================================================================
+
+	function drawRecipes() {
+		stage.innerHTML = "";
+		var all = TEXTS.recipes || [];
+		stage.appendChild(headed("Recipes", RECIPES.length + " of " + all.length + " on"));
+		stage.appendChild(node("p", "gloss",
+			"Read-only blocks that join the prompt verbatim at the position they declare. Edit them in the text database at the top of the source."));
+
+		if (!all.length) {
+			stage.appendChild(node("p", "emptynote", "No recipes defined. Add them to the text-db block in the source."));
+			return;
+		}
+
+		var cards = node("div", "cards");
+		all.forEach(function (r, i) {
+			var on = RECIPES.indexOf(i) !== -1;
+			var card = node("div", "card" + (on ? " on" : ""));
+			var top = node("div", "card-top");
+			top.appendChild(node("h3", null, r.name));
+			top.appendChild(node("span", "chip", "position " + (r.position || "last")));
+			top.appendChild(btn(on ? "ghost tiny" : "quiet tiny", on ? "On" : "Off", function () {
+				RECIPES = toggleIn(RECIPES, i, !on);
+				refresh();
+			}));
+			card.appendChild(top);
+			card.appendChild(paintSlots(fillSlots(r.text)));
+			cards.appendChild(card);
+		});
+		stage.appendChild(cards);
+	}
+
+	// Unfilled {{slots}} stay visible so a missing project path is obvious.
+	function paintSlots(text) {
+		var pre = node("pre");
+		var re = /\{\{\s*[a-z]+\s*\}\}/g;
+		var last = 0, m;
+		while ((m = re.exec(text)) !== null) {
+			if (m.index > last) pre.appendChild(document.createTextNode(text.slice(last, m.index)));
+			pre.appendChild(node("span", "slot", m[0]));
+			last = m.index + m[0].length;
+		}
+		pre.appendChild(document.createTextNode(text.slice(last)));
+		return pre;
+	}
+
+	// =======================================================================
+	// Tab: Utilities
+	// =======================================================================
+
+	function drawUtilities() {
+		stage.innerHTML = "";
+
+		// ---- settings ----
+		stage.appendChild(headed("Settings"));
+		stage.appendChild(node("p", "gloss", "Substituted into recipes and utilities wherever {{path}} appears. Saved with the options."));
+		var f1 = node("div", "field");
+		f1.appendChild(node("div", "lab", "Project path"));
+		var pi = document.createElement("input");
+		pi.type = "text";
+		pi.value = settings().projectPath || "";
+		pi.placeholder = "/Users/you/Projects/thing/tool.html";
+		pi.addEventListener("input", function () {
+			if (!CFG._settings) CFG._settings = {};
+			CFG._settings.projectPath = pi.value;
+			persist();
+			refresh();
+		});
+		f1.appendChild(pi);
+		stage.appendChild(f1);
+
+		// ---- section order ----
+		stage.appendChild(headed("Prompt order", "16 sections"));
+		stage.appendChild(node("p", "gloss",
+			"The order sections appear in the emitted prompt. Independent of where their tiles sit on the dashboard. Drag, or focus a row and press Alt with the arrow keys. Travels with Export options."));
+		var order = orderedSections().map(function (s) { return s.id; });
+		orderedList(order, stage, {
+			label: function (id) { return byId(id).title; },
+			note: false,
+			removable: false,
+			quiet: true,
+			empty: "",
+			onChange: function () {
+				CFG._order = order.slice();
+				persist();
+				refresh();
+			}
+		});
+
+		// ---- utilities ----
+		var all = TEXTS.utilities || [];
+		stage.appendChild(headed("Utilities", all.length + " available"));
+		stage.appendChild(node("p", "gloss",
+			"Whole prompts that stand alone. Choosing one puts it in the panel instead of your built prompt — nothing you have filled in is lost."));
+		var cards = node("div", "cards");
+		all.forEach(function (u, i) {
+			var on = activeUtility === i;
+			var card = node("div", "card" + (on ? " on" : ""));
+			var top = node("div", "card-top");
+			top.appendChild(node("h3", null, u.name));
+			top.appendChild(btn(on ? "ghost tiny" : "quiet tiny", on ? "Showing" : "Show", function () {
+				activeUtility = on ? -1 : i;
+				drawUtilities();
+				refresh();
+			}));
+			card.appendChild(top);
+			card.appendChild(paintSlots(fillSlots(u.text)));
+			cards.appendChild(card);
+		});
+		stage.appendChild(cards);
+
+		// ---- option database ----
+		stage.appendChild(headed("Option database", unsaved() ? "unsaved changes" : "saved"));
+		stage.appendChild(node("p", "gloss", CAN_PICK
+			? "Bind this page to its own file once and Save writes your option edits straight into the source. Until then edits live in this browser only."
+			: "This browser cannot write files, so edits live here only. Export the database and have an agent fold it into the source."));
+
+		var optStatus = node("span", "status");
+
+		if (CAN_PICK) {
+			var saveRow = node("div", "btnrow");
+			saveRow.appendChild(node("span", "rowlab", "File"));
+
+			if (HANDLES.self) {
+				saveRow.appendChild(btn(unsaved() ? "" : "ghost", "Save", function () {
+					saveOptions().then(function (name) {
+						drawUtilities();
+						flash(optStatus, "Written into " + name + ".");
+					}).catch(function (e) {
+						flash(optStatus, e.message || "Could not write the file.");
+					});
+				}));
+				saveRow.appendChild(node("span", "chip", "bound · " + HANDLES.self.name));
+				saveRow.appendChild(btn("quiet", "Unbind", function () {
+					HANDLES.self = null;
+					idbPut("self", null);
+					drawUtilities();
+					flash(optStatus, "Unbound.");
+				}));
+			} else {
+				saveRow.appendChild(btn("ghost", "Bind this file", function () {
+					bindSelf().then(function (name) {
+						drawUtilities();
+						flash(optStatus, "Bound to " + name + ". Save writes to it from now on.");
+					}).catch(function (e) {
+						if (e && e.name !== "AbortError") flash(optStatus, e.message || "Could not bind that file.");
+					});
+				}));
+				saveRow.appendChild(node("span", "status", "choose prompt-builder.html"));
+			}
+			stage.appendChild(saveRow);
+		}
+
+		var row = node("div", "btnrow");
+		row.appendChild(node("span", "rowlab", "Portable"));
+		row.appendChild(btn("ghost", "Export options", function () {
+			download("prompt-builder-options.json", CFG);
+			flash(optStatus, "Exported the current database.");
+		}));
+		var of = fileInput(function (parsed, name) {
+			if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+				flash(optStatus, "That file is not an option database.");
+				return;
+			}
+			applyOverlay(parsed);
+			var kept = persist();
+			route();
+			flash(optStatus, kept ? "Loaded " + name + " — kept for next time."
+				: "Loaded " + name + " — this session only, storage refused.");
+		}, function () { flash(optStatus, "Could not read that file."); });
+		row.appendChild(btn("ghost", "Import options", function () { of.click(); }));
+		row.appendChild(btn("quiet", "Reset options", function () {
+			dropStore();
+			CFG = clone(DEFAULTS);
+			route();
+			flash(optStatus, "Back to the built-in options.");
+		}));
+		row.appendChild(of);
+		row.appendChild(optStatus);
+		stage.appendChild(row);
+	}
+
+	// =======================================================================
+	// Files
+	// =======================================================================
+
+	function download(name, obj) {
+		var url = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" }));
+		var a = document.createElement("a");
+		a.href = url;
+		a.download = name;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+	}
+
+	function fileInput(onOk, onFail) {
+		var input = document.createElement("input");
+		input.type = "file";
+		input.accept = "application/json,.json";
+		input.hidden = true;
+		input.addEventListener("change", function () {
+			var f = input.files && input.files[0];
+			if (!f) return;
+			var r = new FileReader();
+			r.onload = function () {
+				try { onOk(JSON.parse(String(r.result)), f.name); }
+				catch (e) { onFail(); }
+				input.value = "";
+			};
+			r.readAsText(f);
+		});
+		return input;
+	}
+
+	// =======================================================================
+	// Routing
+	// =======================================================================
+
+	var tab = "build";
+
+	function drawTabs() {
+		tabsHost.innerHTML = "";
+		TABS.forEach(function (t) {
+			var b = node("button", null, t.title);
+			b.type = "button";
+			b.setAttribute("role", "tab");
+			b.setAttribute("aria-selected", String(t.id === tab));
+			b.addEventListener("click", function () { location.hash = "#/" + t.id; });
+			tabsHost.appendChild(b);
+		});
+		var filled = SECTIONS.filter(sectionFilled).length;
+		tabsHost.appendChild(node("span", "tally", filled + " / " + SECTIONS.length + " sections filled"));
+	}
+
+	function route() {
+		var hash = location.hash || "#/build";
+		var sec = /^#\/build\/s\/([a-z]+)$/.exec(hash);
+		var t = /^#\/([a-z]+)/.exec(hash);
+		tab = (t && TABS.some(function (x) { return x.id === t[1]; })) ? t[1] : "build";
+
+		railTitle.textContent = tab === "launch" ? "Command" : tab === "utilities" ? "Utility prompt" : "Prompt";
+		copyState.textContent = "";
+		activeBlock = null;
+		currentSection = null;
+
+		drawTabs();
+		if (tab === "build") {
+			if (sec) drawSection(sec[1]); else drawBuild();
+		} else if (tab === "launch")    { drawLaunch(); }
+		else if (tab === "recipes")     { drawRecipes(); }
+		else                            { drawUtilities(); }
+
+		refresh();
+		if (!sec) window.scrollTo(0, 0);
+	}
+
+	// =======================================================================
+	// Copy, theme, keys
+	// =======================================================================
+
+	document.getElementById("copyBtn").addEventListener("click", function () {
+		var text = railText();
+		if (!text.trim()) { flash(copyState, "Nothing to copy yet."); return; }
+		function fallback() {
+			var ta = document.createElement("textarea");
+			ta.value = text;
+			ta.style.position = "fixed";
+			ta.style.left = "-9999px";
+			document.body.appendChild(ta);
+			ta.select();
+			try { document.execCommand("copy"); } catch (e) { /* ignore */ }
+			document.body.removeChild(ta);
+			flash(copyState, "Copied via fallback.");
+		}
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).then(function () { flash(copyState, "Copied."); }, fallback);
+		} else { fallback(); }
+	});
+
+	document.getElementById("themeBtn").addEventListener("click", function () {
+		var root = document.documentElement;
+		var now = root.getAttribute("data-theme");
+		var dark = now ? now === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+		root.setAttribute("data-theme", dark ? "light" : "dark");
+	});
+
+	document.addEventListener("keydown", function (e) {
+		if (e.key === "Escape" && currentSection) location.hash = "#/build";
+	});
+
+	window.addEventListener("hashchange", route);
+	route();
+
+	// Restore remembered handles. Sessions reload on their own only when the
+	// grant already stands, so a cold start never opens a dialog unasked.
+	idbGet("self").then(function (h) {
+		if (!h) return;
+		HANDLES.self = h;
+		if (tab === "utilities") drawUtilities();
+	});
+	idbGet("sessions").then(function (h) {
+		if (!h || !h.queryPermission) return;
+		HANDLES.sessions = h;
+		return h.queryPermission({ mode: "read" }).then(function (p) {
+			if (p !== "granted") {
+				sessionNote = "Folder remembered — press Reload to grant access.";
+				if (tab === "launch") drawLaunch();
+				return;
+			}
+			return loadFromDir(h).then(function () {
+				if (tab === "launch") { drawLaunch(); refresh(); }
+			});
+		});
+	}).catch(function () { /* no stored folder, nothing to restore */ });
+})();
+</script>
+</body>
+</html>
