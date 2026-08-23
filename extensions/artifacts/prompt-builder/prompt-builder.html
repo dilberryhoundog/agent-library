@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Prompt Builder</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D6B64'/%3E%3Ctext x='16' y='22.5' text-anchor='middle' font-family='Georgia,serif' font-size='19' font-weight='700' fill='%23F4F6F6'%3EP%3C/text%3E%3C/svg%3E">
+
+<!-- Runs before first paint so a remembered theme does not flash the default one. -->
+<script>
+try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme); } catch (e) { /* storage blocked; the system theme applies */ }
+</script>
 
 <!-- Fonts load when online. Every stack below falls back to a system face, so
      the page stays readable opened offline from disk. -->
@@ -121,7 +127,7 @@
 		margin:        0 0 20px;
 	}
 	.editbar b { font-family: var(--disp); font-size: 15px; }
-	.editbar span { color: var(--ink-soft); font-size: 14.5px; }
+	.editbar span { color: var(--ink-soft); font-size: 14.5px; flex: 1 1 320px; }
 	.editbar .spacer { margin-left: auto; }
 
 	.tabs { display: flex; flex-wrap: wrap; gap: 2px; border-bottom: 1px solid var(--rule); margin-bottom: 30px; }
@@ -285,11 +291,14 @@
 	input.mono { font-family: var(--mono); font-size: 13.5px; }
 
 	.picks { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+	/* Option chips carry user content (Next.js, localStorage, a sentence), so
+	   they keep their case; only the UI chrome is set in caps. */
 	.picks label {
+		position:       relative;
 		font-family:    var(--mono);
-		font-size:      11.5px;
-		letter-spacing: .05em;
-		text-transform: uppercase;
+		font-size:      12.5px;
+		letter-spacing: .01em;
+		line-height:    1.5;
 		border:         1px solid var(--rule);
 		border-radius:  2px;
 		padding:        5px 11px;
@@ -302,14 +311,15 @@
 	.picks label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
 	.picks input { position: absolute; opacity: 0; width: 0; height: 0; }
 	.picks label.rich::after { content: "+"; font-size: 10px; margin-left: 6px; opacity: .5; }
+	.picks .sugg { text-transform: none; letter-spacing: .01em; font-size: 12px; }
 
 	/* Editable chips are buttons, never labels — a label wrapping a control
 	   forwards its clicks to that control, which turns "open" into "delete". */
 	.picks .edit-chip {
 		font-family:    var(--mono);
-		font-size:      11.5px;
-		letter-spacing: .05em;
-		text-transform: uppercase;
+		font-size:      12.5px;
+		letter-spacing: .01em;
+		text-transform: none;
 		border:         1px dashed var(--warn);
 		background:     var(--warn-soft);
 		color:          var(--warn);
@@ -379,25 +389,27 @@
 
 	/* ---------- ordered rows ---------- */
 
-	.palette { display: grid; gap: 14px; margin-bottom: 22px; }
-	@media (min-width: 640px) { .palette { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); } }
+	/* One row per stage group — name on the left, stages flowing on the right —
+	   so no group ends up as a lone narrow column. */
+	.palette { display: grid; gap: 10px; margin-bottom: 22px; }
+	.pal { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 10px; align-items: start; }
+	@media (max-width: 560px) { .pal { grid-template-columns: 1fr; gap: 4px; } }
 	.pal h5 {
 		font-family:    var(--mono);
 		font-size:      10.5px;
 		letter-spacing: .12em;
 		text-transform: uppercase;
 		color:          var(--ink-faint);
-		margin:         0 0 8px;
+		margin:         0;
+		padding-top:    8px;
 		font-weight:    500;
-		display:        flex;
-		align-items:    center;
-		gap:            8px;
 	}
 	.pal .opts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 	.opt {
 		font-family:    var(--mono);
-		font-size:      11.5px;
-		letter-spacing: .04em;
+		font-size:      12.5px;
+		letter-spacing: .01em;
+		text-transform: none;
 		border:         1px solid var(--rule);
 		background:     var(--surface);
 		color:          var(--ink-soft);
@@ -426,6 +438,17 @@
 	.stage .n { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); width: 22px; flex: none; font-variant-numeric: tabular-nums; }
 	.stage .name { font-family: var(--mono); font-size: 12.5px; color: var(--accent); flex: 0 0 auto; letter-spacing: .03em; }
 	.stage.off .name { color: var(--ink-faint); }
+	.stages.compact { gap: 5px; }
+	.stages.compact .stage { padding: 4px 10px; }
+	/* A deliverable nests under the stage above it: indented, amber edge. */
+	.stage.deliv { margin-left: 36px; border-left: 2px dashed var(--warn); background: var(--warn-soft); }
+	.stage.deliv.orphan { margin-left: 0; border-left-color: var(--stop); }
+	.stage.deliv .name { color: var(--warn); }
+	.stage .flag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--stop); }
+	.pal.deliv h5 { color: var(--warn); }
+	.opt.deliv { border-style: dashed; border-color: var(--warn); color: var(--warn); background: var(--warn-soft); }
+	.opt.deliv:hover { border-style: solid; }
+	.emptynote a { color: var(--accent); }
 	.stage .grow { flex: 1 1 auto; min-width: 0; }
 	.stage input[type="text"] { background: transparent; border: 0; border-bottom: 1px dashed var(--rule); border-radius: 0; padding: 4px 6px; font-size: 14.5px; }
 	.stage input[type="text"]:focus-visible { outline: 0; border-bottom-color: var(--accent); }
@@ -625,6 +648,70 @@
 
 	footer { border-top: 1px solid var(--rule); margin-top: 54px; padding-top: 16px; color: var(--ink-faint); font-size: 14px; max-width: 84ch; }
 
+	/* ---------- tooltip + help ---------- */
+
+	.tip {
+		position:       fixed;
+		z-index:        50;
+		max-width:      min(44ch, calc(100vw - 24px));
+		background:     var(--ink);
+		color:          var(--paper);
+		font-family:    var(--serif);
+		font-size:      13.5px;
+		line-height:    1.45;
+		padding:        8px 11px;
+		border-radius:  3px;
+		box-shadow:     var(--shadow);
+		pointer-events: none;
+		text-transform: none;
+		letter-spacing: normal;
+		white-space:    pre-wrap;
+	}
+	.tip .tip-k {
+		display:        block;
+		font-family:    var(--mono);
+		font-size:      10px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		opacity:        .7;
+		margin-bottom:  3px;
+	}
+
+	dialog.help {
+		border:        1px solid var(--rule);
+		border-left:   3px solid var(--accent);
+		border-radius: 3px;
+		background:    var(--surface);
+		color:         var(--ink);
+		box-shadow:    var(--shadow);
+		padding:       26px 30px 24px;
+		width:         min(760px, calc(100vw - 32px));
+		max-height:    calc(100vh - 48px);
+	}
+	dialog.help::backdrop { background: rgba(14, 19, 19, .5); }
+	dialog.help h2 { font-size: 24px; margin: 0 0 4px; font-weight: 600; }
+	dialog.help .lede { color: var(--ink-soft); margin: 0; font-size: 15.5px; max-width: 62ch; }
+	dialog.help h3 {
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--accent);
+		margin:         22px 0 6px;
+		font-weight:    500;
+	}
+	dialog.help p { margin: 0 0 8px; font-size: 15px; line-height: 1.55; max-width: 72ch; }
+	dialog.help code { font-size: 13px; background: var(--surface-sunk); padding: 1px 5px; border-radius: 2px; }
+	dialog.help kbd {
+		font-size:     12px;
+		border:        1px solid var(--rule);
+		border-bottom: 2px solid var(--rule);
+		border-radius: 3px;
+		padding:       1px 6px;
+		background:    var(--surface-sunk);
+	}
+	dialog.help .close { position: absolute; top: 18px; right: 18px; }
+
 	[hidden] { display: none !important; }
 	@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
@@ -635,9 +722,9 @@
      LOADOUT
 
      A loadout is the whole tool: every builder, its order, whether it shows,
-     the line the agent reads under its heading, and every option each field
-     offers. Import replaces this wholesale — nothing of the previous loadout
-     survives — so a file must carry all sixteen builders complete.
+     its help text, the line the agent reads under its heading, and every
+     option each field offers. Import replaces this wholesale — nothing of the
+     previous loadout survives — so a file must carry every builder complete.
 
      An option is a plain string, or {"key","value"} when the button should
      read shorter than the text it emits.
@@ -662,7 +749,7 @@
       "explain": "",
       "fields": {
         "text": {
-          "help": "One paragraph, imperative. Leave it empty if you are opening with a problem instead.",
+          "help": "One paragraph, imperative. If you only have a problem and no plan yet, leave this empty and fill Problem instead.",
           "placeholder": "Add a --dry-run flag to the sync command that reports what would change without writing anything.",
           "options": []
         }
@@ -674,7 +761,7 @@
       "explain": "",
       "fields": {
         "text": {
-          "help": "What is happening now, who it costs, and how you noticed. No proposed fix — that is Task.",
+          "help": "What is happening, what it costs, and how you noticed. Leave the fix to Task.",
           "placeholder": "Sync restores protected paths after merging and nobody sees the list until it has already happened.",
           "options": []
         }
@@ -686,12 +773,12 @@
       "explain": "",
       "fields": {
         "text": {
-          "help": "Background the agent cannot read off the code.",
+          "help": "Background the agent cannot read from the code: history, decisions, who is affected.",
           "placeholder": "The restore step started as a two-line safeguard and has never had a preview.",
           "options": []
         },
         "files": {
-          "help": "Files and directories worth opening first.",
+          "help": "Files and folders to open before starting, each with why it matters.",
           "placeholder": "",
           "options": []
         }
@@ -703,12 +790,12 @@
       "explain": "",
       "fields": {
         "items": {
-          "help": "Outcomes — the effect, not the artefact. What is true afterwards that is not true now.",
+          "help": "Outcomes, not artefacts: what is true afterwards that is not true now. One per line.",
           "placeholder": "",
           "options": [
-            "The behaviour is previewable before it runs",
-            "Nothing about the default path changes",
-            "A newcomer can tell what the command will do without reading its source"
+            "Existing behaviour is unchanged for current users",
+            "A newcomer can use it without reading the source",
+            "The change is self-contained and easy to revert"
           ]
         }
       }
@@ -719,7 +806,7 @@
       "explain": "",
       "fields": {
         "items": {
-          "help": "The artefacts — the discrete things to build. Name each one, note anything the name does not carry.",
+          "help": "The discrete things to build. Name each one; add a note where the name is not enough.",
           "placeholder": "",
           "options": []
         }
@@ -728,10 +815,10 @@
     "architecture": {
       "order": 6,
       "visible": true,
-      "explain": "Prescriptive. Build with these; do not survey the codebase and infer something else.",
+      "explain": "Prescriptive. Build with these rather than inferring a stack from the codebase.",
       "fields": {
         "language": {
-          "help": "What to build it with. An unset field is an invitation to guess.",
+          "help": "Every language or runtime the work touches.",
           "placeholder": "",
           "options": [
             "Ruby",
@@ -748,7 +835,7 @@
           ]
         },
         "framework": {
-          "help": "",
+          "help": "Frameworks and styling systems in play.",
           "placeholder": "",
           "options": [
             "Rails",
@@ -769,7 +856,7 @@
           ]
         },
         "storage": {
-          "help": "",
+          "help": "Where data lives and how it is accessed.",
           "placeholder": "",
           "options": [
             "PostgreSQL",
@@ -786,7 +873,7 @@
           ]
         },
         "patterns": {
-          "help": "",
+          "help": "Design patterns the work must follow.",
           "placeholder": "",
           "options": [
             {
@@ -817,7 +904,7 @@
           ]
         },
         "infra": {
-          "help": "",
+          "help": "How it is deployed and run.",
           "placeholder": "",
           "options": [
             "Kamal",
@@ -831,8 +918,8 @@
           ]
         },
         "text": {
-          "help": "",
-          "placeholder": "Versions, house patterns, anything the lists do not carry.",
+          "help": "Versions, conventions, anything the lists do not carry.",
+          "placeholder": "Rails 8.1 on Ruby 3.4. Tailwind 4. Kamal 2.",
           "options": []
         }
       }
@@ -843,7 +930,7 @@
       "explain": "",
       "fields": {
         "items": {
-          "help": "Paths, URLs, issue numbers. Label each so the agent knows why it matters.",
+          "help": "Paths, URLs and issue numbers, each labelled with why it matters.",
           "placeholder": "",
           "options": []
         }
@@ -855,12 +942,12 @@
       "explain": "",
       "fields": {
         "inside": {
-          "help": "Explicitly in play.",
+          "help": "Areas, files or behaviours explicitly in play.",
           "placeholder": "",
           "options": []
         },
         "outside": {
-          "help": "Explicitly off limits. The most load-bearing field on the page.",
+          "help": "Explicitly off limits. Often the most useful field on the page.",
           "placeholder": "",
           "options": [
             "The test harness",
@@ -878,12 +965,12 @@
       "explain": "",
       "fields": {
         "text": {
-          "help": "Rules the work must obey while it happens.",
+          "help": "Rules the work must obey while it happens. One per line.",
           "placeholder": "One per line.",
           "options": []
         },
         "picked": {
-          "help": "",
+          "help": "Standing rules. Pick any that apply.",
           "placeholder": "",
           "options": [
             "Match surrounding code style",
@@ -910,26 +997,35 @@
     "output": {
       "order": 10,
       "visible": true,
-      "explain": "",
+      "explain": "Check `Process` for when to stage deliverables, otherwise choose an appropriate stage.",
       "fields": {
         "deliverable": {
-          "help": "What you want handed back.",
+          "help": "What you want handed back. Pick everything the run should produce, then place each one at its stage in Process.",
           "placeholder": "",
-          "options": [
-            "Working code",
-            "Patch / diff",
-            "Implementation plan",
-            "Architecture proposal",
-            "Review",
-            "Explanation",
-            "Research brief",
-            "Single file",
-            "Command to run",
-            "Artifact"
-          ]
+          "options": {
+            "Code": [
+              "Working code",
+              "Patch / diff",
+              "Single file",
+              "Command to run"
+            ],
+            "Planning": [
+              "Implementation plan",
+              "Architecture proposal",
+              "Research brief"
+            ],
+            "Review": [
+              "Review",
+              "Explanation"
+            ],
+            "Documents": [
+              "Artifact",
+              "Markdown document"
+            ]
+          }
         },
         "depth": {
-          "help": "How much prose you want around the deliverable.",
+          "help": "How much explanation to wrap around the deliverable.",
           "placeholder": "",
           "options": [
             {
@@ -951,19 +1047,19 @@
     "verify": {
       "order": 11,
       "visible": true,
-      "explain": "Acceptance criteria are binary. Gates are pass or fail. Checks are the procedure that produces the evidence.",
+      "explain": "Criteria are binary. Gates are pass or fail. Checks are the procedure that shows the evidence.",
       "fields": {
         "criteria": {
-          "help": "Binary and checkable. No judgement call needed to say whether each one passed.",
+          "help": "Binary and checkable: no judgement call needed to say whether each one passed.",
           "placeholder": "",
           "options": [
-            "The flag writes zero bytes",
-            "Exit code is unchanged",
-            "Output fits 80 columns"
+            "No behaviour change outside the stated scope",
+            "Every new code path is exercised by a test",
+            "Handles empty, missing and malformed input"
           ]
         },
         "gates": {
-          "help": "",
+          "help": "Pass-or-fail checks the work must clear before it counts as done.",
           "placeholder": "",
           "options": [
             "Tests must pass",
@@ -974,7 +1070,7 @@
           ]
         },
         "items": {
-          "help": "The procedure that produces the evidence.",
+          "help": "The procedure that produces the evidence. One step per line.",
           "placeholder": "",
           "options": [
             "Run the command and paste the output",
@@ -1006,7 +1102,7 @@
           ]
         },
         "text": {
-          "help": "",
+          "help": "House style, banned phrasings, formatting rules.",
           "placeholder": "House style notes, banned phrasings, formatting rules.",
           "options": []
         }
@@ -1018,7 +1114,7 @@
       "explain": "Ordered. Finish each stage before starting the next, and stop at every gate.",
       "fields": {
         "stages": {
-          "help": "Click a stage to append it. Drag to reorder, or focus a stage and press Alt with the arrow keys. Stages repeat — a run with three approval gates is a normal shape.",
+          "help": "Click a stage to add it to the sequence. The Deliverables row holds what Output picked; place one to nest it under the stage that produces it. Drag to reorder, or focus a row and press Alt with the arrow keys. Stages can repeat.",
           "placeholder": "",
           "options": {
             "Discover": [
@@ -1070,42 +1166,105 @@
     "skills": {
       "order": 14,
       "visible": true,
-      "explain": "",
+      "explain": "Invoke each skill with the Skill tool at the point the work needs it.",
       "fields": {
         "picked": {
-          "help": "Skills the agent can invoke itself. Anything unlisted goes in the row below.",
+          "help": "Skills the agent may invoke itself, grouped by plugin.",
           "placeholder": "",
           "options": {
             "dev-workspace": [
-              "dev-workspace",
-              "discover",
-              "health",
-              "research",
-              "workspace-PR",
-              "conversation-capture"
+              {
+                "key": "dev-workspace",
+                "value": "dev-workspace:dev-workspace"
+              },
+              {
+                "key": "discover",
+                "value": "dev-workspace:discover"
+              },
+              {
+                "key": "health",
+                "value": "dev-workspace:health"
+              },
+              {
+                "key": "research",
+                "value": "dev-workspace:research"
+              },
+              {
+                "key": "workspace-PR",
+                "value": "dev-workspace:workspace-PR"
+              },
+              {
+                "key": "conversation-capture",
+                "value": "dev-workspace:conversation-capture"
+              }
             ],
             "dev-tools": [
-              "versioning",
-              "git-box",
-              "agent-commit",
-              "agent-push",
-              "agent-switch"
+              {
+                "key": "versioning",
+                "value": "dev-tools:versioning"
+              },
+              {
+                "key": "git-box",
+                "value": "dev-tools:git-box"
+              },
+              {
+                "key": "agent-commit",
+                "value": "dev-tools:agent-commit"
+              },
+              {
+                "key": "agent-push",
+                "value": "dev-tools:agent-push"
+              },
+              {
+                "key": "agent-switch",
+                "value": "dev-tools:agent-switch"
+              }
             ],
             "chat-tools": [
-              "markdown",
-              "magic-reply"
+              {
+                "key": "markdown",
+                "value": "chat-tools:markdown"
+              },
+              {
+                "key": "magic-reply",
+                "value": "chat-tools:magic-reply"
+              }
             ],
             "agent-tools": [
-              "drafthorse"
+              {
+                "key": "drafthorse",
+                "value": "agent-tools:drafthorse"
+              }
             ],
             "plugin-dev": [
-              "plugin-structure",
-              "skill-development",
-              "agent-development",
-              "command-development",
-              "hook-development",
-              "mcp-integration",
-              "plugin-settings"
+              {
+                "key": "plugin-structure",
+                "value": "plugin-dev:plugin-structure"
+              },
+              {
+                "key": "skill-development",
+                "value": "plugin-dev:skill-development"
+              },
+              {
+                "key": "agent-development",
+                "value": "plugin-dev:agent-development"
+              },
+              {
+                "key": "command-development",
+                "value": "plugin-dev:command-development"
+              },
+              {
+                "key": "hook-development",
+                "value": "plugin-dev:hook-development"
+              },
+              {
+                "key": "mcp-integration",
+                "value": "plugin-dev:mcp-integration"
+              },
+              {
+                "key": "plugin-settings",
+                "value": "plugin-dev:plugin-settings"
+              }
             ],
             "Built-in": [
               "artifact-design",
@@ -1122,7 +1281,7 @@
           }
         },
         "other": {
-          "help": "Unlisted skills, by name.",
+          "help": "Skills not listed above, by name.",
           "placeholder": "Skill name",
           "options": []
         }
@@ -1131,10 +1290,10 @@
     "exec": {
       "order": 15,
       "visible": true,
-      "explain": "This is about how to organise the work, not what the work is.",
+      "explain": "",
       "fields": {
         "strategy": {
-          "help": "How the work gets carried out.",
+          "help": "How the work is organised: alone, as a team, or as a workflow.",
           "placeholder": "",
           "options": [
             "Solo",
@@ -1150,12 +1309,16 @@
               "key": "Workflow — custom",
               "value": "Author a dynamic workflow for this task, then run it."
             },
+            {
+              "key": "Ultracode",
+              "value": "ultracode — orchestrate with multi-agent workflows throughout; thoroughness over token cost."
+            },
             "/batch",
             "/goal"
           ]
         },
         "economy": {
-          "help": "How much capability to spend per unit of work.",
+          "help": "How much model capability to spend per unit of work.",
           "placeholder": "",
           "options": [
             {
@@ -1177,7 +1340,7 @@
           ]
         },
         "roster": {
-          "help": "Named agents, when the strategy calls for specific ones.",
+          "help": "Named agents to use, when the strategy calls for specific ones.",
           "placeholder": "",
           "options": {
             "Built-in": [
@@ -1186,23 +1349,53 @@
               "general-purpose",
               "claude-code-guide"
             ],
-            "This marketplace": [
-              "doc-reviewer",
-              "drafthorse-saddler",
-              "breaking-change-detector",
-              "git-robot",
-              "course-researcher"
+            "chat-tools": [
+              {
+                "key": "doc-reviewer",
+                "value": "chat-tools:doc-reviewer"
+              }
+            ],
+            "agent-tools": [
+              {
+                "key": "drafthorse-saddler",
+                "value": "agent-tools:drafthorse-saddler"
+              }
+            ],
+            "dev-tools": [
+              {
+                "key": "breaking-change-detector",
+                "value": "dev-tools:breaking-change-detector"
+              },
+              {
+                "key": "git-robot",
+                "value": "dev-tools:git-robot"
+              }
+            ],
+            "classroom": [
+              {
+                "key": "course-researcher",
+                "value": "classroom:course-researcher"
+              }
             ],
             "plugin-dev": [
-              "agent-creator",
-              "plugin-validator",
-              "skill-reviewer"
+              {
+                "key": "agent-creator",
+                "value": "plugin-dev:agent-creator"
+              },
+              {
+                "key": "plugin-validator",
+                "value": "plugin-dev:plugin-validator"
+              },
+              {
+                "key": "skill-reviewer",
+                "value": "plugin-dev:skill-reviewer"
+              }
             ]
           }
         },
         "text": {
-          "help": "",
-          "placeholder": "Fan-out width, verification rounds, anything the picks do not carry.",
+          "help": "Fan-out width, verification rounds, anything the picks do not carry.",
+          "placeholder": "",
           "options": []
         }
       }
@@ -1213,12 +1406,12 @@
       "explain": "",
       "fields": {
         "text": {
-          "help": "What must not happen.",
+          "help": "What must not happen. One per line.",
           "placeholder": "One per line.",
           "options": []
         },
         "picked": {
-          "help": "",
+          "help": "Standing guardrails. Pick any that apply.",
           "placeholder": "",
           "options": [
             "Do not commit",
@@ -1242,7 +1435,7 @@
   },
   "launch": {
     "presets": {
-      "help": "Named commands. Click one to fill the line, click again to clear it.",
+      "help": "One click fills the whole command. Click again to clear it.",
       "placeholder": "",
       "options": [
         {
@@ -1258,25 +1451,25 @@
           "value": "--model opus --effort max"
         },
         {
-          "key": "Fable ",
+          "key": "Fable",
           "value": "--model fable --effort high"
         },
         {
-          "key": "fable smart",
+          "key": "Fable smart",
           "value": "--model fable --effort max"
         },
         {
           "key": "Opus Ultracode",
-          "value": "--model opus --effort ultracode"
+          "value": "--model opus --effort max --ultracode"
         },
         {
           "key": "Fable Ultracode",
-          "value": "--model fable --effort ultracode"
+          "value": "--model fable --effort max --ultracode"
         }
       ]
     },
     "model": {
-      "help": "Overrides the session model.",
+      "help": "Overrides the default model for the session.",
       "placeholder": "",
       "options": [
         "fable",
@@ -1286,7 +1479,7 @@
       ]
     },
     "effort": {
-      "help": "Reasoning effort for the session.",
+      "help": "Reasoning effort. Higher is slower and more thorough.",
       "placeholder": "",
       "options": [
         "low",
@@ -1297,7 +1490,7 @@
       ]
     },
     "mode": {
-      "help": "Permission mode.",
+      "help": "How much the session asks before acting.",
       "placeholder": "",
       "options": [
         "manual",
@@ -1309,49 +1502,53 @@
       ]
     },
     "flags": {
-      "help": "",
+      "help": "Each adds the flag shown. Safe mode needs Worktree; Fork session needs Continue or a resumed session; Ultracode turns on multi-agent workflows for the session.",
       "placeholder": "",
       "options": [
         {
-          "key": "continue",
+          "key": "Continue",
           "value": "--continue"
         },
         {
-          "key": "fork session",
+          "key": "Fork session",
           "value": "--fork-session"
         },
         {
-          "key": "worktree",
+          "key": "Worktree",
           "value": "--worktree"
         },
         {
-          "key": "background",
+          "key": "Background",
           "value": "--background"
         },
         {
-          "key": "safe mode",
+          "key": "Ultracode",
+          "value": "--ultracode"
+        },
+        {
+          "key": "Safe mode",
           "value": "--safe-mode"
         },
         {
-          "key": "bare",
+          "key": "Bare",
           "value": "--bare"
         },
         {
-          "key": "verbose",
+          "key": "Verbose",
           "value": "--verbose"
         },
         {
-          "key": "ide",
+          "key": "IDE",
           "value": "--ide"
         },
         {
-          "key": "chrome",
+          "key": "Chrome",
           "value": "--chrome"
         }
       ]
     },
     "extra": {
-      "help": "Anything else, appended verbatim.",
+      "help": "Appended verbatim to the end of the command.",
       "placeholder": "--add-dir ../sibling-repo",
       "options": []
     }
@@ -1363,22 +1560,22 @@
      TEXT DATABASE
      Recipes join the built prompt verbatim at the position they declare.
      Utilities replace it — each is a whole prompt on its own. {{path}} is
-     substituted from the project path in Utilities. Separate from the loadout
+     replaced with the file path set in Utilities. Kept apart from the loadout
      so swapping loadouts does not take your recipes with it.
      ========================================================================= -->
 <script type="application/json" id="text-db">
 {
   "recipes": [
     {
-      "name": "Example — delete me",
+      "name": "Example recipe",
       "position": "last",
-      "text": "This is a placeholder so the machinery is visible. Recipes emit verbatim at the position they declare, and {{path}} is substituted before they land."
+      "text": "Recipes join the prompt verbatim at the position they declare, first or last. {{path}} is replaced with the file path set in Utilities. Delete this one once you have your own."
     }
   ],
   "utilities": [
     {
       "name": "Update this tool",
-      "text": "Open {{path}} and refresh its skills list.\n\nWalk the installed plugins and the built-in skills available in this session. Rewrite the options object under `builders.skills.fields.picked` in the page's loadout block so each plugin is a group and its agent-invocable skills are the entries. Drop anything no longer installed. Leave the free-text Other field alone.\n\nRules for the edit:\n\n- The two JSON blocks at the top of the file are the only things you change.\n- Keep them hand-editable — two-space indent, one option per line where the list is short, no minifying.\n- An option is either a plain string or a {key, value} object. Use the object form only where the button should read shorter than the text it emits.\n- Every builder keeps its order, visible, explain and fields keys, even when blank. A loadout missing any of them will not import.\n- Do not touch the builder definitions, the widgets, or the styles.\n- Show me the diff before writing."
+      "text": "Open {{path}} and refresh the lists of skills and agents it offers.\n\nList the plugins installed and the skills and agents available in this session, built-ins included. Then, inside the page's `loadout` JSON block:\n\n- Rewrite `builders.skills.fields.picked.options`: one group per plugin, plus a `Built-in` group. A plugin skill is `{\"key\": \"<skill>\", \"value\": \"<plugin>:<skill>\"}`; a built-in skill is a plain string.\n- Rewrite `builders.exec.fields.roster.options` the same way for agents.\n- Drop anything no longer installed. Leave every other field alone.\n\nRules:\n\n- The two JSON blocks at the top of the file are the only things you change.\n- Keep them hand-editable: two-space indent, one option per line.\n- Every builder keeps its `order`, `visible`, `explain` and `fields` keys, even when blank. A loadout missing any of them will not import.\n- Show me the diff before writing."
     }
   ]
 }
@@ -1388,25 +1585,58 @@
 
 	<header class="masthead">
 		<div class="eyebrow">
-			<span>Prompt builder</span>
+			<span>Local tool</span>
 			<span>·</span>
-			<span>v1</span>
+			<span>v1.1</span>
 			<span>·</span>
+			<span>Loadout</span>
 			<span class="loadout" id="loadoutName"></span>
 			<span class="spacer"></span>
-			<button class="quiet tiny" id="editBtn" type="button">Edit</button>
-			<button class="quiet tiny" id="themeBtn" type="button">Theme</button>
+			<button class="quiet tiny" id="helpBtn" type="button" data-tip="How the page works, tab by tab, plus keyboard shortcuts.">Help</button>
+			<button class="quiet tiny" id="editBtn" type="button" data-tip="Change the options, help text and agent instructions in place. Entering Edit clears the current prompt.">Edit</button>
+			<button class="quiet tiny" id="themeBtn" type="button" data-tip="Switch between light and dark. Remembered in this browser.">Theme</button>
 		</div>
 		<h1>Prompt Builder</h1>
-		<p class="standfirst">Sixteen builders, all optional. Fill what this session needs; the rest stay out of the prompt entirely.</p>
+		<p class="standfirst">Fill in the builders this session needs and copy the prompt into Claude Code. Every builder is optional; empty ones stay out of the prompt.</p>
 	</header>
 
 	<div class="editbar" id="editBar" hidden>
 		<b>Editing the loadout</b>
-		<span>Chips open for editing instead of selecting. Changes are held in this browser until you save.</span>
+		<span>Click an option to change or delete it. Help text and agent instructions are editable in place. Changes stay in this browser until you save them from Utilities.</span>
 		<span class="spacer"></span>
 		<button class="amber tiny" id="editDone" type="button">Done editing</button>
 	</div>
+
+	<dialog class="help" id="help">
+		<button class="quiet tiny close" id="helpClose" type="button">Close</button>
+		<h2>How this works</h2>
+		<p class="lede">Fill in builders, pick options, and the prompt assembles in the panel on the right. Copy it into a Claude Code session, or write it to a file.</p>
+
+		<h3>Build</h3>
+		<p>Each tile is a builder: one section of the prompt. Open it, fill it in, and come back. A builder only appears in the prompt once it has content, under a heading the agent reads. The number on a tile is its position in the prompt; set that order in Utilities.</p>
+		<p><b>Write</b> builders take free text. <b>Choose</b> builders offer options from the loadout. An option marked <b>+</b> sends the agent a longer instruction than its label; hover it to read what will be sent. Deliverables picked in Output can be placed inside the Process sequence, nested under the stage that produces each one.</p>
+
+		<h3>Launch</h3>
+		<p>Assembles the <code>claude</code> command that starts the session. Pick a preset or build it flag by flag, then copy it into the terminal. Resume lists recent sessions from a project folder you choose and adds <code>--resume</code> for the one you pick.</p>
+
+		<h3>Recipes</h3>
+		<p>Reusable blocks of text that join the prompt verbatim, before or after the builders. Switch one on to include it. Add or edit recipes in Edit mode.</p>
+
+		<h3>Utilities</h3>
+		<p>What this browser can do, the file path and prompt folder, the order and visibility of builders, standalone utility prompts, and the loadout itself: save it into this file, export it, import another, or reset to the one in the file.</p>
+
+		<h3>Edit mode</h3>
+		<p>Turns every option into something you can change or delete, and opens help text, placeholders and agent instructions for editing. Entering Edit clears the prompt. Changes are held in this browser until Utilities → Save writes them into the page's own source.</p>
+
+		<h3>Loadouts</h3>
+		<p>A loadout is everything the builders offer: options, help text, agent instructions, order and visibility, plus the launch options. Keep one per kind of project and swap them with Export and Import. Import replaces the whole loadout, so a file must carry every builder.</p>
+
+		<h3>Keyboard</h3>
+		<p><kbd>Esc</kbd> returns to the dashboard from a builder. <kbd>Enter</kbd> in a list adds a row below. <kbd>Alt</kbd> + <kbd>↑</kbd> / <kbd>↓</kbd> moves a focused stage or builder row.</p>
+
+		<h3>Privacy</h3>
+		<p>Nothing leaves this browser. The only network request is the font stylesheet, and the page works without it.</p>
+	</dialog>
 
 	<nav class="tabs" role="tablist" id="tabs"></nav>
 	<p class="status notice" id="notice"></p>
@@ -1421,15 +1651,15 @@
 			</div>
 			<div id="out"></div>
 			<div class="btnrow">
-				<button id="copyBtn" type="button">Copy</button>
-				<button id="writeBtn" class="ghost" type="button" hidden>Write to file</button>
+				<button id="copyBtn" type="button" data-tip="Copy the panel to the clipboard.">Copy</button>
+				<button id="writeBtn" class="ghost" type="button" hidden data-tip="Save the panel as a Markdown file in the prompt folder chosen in Utilities.">Write to file</button>
 				<span class="status" id="copyStatus"></span>
 			</div>
 		</aside>
 	</div>
 
 	<footer>
-		Builders are fixed in the page; everything they offer lives in the loadout block at the top of the source. Nothing leaves the browser — no network calls beyond the font stylesheet. Full function in Chromium browsers; elsewhere the page still works but cannot write to disk or remember folders, and says so in Utilities.
+		A single local file. Builders are fixed in the page; everything they offer lives in the loadout block at the top of the source, editable in place or by hand. Nothing leaves the browser. Saving into this file and remembering folders need a Chromium browser; Utilities reports what this one can do.
 	</footer>
 </div>
 
@@ -1443,24 +1673,45 @@
 
 	var KEY_LOAD  = "prompt-builder.loadout";
 	var KEY_TEXTS = "prompt-builder.texts";
+	var KEY_BASE  = "prompt-builder.base";
+	var KEY_THEME = "prompt-builder.theme";
 	var DEFAULTS  = JSON.parse(document.getElementById("loadout").textContent);
 	var TEXT_DEF  = JSON.parse(document.getElementById("text-db").textContent);
 	var LOAD      = clone(DEFAULTS);
 	var TEXTS     = clone(TEXT_DEF);
+	var startupNote = "";
 
 	function clone(o) { return JSON.parse(JSON.stringify(o)); }
+	function hashOf(s) {
+		var h = 5381;
+		for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+		return String(h);
+	}
+	// Fingerprint of the two blocks as they sit in the file right now.
+	function baseMark() { return hashOf(JSON.stringify(DEFAULTS) + JSON.stringify(TEXT_DEF)); }
 
 	// localStorage is unavailable in some browsers on file:// — every access is
 	// guarded so a refusal degrades to the inline blocks rather than a dead page.
 	function readStore(k)     { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
 	function writeStore(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 	function dropStore(k)     { try { localStorage.removeItem(k); } catch (e) { /* nothing to undo */ } }
-	function persist()        { return writeStore(KEY_LOAD, LOAD) && writeStore(KEY_TEXTS, TEXTS); }
+	function persist()        { return writeStore(KEY_LOAD, LOAD) && writeStore(KEY_TEXTS, TEXTS) && writeStore(KEY_BASE, baseMark()); }
+	function dropOverlay()    { dropStore(KEY_LOAD); dropStore(KEY_TEXTS); dropStore(KEY_BASE); }
 
-	var storedLoad = readStore(KEY_LOAD);
-	if (storedLoad && storedLoad.builders) LOAD = storedLoad;
+	// Edits made in the browser overlay the file's blocks, and record which file
+	// contents they were made against. When the file has changed since — an agent
+	// ran "Update this tool", or the blocks were edited by hand — the file wins;
+	// otherwise the overlay would hide the newer file indefinitely.
+	var storedLoad  = readStore(KEY_LOAD);
 	var storedTexts = readStore(KEY_TEXTS);
-	if (storedTexts && storedTexts.recipes) TEXTS = storedTexts;
+	var storedBase  = readStore(KEY_BASE);
+	if ((storedLoad || storedTexts) && storedBase && storedBase !== baseMark()) {
+		dropOverlay();
+		startupNote = "This file changed on disk, so unsaved edits held in this browser were discarded in favour of the file's loadout.";
+	} else {
+		if (storedLoad && storedLoad.builders) LOAD = storedLoad;
+		if (storedTexts && storedTexts.recipes) TEXTS = storedTexts;
+	}
 
 	function bcfg(id)        { return (LOAD.builders && LOAD.builders[id]) || {}; }
 	function fcfg(id, key)   { return (bcfg(id).fields && bcfg(id).fields[key]) || {}; }
@@ -1599,54 +1850,61 @@
 			return h.getFile();
 		}).then(function (f) { return f.text(); })
 		  .then(function (src) {
-			var next = spliceBlock(src, MARK_LOAD, JSON.stringify(LOAD, null, 2), "loadout");
-			next = spliceBlock(next, MARK_TEXTS, JSON.stringify(TEXTS, null, 2), "text-db");
+			var next = spliceBlock(src, MARK_LOAD, blockJson(LOAD), "loadout");
+			next = spliceBlock(next, MARK_TEXTS, blockJson(TEXTS), "text-db");
 			return h.createWritable().then(function (w) {
 				return w.write(next).then(function () { return w.close(); });
 			});
 		}).then(function () { markSaved(); return h.name; });
 	}
 
-	function stateMark()  { return JSON.stringify(LOAD) + " " + JSON.stringify(TEXTS); }
-	var savedMark = stateMark();
-	function unsaved()   { return stateMark() !== savedMark; }
-	function markSaved() { savedMark = stateMark(); }
+	// A literal "</" inside a string would end the script block early when the
+	// page next loads; JSON accepts the escaped slash, so it is written that way.
+	function blockJson(obj) { return JSON.stringify(obj, null, 2).replace(/<\//g, "<\\/"); }
+
+	// "Saved" means the file's blocks match what is in use. After a save the
+	// file holds the current state, so that state becomes the new baseline.
+	function stateMark() { return JSON.stringify(LOAD) + "\n" + JSON.stringify(TEXTS); }
+	function fileMark()  { return JSON.stringify(DEFAULTS) + "\n" + JSON.stringify(TEXT_DEF); }
+	function unsaved()   { return stateMark() !== fileMark(); }
+	function markSaved() { DEFAULTS = clone(LOAD); TEXT_DEF = clone(TEXTS); persist(); }
 
 	// =======================================================================
 	// Builders — fixed in the page. Order and visibility come from the loadout.
 	// Kinds: textarea · multi · single · list · pairlist · grouped · pipeline
+	// A grouped field with single: true allows one pick across all its groups.
 	// =======================================================================
 
 	var BUILDERS = [
 		{ id: "task", title: "Task", heading: "Task", group: "write",
-			blurb: "The single thing you want done.",
+			blurb: "The one thing you want done.",
 			fields: [ { key: "text", kind: "textarea", label: "The ask", tall: true } ] },
 
 		{ id: "problem", title: "Problem", heading: "Problem", group: "write",
-			blurb: "The symptom and its cost. Use this alone when you have a complaint but not yet a plan.",
+			blurb: "What is going wrong and what it costs. Use on its own when you have a complaint but no plan yet.",
 			fields: [ { key: "text", kind: "textarea", label: "What is going wrong", tall: true } ] },
 
 		{ id: "context", title: "Context", heading: "Context", group: "write",
-			blurb: "What the agent needs to know that reading the code will not tell it.",
+			blurb: "Background the agent cannot get from the code.",
 			fields: [
 				{ key: "text",  kind: "textarea", label: "Background" },
 				{ key: "files", kind: "pairlist", label: "Files to read first", a: "path", b: "why it matters" }
 			] },
 
 		{ id: "goals", title: "Goals", heading: "Goals", group: "write",
-			blurb: "The effect. What is true afterwards that is not true now.",
+			blurb: "Outcomes: what is true afterwards that is not true now.",
 			fields: [ { key: "items", kind: "list", label: "Outcomes", ph: "One outcome per line", picks: true } ] },
 
 		{ id: "features", title: "Features", heading: "Features", group: "write",
-			blurb: "The artefacts. The discrete things to build, each with a note if the name needs one.",
+			blurb: "The discrete things to build, each with a note if the name needs one.",
 			fields: [ { key: "items", kind: "pairlist", label: "To build", a: "name", b: "note" } ] },
 
 		{ id: "references", title: "References", heading: "References", group: "write",
-			blurb: "Source material. Paths, URLs, issue numbers.",
+			blurb: "Source material: paths, URLs, issue numbers.",
 			fields: [ { key: "items", kind: "pairlist", label: "Sources", a: "label", b: "path, URL, or #issue" } ] },
 
 		{ id: "scope", title: "Scope", heading: "Scope", group: "write",
-			blurb: "Draw the boundary. Out-of-scope earns its keep more than in-scope does.",
+			blurb: "Where the boundary sits. Out of scope is the half that matters most.",
 			fields: [
 				{ key: "inside",  kind: "list", label: "In scope",     ph: "Area, file, or behaviour" },
 				{ key: "outside", kind: "list", label: "Out of scope", ph: "Area, file, or behaviour", picks: true }
@@ -1660,7 +1918,7 @@
 			] },
 
 		{ id: "verify", title: "Verification", heading: "Verification", group: "write",
-			blurb: "What counts as passing, and how it gets shown.",
+			blurb: "What counts as done, and how to show it.",
 			fields: [
 				{ key: "criteria", kind: "list",  label: "Acceptance criteria", ph: "Binary and checkable", picks: true },
 				{ key: "gates",    kind: "multi", label: "Gates" },
@@ -1668,14 +1926,14 @@
 			] },
 
 		{ id: "guardrails", title: "Guardrails", heading: "Guardrails", group: "write",
-			blurb: "What must not happen. Stated plainly, these hold better than anything else here.",
+			blurb: "What must not happen, stated plainly.",
 			fields: [
 				{ key: "text",   kind: "textarea", label: "Your guardrails" },
 				{ key: "picked", kind: "multi",    label: "Standing guardrails" }
 			] },
 
 		{ id: "architecture", title: "Architecture", heading: "Architecture", group: "choose",
-			blurb: "What to build it with. Unset fields are an invitation to guess.",
+			blurb: "The stack to build with. Unset fields leave the agent to guess.",
 			fields: [
 				{ key: "language",  kind: "multi",    label: "Language / runtime" },
 				{ key: "framework", kind: "multi",    label: "Framework & styling" },
@@ -1688,30 +1946,30 @@
 		{ id: "output", title: "Output", heading: "Output", group: "choose",
 			blurb: "The shape of what comes back.",
 			fields: [
-				{ key: "deliverable", kind: "single", label: "Deliverable" },
+				{ key: "deliverable", kind: "grouped", label: "Deliverables" },
 				{ key: "depth",       kind: "single", label: "Depth" }
 			] },
 
 		{ id: "tone", title: "Tone", heading: "Tone", group: "choose",
-			blurb: "Register and house style for the reply.",
+			blurb: "How the reply should read.",
 			fields: [
 				{ key: "pick", kind: "single",   label: "Register" },
 				{ key: "text", kind: "textarea", label: "Style notes" }
 			] },
 
 		{ id: "process", title: "Process", heading: "Process", group: "choose",
-			blurb: "The run, as an ordered sequence. This is where approval gates go.",
+			blurb: "The run as an ordered sequence, with approval gates where you want them.",
 			fields: [ { key: "stages", kind: "pipeline", label: "Stages" } ] },
 
 		{ id: "skills", title: "Skills", heading: "Skills", group: "choose",
-			blurb: "Skills the agent should read or run.",
+			blurb: "Skills the agent should use.",
 			fields: [
 				{ key: "picked", kind: "grouped", label: "Installed skills" },
 				{ key: "other",  kind: "list",    label: "Other", ph: "Skill name" }
 			] },
 
 		{ id: "exec", title: "Execution", heading: "Execution", group: "choose",
-			blurb: "How the work is carried out, and how much capability to spend doing it.",
+			blurb: "How the work is organised and how much capability to spend on it.",
 			fields: [
 				{ key: "strategy", kind: "single",   label: "Strategy" },
 				{ key: "economy",  kind: "single",   label: "Token economy" },
@@ -1721,8 +1979,8 @@
 	];
 
 	var GROUPS = [
-		{ id: "write",  title: "Write",  gloss: "You compose these. Sentences and a minute of thought." },
-		{ id: "choose", title: "Choose", gloss: "You pick these. Chips, lists, and a few clicks." }
+		{ id: "write",  title: "Write",  gloss: "Free text. Describe the work in your own words." },
+		{ id: "choose", title: "Choose", gloss: "Pick from options. Everything offered here comes from the loadout and can be edited." }
 	];
 	var TABS = [
 		{ id: "build", title: "Build" }, { id: "launch", title: "Launch" },
@@ -1774,6 +2032,7 @@
 	var STATE, LAUNCH, RECIPES, stageSeq = 0, EDIT = false;
 
 	function blankValue(f) {
+		if (f.single) return "";
 		return ["multi", "grouped", "list", "pairlist", "pipeline"].indexOf(f.kind) !== -1 ? [] : "";
 	}
 	function resetPrompt() {
@@ -1820,10 +2079,14 @@
 			.filter(function (p) { return p.a || p.b; });
 	}
 	function bullets(a) { return cleanList(a).map(function (x) { return "- " + x; }); }
+	// tick names the side that is a path and gets code formatting — "a", "b",
+	// or none. The path always leads; the label or note follows.
 	function pairBullets(a, tick) {
 		return cleanPairs(a).map(function (p) {
-			var head = tick ? "`" + p.a + "`" : p.a;
-			return (p.a && p.b) ? "- " + head + " — " + p.b : "- " + (p.a || p.b);
+			var lead = tick === "b" ? p.b : p.a;
+			var rest = tick === "b" ? p.a : p.b;
+			if (tick && lead) lead = "`" + lead + "`";
+			return (lead && rest) ? "- " + lead + " — " + rest : "- " + (lead || rest);
 		});
 	}
 	function para(v) { return String(v || "").trim(); }
@@ -1845,18 +2108,18 @@
 	var BODY = {
 		task:    function (d) { return para(d.text) ? [para(d.text)] : []; },
 		problem: function (d) { return para(d.text) ? [para(d.text)] : []; },
-		context: function (d) { return spaced(para(d.text) ? [para(d.text)] : [], sub("Read first", pairBullets(d.files, true))); },
+		context: function (d) { return spaced(para(d.text) ? [para(d.text)] : [], sub("Read first", pairBullets(d.files, "a"))); },
 		goals:      function (d) { return bullets(d.items); },
-		features:   function (d) { return pairBullets(d.items, false); },
-		references: function (d) { return pairBullets(d.items, true); },
+		features:   function (d) { return pairBullets(d.items, null); },
+		references: function (d) { return pairBullets(d.items, "b"); },
 
 		architecture: function (d) {
 			return spaced([].concat(
-				joined("Language", d.language),
-				joined("Framework", d.framework),
-				joined("Storage", d.storage),
-				bullets(vMany("architecture", "patterns", d.patterns)),
-				joined("Infrastructure", d.infra)
+				joined("Language", vMany("architecture", "language", d.language)),
+				joined("Framework", vMany("architecture", "framework", d.framework)),
+				joined("Storage", vMany("architecture", "storage", d.storage)),
+				joined("Infrastructure", vMany("architecture", "infra", d.infra)),
+				bullets(vMany("architecture", "patterns", d.patterns))
 			), textLines(d.text));
 		},
 
@@ -1865,23 +2128,32 @@
 		guardrails:  function (d) { return textLines(d.text).concat(bullets(vMany("guardrails", "picked", d.picked))); },
 
 		output: function (d) {
+			var picks = Array.isArray(d.deliverable) ? d.deliverable : (d.deliverable ? [d.deliverable] : []);
+			var list = vMany("output", "deliverable", picks);
 			return [].concat(
-				labelled("Deliverable", vOne("output", "deliverable", d.deliverable)),
+				joined(list.length > 1 ? "Deliverables" : "Deliverable", list),
 				labelled("Depth", vOne("output", "depth", d.depth))
 			);
 		},
 
 		verify: function (d) {
-			return spaced(sub("Acceptance criteria", bullets(d.criteria)), sub("Gates", bullets(d.gates)), sub("How to check", bullets(d.items)));
+			return spaced(sub("Acceptance criteria", bullets(d.criteria)), sub("Gates", bullets(vMany("verify", "gates", d.gates))), sub("How to check", bullets(d.items)));
 		},
 
 		tone: function (d) { return [].concat(labelled("Register", vOne("tone", "pick", d.pick)), textLines(d.text)); },
 
+		// A deliverable nests under the stage above it, written as Output writes
+		// it; one placed before any stage stays at the top level.
 		process: function (d) {
-			return (d.stages || []).filter(function (s) { return s && s.label; }).map(function (s, i) {
+			var lines = [], n = 0;
+			(d.stages || []).forEach(function (s) {
+				if (!s || !s.label) return;
+				if (s.kind === "deliv") { lines.push((n ? "   " : "") + "- Deliverable: " + (s.value || s.label)); return; }
+				n++;
 				var note = String(s.note || "").trim();
-				return (i + 1) + ". " + (s.value || s.label) + (note ? " — " + note : "");
+				lines.push(n + ". " + (s.value || s.label) + (note ? " — " + note : ""));
 			});
+			return lines;
 		},
 
 		skills: function (d) { return bullets(vMany("skills", "picked", d.picked)).concat(bullets(d.other)); },
@@ -1959,15 +2231,17 @@
 	function node(t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x != null) n.textContent = x; return n; }
 	function btn(c, x, f) { var b = node("button", c, x); b.type = "button"; b.addEventListener("click", f); return b; }
 	function pad(n) { return String(n).padStart(2, "0"); }
-	function flash(t, msg, bad) {
+	// ms 0 keeps the message until the next one replaces it.
+	function flash(t, msg, bad, ms) {
 		var base = t.classList.contains("notice") ? "status notice" : "status";
 		t.textContent = msg;
 		t.className = base + (bad ? " bad" : "");
-		setTimeout(function () { if (t.textContent === msg) { t.textContent = ""; t.className = base; } }, 3400);
+		if (ms === 0) return;
+		setTimeout(function () { if (t.textContent === msg) { t.textContent = ""; t.className = base; } }, ms || 3400);
 	}
 	// Anything that re-renders a panel must report through this rather than a
 	// status node inside that panel — the redraw would detach it first.
-	function notify(msg, bad) { flash(document.getElementById("notice"), msg, bad); }
+	function notify(msg, bad, ms) { flash(document.getElementById("notice"), msg, bad, ms); }
 	function headed(title, count) {
 		var h = node("div", "sec-head");
 		h.appendChild(node("h2", null, title));
@@ -1990,36 +2264,50 @@
 
 	var openOption = null;   // "<builderId>.<field>[/group]#<index>"
 
-	function optionSlot(cfgObj, groupName, index, onChange) {
+	// The entry is read fresh on every keystroke, so editing the key and then
+	// the value (or the reverse) never writes back a stale copy of the other.
+	function optionSlot(cfgObj, groupName, index, onChange, chip) {
 		var arr = groupName ? cfgObj.options[groupName] : cfgObj.options;
-		var raw = arr[index];
-		var isObj = typeof raw === "object" && raw !== null;
+		function current() {
+			var raw = arr[index];
+			if (typeof raw === "object" && raw !== null) {
+				var k = String(raw.key == null ? "" : raw.key);
+				return { key: k, value: raw.value === undefined ? k : String(raw.value) };
+			}
+			return { key: String(raw), value: String(raw) };
+		}
+		function write(key, value) {
+			arr[index] = (value.trim() && value !== key) ? { key: key, value: value } : key;
+			chip.textContent = key.trim() || "(unnamed)";
+			onChange();
+		}
+		var cur = current();
 		var box = node("div", "kv");
 
 		var pair = node("div", "pair");
 		var kWrap = node("div");
-		kWrap.appendChild(node("div", "mini", "key — the button"));
-		kWrap.appendChild(textInput(isObj ? raw.key : raw, "key", function (v) {
-			if (isObj) raw.key = v; else arr[index] = v;
-			onChange();
+		kWrap.appendChild(node("div", "mini", "Key — the label on the button"));
+		kWrap.appendChild(textInput(cur.key, "Key", function (v) {
+			var now = current();
+			write(v, now.value === now.key ? v : now.value);
 		}, true));
 		var vWrap = node("div");
-		vWrap.appendChild(node("div", "mini", "value — what the prompt gets"));
-		vWrap.appendChild(textInput(isObj ? (raw.value === undefined ? raw.key : raw.value) : raw, "same as the key", function (v) {
-			var key = isObj ? raw.key : raw;
-			if (v === key || !v.trim()) { arr[index] = key; }
-			else { arr[index] = { key: key, value: v }; }
-			onChange();
+		vWrap.appendChild(node("div", "mini", "Value — what the prompt receives"));
+		vWrap.appendChild(textInput(cur.value === cur.key ? "" : cur.value, "Same as the key unless you write something here", function (v) {
+			write(current().key, v);
 		}));
 		pair.appendChild(kWrap);
 		pair.appendChild(vWrap);
 		box.appendChild(pair);
 
 		var row = node("div", "btnrow");
-		row.appendChild(btn("quiet tiny", "Close", function () { openOption = null; onChange(true); }));
+		row.appendChild(btn("quiet tiny", "Close", function () {
+			if (!current().key.trim()) arr.splice(index, 1);
+			openOption = null;
+			onChange(true);
+		}));
 		row.appendChild(btn("amber ghost tiny", "Delete option", function () {
-			var label = isObj ? raw.key : raw;
-			if (!confirm('Delete "' + label + '"?')) return;
+			if (!confirm('Delete "' + current().key + '"?')) return;
 			arr.splice(index, 1);
 			openOption = null;
 			onChange(true);
@@ -2032,38 +2320,43 @@
 		var arr = groupName ? cfgObj.options[groupName] : cfgObj.options;
 		var view = norm(arr);
 		var box = node("div", "picks");
+		var chips = [];
 
 		view.forEach(function (o, i) {
 			var id = slotId + "#" + i;
 			var chip = node("button", "edit-chip", o.key);
 			chip.type = "button";
 			chip.setAttribute("aria-expanded", String(openOption === id));
+			if (o.rich) { chip.dataset.tip = o.value; chip.dataset.tipk = "Value"; }
 			chip.addEventListener("click", function () {
 				openOption = openOption === id ? null : id;
 				onChange(true);
 			});
+			chips.push(chip);
 			box.appendChild(chip);
 		});
-		box.appendChild(btn("quiet tiny", "+ Add option", function () {
+		var add = btn("quiet tiny", "+ Add option", function () {
 			arr.push("New option");
 			openOption = slotId + "#" + (arr.length - 1);
 			onChange(true);
-		}));
+		});
+		add.dataset.tip = "Adds an option and opens it for editing.";
+		box.appendChild(add);
 		host.appendChild(box);
 
 		view.forEach(function (o, i) {
 			if (openOption !== slotId + "#" + i) return;
-			host.appendChild(optionSlot(cfgObj, groupName, i, onChange));
+			host.appendChild(optionSlot(cfgObj, groupName, i, onChange, chips[i]));
 		});
 	}
 
 	function fieldSettings(cfgObj, host, onChange, wantsPlaceholder) {
 		var box = node("div", "fieldsettings");
-		box.appendChild(node("div", "mini", "help — shown to you above the field"));
-		box.appendChild(textInput(cfgObj.help, "no help text", function (v) { cfgObj.help = v; onChange(); }));
+		box.appendChild(node("div", "mini", "Help text — shown under the field label"));
+		box.appendChild(textInput(cfgObj.help, "No help text", function (v) { cfgObj.help = v; onChange(); }));
 		if (wantsPlaceholder) {
-			box.appendChild(node("div", "mini", "placeholder — ghost text inside the field"));
-			box.appendChild(textInput(cfgObj.placeholder, "no placeholder", function (v) { cfgObj.placeholder = v; onChange(); }));
+			box.appendChild(node("div", "mini", "Placeholder — example text shown while the field is empty"));
+			box.appendChild(textInput(cfgObj.placeholder, "No placeholder", function (v) { cfgObj.placeholder = v; onChange(); }));
 		}
 		host.appendChild(box);
 	}
@@ -2072,12 +2365,14 @@
 	// Field widgets
 	// =======================================================================
 
-	function pickBox(list, isOn, multi, onToggle) {
+	// shared: an inputs array reused across several boxes, so a single-pick
+	// field spread over groups stays exclusive as a whole.
+	function pickBox(list, isOn, multi, onToggle, kicker, shared) {
 		var box = node("div", "picks");
-		var inputs = [];
+		var inputs = shared || [];
 		list.forEach(function (o) {
 			var lab = document.createElement("label");
-			if (o.rich) { lab.className = "rich"; lab.title = o.value; }
+			if (o.rich) { lab.className = "rich"; lab.dataset.tip = o.value; lab.dataset.tipk = kicker || "Sent to the agent as"; }
 			var inp = document.createElement("input");
 			// Single-select uses checkboxes with enforced exclusivity, so a second
 			// click on the active option clears the field. Radios cannot.
@@ -2122,7 +2417,7 @@
 			return;
 		}
 		var list = listOpts(c);
-		if (!list.length) return;
+		if (!list.length) { wrap.appendChild(node("p", "emptynote", "No options yet. Turn on Edit to add some.")); return; }
 		wrap.appendChild(pickBox(list,
 			function (k) { return STATE[b.id][f.key].indexOf(k) !== -1; }, true,
 			function (k, on) { STATE[b.id][f.key] = toggleIn(STATE[b.id][f.key], k, on); refresh(); }));
@@ -2137,7 +2432,7 @@
 			return;
 		}
 		var list = listOpts(c);
-		if (!list.length) return;
+		if (!list.length) { wrap.appendChild(node("p", "emptynote", "No options yet. Turn on Edit to add some.")); return; }
 		wrap.appendChild(pickBox(list,
 			function (k) { return STATE[b.id][f.key] === k; }, false,
 			function (k, on) { STATE[b.id][f.key] = on ? k : ""; refresh(); }));
@@ -2178,12 +2473,18 @@
 			return;
 		}
 		var groups = groupOpts(c);
+		if (!Object.keys(groups).length) wrap.appendChild(node("p", "emptynote", "No options yet. Turn on Edit to add some."));
+		var shared = f.single ? [] : null;
 		Object.keys(groups).forEach(function (name) {
 			var g = node("div", "subgroup");
 			g.appendChild(node("h5", null, name));
-			g.appendChild(pickBox(groups[name],
-				function (k) { return STATE[b.id][f.key].indexOf(k) !== -1; }, true,
-				function (k, on) { STATE[b.id][f.key] = toggleIn(STATE[b.id][f.key], k, on); refresh(); }));
+			g.appendChild(f.single
+				? pickBox(groups[name],
+					function (k) { return STATE[b.id][f.key] === k; }, false,
+					function (k, on) { STATE[b.id][f.key] = on ? k : ""; refresh(); }, null, shared)
+				: pickBox(groups[name],
+					function (k) { return STATE[b.id][f.key].indexOf(k) !== -1; }, true,
+					function (k, on) { STATE[b.id][f.key] = toggleIn(STATE[b.id][f.key], k, on); refresh(); }));
 			wrap.appendChild(g);
 		});
 	}
@@ -2194,7 +2495,7 @@
 			fieldSettings(c, wrap, onCfgChange, true);
 			if (f.picks) {
 				if (!Array.isArray(c.options)) c.options = [];
-				wrap.appendChild(node("div", "mini", ""));
+				wrap.appendChild(node("p", "help", "Suggestions — one click adds the option's value as a row."));
 				editableChips(c, null, b.id + "." + f.key, wrap, onCfgChange);
 			}
 			return;
@@ -2238,13 +2539,11 @@
 			var sugg = node("div", "picks");
 			sugg.style.marginTop = "10px";
 			listOpts(c).forEach(function (o) {
-				var s = btn("quiet tiny", "+ " + o.key, function () {
+				var s = btn("quiet tiny sugg", "+ " + o.key, function () {
 					if (arr.length === 1 && !arr[0].trim()) arr[0] = o.value; else arr.push(o.value);
 					draw(); refresh();
 				});
-				s.style.textTransform = "none";
-				s.style.letterSpacing = "0";
-				if (o.rich) s.title = o.value;
+				if (o.rich) { s.dataset.tip = o.value; s.dataset.tipk = "Adds the line"; }
 				sugg.appendChild(s);
 			});
 			wrap.appendChild(sugg);
@@ -2285,7 +2584,7 @@
 	// Ordered list with drag, arrow buttons, and an Alt+arrow keyboard path.
 	function orderedList(arr, host, spec) {
 		var dragFrom = null;
-		var list = node("div", "stages");
+		var list = node("div", "stages" + (spec.compact ? " compact" : ""));
 
 		function move(from, to) {
 			if (to < 0 || to >= arr.length) return;
@@ -2300,7 +2599,7 @@
 			if (!arr.length) { list.appendChild(node("p", "emptynote", spec.empty)); return; }
 			arr.forEach(function (item, i) {
 				var on = spec.isOn ? spec.isOn(item) : true;
-				var row = node("div", "stage" + (on ? " on" : " off"));
+				var row = node("div", "stage" + (on ? " on" : " off") + (spec.rowClass ? " " + spec.rowClass(item, i) : ""));
 				row.draggable = true;
 				row.tabIndex = 0;
 				row.addEventListener("dragstart", function () { dragFrom = i; row.classList.add("dragging"); });
@@ -2319,12 +2618,15 @@
 				row.appendChild(node("span", "handle", "⠿"));
 				row.appendChild(node("span", "n", spec.number ? spec.number(item, i) : pad(i + 1)));
 				row.appendChild(node("span", "name", spec.label(item)));
-				if (spec.note) {
+				if (typeof spec.note === "function" ? spec.note(item) : spec.note) {
 					var note = textInput(item.note, "note — optional", function (v) { item.note = v; spec.onChange(); });
 					note.className = "grow";
 					row.appendChild(note);
 				} else {
-					row.appendChild(node("span", "grow"));
+					var grow = node("span", "grow");
+					var flag = spec.flag ? spec.flag(item, i) : "";
+					if (flag) grow.appendChild(node("span", "flag", flag));
+					row.appendChild(grow);
 				}
 				row.appendChild(btn("mv", "↑", function () { move(i, i - 1); }));
 				row.appendChild(btn("mv", "↓", function () { move(i, i + 1); }));
@@ -2384,19 +2686,61 @@
 					if (redraw) redraw();
 					refresh();
 				});
-				if (o.rich) s.title = o.value;
+				if (o.rich) { s.dataset.tip = o.value; s.dataset.tipk = "Sent to the agent as"; }
 				box.appendChild(s);
 			});
 			col.appendChild(box);
 			pal.appendChild(col);
 		});
+
+		// Deliverables picked in Output, placeable like stages.
+		var isStage = function (s) { return s && s.kind !== "deliv"; };
+		var drow = node("div", "pal deliv");
+		drow.appendChild(node("h5", null, "Deliverables"));
+		var dopts = node("div", "opts");
+		drow.appendChild(dopts);
+		pal.appendChild(drow);
+		function place(k) { arr.push({ id: ++stageSeq, kind: "deliv", label: k, value: vOne("output", "deliverable", k), note: "" }); }
+		function drawDeliv() {
+			dopts.innerHTML = "";
+			var picks = STATE.output.deliverable || [];
+			if (!picks.length) {
+				var e = node("p", "emptynote");
+				e.appendChild(document.createTextNode("Nothing picked in Output yet. "));
+				var a = node("a", null, "Pick deliverables");
+				a.href = "#/build/b/output";
+				e.appendChild(a);
+				e.appendChild(document.createTextNode(" and they appear here."));
+				dopts.appendChild(e);
+				return;
+			}
+			var placed = arr.filter(function (s) { return s.kind === "deliv"; }).map(function (s) { return s.label; });
+			picks.forEach(function (k) {
+				var s = btn("opt deliv", "+ " + k, function () { place(k); if (redraw) redraw(); drawDeliv(); refresh(); });
+				s.dataset.tip = "Adds “- Deliverable: " + k + "” after the last item. Move it under the stage that produces it.";
+				dopts.appendChild(s);
+			});
+			var rest = picks.filter(function (k) { return placed.indexOf(k) === -1; });
+			if (rest.length > 1) {
+				dopts.appendChild(btn("quiet tiny", "Place all unplaced", function () { rest.forEach(place); if (redraw) redraw(); drawDeliv(); refresh(); }));
+			}
+		}
+		drawDeliv();
 		wrap.appendChild(pal);
 
 		redraw = orderedList(arr, wrap, {
-			label: function (s) { return s.label; },
-			note: true, removable: true,
+			label: function (s) { return s.kind === "deliv" ? "Deliverable: " + s.label : s.label; },
+			number: function (s, i) { return s.kind === "deliv" ? "↳" : pad(arr.slice(0, i + 1).filter(isStage).length); },
+			rowClass: function (s, i) { return s.kind === "deliv" ? "deliv" + (arr.slice(0, i).some(isStage) ? "" : " orphan") : ""; },
+			flag: function (s, i) {
+				if (s.kind !== "deliv") return "";
+				if (!arr.slice(0, i).some(isStage)) return "before the first stage";
+				return (STATE.output.deliverable || []).indexOf(s.label) === -1 ? "no longer picked in Output" : "";
+			},
+			note: function (s) { return s.kind !== "deliv"; },
+			removable: true,
 			empty: "No stages yet. Click one above to start the sequence.",
-			onChange: refresh
+			onChange: function () { drawDeliv(); refresh(); }
 		});
 	}
 
@@ -2468,6 +2812,7 @@
 		// Redrawing a panel that does would steal focus on every keystroke.
 		if (tab === "build" && !currentBuilder) drawBuild();
 		drawTabs();
+		dropStaleTip();
 	}
 
 	// =======================================================================
@@ -2493,7 +2838,7 @@
 				top.appendChild(node("h3", null, b.title));
 				t.appendChild(top);
 				t.appendChild(node("p", "blurb", b.blurb));
-				t.appendChild(node("div", "fill", EDIT ? "edit its options" : fillLabel(b)));
+				t.appendChild(node("div", "fill", EDIT ? "edit options" : fillLabel(b)));
 				t.addEventListener("click", function () { location.hash = "#/build/b/" + b.id; });
 				grid.appendChild(t);
 			});
@@ -2507,8 +2852,8 @@
 				hiddenOnes.map(function (b) { return b.title; }).join(", ") + "."));
 		}
 
-		stage.appendChild(headed("Session"));
-		stage.appendChild(node("p", "gloss", "Your filled-in prompt. The options the builders offer live in Utilities."));
+		stage.appendChild(headed("This prompt"));
+		stage.appendChild(node("p", "gloss", "Export the filled-in builders as a file to reuse later, import a saved one, or clear everything and start again."));
 		var sessStatus = node("p", "status");
 		var row = node("div", "btnrow");
 		row.appendChild(node("span", "rowlab", "Prompt"));
@@ -2518,12 +2863,15 @@
 		}));
 		var pf = fileInput(function (parsed, name) {
 			var incoming = parsed && parsed.state ? parsed.state : parsed;
+			if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) throw new Error("not a prompt file");
 			resetPrompt();
 			BUILDERS.forEach(function (b) {
 				var src = incoming[b.id];
 				if (!src) return;
 				b.fields.forEach(function (f) { if (src[f.key] !== undefined) STATE[b.id][f.key] = src[f.key]; });
 			});
+			// Older prompt files hold one deliverable as a string.
+			if (!Array.isArray(STATE.output.deliverable)) STATE.output.deliverable = STATE.output.deliverable ? [STATE.output.deliverable] : [];
 			// Placed stages arrive without live ids; reissue so reordering works.
 			(STATE.process.stages || []).forEach(function (s) {
 				s.id = ++stageSeq;
@@ -2554,29 +2902,31 @@
 
 		var nav = node("div", "btnrow");
 		nav.style.marginBottom = "18px";
-		nav.appendChild(btn("quiet tiny", "← Dashboard", function () { location.hash = "#/build"; }));
+		nav.appendChild(btn("quiet tiny", "← All builders", function () { location.hash = "#/build"; }));
 		nav.appendChild(btn("quiet tiny", "Previous", function () { step(-1); }));
-		nav.appendChild(btn("quiet tiny", "Next builder", function () { step(1); }));
+		nav.appendChild(btn("quiet tiny", "Next", function () { step(1); }));
 		stage.appendChild(nav);
 
 		var head = node("div", "pagehead");
 		head.appendChild(node("h2", null, b.title));
-		head.appendChild(node("span", "chip id", "prompt position " + pad(positionOf(b))));
+		var pos = node("span", "chip id", "prompt position " + pad(positionOf(b)));
+		pos.dataset.tip = "Where this section lands in the prompt. Change the order in Utilities.";
+		head.appendChild(pos);
 		stage.appendChild(head);
 		stage.appendChild(node("p", "page-blurb", b.blurb));
 
 		var ex = explainOf(b.id);
 		if (EDIT) {
 			var box = node("div", "explain");
-			box.appendChild(node("span", "who", "explainer — the agent reads this under the heading"));
-			box.appendChild(textInput(ex, "no explainer — most builders need none", function (v) {
+			box.appendChild(node("span", "who", "Agent instruction — emitted under this builder's heading"));
+			box.appendChild(textInput(ex, "None. Most builders need no instruction beyond their heading.", function (v) {
 				LOAD.builders[b.id].explain = v;
 				onCfgChange();
 			}));
 			stage.appendChild(box);
 		} else if (ex) {
 			var show = node("div", "explain");
-			show.appendChild(node("span", "who", "the agent also reads"));
+			show.appendChild(node("span", "who", "Agent instruction — sent under this heading"));
 			show.appendChild(node("p", null, ex));
 			stage.appendChild(show);
 		}
@@ -2609,7 +2959,7 @@
 		jsonl.sort(function (a, b) { return b.lastModified - a.lastModified; });
 		return Promise.all(jsonl.slice(0, 40).map(readSession)).then(function (rows) {
 			sessions = rows.filter(Boolean);
-			sessionNote = sessions.length + " of " + jsonl.length + " shown, newest first";
+			sessionNote = sessions.length + " of " + jsonl.length + " sessions";
 		});
 	}
 	function loadFromDir(dir) {
@@ -2662,12 +3012,14 @@
 	// flags is where a frequently-typed argument earns a chip.
 	var LAUNCH_LOCKED = { effort: true, mode: true };
 
+	// An empty label means the section heading and gloss already introduce the
+	// field, so its own label and help text are left out.
 	function launchField(key, label, host, render) {
 		var c = lcfg(key);
 		var wrap = node("div", "field");
-		wrap.appendChild(node("div", "lab", label));
+		if (label) wrap.appendChild(node("div", "lab", label));
 		if (EDIT && LAUNCH_LOCKED[key]) {
-			wrap.appendChild(node("p", "help", "Fixed by the CLI — these are the only values it accepts."));
+			wrap.appendChild(node("p", "help", "Fixed by the CLI: these are the only values it accepts."));
 			wrap.appendChild(pickBox(listOpts(c), function () { return false; }, true, function () {}));
 		} else if (EDIT) {
 			fieldSettings(c, wrap, onLaunchChange, key === "extra");
@@ -2676,7 +3028,7 @@
 				editableChips(c, null, "launch." + key, wrap, onLaunchChange);
 			}
 		} else {
-			if (c.help) wrap.appendChild(node("p", "help", c.help));
+			if (c.help && label) wrap.appendChild(node("p", "help", c.help));
 			render(c, wrap);
 		}
 		host.appendChild(wrap);
@@ -2692,39 +3044,41 @@
 		stage.innerHTML = "";
 		var status = node("span", "status");
 
-		stage.appendChild(headed("Presets", EDIT ? "editing" : "one line, copy and run"));
+		var KICK = "Adds to the command";
+
+		stage.appendChild(headed("Presets", EDIT ? "editing" : "one click, copy, run"));
 		stage.appendChild(node("p", "gloss", EDIT
 			? "A preset is a name and the flags it stands for. The key is the button; the value is everything after \"claude\"."
-			: lcfg("presets").help || ""));
-		launchField("presets", "Presets", stage, function (c, wrap) {
+			: lcfg("presets").help || "Whole commands you use often."));
+		launchField("presets", EDIT ? "Presets" : "", stage, function (c, wrap) {
 			wrap.appendChild(pickBox(listOpts(c),
 				function (k) { return LAUNCH.preset === k; }, false,
 				function (k, on) {
 					LAUNCH.preset = on ? k : "";
 					if (on) { LAUNCH.model = LAUNCH.effort = LAUNCH.mode = ""; LAUNCH.flags = []; }
 					drawLaunch(); refresh();
-				}));
+				}, KICK));
 		});
 
 		stage.appendChild(headed("Manual", EDIT ? "" : (LAUNCH.preset ? "a preset is active" : "")));
 		if (!EDIT) {
 			stage.appendChild(node("p", "gloss", LAUNCH.preset
-				? "Picking anything here clears the preset."
-				: "Assembled left to right in the order below."));
+				? "Build the command flag by flag instead. Picking anything here replaces the preset."
+				: "Build the command flag by flag. Each pick is added in the order shown."));
 		}
 
 		[["model", "Model"], ["effort", "Effort"], ["mode", "Permission mode"]].forEach(function (spec) {
 			launchField(spec[0], spec[1], stage, function (c, wrap) {
 				wrap.appendChild(pickBox(listOpts(c),
 					function (k) { return LAUNCH[spec[0]] === k; }, false,
-					function (k, on) { LAUNCH.preset = ""; LAUNCH[spec[0]] = on ? k : ""; drawLaunch(); refresh(); }));
+					function (k, on) { LAUNCH.preset = ""; LAUNCH[spec[0]] = on ? k : ""; drawLaunch(); refresh(); }, KICK));
 			});
 		});
 
 		launchField("flags", "Flags", stage, function (c, wrap) {
 			wrap.appendChild(pickBox(listOpts(c),
 				function (k) { return LAUNCH.flags.indexOf(k) !== -1; }, true,
-				function (k, on) { LAUNCH.preset = ""; LAUNCH.flags = toggleIn(LAUNCH.flags, k, on); drawLaunch(); refresh(); }));
+				function (k, on) { LAUNCH.preset = ""; LAUNCH.flags = toggleIn(LAUNCH.flags, k, on); drawLaunch(); refresh(); }, KICK));
 		});
 
 		launchField("extra", "Extra arguments", stage, function (c, wrap) {
@@ -2736,12 +3090,12 @@
 			return;
 		}
 
+		var dir = settings().sessionDir || "~/.claude/projects/";
 		stage.appendChild(headed("Resume", sessionNote));
-		stage.appendChild(node("p", "gloss", CAN_DIR
-			? "Point this at a project folder under " + (settings().sessionDir || "~/.claude/projects/") +
-			  ". The folder is remembered, so you only choose it once."
-			: "Point this at a project folder under " + (settings().sessionDir || "~/.claude/projects/") +
-			  ". This browser cannot remember the folder, so it needs choosing after every reload."));
+		stage.appendChild(node("p", "gloss", (CAN_DIR
+			? "Choose a project folder under " + dir + " to list its sessions, newest first. The folder is remembered, so you choose it once."
+			: "Choose a project folder under " + dir + " to list its sessions, newest first. This browser cannot remember the folder, so choose it again after a reload.")
+			+ " Picking a session adds --resume with its id to the command."));
 
 		var pickRow = node("div", "btnrow");
 		function after(msg) { return function () { drawLaunch(); refresh(); if (msg) notify(msg); }; }
@@ -2805,11 +3159,11 @@
 
 	function drawRecipes() {
 		stage.innerHTML = "";
-		var all = TEXTS.recipes || [];
+		var all = TEXTS.recipes || (TEXTS.recipes = []);
 		stage.appendChild(headed("Recipes", EDIT ? "editing" : RECIPES.length + " of " + all.length + " on"));
 		stage.appendChild(node("p", "gloss", EDIT
-			? "Name, position and body are editable. Recipes are stored separately from the loadout, so swapping loadouts leaves them alone."
-			: "Read-only blocks that join the prompt verbatim at the position they declare."));
+			? "Name, position and body are editable. Recipes are stored apart from the loadout, so swapping loadouts leaves them alone."
+			: "Reusable blocks that join the prompt verbatim, before or after the builders. Switch one on to include it."));
 
 		var cards = node("div", "cards");
 		all.forEach(function (r, i) {
@@ -2863,9 +3217,9 @@
 				drawRecipes();
 			}));
 			stage.appendChild(node("p", "gloss",
-				"Recipes are written by Save alongside the loadout — both blocks go into the file in one pass."));
+				"Save in Utilities writes recipes into the file alongside the loadout."));
 		} else if (!all.length) {
-			stage.appendChild(node("p", "emptynote", "No recipes. Turn on Edit to add one."));
+			stage.appendChild(node("p", "emptynote", "No recipes yet. Turn on Edit to add one."));
 		}
 	}
 
@@ -2890,14 +3244,14 @@
 		});
 		stage.appendChild(caps);
 		stage.appendChild(node("p", "gloss", (CAN_PICK && CAN_DIR)
-			? "Everything available. Buttons that need disk access are shown."
-			: "Some capabilities are missing here, so the buttons that need them are hidden and export or import does the same job."));
+			? "Everything is available, including saving into this file and remembering folders."
+			: "Some capabilities are missing, so the buttons that need them are hidden. Export and import cover the same ground."));
 
 		// ---- settings ----
 		stage.appendChild(headed("Settings"));
-		stage.appendChild(node("p", "gloss", "Project path is substituted wherever {{path}} appears in a recipe or utility. The prompt folder is where Write to file puts prompts — it has to be picked, because a typed path carries no permission."));
 		var f1 = node("div", "field");
-		f1.appendChild(node("div", "lab", "Project path"));
+		f1.appendChild(node("div", "lab", "Path to this file"));
+		f1.appendChild(node("p", "help", "The absolute path of this page on disk. It replaces {{path}} in recipes and utilities, so an agent can find the file."));
 		f1.appendChild(textInput(settings().projectPath, "/Users/you/Projects/thing/prompt-builder.html", function (v) {
 			settings().projectPath = v; persist(); refresh();
 		}, true));
@@ -2906,6 +3260,7 @@
 		if (CAN_DIR) {
 			var f2 = node("div", "field");
 			f2.appendChild(node("div", "lab", "Prompt folder"));
+			f2.appendChild(node("p", "help", "Where Write to file saves prompts. It is picked rather than typed, because a typed path carries no permission."));
 			var r2 = node("div", "btnrow");
 			r2.appendChild(btn("ghost", HANDLES.prompts ? "Change folder" : "Choose folder", function () {
 				window.showDirectoryPicker({ mode: "readwrite" }).then(function (dir) {
@@ -2926,9 +3281,10 @@
 		// ---- builders ----
 		stage.appendChild(headed("Builders", shown().length + " of " + BUILDERS.length + " on"));
 		stage.appendChild(node("p", "gloss",
-			"Order is the order they reach the agent — independent of where their tiles sit. Switching one off removes its tile and keeps its place in the order. Drag, or focus a row and press Alt with the arrow keys. Saved with the loadout."));
+			"This order is the order sections appear in the prompt, independent of where the tiles sit. Switching a builder off hides its tile and keeps its place. Drag a row, or focus it and press Alt with the arrow keys. Saved with the loadout."));
 		var list = ordered();
 		orderedList(list, stage, {
+			compact: true,
 			label: function (b) { return b.title; },
 			number: function (b) { return visibleOf(b.id) ? pad(positionOf(b)) : "—"; },
 			isOn: function (b) { return visibleOf(b.id); },
@@ -2941,35 +3297,69 @@
 			}
 		});
 
-		// ---- utilities ----
-		var all = TEXTS.utilities || [];
-		stage.appendChild(headed("Utilities", all.length + " available"));
-		stage.appendChild(node("p", "gloss", "Whole prompts that stand alone. Choosing one puts it in the panel instead of your built prompt — nothing you have filled in is lost."));
+		// ---- utility prompts ----
+		var all = TEXTS.utilities || (TEXTS.utilities = []);
+		stage.appendChild(headed("Utility prompts", EDIT ? "editing" : all.length + " available"));
+		stage.appendChild(node("p", "gloss", EDIT
+			? "Standalone prompts for maintaining this tool. Stored with the recipes, so Save writes them into the file together."
+			: "Standalone prompts for maintaining this tool. Showing one puts it in the panel in place of the built prompt; nothing you have filled in is lost."));
 		var cards = node("div", "cards");
 		all.forEach(function (u, i) {
 			var on = activeUtility === i;
-			var card = node("div", "card" + (on ? " on" : ""));
+			var card = node("div", "card" + (on && !EDIT ? " on" : ""));
 			var top = node("div", "card-top");
-			top.appendChild(node("h3", null, u.name));
-			top.appendChild(node("span", "spacer"));
-			top.appendChild(btn(on ? "ghost tiny" : "quiet tiny", on ? "Showing" : "Show", function () {
-				activeUtility = on ? -1 : i;
-				drawUtilities(); refresh();
-			}));
-			card.appendChild(top);
-			card.appendChild(slotted(fillSlots(u.text), node("div", "body")));
+			if (EDIT) {
+				var n = textInput(u.name, "Utility name", function (v) { u.name = v; persist(); });
+				n.style.maxWidth = "300px";
+				top.appendChild(n);
+				top.appendChild(node("span", "spacer"));
+				top.appendChild(btn("amber ghost tiny", "Delete", function () {
+					if (!confirm('Delete the utility "' + u.name + '"?')) return;
+					all.splice(i, 1);
+					activeUtility = -1;
+					persist();
+					drawUtilities(); refresh();
+				}));
+				card.appendChild(top);
+				var ta = document.createElement("textarea");
+				ta.value = u.text;
+				// No redraw on input — the card must survive typing.
+				ta.addEventListener("input", function () { u.text = ta.value; persist(); refresh(); });
+				card.appendChild(ta);
+			} else {
+				top.appendChild(node("h3", null, u.name));
+				top.appendChild(node("span", "spacer"));
+				top.appendChild(btn(on ? "ghost tiny" : "quiet tiny", on ? "Showing" : "Show", function () {
+					activeUtility = on ? -1 : i;
+					drawUtilities(); refresh();
+				}));
+				card.appendChild(top);
+				card.appendChild(slotted(fillSlots(u.text), node("div", "body")));
+			}
 			cards.appendChild(card);
 		});
 		stage.appendChild(cards);
+		if (EDIT) {
+			var addU = btn("quiet", "+ Add utility", function () {
+				all.push({ name: "New utility", text: "" });
+				persist();
+				drawUtilities();
+			});
+			addU.style.marginTop = "12px";
+			stage.appendChild(addU);
+		} else if (!all.length) {
+			stage.appendChild(node("p", "emptynote", "No utility prompts yet. Turn on Edit to add one."));
+		}
 
 		// ---- loadout ----
-		stage.appendChild(headed("Loadout", unsaved() ? "unsaved changes" : "saved"));
+		stage.appendChild(headed("Loadout", unsaved() ? "differs from the file" : "matches the file"));
 		stage.appendChild(node("p", "gloss",
-			"A loadout is the whole tool — every builder, its order and visibility, and every option. Import replaces the lot, so a file has to carry all " +
+			"A loadout is everything the builders offer: options, help text, agent instructions, order and visibility, plus the launch options. Import replaces all of it, so a file must carry all " +
 			BUILDERS.length + " builders complete."));
 
 		var metaRow = node("div", "field");
 		metaRow.appendChild(node("div", "lab", "Loadout name"));
+		metaRow.appendChild(node("p", "help", "Shown in the masthead and used to name the exported file."));
 		metaRow.appendChild(textInput((LOAD.meta || {}).name, "Default", function (v) {
 			if (!LOAD.meta) LOAD.meta = {};
 			LOAD.meta.name = v;
@@ -2999,7 +3389,7 @@
 						if (e && e.name !== "AbortError") flash(status, e.message || "Could not bind that file.", true);
 					});
 				}));
-				saveRow.appendChild(node("span", "status", "choose this page's own .html file"));
+				saveRow.appendChild(node("span", "status", "pick this page's own .html file; Save then writes into it"));
 			}
 			stage.appendChild(saveRow);
 		}
@@ -3027,17 +3417,17 @@
 			notify("Loaded " + ((LOAD.meta || {}).name || name) + " — everything replaced.");
 		}, function () { flash(status, "Could not read that file.", true); });
 		row.appendChild(btn("ghost", "Import loadout", function () { lf.click(); }));
-		row.appendChild(btn("quiet", "Reset to built-in", function () {
-			if (!confirm("Discard this loadout and its recipes, and return to the built-in ones?")) return;
-			dropStore(KEY_LOAD);
-			dropStore(KEY_TEXTS);
+		var reset = btn("quiet", "Reset to file", function () {
+			if (!confirm("Discard the loadout and recipes held in this browser, and go back to the ones in the file?")) return;
+			dropOverlay();
 			LOAD = clone(DEFAULTS);
 			TEXTS = clone(TEXT_DEF);
-			markSaved();
 			resetPrompt();
 			route();
-			notify("Back to the built-in loadout.");
-		}));
+			notify("Back to the loadout in the file.");
+		});
+		reset.dataset.tip = "Drops changes held in this browser and reloads the loadout and recipes written in the file.";
+		row.appendChild(reset);
 		row.appendChild(lf);
 		stage.appendChild(row);
 		status.style.marginTop = "12px";
@@ -3047,13 +3437,13 @@
 		function askThenSave(statusEl) {
 			saveSlot.innerHTML = "";
 			var d = node("div", "dialog");
-			d.appendChild(node("h5", null, "This rewrites two blocks inside " + HANDLES.self.name));
+			d.appendChild(node("h5", null, "Write into " + HANDLES.self.name + "?"));
 			var p = node("p");
-			p.appendChild(document.createTextNode("The "));
+			p.appendChild(document.createTextNode("Two blocks are replaced: "));
 			p.appendChild(node("code", null, 'id="loadout"'));
-			p.appendChild(document.createTextNode(" and "));
+			p.appendChild(document.createTextNode(" (builders and options) and "));
 			p.appendChild(node("code", null, 'id="text-db"'));
-			p.appendChild(document.createTextNode(" blocks are replaced — builders and options in the first, recipes and utilities in the second. Nothing else in the file is touched. Export a copy first if you want one."));
+			p.appendChild(document.createTextNode(" (recipes and utilities). Nothing else in the file changes. Export a copy first if you want one."));
 			d.appendChild(p);
 			var r = node("div", "btnrow");
 			r.appendChild(btn("amber tiny", "Write it", function () {
@@ -3165,7 +3555,7 @@
 
 	function setEdit(on) {
 		if (on && !EDIT) {
-			if (anyFilled() && !confirm("Edit will reset current builders.")) return;
+			if (anyFilled() && !confirm("Entering Edit clears everything filled in so far. Continue?")) return;
 			resetPrompt();
 		}
 		EDIT = on;
@@ -3222,15 +3612,56 @@
 		var root = document.documentElement;
 		var now = root.getAttribute("data-theme");
 		var dark = now ? now === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-		root.setAttribute("data-theme", dark ? "light" : "dark");
+		var next = dark ? "light" : "dark";
+		root.setAttribute("data-theme", next);
+		try { localStorage.setItem(KEY_THEME, next); } catch (e) { /* not remembered */ }
 	});
 
+	var help = document.getElementById("help");
+	document.getElementById("helpBtn").addEventListener("click", function () { help.showModal(); });
+	document.getElementById("helpClose").addEventListener("click", function () { help.close(); });
+	help.addEventListener("click", function (e) { if (e.target === help) help.close(); });
+
 	document.addEventListener("keydown", function (e) {
-		if (e.key === "Escape" && currentBuilder) location.hash = "#/build";
+		if (e.key === "Escape" && currentBuilder && !help.open) location.hash = "#/build";
 	});
+
+	// One shared tooltip for every [data-tip]; data-tipk adds a kicker line.
+	// Sits below the element, or above it when there is no room below.
+	var tip = node("div", "tip"), tipFor = null;
+	tip.hidden = true;
+	document.body.appendChild(tip);
+	function showTip(el) {
+		var text = el.dataset.tip;
+		if (!text) return;
+		tipFor = el;
+		tip.innerHTML = "";
+		if (el.dataset.tipk) tip.appendChild(node("span", "tip-k", el.dataset.tipk));
+		tip.appendChild(document.createTextNode(text));
+		tip.hidden = false;
+		var r = el.getBoundingClientRect();
+		var w = tip.offsetWidth, h = tip.offsetHeight;
+		var left = Math.min(Math.max(8, r.left + r.width / 2 - w / 2), window.innerWidth - w - 8);
+		var top = r.bottom + 8;
+		if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 8);
+		tip.style.left = left + "px";
+		tip.style.top = top + "px";
+	}
+	function hideTip() { tip.hidden = true; tipFor = null; }
+	// A redraw can remove the element under the pointer without a mouseout.
+	function dropStaleTip() { if (tipFor && !document.body.contains(tipFor)) hideTip(); }
+	window.addEventListener("hashchange", hideTip);
+	function tipTarget(e) { return e.target && e.target.closest ? e.target.closest("[data-tip]") : null; }
+	document.addEventListener("mouseover", function (e) { var el = tipTarget(e); if (el) showTip(el); });
+	document.addEventListener("mouseout", function (e) { var el = tipTarget(e); if (el && !el.contains(e.relatedTarget)) hideTip(); });
+	document.addEventListener("focusin", function (e) { var el = tipTarget(e); if (el) showTip(el); });
+	document.addEventListener("focusout", hideTip);
+	document.addEventListener("click", hideTip);
+	window.addEventListener("scroll", hideTip, true);
 
 	window.addEventListener("hashchange", route);
 	route();
+	if (startupNote) notify(startupNote, false, 0);
 
 	// Restore remembered handles. Sessions reload on their own only when the
 	// grant already stands, so a cold start never opens a dialog unasked.
