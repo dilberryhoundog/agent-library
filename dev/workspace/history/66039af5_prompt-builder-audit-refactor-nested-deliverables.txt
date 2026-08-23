@@ -1,0 +1,1344 @@
+Session: 66039af5-ca10-4a46-af14-d8db39471f89
+Date: 2026-08-23 04:01
+Branch: artifacts
+CWD: ~/Projects/agent-library
+
+============================================================
+[SUMMARY]
+>>>
+Audited and refactored the local Prompt Builder page (extensions/artifacts/prompt-builder/prompt-builder.html) to v1.1: plain-language prose throughout, help text on every field, a Help dialog, a shared tooltip system showing what rich options send to the agent, mixed-case option chips, row-per-group Process palette, persisted theme, and utility prompts editable in place.
+Bugs fixed: the option editor lost key/value edits depending on typing order; reference bullets backticked the label instead of the path; rich option values were ignored for architecture lists and verification gates; the localStorage overlay hid file edits made by the "Update this tool" prompt (now fingerprinted against the file, with the file winning on reload); a NUL byte in the source made grep treat the file as binary; "</" inside saved JSON could truncate the script block; presets used an invalid `--effort ultracode` (corrected to the real `--ultracode` flag, which is absent from `claude --help` but documented).
+Skill and agent options now emit exact `plugin:skill` / `plugin:agent` identifiers, and the Update utility refreshes both lists. Output deliverables became a grouped multi-select, and a standalone demo (dev/workspace/reviews/process-nesting-demo.html) settled the design for long agent runs: Process imports the deliverables picked in Output as placeable items that nest under the stage producing them, emitted as "- Deliverable: X" beneath the numbered stage; Output keeps the full set under the instruction "Check `Process` for when to stage deliverables, otherwise choose an appropriate stage."
+Verified in Chromium via Playwright over a localhost server (Playwright blocks file:), zero console errors. Committed as 9783d2d (tool) and f729137 (workspace files); not pushed.
+<<<
+------------------------------------------------------------
+
+[USER]    💭: none
+## Task
+Audit and refactor a local html file for building agent promts.
+
+## Context
+**Read first**
+- `extensions/artifacts/prompt-builder/prompt-builder.html` — The core prompt builder webpage.
+
+## Goals
+- User facing prose to be universal, helpful, concise and clear. As a modern web page would.
+- Arranged layout, with good proportions and spacing.
+- Comprehensive help text and popups
+- Prompt outputs concise and instructive for the agent.
+- Bug free and functions working optimally.
+
+## References
+- `build conversation` — dev/workspace/history/ea347861_prompt-builder-design-and-build.txt
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Starting by reading the prompt builder HTML and the build conversation for context.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: wc -l extensions/artifacts/prompt-builder/prompt-builder.html dev/workspace/history/ea347861_prompt-builder-design-and-build.txt && git diff --stat && ls -la extensions/artifacts/prompt-builder/ dev/workspace/filebox/ dev/workspace/plans/ dev/workspace/reviews/
+Description: Get line counts, diff stat, list workspace dirs
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git status --short; git diff --stat; sed -n '1,400p' extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Show git status and first 400 lines of prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '400,1100p' extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Read lines 400-1100 of prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '1100,1800p' extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Read lines 1100-1800 of prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '1800,2500p' extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Read lines 1800-2500 of prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '2500,3254p' extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Read lines 2500-3254 of prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '1,120p' dev/workspace/history/ea347861_prompt-builder-design-and-build.txt; echo ----; git log --oneline -8 -- extensions/artifacts/prompt-builder/prompt-builder.html; cat dev/workspace/WORKSPACE.md; cat dev/workspace/filebox/README.txt
+Description: Read history summary, git log for file, WORKSPACE.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '1,420p' ~/.claude/projects/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/tool-results/bhg3gcoyd.txt
+Description: Read first half of persisted output (lines 2500-2920 of html)
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '420,800p' ~/.claude/projects/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/tool-results/bhg3gcoyd.txt
+Description: Read second half of persisted output (lines 2920-3254 of html)
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n '^\[USER\]' dev/workspace/history/ea347861_prompt-builder-design-and-build.txt | head -80
+Description: List user turns in the build conversation
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: awk '/^\[USER\]/{p=1} /^------------------------------------------------------------$/{if(p){print "=========="}; p=0} p' dev/workspace/history/ea347861_prompt-builder-design-and-build.txt | sed -n '1,400p'
+Description: Print all user turns from the build conversation (part 1)
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: awk '/^\[USER\]/{p=1} /^------------------------------------------------------------$/{if(p){print "=========="}; p=0} p' dev/workspace/history/ea347861_prompt-builder-design-and-build.txt | sed -n '400,900p'
+Description: Print all user turns from the build conversation (part 2)
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git show 5473972 --stat; git show 5473972 | head -300
+Description: Show the most recent commit diff on the file
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Full read done. Now verifying CLI flags the Launch tab emits, the transcript format the Resume list parses, and loading Playwright for a live run.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: claude --help 2>&1 | grep -iE -- '--(model|effort|permission-mode|continue|fork-session|worktree|background|safe-mode|bare|verbose|ide|chrome|resume|add-dir)\b' | head -40; echo "=== effort/mode detail ==="; claude --help 2>&1 | grep -iE -A3 -- '--effort|--permission-mode' | head -30
+Description: Check claude CLI flags and accepted values
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/.claude/projects/-Users-dylangraham-Projects-agent-library/ && ls -t *.jsonl | head -3; f=$(ls -t *.jsonl | head -1); echo "--- first user lines of $f ---"; grep -m3 '"type":"user"' "$f" | cut -c1-400; echo; echo "--- promptId present? ---"; grep -c promptId "$f"; grep -m1 -o '"promptId":"[^"]*"' "$f"
+Description: Inspect a real session transcript for user record shape
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cat extensions/rules/code-comments.md; echo ======; cat extensions/rules/STYLE.md | head -80
+Description: Read house rules for code comments and style
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Playwright blocks `file:`; serving the repo over localhost instead.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 -m http.server 8765 --bind 127.0.0.1 --directory ~/Projects/agent-library
+Description: Serve repo on localhost:8765 for Playwright
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '1,80p' extensions/rules/STYLE.md
+Description: Read STYLE.md house rule
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: find / -name 'pb-01-dashboard.png' -not -path '*/Library/*' 2>/dev/null | head; ls -d .playwright-mcp 2>/dev/null
+Description: Locate Playwright screenshot output directory
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: for d in . "$HOME" "$HOME/Projects" /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89 /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad; do [ -d "$d/.playwright-mcp" ] && echo "FOUND: $d/.playwright-mcp" && ls -la "$d/.playwright-mcp" | head; done; echo done
+Description: Find the .playwright-mcp output dir in likely locations
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: find "$HOME" -maxdepth 5 -name 'pb-0*.png' -newer extensions/artifacts/prompt-builder/prompt-builder.html 2>/dev/null | head; echo "--- gitignore check ---"; git check-ignore -v .playwright-mcp || echo "NOT ignored"
+Description: Find screenshot PNGs and check .playwright-mcp ignore status
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Screenshots captured; reviewing them now.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/pb-01-dashboard.png
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/pb-02-architecture.png
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: mv ~/Projects/agent-library/pb-0*.png ~/Projects/agent-library/.playwright-mcp/ 2>/dev/null; ls ~/Projects/agent-library/.playwright-mcp/
+Description: Move screenshots out of repo root into .playwright-mcp
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-03-process.png
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-04-launch.png
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Reviewing Utilities, then capturing Edit mode on a builder page.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-05-utilities.png
+
+------------------------------------------------------------
+
+[USER]    💭: none
+[Image: original 1440x2814, displayed at 1023x2000. Multiply coordinates by 1.41 to map to original image.]
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-06-edit.png
+
+------------------------------------------------------------
+
+[USER]    💭: none
+[Image: original 1440x2150, displayed at 1340x2000. Multiply coordinates by 1.07 to map to original image.]
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/rewrite_data.py
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/rewrite_data.py && git diff --stat && wc -l extensions/artifacts/prompt-builder/prompt-builder.html && grep -n 'id="loadout"\|id="text-db"\|^<style>\|^</style>\|^<script>$\|^</script>$\|^<div class="shell">' extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Apply JSON block rewrite and report new landmarks
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Reading the file in chunks so I can make targeted edits.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Applying the edits in batches, starting with the head and CSS.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+CSS done. Now the HTML body prose, help dialog, and the first JS blocks.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n 'spliceBlock(src, MARK_LOAD' extensions/artifacts/prompt-builder/prompt-builder.html; n=$(grep -n 'spliceBlock(src, MARK_LOAD' extensions/artifacts/prompt-builder/prompt-builder.html | cut -d: -f1); sed -n "$((n-3)),$((n+12))p" extensions/artifacts/prompt-builder/prompt-builder.html | cat -A | cut -c1-110
+Description: Show exact whitespace around saveAll splice lines
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n -F 'MARK_LOAD, JSON' extensions/artifacts/prompt-builder/prompt-builder.html; grep -n -F 'var savedMark' extensions/artifacts/prompt-builder/prompt-builder.html; n=$(grep -n -F 'MARK_LOAD, JSON' extensions/artifacts/prompt-builder/prompt-builder.html | cut -d: -f1); sed -n "${n},$((n+11))l" extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Locate saveAll splice lines and show them with visible tabs
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: awk '/function saveAll\(\)/{f=1} f{printf "%d: %s\n", NR, $0} /function markSaved/{f=0}' extensions/artifacts/prompt-builder/prompt-builder.html | sed 's/\t/→/g'
+Description: Print the saveAll region with tabs made visible
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '1823p;1831p' extensions/artifacts/prompt-builder/prompt-builder.html | od -c | head -30
+Description: Hexdump the two suspicious lines to find hidden characters
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 - <<'EOF'
+import re
+p = "extensions/artifacts/prompt-builder/prompt-builder.html"
+s = open(p, encoding="utf-8").read()
+
+old_save = '''\t\t\tvar next = spliceBlock(src, MARK_LOAD, JSON.stringify(LOAD, null, 2), "loadout");
+\t\t\tnext = spliceBlock(next, MARK_TEXTS, JSON.stringify(TEXTS, null, 2), "text-db");
+'''
+new_save = '''\t\t\tvar next = spliceBlock(src, MARK_LOAD, blockJson(LOAD), "loadout");
+\t\t\tnext = spliceBlock(next, MARK_TEXTS, blockJson(TEXTS), "text-db");
+'''
+assert s.count(old_save) == 1
+s = s.replace(old_save, new_save)
+
+pat = re.compile(
+    r'\tfunction stateMark\(\)  \{ return JSON\.stringify\(LOAD\) \+ ".?" \+ JSON\.stringify\(TEXTS\); \}\n'
+    r'\tvar savedMark = stateMark\(\);\n'
+    r'\tfunction unsaved\(\)   \{ return stateMark\(\) !== savedMark; \}\n'
+    r'\tfunction markSaved\(\) \{ savedMark = stateMark\(\); \}\n', re.S)
+assert len(pat.findall(s)) == 1, pat.findall(s)
+new_mark = '''\t// A literal "</" inside a string would end the script block early when the
+\t// page next loads; JSON accepts the escaped slash, so it is written that way.
+\tfunction blockJson(obj) { return JSON.stringify(obj, null, 2).replace(/<\\//g, "<\\\\/"); }
+
+\t// "Saved" means the file's blocks match what is in use. After a save the
+\t// file holds the current state, so that state becomes the new baseline.
+\tfunction stateMark() { return JSON.stringify(LOAD) + "\\n" + JSON.stringify(TEXTS); }
+\tfunction fileMark()  { return JSON.stringify(DEFAULTS) + "\\n" + JSON.stringify(TEXT_DEF); }
+\tfunction unsaved()   { return stateMark() !== fileMark(); }
+\tfunction markSaved() { DEFAULTS = clone(LOAD); TEXT_DEF = clone(TEXTS); persist(); }
+'''
+s = pat.sub(lambda m: new_mark, s)
+open(p, "w", encoding="utf-8").write(s)
+
+bad = [(i+1, repr(ch)) for i, line in enumerate(s.split("\n")) for ch in line if ord(ch) < 32 and ch != "\t"]
+print("control chars left:", bad[:10])
+print("ok")
+EOF
+grep -n -F 'function blockJson' extensions/artifacts/prompt-builder/prompt-builder.html; grep -n -F 'function stateMark' extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Patch saveAll and stateMark block, replacing the NUL separator
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Patched. Now checking JS syntax and reloading the page in Playwright.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 - <<'EOF'
+import re
+s = open("extensions/artifacts/prompt-builder/prompt-builder.html", encoding="utf-8").read()
+blocks = re.findall(r'<script>(.*?)</script>', s, re.S)
+print("plain script blocks:", len(blocks))
+for i, b in enumerate(blocks):
+    open(f"/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/script{i}.js", "w").write(b)
+EOF
+which node && for f in /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/script*.js; do node --check "$f" && echo "OK $f"; done; wc -l extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Extract script blocks and syntax-check them with node
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-11-dashboard.png
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Browser served a cached copy of the old page; reloading with a cache-buster.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-12-dashboard.png
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Dashboard prose and layout are in. Running a scripted fill across builders to verify the prompt output.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-13-edit.png
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-13-edit.png
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Edit mode renders well; the edit bar button wraps at this width, so I'll let the text flex. Now checking the overlay survived the reload and the "differs from the file" indicator.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-14-utilities.png
+
+------------------------------------------------------------
+
+[USER]    💭: none
+[Image: original 1440x2710, displayed at 1063x2000. Multiply coordinates by 1.35 to map to original image.]
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Overlay logic works both ways so far. Now verifying the discard path, the Launch tab, recipes, and tooltips in one scripted pass.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Discard path works, but the startup notice had expired before I checked — making that notice persistent. Then screenshots of Launch, Process, Help and dark theme.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-15-launch.png
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-16-help.png
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Checking the dark-mode Process page and the tooltip rendering.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-17-process-dark.png
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-18-tooltip.png
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-19-narrow.png
+
+------------------------------------------------------------
+
+[USER]    💭: none
+[Image: original 900x2193, displayed at 821x2000. Multiply coordinates by 1.10 to map to original image.]
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git diff --stat && grep -n -i -E 'sixteen|built-in loadout|"Session"|Reset to built-in|the agent also reads|explainer —|title = o\.value|one line, copy and run|projectPath' extensions/artifacts/prompt-builder/prompt-builder.html | head -20
+Description: Diff stat and grep for leftover old wording
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: node -e '
+function blockJson(obj) { return JSON.stringify(obj, null, 2).replace(/<\//g, "<\\/"); }
+var obj = { recipes: [{ name: "x", position: "last", text: "evil </script><b>hi</b> and a/b" }] };
+var out = blockJson(obj);
+console.log("contains raw </ :", /<\//.test(out));
+console.log("round trip equal:", JSON.stringify(JSON.parse(out)) === JSON.stringify(obj));
+' && python3 - <<'EOF'
+p = "dev/workspace/WORKSPACE.md"
+s = open(p, encoding="utf-8").read()
+marker = "- %% Claude: record discoveries here as you work %%"
+add = marker + """
+- 2026-08-23 prompt-builder: `claude --effort` accepts only low/medium/high/xhigh/max — no `ultracode` flag; ultracode is a prompt keyword, so it lives in the Execution builder's strategy options, not a launch preset.
+- 2026-08-23 prompt-builder: browser edits are an overlay on the file's JSON blocks, fingerprinted against the file (`prompt-builder.base` in localStorage). A file edited on disk (e.g. by the "Update this tool" prompt) wins on reload and the overlay is discarded with a notice.
+- 2026-08-23 prompt-builder: verify in a browser over http (Playwright blocks `file:`); `python3 -m http.server` from the repo root works, add a cache-busting query when reloading after edits."""
+assert marker in s
+s = s.replace(marker, add, 1)
+open(p, "w", encoding="utf-8").write(s)
+print("workspace updated")
+EOF
+Description: Sanity-check blockJson escaping and record discoveries in WORKSPACE.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/prompt-builder-authors-task-prompts.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/prompt-builder-authors-task-prompts.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: echo '- [Prompt builder authors task prompts](prompt-builder-authors-task-prompts.md) — ## Task/Context/Goals/References prompts come from extensions/artifacts/prompt-builder; each heading is one builder, skill/agent names are exact invocation ids' >> ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/MEMORY.md && tail -2 ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/MEMORY.md && python3 - <<'EOF'
+import re
+s = open("extensions/artifacts/prompt-builder/prompt-builder.html", encoding="utf-8").read()
+for i, b in enumerate(re.findall(r'<script>(.*?)</script>', s, re.S)):
+    open(f"/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/script{i}.js", "w").write(b)
+EOF
+for f in /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/script*.js; do node --check "$f" && echo "syntax OK $(basename $f)"; done
+Description: Index the memory and re-run the JS syntax check
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+All checks pass with zero console errors. Cleaning up the test server and Playwright artefacts.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: pkill -f "http.server 8765" ; rm -rf ~/Projects/agent-library/.playwright-mcp; sleep 1; git status --short; echo "---"; git diff --stat; echo "---"; grep -c 'data-tip' extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Stop local server, remove Playwright output dir, show final git state
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git status --short; echo "---"; git diff --stat; echo "---"; grep -c 'data-tip' extensions/artifacts/prompt-builder/prompt-builder.html; ls .playwright-mcp | wc -l
+Description: Show final git state and leftover Playwright files
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Done. Uncommitted, in working tree: `extensions/artifacts/prompt-builder/prompt-builder.html` (+609/−270) and 3 discovery lines in `dev/workspace/WORKSPACE.md`.
+
+**Bugs fixed**
+- Option editor lost edits: editing key then value (or reverse) wrote back a stale copy. Rewritten to read the entry live; chip label updates as you type; empty key on Close drops the option.
+- Browser overlay hid file edits forever: after "Update this tool" rewrote the JSON blocks, the page kept showing localStorage. Overlay now fingerprints the file blocks (`prompt-builder.base`); a changed file wins on reload, with a persistent notice.
+- "Saved" indicator compared against localStorage, not the file. Now "matches / differs from the file"; save rebaselines.
+- `--effort ultracode` presets (last commit) fail at the shell — CLI accepts low/medium/high/xhigh/max only. Removed; added an "Ultracode" strategy option in Execution (keyword goes in the prompt, where it actually works). `Fable ` trailing space / `fable smart` casing fixed.
+- References emitted label in backticks, not the path. Now `` - `path` — label ``.
+- Architecture language/framework/storage/infra and Verification gates ignored rich option values (used keys). Now emit values.
+- `stateMark` joined with a literal NUL byte — made `grep` treat the file as binary. Replaced.
+- `</` inside a saved recipe would have terminated the script block on reload; `blockJson` escapes it.
+- Launch: preset help text shown twice; duplicate "Presets" label. Fixed. Favicon 404 gone (inline SVG).
+- Prompt-file import with a non-object now errors cleanly.
+
+**Prose / help / popups**
+- Every field has help text; blurbs, glosses, masthead, edit bar, footer rewritten plain.
+- Help dialog (masthead button) covering all four tabs, Edit mode, loadouts, keyboard, privacy.
+- Shared tooltip system: rich options show "Sent to the agent as …" / "Adds to the command …"; tips on Edit/Theme/Help/Copy/Write/position chip/Reset. Hides on redraw/navigation.
+- Utility prompts now editable in Edit mode (name, body, add, delete) — recipes already were.
+- Theme choice persisted, applied before first paint.
+
+**Layout**
+- Option chips keep their case (`Next.js`, `localStorage`) instead of uppercase mono.
+- Process palette: one row per group (no orphan Ship column). Utilities builder list compact. Edit bar no longer wraps its button.
+
+**Prompt output**
+- Skills/agents emit exact ids (`dev-tools:versioning`, `chat-tools:doc-reviewer`); Skills gets an agent instruction; Execution explainer dropped; pattern sentences follow labelled lines; generic Goals/Criteria suggestions replace the dry-run-specific ones. "Update this tool" now refreshes both skills and agents in that format.
+
+**Verified** in Chromium via Playwright: fill → prompt, edit both orderings, overlay keep/discard, launch command, recipes, tooltips, help, dark theme, 900px layout, Clear all, Reset to file, Esc/Next. `node --check` clean, 0 console errors.
+
+**Notes**
+- `.playwright-mcp/` (untracked, repo root) is test output — delete with `rm -rf .playwright-mcp`. `rm -rf` was denied so I left it.
+- `prompt-builder.bak.html` appeared untracked alongside — not mine.
+- Loadout data changes (skill ids, presets, suggestions) are in the JSON block; reverting any is a one-line edit.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+can we do groups for the output deliverable?
+also `--ultracode` flag works i just tested manually. it is also mentioned here https://code.claude.com/docs/en/settings-reference#ultracode
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Checking the flag in the CLI help first, then I'll wire both changes.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: claude --help 2>&1 | grep -n -i -B1 -A2 'ultracode'
+Description: Check claude CLI help for the ultracode flag
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 - <<'EOF'
+import json
+PATH = "extensions/artifacts/prompt-builder/prompt-builder.html"
+src = open(PATH, encoding="utf-8").read()
+MARK = '<script type="application/json" id="loadout">'
+a = src.index(MARK) + len(MARK); b = src.index("</script>", a)
+load = json.loads(src[a:b])
+
+load["builders"]["output"]["fields"]["deliverable"]["options"] = {
+    "Code": ["Working code", "Patch / diff", "Single file", "Command to run"],
+    "Planning": ["Implementation plan", "Architecture proposal", "Research brief"],
+    "Review": ["Review", "Explanation"],
+    "Documents": ["Artifact", "Markdown document"],
+}
+load["builders"]["output"]["fields"]["deliverable"]["help"] = "What you want handed back. One pick across all groups."
+
+L = load["launch"]
+L["presets"]["options"] = [
+    {"key": "Sonnet", "value": "--model sonnet --effort high"},
+    {"key": "Opus", "value": "--model opus --effort high"},
+    {"key": "Opus smart", "value": "--model opus --effort max"},
+    {"key": "Fable", "value": "--model fable --effort high"},
+    {"key": "Fable smart", "value": "--model fable --effort max"},
+    {"key": "Opus Ultracode", "value": "--model opus --effort max --ultracode"},
+    {"key": "Fable Ultracode", "value": "--model fable --effort max --ultracode"},
+]
+flags = L["flags"]["options"]
+if not any(o.get("value") == "--ultracode" for o in flags if isinstance(o, dict)):
+    flags.insert(4, {"key": "Ultracode", "value": "--ultracode"})
+L["flags"]["help"] = "Each adds the flag shown. Safe mode needs Worktree; Fork session needs Continue or a resumed session; Ultracode turns on multi-agent workflows for the session."
+
+src = src[:a] + "\n" + json.dumps(load, indent=2, ensure_ascii=False) + "\n" + src[b:]
+open(PATH, "w", encoding="utf-8").write(src)
+json.loads(src[src.index(MARK)+len(MARK):src.index("</script>", src.index(MARK))])
+print("loadout ok")
+
+# fix the workspace discovery line
+W = "dev/workspace/WORKSPACE.md"
+w = open(W, encoding="utf-8").read()
+old = "- 2026-08-23 prompt-builder: `claude --effort` accepts only low/medium/high/xhigh/max — no `ultracode` flag; ultracode is a prompt keyword, so it lives in the Execution builder's strategy options, not a launch preset."
+new = "- 2026-08-23 prompt-builder: `claude --effort` accepts only low/medium/high/xhigh/max; ultracode is its own boolean flag `--ultracode` (absent from `claude --help`, documented at code.claude.com/docs/en/settings-reference#ultracode). Presets use it; `ultracode` is also a prompt keyword, kept as an Execution strategy option."
+assert old in w
+open(W, "w", encoding="utf-8").write(w.replace(old, new))
+print("workspace ok")
+EOF
+Description: Group deliverable options, restore ultracode presets and flag, fix workspace note
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 - <<'EOF'
+import re
+s = open("extensions/artifacts/prompt-builder/prompt-builder.html", encoding="utf-8").read()
+for i, b in enumerate(re.findall(r'<script>(.*?)</script>', s, re.S)):
+    open(f"/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/script{i}.js", "w").write(b)
+EOF
+for f in /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/script*.js; do node --check "$f" && echo "syntax OK $(basename $f)"; done
+Description: Syntax-check the page scripts after the grouped-single edits
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 -m http.server 8765 --bind 127.0.0.1 --directory ~/Projects/agent-library
+Description: Serve repo on localhost:8765 for Playwright verification
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Grouped single-pick works and the ultracode flag/presets compose correctly. Grabbing a screenshot of the grouped Output page and shutting the server down.
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/pb-20-output-groups.png
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git status --short; git diff --stat
+Description: Show final git state
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Both done; verified in the browser, zero console errors.
+
+**Deliverable groups**
+- New widget mode: `grouped` field with `single: true` — one pick across all groups, click again to clear. Used for Output → Deliverable.
+- Groups seeded (editable in Edit mode): Code (Working code, Patch / diff, Single file, Command to run) · Planning (Implementation plan, Architecture proposal, Research brief) · Review (Review, Explanation) · Documents (Artifact, Markdown document — the last one is new).
+- Prompt still emits `- Deliverable: <pick>`.
+
+**Ultracode**
+- I was wrong: `--ultracode` is a real boolean flag (just absent from `claude --help`). Restored presets as `Opus Ultracode` → `--model opus --effort max --ultracode` and `Fable Ultracode` → `--model fable --effort max --ultracode` (I paired them with max effort; drop `--effort max` if you'd rather not). Added an `Ultracode` chip under Flags, so manual builds compose e.g. `claude --model fable --ultracode`.
+- Kept the `Ultracode` strategy option in Execution — prompt-side keyword, still useful.
+- Corrected the WORKSPACE.md discovery note.
+
+Still uncommitted; `.playwright-mcp/` in the repo root is my test output (`rm -rf .playwright-mcp`), and `prompt-builder.bak.html` is yours.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+So this prompt builder has a usecase of building out long range prompts for use with large agent runs. My idea was that you could choose `execution` then chain up `process`, `architecture`, `skills` and `outputs`. this means output should be multi selectable. but is this understandable enough for a prompt like this? process will be bundled. outputs bundled. but not explicitly what output at what stage?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Assessment, no changes made.
+
+**Is the bundled form understandable?**
+Partly. For the chained run the agent would currently get:
+
+```
+## Output
+- Deliverables: Implementation plan, Working code, Review
+- Depth: Normal
+
+## Process
+Ordered. Finish each stage before starting the next, and stop at every gate.
+1. Investigate
+2. Tech Plan
+3. User Approval — stop, present the work, and wait for my explicit go before continuing
+4. Implement
+5. Code Review
+```
+
+A capable agent maps that by name (plan→Tech Plan, code→Implement, review→Code Review). It breaks exactly where it matters most:
+- **Approval gates** — nothing says which artefact must be on the table at stage 3. Agent may arrive with a sketch, or with code already written.
+- **Non-obvious pairs** — "Research brief" + "Artifact" across Research / Concept / Spike: which stage produces the artifact? Guess.
+- **Default agent behaviour** — with deliverables listed separately, agents tend to produce them all at the end, not as the run progresses. Same for Skills: "invoke when needed" is fine for self-describing skills, weak for the ones you want at a specific stage (e.g. `versioning` only at Ship).
+- Output (pos 10) is read before Process (pos 13) — fine, but it reinforces "these are end products".
+
+**Recommendation: bind at the stage, keep the bundles as the pools**
+- Each Process stage row gets two small pickers drawing from the existing option lists: *produces* (Output deliverable groups) and *uses* (Skills groups). Stored on the stage, emitted inline:
+  ```
+  2. Tech Plan → produces Implementation plan
+  3. User Approval — stop, present the work, and wait for my explicit go before continuing
+  4. Implement → produces Working code · uses dev-tools:git-box
+  5. Code Review → produces Review
+  ```
+  Unambiguous for the agent, including what the gate is gating.
+- Output builder becomes multi-select and means **what is handed back at the end of the run** + Depth; explainer says so. Stage-level outputs are the intermediates. Clean split, no overlap.
+- Skills builder stays the pool the agent may use; stage *uses* pins timing. Architecture needs nothing — it's global.
+- Cheap fallback if you'd rather not add UI: multi-select Output + an explainer "deliverables in the order they are due; each lands at the stage that produces it", and use the existing stage note field by convention ("→ implementation plan"). Works, but relies on you typing it every time.
+
+Moderate build (~150 lines: row pickers in `orderedList`, stage state, emission, import compat). Nothing lost for single-task prompts — stages without attachments emit as today.
+
+Questions:
+- Build the stage-binding version, or the cheap fallback?
+- Output multi-select = end-of-run deliverables only (my suggestion), or also allowed to duplicate stage outputs?
+- Emission wording: `→ produces X · uses Y`, or something terser?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+what about a new section to the process builder, that imports the deliverables onto the page. then you can "nest" them inside the process chain, exactly as they are written (- deliverable: Review). you can then also move them as per other stages? 
+is the duplication a problem? 
+can you build a demo for me, so I can see it operating.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Building a standalone demo (not touching the tool yet) so you can drive the interaction and compare the duplication renderings side by side.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/process-nesting-demo.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 - <<'EOF'
+import re
+s = open("dev/workspace/reviews/process-nesting-demo.html", encoding="utf-8").read()
+b = re.findall(r'<script>(.*?)</script>', s, re.S)
+open("/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/demo.js", "w").write(b[-1])
+EOF
+node --check /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/demo.js && echo "demo syntax OK"
+Description: Syntax-check the demo page script
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 -m http.server 8765 --bind 127.0.0.1 --directory ~/Projects/agent-library
+Description: Serve repo on localhost:8765 for the demo check
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/demo-01.png
+
+------------------------------------------------------------
+
+[USER]    💭: none
+[Image: original 1418x2323, displayed at 1221x2000. Multiply coordinates by 1.16 to map to original image.]
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Demo runs clean; two small fixes — the "no longer picked" row flag didn't refresh after unpicking in Output, and the counter wording. Patching, then re-verifying.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/process-nesting-demo.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/process-nesting-demo.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 - <<'EOF'
+import re
+s = open("dev/workspace/reviews/process-nesting-demo.html", encoding="utf-8").read()
+open("/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/demo.js", "w").write(re.findall(r'<script>(.*?)</script>', s, re.S)[-1])
+EOF
+node --check /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/demo.js && echo "demo syntax OK"
+Description: Re-check demo script syntax after the patch
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Unexpected row order after that move — isolating it with a clean reload and a single click.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n -i -E 'deliverable|tech plan|user approval|implement|code review' .playwright-mcp/page-2026-08-23T05-55-16-274Z.yml | head -40
+Description: Inspect the accessibility snapshot taken right after the v3 load
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/process-nesting-demo.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/process-nesting-demo.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Reproducing the vanishing-rows case: a row is now focused, navigating to a fresh load next.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Not reproduced with focus alone. Replaying the exact earlier sequence (unpick in Output, then move a row) with the instrumentation still live.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+whatcha doing dude? the demo was perfect. oh was this your playwrite i was messing with?
+"full set in output" is the way.
+also "Due by the end of the run unless Process places them at a stage." should be "Check `Process` for when to stage deliverables, otherwise choose an appropriate stage"
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Ha — yes, that was my Playwright window; mystery solved, no bug. Locking in "full set" and your wording, and building it into the tool now.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 - <<'EOF'
+import json
+PATH = "extensions/artifacts/prompt-builder/prompt-builder.html"
+src = open(PATH, encoding="utf-8").read()
+MARK = '<script type="application/json" id="loadout">'
+a = src.index(MARK) + len(MARK); b = src.index("</script>", a)
+load = json.loads(src[a:b])
+B = load["builders"]
+B["output"]["explain"] = "Check `Process` for when to stage deliverables, otherwise choose an appropriate stage."
+B["output"]["fields"]["deliverable"]["help"] = "What you want handed back. Pick everything the run should produce, then place each one at its stage in Process."
+B["process"]["fields"]["stages"]["help"] = "Click a stage to add it to the sequence. The Deliverables row holds what Output picked; place one to nest it under the stage that produces it. Drag to reorder, or focus a row and press Alt with the arrow keys. Stages can repeat."
+src = src[:a] + "\n" + json.dumps(load, indent=2, ensure_ascii=False) + "\n" + src[b:]
+open(PATH, "w", encoding="utf-8").write(src)
+print("loadout ok")
+EOF
+Description: Set Output explainer and help text in the loadout block
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/process-nesting-demo.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/process-nesting-demo.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/process-nesting-demo.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/process-nesting-demo.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: python3 - <<'EOF'
+import re
+S = "/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/"
+for name, path in (("tool", "extensions/artifacts/prompt-builder/prompt-builder.html"), ("demo", "dev/workspace/reviews/process-nesting-demo.html")):
+    s = open(path, encoding="utf-8").read()
+    for i, b in enumerate(re.findall(r'<script>(.*?)</script>', s, re.S)):
+        open(f"{S}{name}{i}.js", "w").write(b)
+EOF
+for f in /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/tool*.js /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/66039af5-ca10-4a46-af14-d8db39471f89/scratchpad/demo*.js; do node --check "$f" && echo "syntax OK $(basename $f)"; done
+Description: Syntax-check tool and demo scripts
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/tool-nesting.png
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git status --short; git diff --stat
+Description: Show final git state
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Built into the tool and verified; server and browser closed.
+
+**What changed in `prompt-builder.html`**
+- Output → Deliverables is multi-select (grouped). Emits `- Deliverables: A, B, C` (singular when one) plus Depth, under your agent instruction: *Check `Process` for when to stage deliverables, otherwise choose an appropriate stage.* (it's the Output builder's `explain`, editable in Edit mode).
+- Process gets a **Deliverables** row under the stage groups, listing whatever Output has picked. Click one to append it; it moves like any stage and nests under the stage above it. Emission, exactly as Output writes it:
+  ```
+  3. Implement
+     - Deliverable: Working code
+     - Deliverable: Review
+  4. Code Review
+  ```
+- Stage numbering skips deliverable rows (they show `↳`). Flags on a placed deliverable: "before the first stage" (emits top-level) and "no longer picked in Output" (row kept; you decide). "Place all unplaced" appears when more than one is still unplaced.
+- Help text, Help dialog and an older-prompt-file import shim updated.
+
+**Duplication verdict (full set)**: kept as chosen — Output is the set, Process is the schedule; consistent redundancy, and the explainer tells the agent how to read it.
+
+**Demo** (`dev/workspace/reviews/process-nesting-demo.html`) left in place with the instrumentation removed and your wording applied; delete when done. `.playwright-mcp/` in the repo root is still mine to delete (`rm -rf .playwright-mcp`). Nothing committed.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+commit this
+
+------------------------------------------------------------
+
+[USER]    💭: none
+commit this
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git add extensions/artifacts/prompt-builder/prompt-builder.html && git commit -F- <<'EOF'
+🛠 feat(prompt-builder): v1.1 — help, tooltips, nested deliverables, fixes
+
+- Output deliverables grouped and multi-select; Process imports them as
+  placeable items nested under the stage that produces each one
+- Help dialog, shared tooltips, help text on every field, plain prose
+- Launch: ultracode presets and flag, no duplicated help; chips keep case
+- Fix option editor losing key/value edits, reference path formatting,
+  rich values ignored in architecture and gates, browser overlay hiding
+  file edits, NUL byte in source, "</" in saved JSON, favicon 404
+- Theme persisted; utility prompts editable in place; Reset to file
+
+Claude-Session: https://claude.ai/code/session_01YXWwXXtRvAtLh24VoKEgsH
+EOF
+git log --oneline -1 && git status --short
+Description: Stage and commit prompt-builder.html only
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Tool change committed as `9783d2d`. Workspace files (WORKSPACE.md, demo) go through `dev-workspace commit` — checking what it would include first.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: dev-workspace commit --check 2>&1 | tail -20
+Description: Dry-run the workspace-files commit
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: dev-workspace commit 2>&1 | tail -8; git log --oneline -3; git status --short
+Description: Commit the workspace files via dev-workspace
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Committed, working tree clean.
+
+- `9783d2d` 🛠 feat(prompt-builder): v1.1 — help, tooltips, nested deliverables, fixes (`prompt-builder.html` only)
+- `f729137` 📝 Workspace files updated! — `WORKSPACE.md` discoveries + `reviews/process-nesting-demo.html` (via `dev-workspace commit`)
+
+Not pushed. `.playwright-mcp/` and the `.bak` file are gone from status, so nothing stray remains.
+
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/dev-workspace:conversation-capture unknown
+
+------------------------------------------------------------
