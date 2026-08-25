@@ -768,7 +768,7 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
       }
     },
     "context": {
-      "order": 3,
+      "order": 4,
       "visible": true,
       "explain": "",
       "fields": {
@@ -785,7 +785,7 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
       }
     },
     "goals": {
-      "order": 4,
+      "order": 3,
       "visible": true,
       "explain": "",
       "fields": {
@@ -813,7 +813,7 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
       }
     },
     "architecture": {
-      "order": 6,
+      "order": 9,
       "visible": true,
       "explain": "Prescriptive. Build with these rather than inferring a stack from the codebase.",
       "fields": {
@@ -925,7 +925,7 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
       }
     },
     "references": {
-      "order": 7,
+      "order": 6,
       "visible": true,
       "explain": "",
       "fields": {
@@ -937,7 +937,7 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
       }
     },
     "scope": {
-      "order": 8,
+      "order": 7,
       "visible": true,
       "explain": "",
       "fields": {
@@ -960,7 +960,7 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
       }
     },
     "constraints": {
-      "order": 9,
+      "order": 8,
       "visible": true,
       "explain": "",
       "fields": {
@@ -1584,6 +1584,10 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
     {
       "name": "Install fonts",
       "text": "Install the three fonts {{path}} uses, so it renders as designed opened from disk with no network.\n\nAll three are Open Font License: Source Serif 4 (body), Bitter (headings), JetBrains Mono (code).\n\n- Install them system-wide with the platform's package manager. On macOS: `brew install --cask font-source-serif-4 font-bitter font-jetbrains-mono`. Confirm each cask name exists before running, and correct any that does not.\n- Show me the command before you run it.\n- Change nothing in {{path}}. Its Google Fonts `<link>` stays as the online path, and its CSS already names these families, so an installed copy is picked up offline.\n- Afterwards, confirm all three families are present and name any that failed."
+    },
+    {
+      "name": "Name exported prompts",
+      "text": "Rename the raw prompt exports in `dev/workspace/prompts/prompt-builder` so each one reads like a session name.\n\nThis is mechanical string work — run it on the cheapest model available.\n\nOnly touch files still carrying the browser's export name: `prompt.json`, or `prompt (2).json` and the like. A file that already has a name is finished — leave it exactly as it is.\n\nFor each raw export:\n\n- Read the JSON. The prompt text is at `state.task.text`, or `state.problem.text` when task is empty. Older exports hold the state at the top level instead of under `state`.\n- Build a kebab-case slug from it the way you would name a working session: the subject and what is being done to it, three to six words. Not a summary of the whole prompt.\n- Prefix the file's own last-modified date as `YYYY-MM-DD`.\n- Result: `2026-08-25-artifact-suite-page-templates.json`\n\nWhen several raw exports hold the same prompt saved repeatedly — the task text matches — give them one shared slug and append `-v1`, `-v2` and so on in save order, oldest first. Continue the numbering if files with that slug already exist.\n\nLeave alone and report: any file whose task and problem are both empty, and any name that would collide with an existing file.\n\nList every rename as `old → new` and wait for my go-ahead before renaming anything."
     }
   ]
 }
@@ -1769,6 +1773,7 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 	// =======================================================================
 
 	var CAN_PICK = typeof window.showOpenFilePicker === "function";
+	var CAN_SAVE = typeof window.showSaveFilePicker === "function";
 	var CAN_DIR  = typeof window.showDirectoryPicker === "function";
 	var CAN_LS   = (function () { try { localStorage.setItem("__c", "1"); localStorage.removeItem("__c"); return true; } catch (e) { return false; } })();
 	var CAN_IDB  = !!window.indexedDB;
@@ -2861,45 +2866,51 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 		}
 
 		stage.appendChild(headed("This prompt"));
-		stage.appendChild(node("p", "gloss", "Export the filled-in builders as a file to reuse later, import a saved one, or clear everything and start again."));
-		var sessStatus = node("p", "status");
+		stage.appendChild(node("p", "gloss", "Export the filled-in builders as a file to reuse later, import a saved one, or clear everything and start again."
+			+ (CAN_SAVE && CAN_PICK ? " Both open a file dialog, and both reopen in the folder you used last." : "")));
 		var row = node("div", "btnrow");
 		row.appendChild(node("span", "rowlab", "Prompt"));
 		row.appendChild(btn("ghost", "Export", function () {
-			download("prompt.json", { version: 4, state: STATE, recipes: RECIPES });
-			flash(sessStatus, "Exported prompt.json");
+			saveJson(PICK.promptSave, "prompt.json", { version: 4, state: STATE, recipes: RECIPES })
+				.then(function (name) { notify("Exported " + name + "."); })
+				.catch(function (e) { if (e && e.name !== "AbortError") notify(e.message || "Could not write that file.", true); });
 		}));
-		var pf = fileInput(function (parsed, name) {
-			var incoming = parsed && parsed.state ? parsed.state : parsed;
-			if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) throw new Error("not a prompt file");
-			resetPrompt();
-			BUILDERS.forEach(function (b) {
-				var src = incoming[b.id];
-				if (!src) return;
-				b.fields.forEach(function (f) { if (src[f.key] !== undefined) STATE[b.id][f.key] = src[f.key]; });
+		row.appendChild(btn("ghost", "Import", function () {
+			openJson(PICK.promptOpen).then(function (got) {
+				applyPrompt(got.data);
+				route();
+				notify("Imported " + got.name + ".");
+			}).catch(function (e) {
+				if (e && e.name !== "AbortError") notify("Could not read that file.", true);
 			});
-			// Older prompt files hold one deliverable as a string.
-			if (!Array.isArray(STATE.output.deliverable)) STATE.output.deliverable = STATE.output.deliverable ? [STATE.output.deliverable] : [];
-			// Placed stages arrive without live ids; reissue so reordering works.
-			(STATE.process.stages || []).forEach(function (s) {
-				s.id = ++stageSeq;
-				if (s.value === undefined) s.value = s.label;
-			});
-			if (Array.isArray(parsed.recipes)) RECIPES = parsed.recipes;
-			route();
-			notify("Imported " + name);
-		}, function () { flash(sessStatus, "Could not read that file.", true); });
-		row.appendChild(btn("ghost", "Import", function () { pf.click(); }));
+		}));
 		row.appendChild(btn("quiet", "Clear all", function () {
 			if (!confirm("Clear every builder?")) return;
 			resetPrompt();
 			route();
 			notify("Cleared.");
 		}));
-		row.appendChild(pf);
 		stage.appendChild(row);
-		sessStatus.style.marginTop = "12px";
-		stage.appendChild(sessStatus);
+	}
+
+	// Throws when the file is not a prompt, so the caller's catch reports it.
+	function applyPrompt(parsed) {
+		var incoming = parsed && parsed.state ? parsed.state : parsed;
+		if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) throw new Error("not a prompt file");
+		resetPrompt();
+		BUILDERS.forEach(function (b) {
+			var src = incoming[b.id];
+			if (!src) return;
+			b.fields.forEach(function (f) { if (src[f.key] !== undefined) STATE[b.id][f.key] = src[f.key]; });
+		});
+		// Older prompt files hold one deliverable as a string.
+		if (!Array.isArray(STATE.output.deliverable)) STATE.output.deliverable = STATE.output.deliverable ? [STATE.output.deliverable] : [];
+		// Placed stages arrive without live ids; reissue so reordering works.
+		(STATE.process.stages || []).forEach(function (s) {
+			s.id = ++stageSeq;
+			if (s.value === undefined) s.value = s.label;
+		});
+		if (Array.isArray(parsed.recipes)) RECIPES = parsed.recipes;
 	}
 
 	function drawBuilderPage(id) {
@@ -3243,7 +3254,7 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 		stage.appendChild(headed("This browser"));
 		var caps = node("div", "caps");
 		[["save to file", CAN_PICK], ["remember folders", CAN_DIR && CAN_IDB],
-		 ["local storage", CAN_LS], ["export files", typeof URL.createObjectURL === "function"]
+		 ["local storage", CAN_LS], ["choose where exports go", CAN_SAVE && CAN_PICK]
 		].forEach(function (c) {
 			var s = node("span", "cap");
 			s.appendChild(node("b", null, c[0]));
@@ -3251,9 +3262,9 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 			caps.appendChild(s);
 		});
 		stage.appendChild(caps);
-		stage.appendChild(node("p", "gloss", (CAN_PICK && CAN_DIR)
-			? "Everything is available, including saving into this file and remembering folders."
-			: "Some capabilities are missing, so the buttons that need them are hidden. Export and import cover the same ground."));
+		stage.appendChild(node("p", "gloss", (CAN_PICK && CAN_SAVE && CAN_DIR)
+			? "Everything is available, including saving into this file, remembering folders, and export and import reopening where you last left them."
+			: "Some capabilities are missing, so the buttons that need them are hidden. Export and import still work — this browser picks the folder instead of asking you."));
 
 		// ---- settings ----
 		stage.appendChild(headed("Settings"));
@@ -3363,7 +3374,8 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 		stage.appendChild(headed("Loadout", unsaved() ? "differs from the file" : "matches the file"));
 		stage.appendChild(node("p", "gloss",
 			"A loadout is everything the builders offer: options, help text, agent instructions, order and visibility, plus the launch options. Import replaces all of it, so a file must carry all " +
-			BUILDERS.length + " builders complete."));
+			BUILDERS.length + " builders complete."
+			+ (CAN_SAVE && CAN_PICK ? " Loadouts keep their own export and import folders, apart from the ones prompts use." : "")));
 
 		var metaRow = node("div", "field");
 		metaRow.appendChild(node("div", "lab", "Loadout name"));
@@ -3381,7 +3393,7 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 			var saveRow = node("div", "btnrow");
 			saveRow.appendChild(node("span", "rowlab", "File"));
 			if (HANDLES.self) {
-				saveRow.appendChild(btn(unsaved() ? "" : "ghost", "Save", function () { askThenSave(status); }));
+				saveRow.appendChild(btn(unsaved() ? "" : "ghost", "Save", function () { askThenSave(); }));
 				saveRow.appendChild(node("span", "status", HANDLES.self.name));
 				saveRow.appendChild(btn("quiet", "Unbind", function () {
 					HANDLES.self = null;
@@ -3405,26 +3417,36 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 		var saveSlot = node("div");
 		stage.appendChild(saveSlot);
 
+		// Both export buttons go through this, so the escape hatch inside the
+		// save dialog writes the same file to the same remembered folder.
+		function exportLoadout() {
+			return saveJson(PICK.loadoutSave, slug((LOAD.meta || {}).name || "loadout") + ".loadout.json", LOAD);
+		}
+
 		var row = node("div", "btnrow");
 		row.appendChild(node("span", "rowlab", "Portable"));
 		row.appendChild(btn("ghost", "Export loadout", function () {
-			download(slug((LOAD.meta || {}).name || "loadout") + ".loadout.json", LOAD);
-			flash(status, "Exported.");
+			exportLoadout()
+				.then(function (name) { notify("Exported " + name + "."); })
+				.catch(function (e) { if (e && e.name !== "AbortError") notify(e.message || "Could not write that file.", true); });
 		}));
-		var lf = fileInput(function (parsed, name) {
-			var bad = validate(parsed);
-			if (bad.length) {
-				flash(status, "Not a complete loadout — " + bad.slice(0, 3).join("; ") +
-					(bad.length > 3 ? " (+" + (bad.length - 3) + " more)" : ""), true);
-				return;
-			}
-			LOAD = parsed;
-			persist();
-			resetPrompt();
-			route();
-			notify("Loaded " + ((LOAD.meta || {}).name || name) + " — everything replaced.");
-		}, function () { flash(status, "Could not read that file.", true); });
-		row.appendChild(btn("ghost", "Import loadout", function () { lf.click(); }));
+		row.appendChild(btn("ghost", "Import loadout", function () {
+			openJson(PICK.loadoutOpen).then(function (got) {
+				var bad = validate(got.data);
+				if (bad.length) {
+					notify("Not a complete loadout — " + bad.slice(0, 3).join("; ") +
+						(bad.length > 3 ? " (+" + (bad.length - 3) + " more)" : ""), true);
+					return;
+				}
+				LOAD = got.data;
+				persist();
+				resetPrompt();
+				route();
+				notify("Loaded " + ((LOAD.meta || {}).name || got.name) + " — everything replaced.");
+			}).catch(function (e) {
+				if (e && e.name !== "AbortError") notify("Could not read that file.", true);
+			});
+		}));
 		var reset = btn("quiet", "Reset to file", function () {
 			if (!confirm("Discard the loadout and recipes held in this browser, and go back to the ones in the file?")) return;
 			dropOverlay();
@@ -3436,13 +3458,12 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 		});
 		reset.dataset.tip = "Drops changes held in this browser and reloads the loadout and recipes written in the file.";
 		row.appendChild(reset);
-		row.appendChild(lf);
 		stage.appendChild(row);
 		status.style.marginTop = "12px";
 		stage.appendChild(status);
 
 		// Warn on every save, per your call — the dialog names the file each time.
-		function askThenSave(statusEl) {
+		function askThenSave() {
 			saveSlot.innerHTML = "";
 			var d = node("div", "dialog");
 			d.appendChild(node("h5", null, "Write into " + HANDLES.self.name + "?"));
@@ -3461,10 +3482,15 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 					notify("Written into " + name + ".");
 				}).catch(function (e) { notify(e.message || "Could not write the file.", true); });
 			}));
+			// Cancelling the save dialog leaves this dialog up, so the choice
+			// between exporting and writing is still there to make.
 			r.appendChild(btn("ghost tiny", "Export first", function () {
-				download(slug((LOAD.meta || {}).name || "loadout") + ".loadout.json", LOAD);
-				flash(statusEl, "Exported. Press Save again to write.");
-				saveSlot.innerHTML = "";
+				exportLoadout().then(function (name) {
+					saveSlot.innerHTML = "";
+					notify("Exported " + name + ". Press Save again to write.");
+				}).catch(function (e) {
+					if (e && e.name !== "AbortError") notify(e.message || "Could not write that file.", true);
+				});
 			}));
 			r.appendChild(btn("quiet tiny", "Cancel", function () { saveSlot.innerHTML = ""; }));
 			d.appendChild(r);
@@ -3478,6 +3504,115 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 	// Files
 	// =======================================================================
 
+	// One folder is remembered against each of these ids, so every button
+	// reopens where it last left off and only the first press navigates.
+	//
+	// Prompts and loadouts get separate pairs: a prompt export is scratch that
+	// belongs beside its project, a loadout is kept and handed around. Save and
+	// open are separate again, so importing from elsewhere does not move where
+	// exports land.
+	var PICK = {
+		promptSave:  "pb-prompt-save",
+		promptOpen:  "pb-prompt-open",
+		loadoutSave: "pb-loadout-save",
+		loadoutOpen: "pb-loadout-open"
+	};
+	var JSON_TYPES = [{ description: "Prompt builder JSON", accept: { "application/json": [".json"] } }];
+
+	// The id above is the picker's own memory. Tested three ways in Chrome: the
+	// id alone reopens at the default folder every time, while handing back the
+	// handle the picker returned does remember it. So the handle is what carries
+	// the folder — the spec ranks a handle above the id memory, and a file
+	// handle resolves to the folder holding it, which is the folder wanted. The
+	// id stays on the call as a second line: it costs one property, and it is
+	// all that is left if the stored handle is ever dropped.
+	//
+	// Read synchronously — an await between the click and the picker would spend
+	// the transient user activation both pickers require. IndexedDB refills this
+	// at boot and never sits in the click path.
+	var LAST_PICK = {};
+
+	function rememberPick(id, handle) {
+		LAST_PICK[id] = handle;
+		idbPut("pick:" + id, handle);
+		return handle;
+	}
+	function forgetPick(id) {
+		LAST_PICK[id] = null;
+		idbPut("pick:" + id, null);
+	}
+
+	// A remembered handle can be rejected outright — the file moved, the grant
+	// lapsed, or the origin cannot vouch for it — and the picker may signal that
+	// by throwing where it stands rather than by rejecting. Either way the call
+	// is remade without it and the handle is dropped, so one bad handle cannot
+	// leave a button inert.
+	function pick(name, opts) {
+		var startIn = LAST_PICK[opts.id];
+
+		function call(from) {
+			var o = {};
+			Object.keys(opts).forEach(function (k) { o[k] = opts[k]; });
+			if (from) o.startIn = from;
+			try { return Promise.resolve(window[name](o)); }
+			catch (e) { return Promise.reject(e); }
+		}
+
+		if (!startIn) return call(null);
+		return call(startIn).catch(function (e) {
+			if (e && e.name === "AbortError") throw e;
+			forgetPick(opts.id);
+			return call(null);
+		});
+	}
+
+	// Both pickers reject with AbortError when the user backs out. Call sites
+	// stay silent on that name and report everything else.
+	function aborted() { var e = new Error("cancelled"); e.name = "AbortError"; return e; }
+
+	// Writes obj through the save dialog and resolves with the name written.
+	function saveJson(id, suggestedName, obj) {
+		var body = JSON.stringify(obj, null, 2);
+		if (!CAN_SAVE) { download(suggestedName, body); return Promise.resolve(suggestedName); }
+		return pick("showSaveFilePicker", { id: id, suggestedName: suggestedName, types: JSON_TYPES })
+			.then(function (h) {
+				rememberPick(id, h);
+				return h.createWritable().then(function (w) {
+					return w.write(body).then(function () { return w.close(); });
+				}).then(function () { return h.name; });
+			});
+	}
+
+	// Resolves with { data, name }. Rejects on bad JSON as well as on cancel.
+	function openJson(id) {
+		if (!CAN_PICK) return openViaInput();
+		return pick("showOpenFilePicker", { id: id, multiple: false, types: JSON_TYPES })
+			.then(function (hs) { return rememberPick(id, hs[0]).getFile(); })
+			.then(readJson);
+	}
+	function readJson(f) {
+		return f.text().then(function (t) { return { data: JSON.parse(t), name: f.name }; });
+	}
+
+	// Browsers without the pickers get the old hidden input, whose dialog opens
+	// wherever the browser last left it — nothing here can steer that.
+	function openViaInput() {
+		return new Promise(function (res, rej) {
+			var input = document.createElement("input");
+			input.type = "file";
+			input.accept = "application/json,.json";
+			input.hidden = true;
+			input.addEventListener("cancel", function () { input.remove(); rej(aborted()); });
+			input.addEventListener("change", function () {
+				input.remove();
+				var f = input.files && input.files[0];
+				if (f) res(readJson(f)); else rej(aborted());
+			});
+			document.body.appendChild(input);
+			input.click();
+		});
+	}
+
 	function download(name, obj) {
 		var body = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
 		var url = URL.createObjectURL(new Blob([body], { type: "application/json" }));
@@ -3488,24 +3623,6 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 		a.click();
 		document.body.removeChild(a);
 		setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-	}
-	function fileInput(onOk, onFail) {
-		var input = document.createElement("input");
-		input.type = "file";
-		input.accept = "application/json,.json";
-		input.hidden = true;
-		input.addEventListener("change", function () {
-			var f = input.files && input.files[0];
-			if (!f) return;
-			var r = new FileReader();
-			r.onload = function () {
-				try { onOk(JSON.parse(String(r.result)), f.name); }
-				catch (e) { onFail(); }
-				input.value = "";
-			};
-			r.readAsText(f);
-		});
-		return input;
 	}
 	function stampName() {
 		var d = new Date();
@@ -3673,6 +3790,13 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
 
 	// Restore remembered handles. Sessions reload on their own only when the
 	// grant already stands, so a cold start never opens a dialog unasked.
+	// Warms the picker cache before any button can be pressed, so no button
+	// ever has to wait on IndexedDB with the user activation ticking.
+	Object.keys(PICK).forEach(function (k) {
+		var id = PICK[k];
+		idbGet("pick:" + id).then(function (h) { if (h && !LAST_PICK[id]) LAST_PICK[id] = h; });
+	});
+
 	idbGet("self").then(function (h) { if (h) { HANDLES.self = h; if (tab === "utilities") drawUtilities(); } });
 	idbGet("prompts").then(function (h) { if (h) { HANDLES.prompts = h; refresh(); if (tab === "utilities") drawUtilities(); } });
 	idbGet("sessions").then(function (h) {
