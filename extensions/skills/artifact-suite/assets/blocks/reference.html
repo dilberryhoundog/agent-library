@@ -1,0 +1,112 @@
+<!-- BLOCK: reference — a file or site reference. The agent writes an empty details.ref, or an empty
+     inline a.ref-link, carrying data-path or data-url; this block's script builds the summary, the
+     Disk, Editor and GitHub chips, the Copy path button and every href from #page-meta.provenance,
+     and its style picks the one solid chip for the page's origin. Required on every page carrying a
+     details.ref or an a.ref-link. Attributes, routes and the mirror rule: references/provenance.md.
+
+     Splice each part once per page; a second splice of the same part is refused:
+       python3 $S/splice.py $P template-style  $S/blocks/reference.html style
+       python3 $S/splice.py $P template-script $S/blocks/reference.html script
+     Then write the @markup shapes into cards, attributes only. -->
+<style>
+	/* @style */
+	details.ref { padding: 0; border-left: 2px solid var(--rule); border-radius: 2px; margin: 12px 0; }
+	details.ref summary { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 9px 14px; background: var(--surface-sunk); }
+	.ref .path { font-family: var(--mono); font-size: 12.5px; color: var(--ink); word-break: break-all; }
+	.ref .lines, .ref .loc { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+	.ref .mirror { margin-left: auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; background: var(--warn-soft); color: var(--warn); padding: 3px 8px; border-radius: 2px; }
+	.ref-links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 14px; }
+	.ref-chip { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 4px 10px; color: var(--ink-soft); background: var(--surface); text-decoration: none; cursor: pointer; }
+	.refs { display: grid; gap: 8px; margin: 14px 0; }
+	.ref--broken > summary { border-left: 2px solid var(--stop); }
+	.ref--broken .path { color: var(--stop); }
+	:root[data-origin="web"] .ref-disk, :root[data-origin="web"] .ref-editor, .ref--nodisk .ref-disk, .ref--nodisk .ref-editor { display: none; }
+	:root[data-origin="disk"] .ref:not(.ref--nodisk) .ref-disk, :root[data-origin="web"] .ref-gh, .ref--nodisk .ref-gh, .ref-site { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+	/* @style:end */
+</style>
+<!-- @script -->
+<script>
+	(function () {
+		"use strict";
+		var LINES_RE = /^\d+(?:-\d+)?$/, COMMIT_RE = /^[0-9a-f]{7,40}$/;
+
+		function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+		function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
+		function encPath(p) { return p.split("/").map(encodeURIComponent).join("/"); }
+		function lineAnchor(lines) { return lines ? "#L" + lines.replace("-", "-L") : ""; }
+		function firstLine(lines) { return lines ? lines.split("-")[0] : ""; }
+		function mirrorPath(path, branch) { return path.indexOf("dev/workspace/") === 0 ? "dev/branches/" + branch + "/" + path.slice("dev/workspace/".length) : null; }
+		function outLink(cls, href, title, text) { return '<a class="' + cls + '" href="' + esc(href) + '" target="_blank" rel="noopener" title="' + esc(title) + '">' + esc(text) + "</a>"; }
+
+		function refRoutes(el) {
+			var p = window.SUITE.meta.provenance, d = el.dataset, r = {path: d.path || "", url: d.url || "", lines: LINES_RE.test(d.lines || "") ? d.lines : "", broken: ""};
+			if (!!r.path === !!r.url) r.broken = "a reference carries data-path or data-url, never both and never neither";
+			else if (r.url && r.url.indexOf("https://") !== 0) r.broken = "data-url must be https:";
+			else if (r.path && /^(\.?\/)|(^|\/)\.\.(\/|$)/.test(r.path)) r.broken = "data-path must be repo-relative with no leading / or ./ and no ..";
+			if (r.broken || r.url) return r;
+			r.disk = d.branch ? mirrorPath(r.path, d.branch) : r.path;
+			r.ref = COMMIT_RE.test(d.commit || "") ? d.commit : (d.branch || p.commit || p.branch || "");
+			if (p.root && r.disk) {
+				r.abs = p.root + "/" + r.disk;
+				r.diskHref = "file://" + encPath(r.abs);
+				if (p.editor) r.editorHref = p.editor + "://file" + encPath(r.abs) + (r.lines ? ":" + firstLine(r.lines) : "");
+			}
+			if (p.repo && r.ref) r.ghHref = p.repo + "/blob/" + r.ref + "/" + encPath(r.path) + lineAnchor(r.lines);
+			return r;
+		}
+		function expandRef(el) {
+			var d = el.dataset, r = refRoutes(el), p = window.SUITE.meta.provenance, disk = document.documentElement.dataset.origin === "disk", head = "", links = "", u;
+			if (el.querySelector(".ref-links") || el.classList.contains("ref-link") && el.dataset.expanded) return;
+			if (r.broken) console.warn("artifact-suite: broken reference (" + r.broken + "): " + (r.path || r.url || "(empty)"));
+			if (el.classList.contains("ref-link")) {
+				el.dataset.expanded = "1";
+				if (r.broken) { el.classList.add("ref--broken"); return; }
+				el.href = r.url || (disk && r.diskHref) || r.ghHref || r.diskHref || "#";
+				el.target = "_blank";
+				el.rel = "noopener";
+				el.title = r.url ? r.url : [r.abs, r.ghHref].filter(Boolean).join(" · ");
+				if (!el.textContent.trim()) el.textContent = d.label || r.path || r.url;
+				return;
+			}
+			if (r.broken) {
+				el.classList.add("ref--broken");
+				el.innerHTML = '<summary><span class="path"></span></summary>';
+				el.querySelector(".path").textContent = r.path || r.url || "(empty reference)";
+				return;
+			}
+			if (r.url) {
+				u = document.createElement("a");
+				u.href = r.url;
+				head = '<span class="path">' + esc(u.host + u.pathname) + "</span>";
+				links = outLink("ref-chip ref-site", r.url, r.url, "Open site");
+			} else {
+				/* no disk route — mirror absent or provenance.root missing — makes GitHub the primary chip at either origin */
+				if (!r.diskHref) el.classList.add("ref--nodisk");
+				head = '<span class="path">' + esc(r.path) + "</span>" + (r.lines ? '<span class="lines">L' + esc(r.lines) + "</span>" : "");
+				if (r.diskHref) links += outLink("ref-chip ref-disk", r.diskHref, r.abs, "Open file");
+				if (r.editorHref) links += outLink("ref-chip ref-editor", r.editorHref, p.editor + (r.lines ? " · line " + firstLine(r.lines) : ""), "Editor");
+				if (r.ghHref) links += outLink("ref-chip ref-gh", r.ghHref, "blob/" + (COMMIT_RE.test(r.ref) ? r.ref.slice(0, 7) : r.ref), "GitHub");
+			}
+			if (d.loc) head += '<span class="loc">' + esc(d.loc) + "</span>";
+			if (d.branch && r.disk) head += '<span class="mirror">archived copy</span>';
+			links += '<button type="button" class="ref-chip ref-copy" data-copy="' + esc(r.url || (r.disk || r.path) + (r.lines ? ":" + r.lines : "")) + '">Copy path</button>';
+			el.innerHTML = "<summary>" + head + '</summary><div class="ref-links">' + links + "</div>";
+		}
+		/* registered after the engine's own listener, so SUITE.meta is parsed by the time this runs */
+		document.addEventListener("DOMContentLoaded", function () { $$("details.ref, a.ref-link").forEach(expandRef); });
+		document.addEventListener("click", function (ev) {
+			var b = ev.target.closest(".ref-copy");
+			if (!b || !b.dataset.copy) return;
+			window.SUITE.copyText(b.dataset.copy, function () { window.SUITE.flash("Copied " + b.dataset.copy); });
+		});
+	})();
+</script>
+<!-- @script:end -->
+<!-- @markup -->
+<details class="ref" data-path="docs/drafthorse/framework/steps.md" data-lines="136-142" data-loc="§ Dispositions"></details>
+<div class="refs">
+	<details class="ref" data-path="dev/workspace/reviews/corpus-sweep-design.html" data-branch="agent-teams" data-lines="50-62" data-loc="SVG kit"></details>
+	<details class="ref" data-url="https://developer.mozilla.org/en-US/docs/Web/CSS/:has" data-loc="MDN"></details>
+</div>
+<p>Inline: <a class="ref-link" data-path="docs/drafthorse/framework/steps.md" data-lines="136" data-label="the dispositions list"></a>.</p>
+<!-- @markup:end -->

@@ -1,0 +1,64 @@
+<!-- BLOCK: figure — an inline SVG diagram in a scrolling frame, drawn with a fixed class kit so
+     every figure reads the same and both themes are covered. Actor colour comes from .a / .b / .c
+     on a .box; a style attribute on an SVG element is a build error.
+     Kit: .lanebg lane ground, .lanelbl lane label, .box node (+ .a .b .c), .t label, .ts sublabel,
+     .arw connector, .track timeline, .dot stop on a track, figcaption.cap the caption; details.more
+     holds evidence that would crowd the figure.
+
+     Splice the style once per page; a second splice of the same part is refused:
+       python3 $S/splice.py $P template-style $S/blocks/figure.html style
+     There is no script. Copy the @markup shape into a card and redraw the geometry. -->
+<style>
+	/* @style */
+	figure.fig { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 16px 18px; margin: 18px 0; overflow-x: auto; }
+	figure.fig svg { display: block; min-width: 640px; max-width: 100%; height: auto; }
+	figcaption.cap { font-size: 14px; color: var(--ink-faint); margin: 10px 0 0; }
+	svg text { font-family: var(--mono); fill: var(--ink); }
+	svg .lanebg { fill: var(--surface-sunk); }
+	svg .lanelbl { font-size: 10px; letter-spacing: .09em; fill: var(--ink-faint); }
+	svg .box { fill: var(--surface); stroke: var(--rule); stroke-width: 1.5; }
+	svg .box.a { stroke: var(--accent); }
+	svg .box.b { stroke: var(--warn); }
+	svg .box.c { stroke: var(--ink-soft); }
+	svg .t { font-size: 11px; }
+	svg .ts { font-size: 9.5px; fill: var(--ink-faint); }
+	svg .arw { stroke: var(--ink-faint); stroke-width: 1.4; fill: none; }
+	svg .track { stroke: var(--rule); stroke-width: 2; }
+	svg .dot { fill: var(--surface); stroke-width: 2; }
+	details.more { margin: 14px 0 0; }
+	details.more .body { margin-top: 10px; color: var(--ink-soft); font-size: 15px; max-width: 68ch; }
+	/* @style:end */
+</style>
+<!-- @markup -->
+<figure class="fig">
+	<svg viewBox="0 0 660 196" role="img" aria-label="Three passes on one track: audit, decide, migrate">
+		<rect class="lanebg" x="0" y="16" width="660" height="96" rx="3"/>
+		<text class="lanelbl" x="12" y="34">PIPELINE</text>
+		<rect class="box a" x="40" y="44" width="150" height="52" rx="3"/>
+		<text class="t" x="56" y="70">audit</text>
+		<text class="ts" x="56" y="86">reads, never writes</text>
+		<path class="arw" d="M196 70 H240 m-7 -5 l7 5 -7 5"/>
+		<rect class="box b" x="250" y="44" width="150" height="52" rx="3"/>
+		<text class="t" x="266" y="70">decide</text>
+		<text class="ts" x="266" y="86">the owner picks</text>
+		<path class="arw" d="M406 70 H450 m-7 -5 l7 5 -7 5"/>
+		<rect class="box c" x="460" y="44" width="150" height="52" rx="3"/>
+		<text class="t" x="476" y="70">migrate</text>
+		<text class="ts" x="476" y="86">one file at a time</text>
+		<line class="track" x1="40" y1="150" x2="620" y2="150"/>
+		<circle class="box a dot" cx="115" cy="150" r="5"/>
+		<circle class="box b dot" cx="325" cy="150" r="5"/>
+		<circle class="box c dot" cx="535" cy="150" r="5"/>
+		<text class="ts" x="96" y="172">pass 1</text>
+		<text class="ts" x="306" y="172">pass 2</text>
+		<text class="ts" x="516" y="172">pass 3</text>
+	</svg>
+	<figcaption class="cap">One pass per stage; nothing is written before the middle box.</figcaption>
+</figure>
+<details class="more">
+	<summary>What each pass measured</summary>
+	<div class="body">
+		<p>The evidence the figure compresses, in as many paragraphs as it takes.</p>
+	</div>
+</details>
+<!-- @markup:end -->

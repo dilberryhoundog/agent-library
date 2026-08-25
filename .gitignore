@@ -4,3 +4,6 @@
 # so skill reference .txt files in subdirectories stay tracked.
 /20??-??-??-*.txt
 /archive
+
+# Python bytecode from importing splice.py or verify.py.
+__pycache__/

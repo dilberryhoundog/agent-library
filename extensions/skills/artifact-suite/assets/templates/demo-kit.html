@@ -1,0 +1,193 @@
+<!-- KIT: demo — not a page template. A demo has no fixed shape, so this file ships the parts one
+     is built from: a scoped style, two proven shapes, the integration points, the rules, a worked
+     example, and the scaffold a demo-kind page starts from. A page of any kind carrying a .demo
+     reads this file as well as its page template; a demo-kind page reads it alone.
+
+     Splice the style once per page; a second splice of the same part is refused:
+       python3 $S/splice.py $P template-style $S/templates/demo-kit.html style
+     A demo-kind page also takes the part 6 scaffold:
+       python3 $S/splice.py $P content $S/templates/demo-kit.html markup
+     The demo's own markup is typed into a card or section, its script into @template-script.
+     Carry only the fragments the demo used. -->
+
+<!-- PART 1 — the scoped style. ~1.4KB in @template-style, once however many demos a page has. -->
+<style>
+	/* @style */
+	.demo { border: 1px dashed var(--rule); border-radius: 3px; background: var(--surface-sunk); padding: 14px 16px; margin: 16px 0; }
+	.demo > .tag { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+	.demo .sub { color: var(--ink-soft); font-size: 14.5px; margin: 0 0 10px; max-width: 62ch; }
+	.demo .note { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+	.readout { font-family: var(--mono); font-size: 12.5px; line-height: 1.6; background: var(--surface); border: 1px solid var(--rule); border-left: 2px solid var(--accent); border-radius: 2px; padding: 10px 12px; margin: 10px 0 0; white-space: pre-wrap; overflow-x: auto; }
+	.readout .muted { color: var(--ink-faint); }
+	.picks { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+	.picks label { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 5px 11px; background: var(--surface); cursor: pointer; }
+	.picks input { accent-color: var(--accent); margin: 0; }
+	.picks label:has(input:checked) { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+	.btnrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0 0; }
+	.field { display: block; width: 100%; font-family: var(--mono); font-size: 12.5px; background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 2px; padding: 8px 10px; }
+	.help { color: var(--ink-soft); font-size: 13.5px; margin: 6px 0 0; max-width: 62ch; }
+	/* @style:end */
+</style>
+
+<!-- PART 1b — the class inventory
+     .demo        the dashed sunk strip holding one demonstration; carries the id and data-report
+     .demo > .tag the label, by convention "live · <scope>"
+     .demo .sub   one line telling the reader what to do
+     .demo .note  the demo's own transient status line — .status belongs to the shell
+     .readout     live output, mono, on an accent edge; .readout .muted for placeholder text
+     .picks       a pill set of radios or checkboxes; the pill takes the accent when checked
+     .btnrow      a row of buttons, optionally ending in a .note
+     .field       a text input or textarea in a demo; .help the line under it
+     Buttons come from the shell: button, .ghost, .quiet, .amber, .tiny. -->
+
+<!-- PART 2 — the two proven shapes
+
+     SHAPE A — the inline strip inside a review card. The card stays an ordinary card, keeping its
+     id, chiprow and verdict surface; the strip sits between the prose and the engine's .respond.
+     data-report plus a current dataset.state adds one line to the prompt.
+
+<div class="demo" id="depth-picker" data-report="Depth field, as configured">
+	<span class="tag">live · depth field</span>
+	<p class="sub">Pick a depth and read the field the skill would write.</p>
+	<div class="picks">
+		<label><input type="radio" name="depth-picker-n" value="two options" checked> two</label>
+		<label><input type="radio" name="depth-picker-n" value="three options"> three</label>
+		<label><input type="radio" name="depth-picker-n" value="four options"> four</label>
+	</div>
+	<div class="btnrow">
+		<button class="ghost tiny" type="button" data-demo="depth-render">Render</button>
+		<span class="note"></span>
+	</div>
+	<div class="readout"><span class="muted">Nothing rendered yet.</span></div>
+</div>
+
+     SHAPE B — the board. The page takes the board layout class, controls go in the content region
+     and the live rendering in the sidebar region, which is sticky above 1060px:
+       python3 $S/splice.py $P layout board
+     Controls, into the content region inside a section:
+
+<div class="demo" id="prompt-board" data-report="Prompt shape, as composed">
+	<span class="tag">live · prompt composer</span>
+	<p class="sub">Change a field and watch the prompt rebuild beside it.</p>
+	<label class="help" for="prompt-board-task">Task</label>
+	<textarea class="field" id="prompt-board-task" rows="3"></textarea>
+	<div class="btnrow"><button class="ghost tiny" type="button" data-demo="prompt-copy">Copy prompt shape</button><span class="note"></span></div>
+</div>
+
+     Rendering, into the sidebar region:
+
+<div class="demo" id="prompt-board-out">
+	<span class="tag">live · preview</span>
+	<div class="readout"><span class="muted">Type a task to see the shape.</span></div>
+</div>
+-->
+
+<!-- PART 3 — the two integration points
+     CSS: the demo's own rules go in @template-style, scoped under the demo's id
+          (#depth-picker .row { … }) so two demos on one page cannot collide.
+     JS:  the demo's script goes in @template-script, after the engine, as one IIFE. It looks up
+          its host by id and returns at once when the host is absent — the card may be filtered,
+          dead or removed from the page. The engine offers it three things and nothing else:
+       window.SUITE.copyText(text, onDone)  the suite's only clipboard path
+       window.SUITE.flash(msg, bad)         the shell's status line, bad true for a red one
+       window.SUITE.meta                    the parsed #page-meta, read-only
+     The return prompt takes one line from a demo: put data-report="<label>" on the .demo and keep
+     the current answer in its dataset.state. When the card the demo sits in is touched, the prompt
+     gains "- <label>: <state>". A demo with no data-report contributes nothing. -->
+
+<!-- PART 4 — the rules
+     No external asset: no image, font, stylesheet or script from another host.
+     No localStorage in any form. The page keeps one document under one key; demo state lives in
+       memory or a dataset attribute and is gone on reload by design.
+     No data-theme, no token declaration, no edit to a theme block.
+     No font family and no raw colour: every value is a token the shell already defines. The one
+       raw colour in the suite is panel.html's dialog.panel::backdrop, where custom properties do
+       not reliably inherit; a demo has no such surface.
+     No shell class redeclared, even where the shell's rule is scoped elsewhere. Reserved:
+       .status .card .chip .respond .toc .filters .floater .shell .masthead .eyebrow .themeset
+       .sidebar .sec-head .sec-intro .gloss .chiprow .changed .verdicts .clear .loose .lab
+       .refs .ref-links .ref-chip .path .lines .loc .mirror .mono .standfirst .masthead-meta
+     Reserved ids, never taken by a demo:
+       #page-meta #eyebrow #toc-column #toc-pills #filters #status #accept-all #view-prompt
+       #copy-prompt #outwrap #out #foot #held-note #storage-note
+     No .respond and none of its inputs; no data-card on a demo control — data-card is how the
+       engine recognises an answer. A demo card that takes a verdict is still an ordinary card
+       with an id, and the engine attaches its response surface as usual. -->
+
+<!-- PART 5 — one worked micro-example, complete. Markup, typed into the card: -->
+<div class="demo" id="slug-demo" data-report="Slug rule, as demonstrated">
+	<span class="tag">live · id slug</span>
+	<p class="sub">Type a card title and read the id the build rule would give it.</p>
+	<input class="field" id="slug-demo-in" type="text" placeholder="One JSON document per page">
+	<div class="btnrow">
+		<button class="ghost tiny" type="button" data-demo="slug-copy">Copy id</button>
+		<span class="note"></span>
+	</div>
+	<div class="readout" id="slug-demo-out"><span class="muted">Nothing typed yet.</span></div>
+</div>
+<!-- Script, typed into @template-script:
+<script>
+	(function () {
+		"use strict";
+		var host = document.getElementById("slug-demo"), input = document.getElementById("slug-demo-in");
+		if (!host) return;
+		var out = document.getElementById("slug-demo-out"), note = host.querySelector(".note");
+		function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48); }
+		function render() {
+			var s = slug(input.value);
+			host.dataset.state = s;
+			out.textContent = s;
+			if (!s) out.innerHTML = "<span class=\"muted\">Nothing typed yet.</span>";
+			note.textContent = s ? s.length + " characters" : "";
+		}
+		input.addEventListener("input", render);
+		host.addEventListener("click", function (ev) {
+			if (!ev.target.closest("[data-demo=\"slug-copy\"]")) return;
+			window.SUITE.copyText(host.dataset.state || "", function () { window.SUITE.flash("Id copied."); });
+		});
+		render();
+	})();
+</script>
+-->
+
+<!-- PART 6 — the demo-kind page. #page-meta, piped into the page-meta region. kind "demo" gives
+     the eyebrow its label and an empty default verdict set, so a demo page's cards carry
+     data-verdicts when they take an answer at all. Any </ inside a string is written <\/ .
+
+<script type="application/json" id="page-meta">
+{
+  "id": "prompt-depth-demo",
+  "kind": "demo",
+  "rev": 1,
+  "title": "Prompt depth — live",
+  "provenance": {
+    "repo": "https://github.com/dilberryhoundog/agent-library",
+    "root": "/Users/dylangraham/Projects/agent-library",
+    "self": "dev/workspace/artifacts/prompt-depth-demo.html",
+    "branch": "artifacts",
+    "commit": "b966a43f1c2d4e5a6b7c8d9e0f1a2b3c4d5e6f70",
+    "issue": null,
+    "pr": null,
+    "date": "2026-08-25",
+    "builtAt": "2026-08-25T04:10:00Z",
+    "editor": "vscode"
+  },
+  "prompt": { "heading": "Response — prompt depth demo" },
+  "next": ["Say which depth the skill should default to."]
+}
+</script>
+
+     Masthead, piped into the masthead region:
+
+<h1>Prompt depth — live</h1>
+<p class="standfirst">One paragraph saying what the demonstration shows and what it wants back.</p>
+-->
+
+<!-- The scaffold below is the whole @markup part: one section, no cards. Cards enter it with
+     python3 $S/splice.py $P section demonstration < card.html -->
+<!-- @markup -->
+<section id="demonstration">
+	<div class="sec-head"><h2>Demonstration</h2><span class="count">1</span></div>
+	<p class="sec-intro">One or two lines on what the reader is being shown and what to try.</p>
+</section>
+<!-- @markup:end -->

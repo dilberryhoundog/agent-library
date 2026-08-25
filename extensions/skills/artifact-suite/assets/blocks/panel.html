@@ -1,0 +1,58 @@
+<!-- BLOCK: panel — an optional aside in a native <dialog>: method notes, a glossary, a long
+     rationale that would drown a card. Never shell furniture. The opener sits anywhere in the
+     prose; the dialog is a sibling of the section, never inside a card. Nothing inside a panel
+     reaches the return prompt.
+
+     Splice each part once per page; a second splice of the same part is refused:
+       python3 $S/splice.py $P template-style  $S/blocks/panel.html style
+       python3 $S/splice.py $P template-script $S/blocks/panel.html script
+     Then copy the @markup shape in after that section, giving the dialog its own id and naming
+     that id in the opener's data-panel. -->
+<style>
+	/* @style */
+	dialog.panel { border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 3px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow); padding: 26px 30px 24px; width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); }
+	dialog.panel::backdrop { background: rgba(14, 19, 19, .5); }
+	dialog.panel h2 { font-size: 24px; margin: 0 0 4px; font-weight: 600; }
+	dialog.panel .lede { color: var(--ink-soft); margin: 0; font-size: 15.5px; max-width: 62ch; }
+	dialog.panel h3 { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 22px 0 6px; font-weight: 500; }
+	dialog.panel p { margin: 0 0 8px; font-size: 15px; line-height: 1.55; max-width: 72ch; }
+	dialog.panel code { font-size: 13px; }
+	dialog.panel kbd { font-size: 12px; border: 1px solid var(--rule); border-bottom: 2px solid var(--rule); border-radius: 3px; padding: 1px 6px; background: var(--surface-sunk); }
+	dialog.panel .close { position: absolute; top: 18px; right: 18px; }
+	/* @style:end */
+</style>
+<!-- @script -->
+<script>
+	(function () {
+		"use strict";
+		document.addEventListener("click", function (ev) {
+			var opener = ev.target.closest("[data-panel]");
+			if (opener) {
+				var dlg = document.getElementById(opener.getAttribute("data-panel"));
+				if (dlg) dlg.showModal();
+				return;
+			}
+			var closer = ev.target.closest("[data-panel-close]");
+			if (closer) {
+				closer.closest("dialog.panel").close();
+				return;
+			}
+			/* a click on the backdrop is dispatched at the dialog element itself */
+			if (ev.target.tagName === "DIALOG" && ev.target.classList.contains("panel")) ev.target.close();
+		});
+	})();
+</script>
+<!-- @script:end -->
+<!-- @markup -->
+<dialog class="panel" id="panel-method">
+	<button class="quiet tiny close" type="button" data-panel-close>Close</button>
+	<h2>How the sweep was run</h2>
+	<p class="lede">One paragraph on what the reader is looking at and why it sits behind a button.</p>
+	<h3>Corpus</h3>
+	<p>What was in scope and what was left out.</p>
+	<h3>Method</h3>
+	<p>The passes, in order, and what each one decided.</p>
+</dialog>
+<!-- @markup:end -->
+<!-- The opener, written inline in a card or a section intro:
+     <button class="ghost tiny" type="button" data-panel="panel-method">How the sweep was run</button> -->
