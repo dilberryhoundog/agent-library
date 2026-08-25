@@ -1,0 +1,76 @@
+{
+  "version": 4,
+  "state": {
+    "task": {
+      "text": "Build a html artifact suite. The core layout, styles and js can all be in a shell template. Then templated \"kitchen sink\" components with all prerequisite styles  can be edited into the shell. "
+    },
+    "problem": {
+      "text": ""
+    },
+    "context": {
+      "text": "",
+      "files": [
+        {
+          "a": "extensions/artifacts/prompt-builder/prompt-builder.html",
+          "b": "The most recent, active example of styling and layout. "
+        }
+      ]
+    },
+    "goals": {
+      "items": []
+    },
+    "features": {
+      "items": []
+    },
+    "references": {
+      "items": []
+    },
+    "scope": {
+      "inside": [],
+      "outside": []
+    },
+    "constraints": {
+      "text": "",
+      "picked": []
+    },
+    "verify": {
+      "criteria": [],
+      "gates": [],
+      "items": []
+    },
+    "guardrails": {
+      "text": "",
+      "picked": []
+    },
+    "architecture": {
+      "language": [],
+      "framework": [],
+      "storage": [],
+      "patterns": [],
+      "infra": [],
+      "text": ""
+    },
+    "output": {
+      "deliverable": [],
+      "depth": ""
+    },
+    "tone": {
+      "pick": "",
+      "text": ""
+    },
+    "process": {
+      "stages": []
+    },
+    "skills": {
+      "picked": [],
+      "other": []
+    },
+    "exec": {
+      "strategy": "",
+      "economy": "",
+      "roster": [],
+      "text": ""
+    }
+  },
+  "recipes": []
+}

@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Export Where You Point</title>
+<!-- Runs before first paint so a remembered theme does not flash the default one. -->
+<script>
+try { var savedTheme = localStorage.getItem("artifact.theme"); if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme); } catch (e) { }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+	:root {
+		--paper:        #F4F6F6;
+		--surface:      #FFFFFF;
+		--surface-sunk: #ECF0EF;
+		--ink:          #14191A;
+		--ink-soft:     #4E5B5C;
+		--ink-faint:    #78878A;
+		--rule:         #D6DEDD;
+		--accent:       #0D6B64;
+		--accent-soft:  #E2EFED;
+		--warn:         #8A5B00;
+		--warn-soft:    #F6EBD6;
+		--stop:         #93332A;
+		--stop-soft:    #F7E5E2;
+		--shadow:       0 1px 2px rgba(20, 25, 26, .05), 0 8px 24px rgba(20, 25, 26, .05);
+		--serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+		--disp:  Bitter, "Source Serif 4", Georgia, serif;
+		--mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--paper: #0E1313; --surface: #161C1C; --surface-sunk: #1D2525;
+			--ink: #E7EDEC; --ink-soft: #A9B6B5; --ink-faint: #7D8B8A; --rule: #293333;
+			--accent: #59C5B9; --accent-soft: #16302E; --warn: #D9A44F; --warn-soft: #2E2617;
+			--stop: #E08277; --stop-soft: #331C19;
+			--shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+		}
+	}
+	:root[data-theme="dark"] {
+		--paper: #0E1313; --surface: #161C1C; --surface-sunk: #1D2525;
+		--ink: #E7EDEC; --ink-soft: #A9B6B5; --ink-faint: #7D8B8A; --rule: #293333;
+		--accent: #59C5B9; --accent-soft: #16302E; --warn: #D9A44F; --warn-soft: #2E2617;
+		--stop: #E08277; --stop-soft: #331C19;
+		--shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+	}
+
+	* { box-sizing: border-box; }
+	body {
+		margin: 0; background: var(--paper); color: var(--ink);
+		font-family: var(--serif); font-size: 17px; line-height: 1.6;
+		-webkit-font-smoothing: antialiased;
+	}
+	h1, h2, h3, h4, h5 { font-family: var(--disp); text-wrap: balance; }
+	code, .mono, kbd { font-family: var(--mono); }
+	code { font-size: .87em; background: var(--surface-sunk); padding: 1px 5px; border-radius: 2px; }
+	a { color: var(--accent); }
+	p { max-width: 68ch; }
+
+	.shell { display: grid; grid-template-columns: 1fr; max-width: 1180px; margin: 0 auto; padding: 0 20px 120px; }
+	@media (min-width: 1040px) { .shell { grid-template-columns: 224px minmax(0, 1fr); gap: 56px; padding-right: 32px; } }
+
+	.masthead { grid-column: 1 / -1; border-bottom: 1px solid var(--rule); padding: 40px 0 26px; margin-bottom: 40px; }
+	.eyebrow {
+		font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+		color: var(--ink-faint); display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+	}
+	.eyebrow b { color: var(--warn); font-weight: 500; }
+	h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.05; font-weight: 600; margin: 14px 0 8px; letter-spacing: -.02em; }
+	.standfirst { max-width: 62ch; color: var(--ink-soft); font-size: 18px; margin: 0 0 8px; }
+	.tally { display: flex; flex-wrap: wrap; gap: 10px 26px; margin-top: 20px; font-size: 14px; color: var(--ink-soft); }
+	.tally b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+	/* ---------- rail ---------- */
+	.rail { display: none; }
+	@media (min-width: 1040px) {
+		.rail { display: block; position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; padding-bottom: 20px; }
+	}
+	.rail h4 { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 10px; font-weight: 500; }
+	.rail ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+	.rail a { text-decoration: none; color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; display: block; border-left: 2px solid var(--rule); padding-left: 10px; }
+	.rail a:hover, .rail a:focus-visible, .rail a[aria-current="true"] { color: var(--accent); border-left-color: var(--accent); }
+	.toc-fallback { margin: -16px 0 32px; border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); padding: 8px 14px; }
+	.toc-fallback summary { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); cursor: pointer; }
+	.toc-fallback ol { list-style: none; margin: 10px 0 4px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+	.toc-fallback a { text-decoration: none; font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); border: 1px solid var(--rule); border-radius: 999px; padding: 4px 10px; display: inline-block; }
+	.toc-fallback a:hover, .toc-fallback a:focus-visible { color: var(--accent); border-color: var(--accent); }
+	@media (min-width: 1040px) { .toc-fallback { display: none; } }
+
+	/* ---------- sections ---------- */
+	main { min-width: 0; }
+	section { margin-bottom: 64px; scroll-margin-top: 16px; }
+	.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 10px; }
+	.sec-head h2 { font-size: 25px; margin: 0; font-weight: 600; letter-spacing: -.01em; }
+	.sec-head .count { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); margin-left: auto; white-space: nowrap; }
+	.sec-intro { color: var(--ink-soft); max-width: 68ch; margin: 14px 0 30px; }
+
+	/* ---------- flow strip ---------- */
+	.flows { display: grid; gap: 18px; }
+	@media (min-width: 860px) { .flows { grid-template-columns: 1fr 1fr; } }
+	.flow { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; box-shadow: var(--shadow); padding: 18px 20px; }
+	.flow.after { border-left: 3px solid var(--accent); }
+	.flow.before { border-left: 3px solid var(--stop); }
+	.flow h3 { font-size: 18px; margin: 0 0 4px; font-weight: 600; }
+	.flow .verb { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
+	.steps { list-style: none; margin: 14px 0 0; padding: 0; display: flex; flex-direction: column; gap: 0; }
+	.steps li { display: flex; gap: 12px; align-items: flex-start; padding: 8px 0; font-size: 14.5px; line-height: 1.45; }
+	.steps li + li { border-top: 1px dashed var(--rule); }
+	.steps .mark {
+		flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--rule);
+		display: grid; place-items: center; font-family: var(--mono); font-size: 10.5px; color: var(--ink-faint);
+		margin-top: 1px; background: var(--surface-sunk);
+	}
+	.steps li.friction .mark { border-color: var(--stop); color: var(--stop); background: var(--stop-soft); }
+	.steps li.friction b { color: var(--stop); font-weight: 600; }
+	.steps li.gain .mark { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+	.steps li.gain b { color: var(--accent); font-weight: 600; }
+	.steps li.once .mark { border-style: dashed; }
+	.steps .where { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); display: block; margin-top: 3px; }
+
+	/* ---------- algorithm ladder ---------- */
+	.ladder { list-style: none; margin: 0; padding: 0; counter-reset: rung; border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); overflow: hidden; }
+	.ladder li { display: flex; gap: 14px; align-items: flex-start; padding: 12px 16px; font-size: 15px; line-height: 1.45; }
+	.ladder li + li { border-top: 1px solid var(--rule); }
+	.ladder li::before {
+		counter-increment: rung; content: counter(rung);
+		flex: none; width: 22px; height: 22px; border-radius: 2px; display: grid; place-items: center;
+		font-family: var(--mono); font-size: 11px; color: var(--ink-faint); background: var(--surface-sunk); margin-top: 1px;
+	}
+	.ladder li.live { background: var(--accent-soft); }
+	.ladder li.live::before { background: var(--accent); color: var(--paper); }
+	.ladder li.live b { color: var(--accent); }
+	.ladder li.avoid { background: var(--stop-soft); }
+	.ladder li.avoid::before { background: var(--stop); color: var(--paper); }
+	.ladder li.avoid b { color: var(--stop); }
+	.ladder .tagline { display: block; font-size: 13.5px; color: var(--ink-soft); margin-top: 3px; }
+
+	/* ---------- cards ---------- */
+	.card {
+		background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--rule);
+		border-radius: 3px; box-shadow: var(--shadow); padding: 22px 24px; margin-bottom: 22px; scroll-margin-top: 16px;
+	}
+	.card.hard   { border-left-color: var(--stop); }
+	.card.choice { border-left-color: var(--warn); }
+	.card.win    { border-left-color: var(--accent); }
+	.card h3 { font-size: 20px; margin: 0 0 8px; font-weight: 600; line-height: 1.3; }
+	.card h5 { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 16px 0 6px; font-weight: 500; }
+	.card p { margin: 0 0 10px; }
+	.card p:last-child { margin-bottom: 0; }
+	.card .ask { background: var(--warn-soft); border-left: 2px solid var(--warn); padding: 8px 12px; margin: 12px 0; max-width: 68ch; font-size: 15px; }
+	.card .ask b { font-weight: 600; }
+
+	pre {
+		font-family: var(--mono); font-size: 12.5px; line-height: 1.55; color: var(--ink);
+		background: var(--surface-sunk); border: 1px solid var(--rule); border-radius: 2px;
+		padding: 12px 14px; margin: 10px 0; overflow-x: auto;
+	}
+	pre .c { color: var(--ink-faint); }
+	pre .k { color: var(--accent); }
+
+	.chiprow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+	.chip {
+		font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+		padding: 3px 8px; border-radius: 2px; background: var(--surface-sunk); color: var(--ink-soft); white-space: nowrap;
+	}
+	.chip.id { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); }
+	.chip.hard { background: var(--stop-soft); color: var(--stop); }
+	.chip.choice { background: var(--warn-soft); color: var(--warn); }
+	.chip.win { background: var(--accent-soft); color: var(--accent); }
+
+	/* ---------- decision options ---------- */
+	.options { display: grid; gap: 8px; margin: 14px 0 0; }
+	.option { display: flex; gap: 12px; align-items: flex-start; background: var(--surface-sunk); border: 1px solid var(--rule); border-left: 3px solid var(--rule); border-radius: 3px; padding: 10px 14px; cursor: pointer; }
+	.option input { margin-top: 6px; accent-color: var(--accent); flex: none; }
+	.option:has(input:checked) { border-color: var(--accent); border-left-color: var(--accent); }
+	.option:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+	.option .obody { display: block; min-width: 0; }
+	.option b { font-weight: 600; display: block; }
+	.option .rec { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-left: 8px; background: var(--accent-soft); padding: 2px 6px; border-radius: 2px; vertical-align: 1px; }
+	.option .onote { display: block; font-size: 14.5px; color: var(--ink-soft); margin-top: 2px; max-width: 68ch; }
+	.option .why { display: block; font-size: 14px; color: var(--ink); margin-top: 6px; max-width: 68ch; border-left: 2px solid var(--accent); padding-left: 10px; }
+
+	/* ---------- tables ---------- */
+	.tablewrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); }
+	table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: 14.5px; }
+	th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+	thead th { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); font-weight: 500; background: var(--surface-sunk); }
+	tbody tr:last-child td { border-bottom: 0; }
+	td.y { color: var(--accent); font-family: var(--mono); font-size: 13px; }
+	td.n { color: var(--ink-faint); font-family: var(--mono); font-size: 13px; }
+	td .mono { font-size: 12.5px; }
+
+	/* ---------- risk list ---------- */
+	.risks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+	.risks li { border-left: 2px solid var(--rule); padding-left: 14px; max-width: 74ch; }
+	.risks li.watch { border-left-color: var(--warn); }
+	.risks b { display: block; font-family: var(--disp); font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+	.risks span { font-size: 15px; color: var(--ink-soft); }
+	.risks .ln { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+
+	/* ---------- blast radius ---------- */
+	.radius { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); overflow: hidden; }
+	.radius div { display: flex; gap: 14px; align-items: baseline; padding: 10px 15px; font-size: 14.5px; }
+	.radius div + div { border-top: 1px solid var(--rule); }
+	.radius .ln { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); flex: none; width: 92px; font-variant-numeric: tabular-nums; }
+	.radius .what { color: var(--ink-soft); }
+	.radius .what b { color: var(--ink); font-weight: 600; }
+	.radius .gone { color: var(--ink-faint); }
+	.radius .gone b { color: var(--ink-faint); text-decoration: line-through; }
+
+	button {
+		font-family: var(--mono); font-size: 12px; letter-spacing: .07em; text-transform: uppercase;
+		padding: 9px 15px; border-radius: 2px; border: 1px solid var(--accent);
+		background: var(--accent); color: var(--paper); cursor: pointer;
+	}
+	button.quiet { background: transparent; color: var(--ink-faint); border-color: var(--rule); }
+	button.quiet:hover { color: var(--accent); border-color: var(--accent); }
+	button:hover { filter: brightness(1.08); }
+	button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+	.float { position: fixed; right: 22px; bottom: 22px; display: flex; gap: 8px; align-items: center; z-index: 20; }
+	.float button { box-shadow: var(--shadow); }
+	.float .status { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--rule); border-radius: 2px; padding: 5px 9px; }
+	.float .status:empty { display: none; }
+
+	footer { grid-column: 1 / -1; border-top: 1px solid var(--rule); margin-top: 40px; padding-top: 16px; color: var(--ink-faint); font-size: 14px; }
+	@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="shell">
+
+	<header class="masthead">
+		<div class="eyebrow">
+			<span>Discovery</span>
+			<span>·</span>
+			<span>branch <b>artifacts</b></span>
+			<span>·</span>
+			<span>extensions/artifacts/prompt-builder/prompt-builder.html</span>
+		</div>
+		<h1>Export where you point</h1>
+		<p class="standfirst">Export drops a file in the browser's download folder. Import opens a dialog wherever the browser last happened to be. Both are fixed by swapping two helpers for the two pickers the platform already provides — and by handing each picker back the handle it returned last time, which is the one form of memory that survives a page opened from disk.</p>
+		<div class="tally">
+			<span><b>5</b> call sites to change</span>
+			<span><b>2</b> helpers replaced</span>
+			<span><b>4</b> remembered folders</span>
+			<span><b>1</b> handle kept per button</span>
+			<span><b>0</b> setup steps</span>
+		</div>
+	</header>
+
+	<nav class="rail" aria-label="Sections">
+		<h4>Contents</h4>
+		<ol id="railList"></ol>
+	</nav>
+
+	<main>
+		<details class="toc-fallback">
+			<summary>Contents</summary>
+			<ol id="tocList"></ol>
+		</details>
+
+		<!-- ============================================================ -->
+		<section id="shape">
+			<div class="sec-head"><h2>The shape</h2><span class="count">before · after</span></div>
+			<p class="sec-intro">Every Export in the page routes through one helper, every Import through another. Neither opens a picker. Replacing them with <code>showSaveFilePicker</code> and <code>showOpenFilePicker</code> puts a dialog on every press — and after the first press, that dialog is already standing in the right folder.</p>
+
+			<div class="flows">
+				<div class="flow before">
+					<span class="verb">Today</span>
+					<h3>Blob, anchor, download folder</h3>
+					<ol class="steps">
+						<li><span class="mark">1</span><span>You press <b>Export</b>.<span class="where">:2869 · :3411 · :3465</span></span></li>
+						<li><span class="mark">2</span><span><code>download()</code> serialises and builds a Blob URL.<span class="where">:3481</span></span></li>
+						<li class="friction"><span class="mark">3</span><span>A hidden <code>&lt;a download&gt;</code> is clicked. <b>The browser chooses the folder.</b> No picker.</span></li>
+						<li class="friction"><span class="mark">4</span><span>You open a file manager and <b>move the file</b> where it should have gone.</span></li>
+						<li class="friction"><span class="mark">5</span><span>On Import, the OS dialog opens <b>wherever the browser last was</b> and you navigate again — every time.<span class="where">:3492</span></span></li>
+					</ol>
+				</div>
+
+				<div class="flow after">
+					<span class="verb">After</span>
+					<h3>Picker, remembered per button</h3>
+					<ol class="steps">
+						<li><span class="mark">1</span><span>You press <b>Export</b>.</span></li>
+						<li class="once"><span class="mark">2</span><span><code>showSaveFilePicker({ id })</code> opens the save dialog with the name pre-filled. <b>First time only</b>, you navigate to the folder you want.</span></li>
+						<li class="gain"><span class="mark">3</span><span>The file is written, and the page <b>keeps the handle the picker returned</b>.</span></li>
+						<li class="gain"><span class="mark">4</span><span>Every later Export hands that handle back as <code>startIn</code> and opens <b>already standing in that folder</b>. Confirm and you are done.</span></li>
+						<li class="gain"><span class="mark">5</span><span>Import keeps its own handle, so it <b>remembers where you open from</b> independently of where you save.</span></li>
+					</ol>
+				</div>
+			</div>
+
+			<div class="card win" style="margin-top:22px">
+				<div class="chiprow"><span class="chip id">F1</span><span class="chip win">no setup step</span></div>
+				<h3>Nothing to configure, nothing in the file</h3>
+				<p>No settings key, no folder-picker field in Utilities, no "choose a folder before this button works", and nothing that can fall out of sync with the loadout. The page keeps one thing per button — the handle the picker last returned — in the IndexedDB store it already runs, and refills it at boot.</p>
+				<p>Every button is usable on first press. The remembered folder is a consequence of using it, not a prerequisite.</p>
+			</div>
+		</section>
+
+		<!-- ============================================================ -->
+		<section id="how">
+			<div class="sec-head"><h2>How the picker remembers</h2><span class="count">verified against the spec</span></div>
+			<p class="sec-intro">The behaviour is specified, not a Chromium accident. The File System Access spec defines an ordered algorithm for choosing the directory a picker starts in, and two of its steps decide whether this works.</p>
+
+			<ol class="ladder">
+				<li><span>Validate <code>id</code> — ASCII letters, digits, <code>_</code> and <code>-</code> only, <b>32 characters maximum</b>.</span></li>
+				<li class="live"><span><b>If <code>startIn</code> is a <code>FileSystemHandle</code>, it wins outright</b> and the remembered directory is never consulted. A <i>file</i> handle resolves to the directory holding it.<span class="tagline">This step is what the page uses. Hand back the handle the picker returned last time and it reopens in that file's folder.</span></span></li>
+				<li class="avoid"><span>If <code>id</code> is given, the recently-picked-directory map <b>for this origin</b> is checked.<span class="tagline">Measured not to hold in Chrome — see below. This was the first implementation, and it silently does nothing.</span></span></li>
+				<li><span>Otherwise, if <code>startIn</code> names a well-known directory (<code>documents</code>, <code>downloads</code>, <code>desktop</code>, …), that is used.</span></li>
+				<li><span>Otherwise, with no <code>id</code>, the map is checked under the empty-string key.</span></li>
+				<li><span>Otherwise, a user-agent default path — Documents, in practice.</span></li>
+			</ol>
+
+			<div class="card win" style="margin-top:22px">
+				<div class="chiprow"><span class="chip id">F2</span><span class="chip win">measured</span></div>
+				<h3>Step 3 does not hold in Chrome; step 2 does</h3>
+				<p>A standalone page — <code>dev/workspace/filebox/picker-demo.html</code> — ran the three strategies side by side, each with its own picker id and its own stored handles, saving and opening a dummy object and logging every option passed. The result, across reloads:</p>
+				<div class="tablewrap" style="margin:14px 0">
+					<table>
+						<thead><tr><th>Strategy</th><th>What it passes</th><th>Reopens where you left it</th></tr></thead>
+						<tbody>
+							<tr><td><b>id only</b></td><td class="mono">{ id }</td><td class="n">✕ back to the default folder every time</td></tr>
+							<tr><td><b>handle</b></td><td class="mono">{ startIn: handle }</td><td class="y">✓ remembers</td></tr>
+							<tr><td><b>both</b></td><td class="mono">{ id, startIn: handle }</td><td class="y">✓ remembers</td></tr>
+						</tbody>
+					</table>
+				</div>
+				<p>So the handle carries the folder and the id carries nothing. <b>Both</b> is what the page ships: the handle does the work, and the id stays on the call as a second line for the case where the stored handle is dropped — one property, and the only thing left if IndexedDB is ever cleared.</p>
+			</div>
+
+			<div class="card hard">
+				<div class="chiprow"><span class="chip id">F3</span><span class="chip hard">testing trap</span></div>
+				<h3>An attached debugger silently eats the dialog</h3>
+				<p>While a Chrome DevTools Protocol client is attached — Playwright, Puppeteer, or any automation driving the browser — file-chooser dialogs are intercepted and dismissed before they appear. The picker then rejects with:</p>
+				<pre>AbortError: Failed to execute 'showSaveFilePicker' on 'Window':
+Intercepted by Page.setInterceptFileChooserDialog().</pre>
+				<p>Because <code>AbortError</code> is the same name a genuine cancel produces, and a cancel is deliberately silent, the button looks completely inert — no dialog, no message, no console error. The interception applies to the whole browser, not only the automated tab.</p>
+				<div class="ask">
+					<b>Test the pickers by hand, with nothing attached.</b> Any measurement of this feature taken while automation is connected is worthless, and looks exactly like a broken button.
+				</div>
+			</div>
+
+			<div class="card">
+				<h5>What follows from that</h5>
+				<p><b>The remembered handle must be read synchronously.</b> Both pickers require transient user activation, so an <code>await</code> between the click and the call risks spending it. The handles are cached in memory and refilled from IndexedDB at boot, so the click path never waits on storage.</p>
+				<p><b>A remembered file can be moved or deleted.</b> That makes <code>startIn</code> throw, so the call is retried once without it and the picker falls back on its own defaults. A cancel is not retried.</p>
+				<p><b>A handle returned by a picker arrives already granted.</b> The <code>allowed()</code> re-check at line 1806 exists for handles restored from IndexedDB; nothing on this path needs it, and <code>startIn</code> only reads the path.</p>
+			</div>
+		</section>
+
+		<!-- ============================================================ -->
+		<section id="code">
+			<div class="sec-head"><h2>The two replacements</h2><span class="count">helpers, then 5 call sites</span></div>
+			<p class="sec-intro">Both new helpers return promises and both reject with <code>AbortError</code> when the user cancels. The page already has the idiom for swallowing that — <code>if (e &amp;&amp; e.name !== "AbortError")</code> appears at lines 3117 and 3280.</p>
+
+			<div class="card win">
+				<h5>The memory — one handle per picker id</h5>
+<pre><span class="c">// Read synchronously: an await here would spend the user activation</span>
+<span class="c">// both pickers require. IndexedDB only refills the cache at boot.</span>
+<span class="k">var</span> LAST_PICK = {};
+
+<span class="k">function</span> rememberPick(id, handle) {
+  LAST_PICK[id] = handle;
+  idbPut(<span class="c">"pick:"</span> + id, handle);
+  <span class="k">return</span> handle;
+}
+
+<span class="c">// A remembered file that has since moved makes startIn throw, so the</span>
+<span class="c">// retry drops it and lets the picker fall back on its own.</span>
+<span class="k">function</span> pick(name, opts) {
+  <span class="k">var</span> startIn = LAST_PICK[opts.id];
+  <span class="k">if</span> (startIn) opts.startIn = startIn;
+  <span class="k">return</span> window[name](opts).catch(<span class="k">function</span> (e) {
+    <span class="k">if</span> (!startIn || (e &amp;&amp; e.name === <span class="c">"AbortError"</span>)) <span class="k">throw</span> e;
+    <span class="k">delete</span> opts.startIn;
+    <span class="k">return</span> window[name](opts);
+  });
+}</pre>
+			</div>
+
+			<div class="card win">
+				<h5>Export — replaces <code>download()</code> at :3481</h5>
+<pre><span class="k">function</span> saveJson(id, suggestedName, obj) {
+  <span class="k">var</span> body = JSON.stringify(obj, <span class="k">null</span>, 2);
+  <span class="k">if</span> (!CAN_SAVE) { download(suggestedName, body); <span class="k">return</span> Promise.resolve(suggestedName); }
+  <span class="k">return</span> pick(<span class="c">"showSaveFilePicker"</span>, { id: id, suggestedName: suggestedName, types: JSON_TYPES })
+    .then(<span class="k">function</span> (h) {
+      rememberPick(id, h);
+      <span class="k">return</span> h.createWritable().then(<span class="k">function</span> (w) {
+        <span class="k">return</span> w.write(body).then(<span class="k">function</span> () { <span class="k">return</span> w.close(); });
+      }).then(<span class="k">function</span> () { <span class="k">return</span> h.name; });
+    });
+}</pre>
+				<p>The write half — <code>createWritable</code>, <code>write</code>, <code>close</code> — is the same three calls the page already makes in <b>Write to file</b> (line 3611) and in <code>saveAll()</code> (line 1863).</p>
+			</div>
+
+			<div class="card win">
+				<h5>Import — replaces <code>fileInput()</code> at :3492</h5>
+<pre><span class="k">function</span> openJson(id) {
+  <span class="k">if</span> (!CAN_PICK) <span class="k">return</span> openViaInput();
+  <span class="k">return</span> pick(<span class="c">"showOpenFilePicker"</span>, { id: id, multiple: <span class="k">false</span>, types: JSON_TYPES })
+    .then(<span class="k">function</span> (hs) { <span class="k">return</span> rememberPick(id, hs[0]).getFile(); })
+    .then(readJson);
+}
+
+<span class="k">function</span> readJson(f) {
+  <span class="k">return</span> f.text().then(<span class="k">function</span> (t) { <span class="k">return</span> { data: JSON.parse(t), name: f.name }; });
+}</pre>
+				<p><code>File.text()</code> replaces the <code>FileReader</code> dance. The existing handlers keep their bodies unchanged — the prompt importer's shape check and the loadout importer's <code>validate()</code> gate both still run, now inside a <code>.then</code> rather than an <code>onload</code>.</p>
+			</div>
+
+			<div class="card">
+				<h5>The five call sites</h5>
+				<div class="tablewrap">
+					<table>
+						<thead><tr><th>Tab</th><th>Button</th><th>Line</th><th>Becomes</th></tr></thead>
+						<tbody>
+							<tr><td>Build</td><td>Export</td><td class="mono">2869</td><td><code>saveJson(…, "prompt.json", { version, state, recipes })</code></td></tr>
+							<tr><td>Build</td><td>Import</td><td class="mono">2872</td><td><code>openJson(…)</code> → existing prompt handler</td></tr>
+							<tr><td>Utilities</td><td>Export loadout</td><td class="mono">3411</td><td><code>saveJson(…, slug(name) + ".loadout.json", LOAD)</code></td></tr>
+							<tr><td>Utilities</td><td>Import loadout</td><td class="mono">3414</td><td><code>openJson(…)</code> → existing <code>validate()</code> gate</td></tr>
+							<tr><td>Utilities</td><td>Export first</td><td class="mono">3465</td><td>Same as Export loadout — easy to miss</td></tr>
+						</tbody>
+					</table>
+				</div>
+				<p style="margin-top:12px">The fifth sits inside the "Write into this file?" confirmation as an escape hatch. Left alone, the page grows a third export behaviour reachable from the same tab.</p>
+			</div>
+		</section>
+
+		<!-- ============================================================ -->
+		<section id="ids">
+			<div class="sec-head"><h2>The four ids</h2><span class="count">settled</span></div>
+			<p class="sec-intro">Each payload gets its own save and open memory, because a working prompt and a shared loadout do not live in the same place. A prompt export is scratch, tied to one job, and belongs beside the project it came from. A loadout is a configuration you keep and hand around.</p>
+
+			<div class="card win" id="d1">
+				<div class="chiprow"><span class="chip id">D1</span><span class="chip win">decided · four ids</span></div>
+				<h3>One memory slot per button pair</h3>
+				<div class="tablewrap">
+					<table>
+						<thead><tr><th>Id</th><th>Used by</th><th>Line</th><th>Remembers</th></tr></thead>
+						<tbody>
+							<tr><td><code>pb-prompt-save</code></td><td>Build · Export</td><td class="mono">2869</td><td>Where prompt exports are written</td></tr>
+							<tr><td><code>pb-prompt-open</code></td><td>Build · Import</td><td class="mono">2872</td><td>Where prompts are opened from</td></tr>
+							<tr><td><code>pb-loadout-save</code></td><td>Utilities · Export loadout<br>Utilities · Export first</td><td class="mono">3411 · 3465</td><td>Where loadouts are written</td></tr>
+							<tr><td><code>pb-loadout-open</code></td><td>Utilities · Import loadout</td><td class="mono">3414</td><td>Where loadouts are opened from</td></tr>
+						</tbody>
+					</table>
+				</div>
+				<p style="margin-top:12px">Each id keys one remembered handle in IndexedDB under <code>pick:&lt;id&gt;</code>, and is also passed to the picker so the native memory works wherever the page is served from a real origin. All four are inside the 32-character limit and use only characters the spec allows.</p>
+				<p><b>Export first shares the loadout save id deliberately.</b> It writes the same payload as the button three lines below it, so it should land in the same folder — sharing the id is what makes that true.</p>
+			</div>
+		</section>
+
+		<!-- ============================================================ -->
+		<section id="tiers">
+			<div class="sec-head"><h2>Browser tiers</h2><span class="count">the fallback stays</span></div>
+			<p class="sec-intro">Firefox and Safari have neither picker, so the current helpers cannot simply be deleted — they become the lower tier. The page already reports capabilities to the user in the "This browser" panel.</p>
+			<div class="tablewrap">
+				<table>
+					<thead><tr><th>Tier</th><th>Detected by</th><th>Export</th><th>Import</th></tr></thead>
+					<tbody>
+						<tr>
+							<td><b>Chromium</b><br><span class="mono">Chrome, Edge, Arc</span></td>
+							<td class="mono">showSaveFilePicker &amp;&amp;<br>showOpenFilePicker</td>
+							<td class="y">Save dialog, remembered folder</td>
+							<td class="y">Open dialog, remembered folder</td>
+						</tr>
+						<tr>
+							<td><b>Everything else</b><br><span class="mono">Firefox, Safari</span></td>
+							<td class="mono">neither</td>
+							<td class="n">Anchor download, unchanged</td>
+							<td class="n">File input dialog, unchanged</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="card" style="margin-top:18px">
+				<div class="chiprow"><span class="chip id">F2</span></div>
+				<h3>A new capability flag is needed</h3>
+				<p><code>CAN_PICK</code> at line 1771 tests <code>showOpenFilePicker</code> only — it is the flag that gates <b>Bind this file</b>. Export needs its own test for <code>showSaveFilePicker</code>, since the two are separate functions and a browser could ship one without the other.</p>
+				<p>The capability panel at line 3245 lists four rows; <b>save to file</b> currently means binding this page for in-place saves. Adding <code>showSaveFilePicker</code> to that row, or giving export its own row, keeps the panel honest.</p>
+			</div>
+		</section>
+
+		<!-- ============================================================ -->
+		<section id="risks">
+			<div class="sec-head"><h2>Watch items</h2><span class="count">6</span></div>
+			<p class="sec-intro">Drawn from how the surrounding code already behaves.</p>
+			<ul class="risks">
+				<li class="watch"><b>Cancel is not an error</b><span>Both pickers reject with <code>AbortError</code> when the user backs out. Reporting that as a failure would put a red status line under a button the user deliberately dismissed. Copy the existing guard: <code>if (e &amp;&amp; e.name !== "AbortError")</code>. <span class="ln">:3117 · :3280</span></span></li>
+				<li class="watch"><b>Transient user activation</b><span>Both pickers must be called from a user gesture. Awaiting anything before the call can let activation lapse and throw <code>SecurityError</code>. Call the picker first in the click handler and serialise the JSON inside the <code>.then</code>. <span class="ln">:2869 · :3411</span></span></li>
+				<li><b>Export first, inside the save dialog</b><span>Line 3465 calls <code>download()</code> directly from within the "Write into this file?" confirmation. Miss it and one tab offers two different export behaviours. <span class="ln">:3465</span></span></li>
+				<li><b>Export is not Save</b><span><code>unsaved()</code> and <code>markSaved()</code> compare the live loadout against the blocks in this file. An export writes somewhere else entirely, so it must not call <code>markSaved()</code> — the "differs from the file" badge would start lying. <span class="ln">:1873–1876</span></span></li>
+				<li><b>Validation stays put</b><span>Loadout import runs <code>validate()</code>; prompt import type-checks and tolerates older shapes. Both move from a <code>FileReader.onload</code> into a <code>.then</code>, and <code>JSON.parse</code> now throws into the promise chain rather than a <code>try</code> block — the failure message should still name the file. <span class="ln">:2011 · :2874</span></span></li>
+				<li><b>Status lines survive the redraw</b><span>Prompt import calls <code>route()</code>, which rebuilds the stage and detaches the local status node. The existing rule at line 2251 is that anything re-rendering a panel reports through <code>notify()</code> instead. Async handlers make this easier to get wrong. <span class="ln">:2250–2252</span></span></li>
+			</ul>
+		</section>
+
+		<!-- ============================================================ -->
+		<section id="radius">
+			<div class="sec-head"><h2>Blast radius</h2><span class="count">one file</span></div>
+			<p class="sec-intro">All inside <code>extensions/artifacts/prompt-builder/prompt-builder.html</code>. No plugin symlinks point at it, so nothing else in the marketplace moves.</p>
+			<div class="radius">
+				<div><span class="ln">1771</span><span class="what"><b>capability flags</b> — add a test for <code>showSaveFilePicker</code></span></div>
+				<div><span class="ln">2869</span><span class="what"><b>Build · Export</b> — <code>saveJson()</code></span></div>
+				<div><span class="ln">2872</span><span class="what"><b>Build · Import</b> — <code>openJson()</code>, handler body unchanged</span></div>
+				<div><span class="ln">3245</span><span class="what"><b>capability panel</b> — the "save to file" row now covers two abilities</span></div>
+				<div><span class="ln">3411</span><span class="what"><b>Utilities · Export loadout</b> — <code>saveJson()</code></span></div>
+				<div><span class="ln">3414</span><span class="what"><b>Utilities · Import loadout</b> — <code>openJson()</code>, <code>validate()</code> gate unchanged</span></div>
+				<div><span class="ln">3465</span><span class="what"><b>Export first</b> — same path as the other exports</span></div>
+				<div><span class="ln">3481</span><span class="what"><b>download()</b> — kept as the no-picker fallback, plus the new <code>saveJson()</code></span></div>
+				<div><span class="ln">3492</span><span class="what"><b>fileInput()</b> — kept as the no-picker fallback, plus the new <code>openJson()</code></span></div>
+				<div><span class="ln">3676</span><span class="what"><b>boot preload</b> — warm <code>LAST_PICK</code> from IndexedDB before any button can be pressed</span></div>
+				<div><span class="gone"><span class="ln">—</span><span class="what"><b>settings.exportDir</b> · <b>HANDLES.exports</b> · <b>Utilities folder field</b> — none of it needed</span></span></div>
+			</div>
+			<p style="margin-top:16px">Untouched: the <code>HANDLES</code> machinery, <code>allowed()</code>, the Prompt folder, the Resume session list, and everything that saves into this file. The <code>idbPut</code> / <code>idbGet</code> pair gains four keys and is otherwise unchanged.</p>
+		</section>
+	</main>
+
+	<footer>
+		Discovery only — nothing in <code>prompt-builder.html</code> has been changed. Line numbers are against the working tree on branch <code>artifacts</code>. Picker behaviour verified against the WICG File System Access specification, "determine the directory the picker will start in".
+	</footer>
+</div>
+
+<script>
+(function () {
+	"use strict";
+
+	// Rail and narrow-viewport contents are generated from the sections, so a
+	// new section never needs a second edit.
+	var secs = [].slice.call(document.querySelectorAll("main section"));
+	var railList = document.getElementById("railList");
+	var tocList  = document.getElementById("tocList");
+	var links = [];
+
+	secs.forEach(function (s) {
+		var title = s.querySelector(".sec-head h2").textContent;
+		[railList, tocList].forEach(function (host) {
+			var li = document.createElement("li");
+			var a = document.createElement("a");
+			a.href = "#" + s.id;
+			a.textContent = title;
+			li.appendChild(a);
+			host.appendChild(li);
+			if (host === railList) links.push(a);
+		});
+	});
+
+	// Highlights the section nearest the top of the viewport.
+	if ("IntersectionObserver" in window) {
+		var seen = {};
+		var io = new IntersectionObserver(function (entries) {
+			entries.forEach(function (e) { seen[e.target.id] = e.isIntersecting; });
+			var active = secs.filter(function (s) { return seen[s.id]; })[0];
+			links.forEach(function (a) {
+				a.setAttribute("aria-current", String(!!active && a.getAttribute("href") === "#" + active.id));
+			});
+		}, { rootMargin: "-10% 0px -70% 0px" });
+		secs.forEach(function (s) { io.observe(s); });
+	}
+})();
+</script>
+</body>
+</html>

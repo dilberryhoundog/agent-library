@@ -1,0 +1,80 @@
+{
+  "version": 4,
+  "state": {
+    "task": {
+      "text": "display a plan-review local html file. capturing all the implementations the plan suggests. build the file using the styling, formatting and patterns contained within."
+    },
+    "problem": {
+      "text": ""
+    },
+    "context": {
+      "text": "",
+      "files": [
+        {
+          "a": "dev/workspace/plans/artifact-suite-implementation.md",
+          "b": "The plan to convert"
+        }
+      ]
+    },
+    "goals": {
+      "items": [
+        "The user can approve and comment on all the aspects of the plan before building.",
+        "The user can present their findings to a workflow agent using a return prompt",
+        "The review actively demos features not already in the corpus."
+      ]
+    },
+    "features": {
+      "items": []
+    },
+    "references": {
+      "items": []
+    },
+    "scope": {
+      "inside": [],
+      "outside": []
+    },
+    "constraints": {
+      "text": "",
+      "picked": []
+    },
+    "verify": {
+      "criteria": [],
+      "gates": [],
+      "items": []
+    },
+    "guardrails": {
+      "text": "",
+      "picked": []
+    },
+    "architecture": {
+      "language": [],
+      "framework": [],
+      "storage": [],
+      "patterns": [],
+      "infra": [],
+      "text": ""
+    },
+    "output": {
+      "deliverable": [],
+      "depth": ""
+    },
+    "tone": {
+      "pick": "",
+      "text": ""
+    },
+    "process": {
+      "stages": []
+    },
+    "skills": {
+      "picked": [],
+      "other": []
+    },
+    "exec": {
+      "strategy": "",
+      "economy": "",
+      "roster": [],
+      "text": ""
+    }
+  },
+  "recipes": []
+}

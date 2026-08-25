@@ -1,0 +1,2250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FlightDeck — naming and conventions review</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230D6B64'/%3E%3Crect x='4' y='4' width='8' height='2' fill='%23F4F6F6'/%3E%3Crect x='4' y='8' width='8' height='2' fill='%23F4F6F6'/%3E%3Crect x='4' y='12' width='5' height='2' fill='%23F4F6F6'/%3E%3C/svg%3E">
+<script>
+	/* Runs before first paint so a remembered theme does not flash the default. */
+	try {
+		var t = localStorage.getItem("artifact-suite.theme");
+		if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+	} catch (e) { /* storage blocked; the system theme applies */ }
+	document.documentElement.dataset.origin = location.protocol === "file:" ? "disk" : "web";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+	:root {
+		--paper:        #F4F6F6;
+		--surface:      #FFFFFF;
+		--surface-sunk: #ECF0EF;
+		--ink:          #14191A;
+		--ink-soft:     #4E5B5C;
+		--ink-faint:    #78878A;
+		--rule:         #D6DEDD;
+		--accent:       #0D6B64;
+		--accent-soft:  #E2EFED;
+		--warn:         #8A5B00;
+		--warn-soft:    #F6EBD6;
+		--stop:         #93332A;
+		--stop-soft:    #F7E5E2;
+		--shadow:       0 1px 2px rgba(20, 25, 26, .05), 0 8px 24px rgba(20, 25, 26, .05);
+
+		--add-bg:       #E4F1E9;
+		--add-ink:      #17603E;
+		--del-bg:       #FAE8E5;
+		--del-ink:      #8E332A;
+		--keep-ink:     #4E5B5C;
+		--add-mark:     #17603E;
+		--del-mark:     #8E332A;
+
+		--serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+		--disp:  Bitter, "Source Serif 4", Georgia, serif;
+		--mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--paper:        #0E1313;
+			--surface:      #161C1C;
+			--surface-sunk: #1D2525;
+			--ink:          #E7EDEC;
+			--ink-soft:     #A9B6B5;
+			--ink-faint:    #7D8B8A;
+			--rule:         #293333;
+			--accent:       #59C5B9;
+			--accent-soft:  #16302E;
+			--warn:         #D9A44F;
+			--warn-soft:    #2E2617;
+			--stop:         #E08277;
+			--stop-soft:    #331C19;
+			--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+
+			--add-bg:       #13291F;
+			--add-ink:      #7FCFA3;
+			--del-bg:       #2C1A18;
+			--del-ink:      #E29288;
+			--keep-ink:     #A9B6B5;
+			--add-mark:     #7FCFA3;
+			--del-mark:     #E29288;
+		}
+	}
+	:root[data-theme="dark"] {
+		--paper:        #0E1313;
+		--surface:      #161C1C;
+		--surface-sunk: #1D2525;
+		--ink:          #E7EDEC;
+		--ink-soft:     #A9B6B5;
+		--ink-faint:    #7D8B8A;
+		--rule:         #293333;
+		--accent:       #59C5B9;
+		--accent-soft:  #16302E;
+		--warn:         #D9A44F;
+		--warn-soft:    #2E2617;
+		--stop:         #E08277;
+		--stop-soft:    #331C19;
+		--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+
+		--add-bg:       #13291F;
+		--add-ink:      #7FCFA3;
+		--del-bg:       #2C1A18;
+		--del-ink:      #E29288;
+		--keep-ink:     #A9B6B5;
+		--add-mark:     #7FCFA3;
+		--del-mark:     #E29288;
+	}
+
+	/* radius: 2px on controls, 3px on cards. No token — indirection over a constant. */
+	* { box-sizing: border-box; }
+	body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+	h1, h2, h3, h4, h5 { font-family: var(--disp); text-wrap: balance; }
+	code, .mono, kbd { font-family: var(--mono); }
+	code { font-size: .87em; background: var(--surface-sunk); padding: 1px 5px; border-radius: 2px; }
+	a { color: var(--accent); }
+	main { min-width: 0; }
+	section { margin-bottom: 64px; }
+	html { scroll-behavior: smooth; }
+	@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+	@media print { .toc, .filters, .themeset, .floater, #outwrap { display: none; } }
+
+	/* ---------- layouts ---------- */
+	.shell { display: grid; grid-template-columns: 1fr; max-width: 940px; margin: 0 auto; padding: 0 22px 96px; }
+	.shell.rail { max-width: 1180px; }
+	.shell.board { max-width: 1340px; }
+	.masthead, footer { grid-column: 1 / -1; }
+	.shell:not(.board) > .sidebar { display: none; }
+	@media (min-width: 1040px) {
+		.shell.rail { grid-template-columns: 232px minmax(0, 1fr); gap: 56px; padding-right: 32px; }
+	}
+	@media (min-width: 1060px) {
+		.shell.board { grid-template-columns: minmax(0, 1fr) 440px; gap: 44px; }
+		.shell.board > .sidebar { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; }
+	}
+
+	/* ---------- masthead ---------- */
+	.masthead { border-bottom: 1px solid var(--rule); padding: 40px 0 26px; margin-bottom: 34px; }
+	.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+	.eyebrow .spacer { margin-left: auto; }
+	.eyebrow a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--rule); }
+	.eyebrow .pv-branch code { color: var(--accent); }
+	.eyebrow .sep { color: var(--ink-faint); }
+	.eyebrow .sep::before { content: "\00B7"; }
+	h1 { font-size: clamp(26px, 3.6vw, 36px); line-height: 1.1; font-weight: 600; margin: 16px 0 10px; letter-spacing: -.015em; }
+	.standfirst { max-width: 62ch; color: var(--ink-soft); font-size: 18px; margin: 0; }
+	.masthead-meta { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 22px; font-size: 14px; color: var(--ink-soft); }
+	.masthead-meta b { color: var(--ink); font-weight: 600; }
+
+	/* ---------- table of contents ---------- */
+	.toc.column { display: none; }
+	.toc.column h4 { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 22px 0 10px; font-weight: 500; }
+	.toc.column ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+	.toc.column a { text-decoration: none; color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; display: block; border-left: 2px solid var(--rule); padding-left: 10px; }
+	.toc.column a:hover, .toc.column a:focus-visible, .toc.column a[aria-current="true"] { color: var(--accent); border-left-color: var(--accent); }
+	.toc.pills { position: sticky; top: 0; z-index: 6; display: flex; gap: 8px; overflow-x: auto; margin: 0 0 26px; padding: 10px 0; background: var(--paper); border-bottom: 1px solid var(--rule); }
+	.toc.pills a { flex: none; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; white-space: nowrap; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--rule); border-radius: 2px; padding: 5px 11px; }
+	.toc.pills a[aria-current="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+	.toc li[hidden], .toc a[hidden] { display: none; }
+	@media (min-width: 1040px) {
+		.shell.rail > .toc.column { display: block; position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; padding-bottom: 20px; }
+		.shell.rail main > .toc.pills { display: none; }
+	}
+	[id] { scroll-margin-top: 72px; }
+	@media (min-width: 1040px) { .shell.rail [id] { scroll-margin-top: 24px; } }
+	article[id]:target, section[id]:target { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+	/* ---------- chips and filters ---------- */
+	.chiprow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+	.chip { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; background: var(--surface-sunk); color: var(--ink-soft); white-space: nowrap; text-decoration: none; }
+	.chip.id { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); }
+	.chip.integrate { background: var(--accent-soft); color: var(--accent); }
+	.chip.yourcall { background: var(--warn-soft); color: var(--warn); }
+	.chip.defer { background: transparent; border: 1px dashed var(--rule); color: var(--ink-faint); }
+	.chip.dead { background: transparent; border: 1px dashed var(--rule); color: var(--ink-faint); text-decoration: line-through; }
+	.chip.earlier { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); }
+	.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 26px; }
+	.filters button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+	.filters .n { margin-left: 6px; font-variant-numeric: tabular-nums; opacity: .75; }
+	.filters[hidden] { display: none; }
+
+	/* ---------- cards and section furniture ---------- */
+	.card { background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--rule); border-radius: 3px; box-shadow: var(--shadow); padding: 22px 24px; margin-bottom: 22px; }
+	.card > *:first-child { margin-top: 0; }
+	.card h3 { font-size: 19.5px; margin: 0 0 8px; font-weight: 600; line-height: 1.3; }
+	.card p, .card ul, .card ol { max-width: 68ch; }
+	.card ul, .card ol { padding-left: 20px; }
+	.card li { margin-bottom: 6px; }
+	.card p:last-child { margin-bottom: 0; }
+	.card[hidden] { display: none; }
+	.card[data-tag="integrate"] { border-left-color: var(--accent); }
+	.card[data-tag="yourcall"] { border-left-color: var(--warn); }
+	.card[data-tag="defer"] { border-left-color: var(--ink-faint); }
+	.card.dead { border-left-color: var(--ink-faint); background: var(--surface-sunk); }
+	.card.dead h3 { color: var(--ink-soft); }
+	.card.needs-id { border-left-color: var(--warn); }
+	.changed { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--warn); background: var(--warn-soft); border-left: 2px solid var(--warn); padding: 6px 10px; margin: 0 0 12px; display: flex; gap: 10px; align-items: center; }
+	.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 10px; }
+	.sec-head h2 { font-size: 25px; margin: 0; font-weight: 600; letter-spacing: -.01em; }
+	.sec-head .count { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+	.sec-intro { color: var(--ink-soft); max-width: 68ch; margin: 14px 0 30px; }
+	.gloss { color: var(--ink-soft); font-size: 14.5px; margin: 0 0 18px; max-width: 62ch; }
+
+	/* ---------- response surface ---------- */
+	.respond { margin-top: 18px; border-top: 1px dashed var(--rule); padding-top: 14px; }
+	.verdicts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+	.verdicts label { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 4px 10px; cursor: pointer; color: var(--ink-soft); user-select: none; background: var(--surface); }
+	.verdicts input { position: absolute; opacity: 0; width: 0; height: 0; }
+	.verdicts label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+	.verdicts label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+	.verdicts label.recommended .rec { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-left: 7px; }
+	@supports not (selector(:has(*))) { .verdicts input { position: static; opacity: 1; width: auto; height: auto; } }
+	textarea { width: 100%; min-height: 68px; resize: vertical; background: var(--surface-sunk); color: var(--ink); border: 1px solid var(--rule); border-radius: 2px; padding: 10px 12px; font-family: var(--serif); font-size: 15.5px; line-height: 1.5; }
+	textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+	textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+	.loose { border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); padding: 16px 18px; margin-top: 22px; box-shadow: var(--shadow); }
+	.loose .lab { margin-bottom: 9px; }
+
+	/* ---------- quote, micro-label, disclosure ---------- */
+	blockquote { margin: 14px 0; padding: 4px 0 4px 16px; border-left: 2px solid var(--accent); color: var(--ink-soft); font-style: italic; max-width: 62ch; }
+	blockquote code { font-style: normal; }
+	blockquote cite, .q, .lab { display: block; margin-top: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; font-style: normal; color: var(--ink-faint); }
+	details { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 14px; margin: 14px 0; }
+	details summary { cursor: pointer; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--ink-soft); }
+
+	/* ---------- buttons ---------- */
+	button { font-family: var(--mono); font-size: 12px; letter-spacing: .07em; text-transform: uppercase; padding: 9px 15px; border-radius: 2px; border: 1px solid var(--accent); background: var(--accent); color: var(--paper); cursor: pointer; }
+	button.ghost { background: transparent; color: var(--accent); }
+	button.quiet { background: transparent; color: var(--ink-faint); border-color: var(--rule); }
+	button.quiet:hover { color: var(--accent); border-color: var(--accent); }
+	button.amber { background: var(--warn); border-color: var(--warn); color: var(--paper); }
+	button.amber.ghost { background: transparent; color: var(--warn); }
+	button:hover { filter: brightness(1.08); }
+	button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+	button.tiny { padding: 6px 11px; font-size: 11px; }
+	button:disabled { opacity: .4; cursor: default; filter: none; }
+
+	/* ---------- theme, floater, foot ---------- */
+	.themeset { display: flex; gap: 4px; }
+	.themeset button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+	.floater { position: fixed; right: 22px; bottom: 22px; z-index: 40; display: flex; gap: 8px; align-items: center; }
+	.floater .status { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); background: var(--paper); padding: 2px 6px; border-radius: 2px; }
+	.floater .status.bad { color: var(--stop); }
+	.floater [hidden] { display: none; }
+	#outwrap { position: fixed; right: 22px; bottom: 74px; z-index: 39; width: min(560px, calc(100vw - 44px)); background: var(--surface); border: 1px solid var(--rule); border-left: 2px solid var(--accent); border-radius: 3px; box-shadow: var(--shadow); padding: 10px; }
+	#outwrap[hidden] { display: none; }
+	#out { width: 100%; height: min(52vh, 460px); font-family: var(--mono); font-size: 12.5px; line-height: 1.55; }
+	#foot { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); padding-top: 18px; border-top: 1px solid var(--rule); display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+	#foot .sep { color: var(--ink-faint); }
+	#held-note, #storage-note { flex-basis: 100%; color: var(--warn); }
+	@media (max-width: 620px) {
+		.floater { left: 14px; right: 14px; justify-content: flex-end; }
+		#outwrap { left: 14px; right: 14px; width: auto; }
+	}
+
+	/* ---------- reference block ---------- */
+	details.ref { padding: 0; border-left: 2px solid var(--rule); border-radius: 2px; margin: 12px 0; }
+	details.ref summary { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 9px 14px; background: var(--surface-sunk); }
+	.ref .path { font-family: var(--mono); font-size: 12.5px; color: var(--ink); word-break: break-all; }
+	.ref .lines, .ref .loc { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+	.ref .mirror { margin-left: auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; background: var(--warn-soft); color: var(--warn); padding: 3px 8px; border-radius: 2px; }
+	.ref-links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 14px; }
+	.ref-chip { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 4px 10px; color: var(--ink-soft); background: var(--surface); text-decoration: none; cursor: pointer; }
+	.refs { display: grid; gap: 8px; margin: 14px 0; }
+	.path--unlinked { text-decoration: underline dotted var(--warn); }
+	.ref--broken > summary { border-left: 2px solid var(--stop); }
+	.ref--broken .path { color: var(--stop); }
+	:root[data-origin="web"] .ref-disk, .ref--nodisk .ref-disk, .ref--nodisk .ref-editor { display: none; }
+	:root[data-origin="disk"] .ref:not(.ref--nodisk) .ref-disk, :root[data-origin="web"] .ref-gh, .ref--nodisk .ref-gh, .ref-site { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+
+	/* ---------- template scope: review ---------- */
+	.verdict-strip { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 3px; padding: 18px 22px; margin-bottom: 34px; }
+	.verdict-strip h3 { font-size: 18px; margin: 0 0 8px; color: var(--accent); }
+	.verdict-strip p { margin: 0 0 8px; max-width: 68ch; }
+	.verdict-strip p:last-child { margin-bottom: 0; }
+	.stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 0; }
+	.stat { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 14px; }
+	.stat b { display: block; font-family: var(--disp); font-size: 20px; font-variant-numeric: tabular-nums; }
+	.stat span { font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-faint); }
+	.src { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); background: var(--surface-sunk); border-left: 2px solid var(--rule); padding: 10px 14px; margin: 12px 0; overflow-x: auto; white-space: pre; }
+	.delta { display: grid; gap: 10px; margin: 14px 0; }
+	@media (min-width: 700px) { .delta { grid-template-columns: 1fr 1fr; } }
+	.delta > div { background: var(--surface-sunk); border-radius: 2px; padding: 10px 14px; font-size: 14.5px; }
+	.delta .now { border-left: 2px solid var(--stop); }
+	.delta .next { border-left: 2px solid var(--accent); }
+	.delta b { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 5px; }
+	.options { display: grid; gap: 10px; margin: 14px 0 0; }
+	.option { display: flex; gap: 12px; background: var(--surface); border: 1px solid var(--rule); border-left: 2px solid var(--rule); border-radius: 2px; padding: 11px 14px; cursor: pointer; }
+	.option:has(input:checked) { border-left-color: var(--accent); }
+	.option input { margin-top: 6px; accent-color: var(--accent); }
+	.option b { font-family: var(--disp); font-size: 15.5px; display: block; }
+	.option span { color: var(--ink-soft); font-size: 14.5px; }
+	.option .rec { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-left: 7px; }
+	.option.recommended { background: var(--accent-soft); border-left-color: var(--accent); }
+
+	/* ---------- template scope: interview ---------- */
+	.card.answered { border-left-color: var(--accent); }
+	.card.answered h3 { font-size: 16.5px; margin: 0 0 6px; }
+	.q.rec { color: var(--ink); text-transform: none; letter-spacing: 0; font-family: var(--serif); font-size: 15px; }
+	.q.rec b { color: var(--accent); }
+
+	/* ---------- block scope: diff ---------- */
+	.diff { font-family: var(--mono); font-size: 12.5px; line-height: 1.65; border: 1px solid var(--rule); border-radius: 2px; background: var(--surface-sunk); overflow-x: auto; margin: 4px 0 14px; }
+	.diff-row { display: grid; grid-template-columns: 1.6em minmax(0, 1fr); }
+	.diff-row::before { content: ""; grid-column: 1; grid-row: 1; text-align: center; user-select: none; }
+	.diff-row > .tx { grid-column: 2; grid-row: 1; padding: 3px 12px 3px 4px; white-space: pre-wrap; word-break: break-word; }
+	.diff.numbered .diff-row { grid-template-columns: 3.4em 1.6em minmax(0, 1fr); }
+	.diff.numbered .diff-row::after { content: attr(data-ln); grid-column: 1; grid-row: 1; text-align: right; padding-right: 10px; color: var(--ink-faint); user-select: none; font-variant-numeric: tabular-nums; }
+	.diff.numbered .diff-row::before { grid-column: 2; }
+	.diff.numbered .diff-row > .tx { grid-column: 3; }
+	.diff-row.add::before { content: "+"; color: var(--add-mark); }
+	.diff-row.del::before { content: "\2212"; color: var(--del-mark); }
+	.diff-row.ctx > .tx { color: var(--keep-ink); }
+	.diff-row.add > .tx { background: var(--add-bg); color: var(--add-ink); }
+	.diff-row.del > .tx { background: var(--del-bg); color: var(--del-ink); }
+	.diff-row.gap > .tx { color: var(--ink-faint); opacity: .7; }
+
+	/* ---------- block scope: panel ---------- */
+	dialog.panel { max-width: 640px; width: calc(100vw - 44px); background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 3px; box-shadow: var(--shadow); padding: 24px 26px; }
+	dialog.panel::backdrop { background: rgba(20, 25, 26, .5); }
+	dialog.panel h2 { font-size: 21px; margin: 0 0 8px; }
+	dialog.panel .lede { color: var(--ink-soft); margin: 0 0 16px; }
+	dialog.panel h3 { font-size: 15.5px; margin: 16px 0 4px; }
+	dialog.panel p { margin: 0 0 8px; font-size: 15px; }
+	dialog.panel ol { padding-left: 20px; font-size: 15px; }
+	dialog.panel li { margin-bottom: 7px; }
+	dialog.panel .close { position: absolute; top: 14px; right: 16px; }
+
+	/* ---------- block scope: figure ---------- */
+	figure.fig { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 16px 18px; margin: 16px 0; overflow-x: auto; }
+	figure.fig svg { display: block; min-width: 640px; max-width: 100%; height: auto; }
+	figcaption.cap { font-size: 14px; color: var(--ink-faint); margin: 10px 0 0; }
+	svg text { font-family: var(--mono); fill: var(--ink); }
+	svg .lanebg { fill: var(--surface-sunk); }
+	svg .lanelbl { font-size: 10px; letter-spacing: .09em; fill: var(--ink-faint); }
+	svg .box { fill: var(--surface); stroke: var(--rule); stroke-width: 1.5; }
+	svg .box.a { stroke: var(--accent); }
+	svg .box.b { stroke: var(--warn); }
+	svg .box.c { stroke: var(--ink-soft); }
+	svg .t { font-size: 11px; }
+	svg .ts { font-size: 9.5px; fill: var(--ink-faint); }
+	svg .arw { stroke: var(--ink-faint); stroke-width: 1.4; fill: none; }
+	svg .track { stroke: var(--rule); stroke-width: 2; }
+	svg .dot { fill: var(--surface); stroke-width: 2; }
+	details.more { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 14px; }
+	details.more .body { margin-top: 10px; font-size: 15px; color: var(--ink-soft); }
+
+	/* ---------- demo scope ---------- */
+	.demo { border: 1px dashed var(--rule); border-radius: 3px; background: var(--surface-sunk); padding: 14px 16px; margin: 16px 0; }
+	.demo > .tag { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+	.demo .sub { margin: 0 0 10px; font-size: 14.5px; color: var(--ink-soft); max-width: 68ch; }
+	.demo .note { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+	.demo .readout { font-family: var(--mono); font-size: 12px; line-height: 1.6; background: var(--surface); border-left: 2px solid var(--accent); border-radius: 2px; padding: 9px 12px; margin-top: 10px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+	.demo .readout .muted { color: var(--ink-faint); }
+	.demo .btnrow { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; margin-top: 4px; }
+	.demo .picks { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+	.demo .picks label { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 4px 10px; cursor: pointer; color: var(--ink-soft); background: var(--surface); user-select: none; }
+	.demo .picks label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+	.demo .picks input { position: absolute; opacity: 0; width: 0; height: 0; }
+	.demo .field { width: 100%; min-height: 54px; }
+	.demo .help { font-size: 13.5px; color: var(--ink-faint); margin: 8px 0 0; }
+	.swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+	.swatch { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 5px 9px; }
+</style>
+</head>
+<body>
+
+<script type="application/json" id="page-meta">
+{
+  "id": "flightdeck-naming-review",
+  "kind": "review",
+  "rev": 1,
+  "title": "FlightDeck \u2014 naming and conventions review",
+  "provenance": {
+    "repo": "https://github.com/dilberryhoundog/agent-library",
+    "root": "/Users/dylangraham/Projects/agent-library",
+    "self": "dev/workspace/reviews/flightdeck-naming-review.html",
+    "branch": "artifacts",
+    "commit": "5277d2d68003a1ebe0daf9cccbce56747fd4d0f5",
+    "issue": null,
+    "pr": null,
+    "date": "2026-08-25",
+    "builtAt": "2026-08-25T00:00:00Z",
+    "editor": "vscode"
+  },
+  "prompt": {
+    "heading": "Response \u2014 FlightDeck naming and conventions"
+  },
+  "next": [
+    "Write docs/flightdeck/ (conventions, terms, profiles, delivery) from every card marked Agree, using the accepted name and profile terms throughout.",
+    "Apply each Revise or Rename note to the term or convention it names before writing the doc; ask where a note is missing.",
+    "Amend stage-1-decisions.md, artifact-suite-implementation.md and PIVOT.md wherever a card here overrides them (landing rule, skill name, Artifact-tool compat).",
+    "Record the dev-workspace scaffold change (flightdecks/ directory, named tree) as a task against the dev-workspace repository.",
+    "Treat every untouched card as accepted as written."
+  ]
+}
+</script>
+
+<div class="shell rail">
+	<header class="masthead">
+		<div class="eyebrow" id="eyebrow"><span class="spacer"></span>
+			<div class="themeset" role="group" aria-label="Theme">
+				<button class="quiet tiny" type="button" data-theme-set="system" aria-pressed="true">System</button>
+				<button class="quiet tiny" type="button" data-theme-set="light" aria-pressed="false">Light</button>
+				<button class="quiet tiny" type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+			</div>
+		</div>
+		<h1>FlightDeck — naming and conventions review</h1>
+		<p class="standfirst">A name for the HTML artifact family, where its pages live and how they are delivered — then every term and convention this branch has coined, one card each, for you to keep, rename or drop. Answer what you care about; untouched cards stand as written.</p>
+		<div class="masthead-meta">
+			<span><b>Branch</b> artifacts</span>
+			<span><b>Swept</b> 36 workspace files + prompt-builder.html</span>
+			<span><b>Proposal</b> FlightDeck · deck / page</span>
+		</div>
+		<div class="stats">
+			<div class="stat"><b>113</b><span>cards</span></div>
+			<div class="stat"><b>7</b><span>takes</span></div>
+			<div class="stat"><b>63</b><span>terms</span></div>
+			<div class="stat"><b>14</b><span>convention topics</span></div>
+			<div class="stat"><b>20</b><span>decisions</span></div>
+		</div>
+	</header>
+
+	<nav class="toc column" id="toc-column" aria-label="Contents"></nav>
+
+	<main>
+		<nav class="toc pills" id="toc-pills" aria-label="Contents"></nav>
+		<div class="filters" id="filters" hidden></div>
+
+		<section id="takes">
+			<div class="sec-head"><h2>Takes</h2><span class="count"></span></div>
+			<p class="sec-intro">The six positions from the chat reply plus one on profiles. Each is an option set where the choice is genuinely yours; the rest are recommendations.</p>
+
+			<article class="card" id="flightdeck-as-the-family-name" data-tag="yourcall" data-verdicts="FlightDeck|Keep artifact-suite|Other name (note)" data-recommended="FlightDeck">
+				<div class="chiprow"><a class="chip id" href="#flightdeck-as-the-family-name">01</a><span class="chip yourcall">Your call</span><span class="chip">naming</span></div>
+				<h3>FlightDeck as the family name</h3>
+				<p>Fits the library's naming register (DraftHorse, git-box, magic-reply, corpus-sweep). Distinct from <i>artifact</i>, which is overloaded three ways on this branch: the claude.ai Artifact tool, <code>dev/workspace/artifacts/</code>, and the <code>artifact-suite</code> skill name. That overload alone justifies a coined name.</p><p>Caution: <i>deck</i> collides with slide decks in casual chat. Define it once in the framework doc and the collision is harmless.</p>
+			</article>
+			<article class="card" id="two-profiles-under-one-family-deck-and-page" data-tag="yourcall" data-verdicts="deck / page|Other pair (note)|One term only" data-recommended="deck / page">
+				<div class="chiprow"><a class="chip id" href="#two-profiles-under-one-family-deck-and-page">02</a><span class="chip yourcall">Your call</span><span class="chip">naming</span></div>
+				<h3>Two profiles under one family: deck and page</h3>
+				<p>You have two kinds of thing, not one. <b>Deck</b> — a durable instrument like prompt-builder: opened daily, versioned, carries its own state (localStorage, File System Access), lives in <code>extensions/</code>. <b>Page</b> — a task artifact like a review or interview: generated once, disposable, lives in the workspace, carries a return prompt. Same shell, very different lifecycle.</p><p>Resist theming the sub-names (sortie, instrument, cockpit). Durable-documents rule: every coined term needs a home in the doc, and two coined terms is enough.</p>
+			</article>
+			<article class="card" id="landing-rule-page-kind-decides-the-directory" data-tag="yourcall" data-verdicts="Kind decides|Single directory|Revise (note)" data-recommended="Kind decides">
+				<div class="chiprow"><a class="chip id" href="#landing-rule-page-kind-decides-the-directory">03</a><span class="chip yourcall">Your call</span><span class="chip">location</span></div>
+				<h3>Landing rule: page kind decides the directory</h3>
+				<p>Claude placing reviews in <code>reviews/</code> and plans in <code>plans/</code> is right. The dev-workspace directories already carry meaning, and archive, commit and history all work on them for free. A catch-all <code>artifacts/</code> duplicates that meaning and hides the page's purpose.</p><p>Proposed table: review page → <code>reviews/</code>; interview, options and decision pages → <code>plans/</code>; demo, dashboard or anything with no natural home → <code>flightdecks/</code>, a rename of the experimental <code>artifacts/</code> directory. This overrides the plan's single-directory landing rule (D-19, tech plan File layout).</p>
+			</article>
+			<article class="card" id="durable-decks-live-in-extensions-flightdecks" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#durable-decks-live-in-extensions-flightdecks">04</a><span class="chip integrate">Integrate</span><span class="chip">location</span></div>
+				<h3>Durable decks live in <code>extensions/flightdecks/</code></h3>
+				<p>Rename <code>extensions/artifacts/</code>. Each deck at <code>extensions/flightdecks/&lt;name&gt;/&lt;name&gt;.html</code> with its own README, symlinked into a plugin like every other asset. The skill's build material (shell, templates, blocks) stays inside the skill directory; it is not a deck.</p><p>Repo docs mirror DraftHorse: <code>docs/flightdeck/</code> for conventions, profiles and delivery; skill at <code>extensions/skills/flightdeck/</code>; optional rule in <code>extensions/rules/</code>. Cheap now — the plan is not yet built.</p>
+			</article>
+			<article class="card" id="dev-workspace-integration" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#dev-workspace-integration">05</a><span class="chip integrate">Integrate</span><span class="chip">dw</span></div>
+				<h3>dev-workspace integration</h3>
+				<p>dev-workspace is its own repo. The scaffold change (add <code>flightdecks/</code> with a <code>.keep</code>) belongs there; the tree config picks it up automatically.</p><p>Worth a named tree (<code>dev-workspace tree</code>) listing decks and pages across the live workspace and every <code>dev/branches/</code> archive — that is the high-level insight surface for pages.</p><p>Archives are the killer feature: task pages snapshot with their context. Argues strongly for pages living inside <code>dev/workspace/</code> and never in scratch or tmp.</p>
+			</article>
+			<article class="card" id="delivery-keep-artifact-tool-compatibility" data-tag="yourcall" data-verdicts="Keep compat|Drop compat, plain doctype|Revise (note)" data-recommended="Keep compat">
+				<div class="chiprow"><a class="chip id" href="#delivery-keep-artifact-tool-compatibility">06</a><span class="chip yourcall">Your call</span><span class="chip">delivery</span></div>
+				<h3>Delivery: keep Artifact-tool compatibility</h3>
+				<p>Three surfaces: disk (<code>file://</code>, disk-primary links per D-18), a published Artifact (stable URL, shareable), and browser MCP for verification. Compat cost is small — verify writes the wrapped copy — and it is the only way a durable deck becomes a true daily driver across machines and projects.</p><p>Convention: decks publish once with a stable URL recorded in the deck's README and redeploy to the same path; pages stay on disk and publish only on request. Cross-project deck access otherwise goes through <code>${CLAUDE_PLUGIN_ROOT}</code> after plugin install. Settles PIVOT §8's first open decision.</p>
+			</article>
+			<article class="card" id="profiles-as-the-documented-axis" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#profiles-as-the-documented-axis">07</a><span class="chip integrate">Integrate</span><span class="chip">profiles</span></div>
+				<h3>Profiles as the documented axis</h3>
+				<b>deck</b> — persistent state, versioned with a plugin, no return prompt, own README. <b>page / respond</b> — respond surface plus return prompt, kind-to-directory landing, disposable. <b>page / read-only</b> — demo, dashboard, figure; no state.<p>Profile is what the skill dispatches on; the three templates hang under it.</p>
+			</article>
+		<!-- @end-takes -->
+		</section>
+
+		<section id="questions" data-loose="Anything the takes missed">
+			<div class="sec-head"><h2>Questions</h2><span class="count"></span></div>
+			<p class="sec-intro">Left open by the takes. No recommendation where the answer changes the work materially.</p>
+
+			<article class="card" id="answered-interview-page-where-does-it-land" data-tag="yourcall" data-verdicts="context/ once answered|Stays in plans/|Revise (note)">
+				<div class="chiprow"><a class="chip id" href="#answered-interview-page-where-does-it-land">08</a><span class="chip yourcall">Your call</span><span class="chip">location</span></div>
+				<h3>Answered interview page: where does it land?</h3>
+				<p>An interview page starts as open questions and is republished with <code>.answered</code> record cards (D-15). Once fully answered it is a decision record, which is what <code>context/</code> holds today (<code>stage-1-decisions.md</code>).</p>
+			</article>
+			<article class="card" id="which-plugin-hosts-prompt-builder-and-the-skill" data-tag="yourcall" data-verdicts="New flightdeck plugin|chat-tools|Defer">
+				<div class="chiprow"><a class="chip id" href="#which-plugin-hosts-prompt-builder-and-the-skill">09</a><span class="chip yourcall">Your call</span><span class="chip">packaging</span></div>
+				<h3>Which plugin hosts prompt-builder and the skill?</h3>
+				<p>The tech plan symlinks the skill into <code>chat-tools</code>. A dedicated <code>flightdeck</code> plugin gives decks their own release cadence and keeps chat-tools small.</p>
+			</article>
+			<article class="card" id="rename-the-skill-and-the-plan-now" data-tag="yourcall" data-verdicts="Rename now|Rename after build|Keep artifact-suite" data-recommended="Rename now">
+				<div class="chiprow"><a class="chip id" href="#rename-the-skill-and-the-plan-now">10</a><span class="chip yourcall">Your call</span><span class="chip">naming</span></div>
+				<h3>Rename the skill and the plan now?</h3>
+				<code>artifact-suite</code> → <code>flightdeck</code> across <code>artifact-suite-implementation.md</code>, <code>PIVOT.md</code>, the storage key prefix (<code>artifact-suite.page.&lt;id&gt;</code>) and the shell stamp. Nothing is built yet, so a rename is a search-and-replace; after WP-1 it is a migration.
+			</article>
+			<article class="card" id="sweep-scope-prompt-builder-internals-and-archives" data-tag="yourcall" data-verdicts="Add prompt-builder internals|Add archives|Add both|Scope is right" data-recommended="Scope is right">
+				<div class="chiprow"><a class="chip id" href="#sweep-scope-prompt-builder-internals-and-archives">11</a><span class="chip yourcall">Your call</span><span class="chip">scope</span></div>
+				<h3>Sweep scope: prompt-builder internals and archives</h3>
+				<p>This sweep covered <code>dev/workspace/</code> and the head of <code>prompt-builder.html</code>. Not swept: prompt-builder's internal vocabulary (builders, deliverables, nested deliverables, tooltips, help) and the archived workspaces under <code>dev/branches/</code>. Say if either belongs in the conventions doc.</p>
+			</article>
+		<!-- @end-questions -->
+		</section>
+
+		<section id="terms" data-loose="Terms the sweep missed">
+			<div class="sec-head"><h2>Terms</h2><span class="count"></span></div>
+			<p class="sec-intro">Every coined term found in the workspace, alphabetical by family then subject. Agree keeps it as defined; Revise means the definition or the word needs a change (say which in the note); Reject retires it. Terms already contested by the takes carry Keep / Rename / Drop instead.</p>
+
+			<article class="card" id="term-artifact" data-tag="yourcall" data-verdicts="Keep|Rename|Drop">
+				<div class="chiprow"><a class="chip id" href="#term-artifact">12</a><span class="chip yourcall">Your call</span><span class="chip">open</span></div>
+				<h3>Artifact</h3>
+				<p>A self-contained hand-authored HTML page presenting work to the user; also the kickoff's Stage 3 deliverable. The word this review proposes to retire in favour of FlightDeck.</p><p class="gloss">Source: <code>prompts/prompt-2026-08-23-2257.md</code>, <code>WORKSPACE.md</code></p>
+			</article>
+			<article class="card" id="term-artifact-tool" data-tag="yourcall" data-verdicts="Keep|Rename|Drop">
+				<div class="chiprow"><a class="chip id" href="#term-artifact-tool">13</a><span class="chip yourcall">Your call</span><span class="chip">open</span></div>
+				<h3>Artifact tool</h3>
+				<p>The claude.ai publishing tool that wraps a fragment in its own doctype/head/body skeleton and serves it under a CSP blocking every external host except Google Fonts.</p><p class="gloss">Source: <code>plans/PIVOT.md</code> §3</p>
+			</article>
+			<article class="card" id="term-artifact-suite-the-suite" data-tag="yourcall" data-verdicts="Keep|Rename|Drop">
+				<div class="chiprow"><a class="chip id" href="#term-artifact-suite-the-suite">14</a><span class="chip yourcall">Your call</span><span class="chip">open</span></div>
+				<h3>Artifact suite / the suite</h3>
+				<p>The whole system: shell, templates, blocks, engine and skill. Candidate for renaming to FlightDeck.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> Summary</p>
+			</article>
+			<article class="card" id="term-shell" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-shell">15</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Shell</h3>
+				<p>The single copyable file carrying all tokens, layouts, chrome and the engine. A page is made by copying it.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Shell</p>
+			</article>
+			<article class="card" id="term-chrome" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-chrome">16</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Chrome</h3>
+				<p>The shared non-content bytes of a page: tokens, layouts, masthead, ToC, filters, floater, engine. The agent never writes chrome.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Form, § Token economy</p>
+			</article>
+			<article class="card" id="term-engine" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-engine">17</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Engine</h3>
+				<p>The single IIFE at the foot of the shell that generates every response surface, the ToC, filter bar, eyebrow, reference chips and the return prompt.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Runtime &amp; state</p>
+			</article>
+			<article class="card" id="term-page" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-page">18</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Page</h3>
+				<p>One built HTML file: a shell copy with content in its marker regions. Proposed as the profile name for task artifacts.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> throughout</p>
+			</article>
+			<article class="card" id="term-kind-page-kind" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-kind-page-kind">19</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Kind / page kind</h3>
+				<p>The page's purpose: <code>review</code>, <code>options</code>, <code>issue</code>, <code>interview</code>, <code>demo</code>. Six kickoff kinds map onto three templates.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Six kinds onto three templates; D-14</p>
+			</article>
+			<article class="card" id="term-template" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-template">20</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Template</h3>
+				<p>One of three exemplar files — <code>review.html</code> (also serving options and issue-breakdown), <code>interview.html</code>, and the demo kit. PIVOT demotes them from spliceable files to markup exemplars.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code>; <code>plans/PIVOT.md</code> §5</p>
+			</article>
+			<article class="card" id="term-block" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-block">21</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Block</h3>
+				<p>A small copyable markup shape with scoped CSS: <code>diff</code>, <code>panel</code>, <code>figure</code>. After PIVOT §5 a block documents a shape whose CSS and JS already live in the shell.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Blocks; <code>plans/PIVOT.md</code> §5</p>
+			</article>
+			<article class="card" id="term-demo" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-demo">22</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Demo</h3>
+				<p>A live interactive fragment inside <code>.demo</code>, composed freely by the building agent. The one exception to “everything reusable ships in the shell”.</p><p class="gloss">Source: D-16; <code>plans/PIVOT.md</code> §7</p>
+			</article>
+			<article class="card" id="term-demo-kit" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-demo-kit">23</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Demo kit</h3>
+				<p>A kit, not a page template: labelled fragments, class inventory, integration points, reserved-name list, one worked micro-example.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Template: demo kit; D-16</p>
+			</article>
+			<article class="card" id="term-demo-helper-suite-demo" data-tag="yourcall" data-verdicts="Keep|Rename|Drop" data-recommended="Keep">
+				<div class="chiprow"><a class="chip id" href="#term-demo-helper-suite-demo">24</a><span class="chip yourcall">Your call</span><span class="chip">proposed</span></div>
+				<h3>Demo helper (<code>SUITE.demo</code>)</h3>
+				<p>Proposed shell-exposed scoping helper giving a demo <code>d.out</code>, <code>d.note</code>, <code>d.report</code>, <code>d.on</code>. Rejecting it costs nothing structural.</p><p class="gloss">Source: <code>plans/PIVOT.md</code> §7</p>
+			</article>
+			<article class="card" id="term-card" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-card">25</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Card</h3>
+				<code>&lt;article class="card" id=… data-tag=…&gt;</code>; one unit of decision.<p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Card anatomy, § Card contract</p>
+			</article>
+			<article class="card" id="term-card-id" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-card-id">26</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Card id</h3>
+				<p>Agent-assigned kebab slug naming the card's subject, never a position; permanent once published; sole key for storage, radio name, ToC anchor and deep link.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Card contract</p>
+			</article>
+			<article class="card" id="term-chip-chiprow" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-chip-chiprow">27</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Chip / chiprow</h3>
+				<p>Mono uppercase pill in the card's fixed first child <code>.chiprow</code>. Modifiers: <code>.id</code>, <code>.integrate</code>, <code>.yourcall</code>, <code>.defer</code>, <code>.dead</code>, <code>.earlier</code>; an unmodified chip is a free topic chip.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Chips and the filter bar; D-3</p>
+			</article>
+			<article class="card" id="term-tag-vocabulary" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-tag-vocabulary">28</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Tag vocabulary</h3>
+				<code>integrate</code> / <code>yourcall</code> / <code>defer</code>, spelled identically in <code>data-tag</code>, the chip modifier, the card edge and the filter button.<p class="gloss">Source: D-3</p>
+			</article>
+			<article class="card" id="term-filter-bar" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-filter-bar">29</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Filter bar</h3>
+				<p>Shell furniture: <code>all | integrate | yourcall | defer | unanswered</code> with DOM-computed counts. <code>all</code> and <code>unanswered</code> are states, not tags.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Chips and the filter bar</p>
+			</article>
+			<article class="card" id="term-respond-surface" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-respond-surface">30</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Respond surface</h3>
+				<p>The engine-generated <code>.respond</code>: verdict radios, textarea and Clear, appended as a card's last child. The agent never writes an input.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Generated respond surface</p>
+			</article>
+			<article class="card" id="term-verdict" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-verdict">31</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Verdict</h3>
+				<p>The user's per-card answer, chosen from the card's verdict set.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code></p>
+			</article>
+			<article class="card" id="term-verdict-vocabulary" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-verdict-vocabulary">32</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Verdict vocabulary</h3>
+				<p>Per-kind option set carried as data: review = Agree|Revise|Reject; issue = Accept|Amend|Defer; options, interview and demo supply their own via <code>data-verdicts</code>.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Card contract; D-14</p>
+			</article>
+			<article class="card" id="term-verdict-strip" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-verdict-strip">33</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Verdict strip</h3>
+				<p>Accent-ground summary panel as the first child of the first section — “where it landed”.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Issue breakdown pieces</p>
+			</article>
+			<article class="card" id="term-verdict-floor" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-verdict-floor">34</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Verdict floor</h3>
+				<p>The <code>@supports not (selector(:has(*)))</code> rule keeping verdict radios visible where <code>:has()</code> is unsupported.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> :has() policy</p>
+			</article>
+			<article class="card" id="term-touched" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-touched">35</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Touched</h3>
+				<p>A card is touched only after a genuine change or input, or a deliberate click on an already-checked recommendation. Only touched cards enter the return prompt.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Touched, defaults, Accept all, Clear; D-8</p>
+			</article>
+			<article class="card" id="term-accept-all" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-accept-all">36</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Accept all</h3>
+				<p>Button recording every untouched recommended card as agreed in one act; hidden until a card carries a recommendation.</p><p class="gloss">Source: D-8</p>
+			</article>
+			<article class="card" id="term-return-prompt" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-return-prompt">37</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Return prompt</h3>
+				<p>The Markdown block the page composes from touched cards and hands back to the agent. The point of the suite.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Return prompt</p>
+			</article>
+			<article class="card" id="term-page-meta" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-page-meta">38</a><span class="chip integrate">Integrate</span><span class="chip">data</span></div>
+				<h3><code>#page-meta</code></h3>
+				<p>The sole agent-authored machine-data block: <code>id</code>, <code>kind</code>, <code>rev</code>, <code>title</code>, <code>provenance{}</code>, <code>prompt.heading</code>, <code>next[]</code>.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § #page-meta schema; D-9</p>
+			</article>
+			<article class="card" id="term-rev" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-rev">39</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Rev</h3>
+				<p>The <code>#page-meta.rev</code> integer bumped on every regeneration; also recorded per stored answer.</p><p class="gloss">Source: D-7</p>
+			</article>
+			<article class="card" id="term-fingerprint" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-fingerprint">40</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Fingerprint</h3>
+				<p>DJB2 hash of a card's normalised text plus <code>data-tag</code> and <code>data-verdicts</code>, per card never per file. PIVOT §9 strips generated regions before hashing.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Fingerprints; <code>plans/PIVOT.md</code> §9</p>
+			</article>
+			<article class="card" id="term-changed-strip" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-changed-strip">41</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Changed strip</h3>
+				<p>Amber engine-inserted bar “Changed since you answered (rev N)” with Dismiss, raised when a card's fingerprint moved.</p><p class="gloss">Source: D-7</p>
+			</article>
+			<article class="card" id="term-orphan-held-answer" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-orphan-held-answer">42</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Orphan / held answer</h3>
+				<p>A stored answer whose card left the page: kept under <code>orphans</code> with its last title and surfaced in the footer with Show / Discard.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Fingerprints, changed cards, orphans; D-7</p>
+			</article>
+			<article class="card" id="term-withdrawn-card" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-withdrawn-card">43</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Withdrawn card</h3>
+				<code>.card.dead</code>: a retired card that keeps its id, tag and held record, carries a Withdrawn chip and <code>data-answer="none"</code>, and never leaves the page.<p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Withdrawn card</p>
+			</article>
+			<article class="card" id="term-answered-record" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-answered-record">44</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Answered record</h3>
+				<p>An <code>.answered</code> card the agent writes on republish in place of an interview question, keeping the question's id.</p><p class="gloss">Source: D-15</p>
+			</article>
+			<article class="card" id="term-loose-box" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-loose-box">45</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Loose box</h3>
+				<p>A section-level free comment box the engine appends to any <code>&lt;section data-loose="…"&gt;</code>.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Generated respond surface</p>
+			</article>
+			<article class="card" id="term-masthead" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-masthead">46</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Masthead</h3>
+				<code>header.masthead</code>: eyebrow, <code>h1</code>, standfirst, optional <code>.masthead-meta</code>.<p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Masthead</p>
+			</article>
+			<article class="card" id="term-eyebrow" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-eyebrow">47</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Eyebrow</h3>
+				<p>Mono uppercase provenance strip at the top of the masthead: kind · rev · issue · pr · branch · commit · date. Entirely engine-generated.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Eyebrow</p>
+			</article>
+			<article class="card" id="term-standfirst" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-standfirst">48</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Standfirst</h3>
+				<p>The lead paragraph under the h1, capped at 62ch.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Masthead</p>
+			</article>
+			<article class="card" id="term-stats-stat-tiles" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-stats-stat-tiles">49</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Stats / stat tiles</h3>
+				<code>.stats</code>/<code>.stat</code> numeric tiles in an issue-breakdown masthead.<p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Issue breakdown pieces</p>
+			</article>
+			<article class="card" id="term-layouts-reading-rail-board" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-layouts-reading-rail-board">50</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Layouts: reading, rail, board</h3>
+				<code>.shell</code> 940px reading; <code>.shell.rail</code> 1180px with a 232px left ToC column; <code>.shell.board</code> 1340px with main plus a sticky right sidebar. A page picks by class.<p class="gloss">Source: D-1</p>
+			</article>
+			<article class="card" id="term-rail-reserved" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-rail-reserved">51</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Rail (reserved)</h3>
+				<code>.shell.rail</code> is the layout; a bare <code>.rail</code> selector is never defined by the shell because it already names the folder-picker row in <code>mock-4-proposals.html</code>.<p class="gloss">Source: D-5</p>
+			</article>
+			<article class="card" id="term-table-of-contents-pill-row" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-table-of-contents-pill-row">52</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Table of contents / pill row</h3>
+				<code>.toc</code>, generated by the engine into two surfaces: the sticky column in rail layout and the sticky <code>.toc.pills</code> row everywhere else.<p class="gloss">Source: D-2; <code>plans/artifact-suite-implementation.md</code> § Table of contents</p>
+			</article>
+			<article class="card" id="term-section-id-contract" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-section-id-contract">53</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Section id contract</h3>
+				<p>A section's id is the lowercase slug of its <code>.sec-head h2</code>; permanent once published, like a card id.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Table of contents</p>
+			</article>
+			<article class="card" id="term-floater-floating-pair" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-floater-floating-pair">54</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Floater / floating pair</h3>
+				<p>Fixed bottom-right container holding <code>#status</code>, Accept all, View prompt, Copy prompt.</p><p class="gloss">Source: D-10</p>
+			</article>
+			<article class="card" id="term-marker-marker-region" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-marker-marker-region">55</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Marker / marker region</h3>
+				<p>An editable region delimited by <code>&lt;!-- @name --&gt;</code> … <code>&lt;!-- @name:end --&gt;</code>. Everything outside a marker is fixed chrome.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Markers; <code>plans/PIVOT.md</code> §7</p>
+			</article>
+			<article class="card" id="term-shell-stamp" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-shell-stamp">56</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Shell stamp</h3>
+				<p>Line 1 of the shell: a version comment stating what may be written. Verification reads it by text, never by line number.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Form; <code>plans/PIVOT.md</code> §3</p>
+			</article>
+			<article class="card" id="term-pre-paint-script" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-pre-paint-script">57</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Pre-paint script</h3>
+				<p>First script above <code>&lt;style&gt;</code>: restores the remembered theme and stamps <code>data-origin</code>, so no theme flash.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Theme control; prompt-builder head</p>
+			</article>
+			<article class="card" id="term-provenance" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-provenance">58</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Provenance</h3>
+				<p>The <code>#page-meta.provenance</code> object (repo, root, self, branch, commit, issue, pr, date, builtAt, editor) from which every URL is derived.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Provenance &amp; links</p>
+			</article>
+			<article class="card" id="term-reference-block-link-to-site" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-reference-block-link-to-site">59</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Reference block / link-to-site</h3>
+				<p>An empty <code>details.ref</code> with <code>data-path</code>, <code>data-lines</code>, <code>data-loc</code> that the engine expands into a summary plus Disk / Editor / GitHub / Copy-path chips.</p><p class="gloss">Source: D-11</p>
+			</article>
+			<article class="card" id="term-disk-primary-links" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-disk-primary-links">60</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Disk-primary links</h3>
+				<p>The reference's solid chip is the <code>file://</code> one when opened from disk, GitHub when on the web.</p><p class="gloss">Source: D-18; <code>plans/artifact-suite-implementation.md</code> § Origin gating</p>
+			</article>
+			<article class="card" id="term-origin-gating" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-origin-gating">61</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Origin gating</h3>
+				<p>CSS-only switching of link chips off <code>:root[data-origin="disk"|"web"]</code>, so a page needs no rebuild when published.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Origin gating</p>
+			</article>
+			<article class="card" id="term-archive-mirror" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-archive-mirror">62</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Archive mirror</h3>
+				<p>The <code>dev/branches/&lt;branch&gt;/</code> snapshot; how a file on another branch opens from disk, badged “archived copy”.</p><p class="gloss">Source: D-12</p>
+			</article>
+			<article class="card" id="term-paper-ink" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-paper-ink">63</a><span class="chip integrate">Integrate</span><span class="chip">design</span></div>
+				<h3>Paper/Ink</h3>
+				<p>The canonical design system: paper/surface/ink/rule/accent/warn/stop tokens with <code>-soft</code> companions, the type triple, and the <code>.shell/.masthead/.eyebrow/.standfirst</code> scaffold.</p><p class="gloss">Source: <code>reviews/paper-ink-fingerprint.html</code>; prompt-builder lines 21-74</p>
+			</article>
+			<article class="card" id="term-family-in-family" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-family-in-family">64</a><span class="chip integrate">Integrate</span><span class="chip">design</span></div>
+				<h3>Family / in-family</h3>
+				<p>Whether an HTML document belongs to Paper/Ink, judged by four always-present marks: token vocabulary, type triple, <code>.shell</code>, <code>.sec-head</code>.</p><p class="gloss">Source: <code>reviews/paper-ink-fingerprint.html</code></p>
+			</article>
+			<article class="card" id="term-the-signal" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-the-signal">65</a><span class="chip integrate">Integrate</span><span class="chip">design</span></div>
+				<h3>The signal</h3>
+				<code>--surface-sunk</code>: the one string that finds every Paper/Ink document and nothing else.<p class="gloss">Source: <code>reviews/paper-ink-fingerprint.html</code></p>
+			</article>
+			<article class="card" id="term-diff-review" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-diff-review">66</a><span class="chip integrate">Integrate</span><span class="chip">design</span></div>
+				<h3>Diff-Review</h3>
+				<p>The other, out-of-scope HTML design family in this repo: <code>--bg/--panel/--muted/--line</code>, monospace throughout, no web fonts.</p><p class="gloss">Source: <code>reviews/paper-ink-fingerprint.html</code></p>
+			</article>
+			<article class="card" id="term-type-triple" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-type-triple">67</a><span class="chip integrate">Integrate</span><span class="chip">design</span></div>
+				<h3>Type triple</h3>
+				<p>Bitter (display), Source Serif 4 (body), JetBrains Mono (data) — one Google Fonts link, system fallbacks.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Type triple</p>
+			</article>
+			<article class="card" id="term-token-economy" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-token-economy">68</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Token economy</h3>
+				<p>The accounting of what the agent never types versus what supplies it; the suite's efficiency contract.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Token economy</p>
+			</article>
+			<article class="card" id="term-landing-rule" data-tag="yourcall" data-verdicts="Keep|Rename|Drop">
+				<div class="chiprow"><a class="chip id" href="#term-landing-rule">69</a><span class="chip yourcall">Your call</span><span class="chip">open</span></div>
+				<h3>Landing rule</h3>
+				<p>The rule stating where a built page lands on disk. Currently <code>dev/workspace/artifacts/&lt;id&gt;.html</code>; this review proposes kind-decides.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § File layout</p>
+			</article>
+			<article class="card" id="term-corpus" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-corpus">70</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Corpus</h3>
+				<p>The eight reference HTML files Stage 1 read.</p><p class="gloss">Source: D-20</p>
+			</article>
+			<article class="card" id="term-kickoff" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-kickoff">71</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Kickoff</h3>
+				<p>The originating task prompt file for the suite.</p><p class="gloss">Source: <code>prompts/prompt-2026-08-23-2257.md</code></p>
+			</article>
+			<article class="card" id="term-lens-and-finding-prefixes" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-lens-and-finding-prefixes">72</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Lens and finding prefixes</h3>
+				<p>The five Stage 1 reading angles and their finding ids: DS- design system, CO- component catalogue, ST- scripting and state, AR- architecture, PR- provenance and navigation; Q- open questions.</p><p class="gloss">Source: <code>reviews/artifact-suite-investigation.html</code></p>
+			</article>
+			<article class="card" id="term-work-package-wp-n" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-work-package-wp-n">73</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Work package (WP-n)</h3>
+				<p>Stage 3 build units, each with a done-check. WP-10 deleted by PIVOT §1.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Stage 3 work packages</p>
+			</article>
+			<article class="card" id="term-blast-radius" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-blast-radius">74</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<h3>Blast radius</h3>
+				<p>Scope of what a change can break; used as a heading in the export/import discovery.</p><p class="gloss">Source: <code>reviews/export-import-discovery.html</code></p>
+			</article>
+		<!-- @end-terms -->
+		</section>
+
+		<section id="conventions" data-loose="Conventions the sweep missed">
+			<div class="sec-head"><h2>Conventions</h2><span class="count"></span></div>
+			<p class="sec-intro">One card per topic, listing the rules the plan and PIVOT settle. Agree accepts the list whole; Revise with a note strikes or amends individual lines.</p>
+
+			<article class="card" id="file-form" data-tag="yourcall" data-verdicts="Agree|Revise|Reject" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#file-form">75</a><span class="chip yourcall">Your call</span></div>
+				<h3>File form</h3>
+				<ul><li>Bare fragment: no doctype/html/head/body — <b>open</b>, PIVOT §8 builds against dropping it.</li><li>Four quirks-mode rules: lowercase class/id names; explicit font-size/line-height on td/th; no percentage heights; no image in a table.</li><li>Non-ASCII CSS <code>content</code> written as escapes (<code>\2212</code>, <code>\00B7</code>).</li><li>Version stamp on line 1, read by text.</li><li>Self-contained single file; only the Google Fonts link and a data-URI SVG favicon leave the file.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Form; D-18</p>
+			</article>
+			<article class="card" id="location-and-landing" data-tag="yourcall" data-verdicts="Agree|Revise|Reject" data-recommended="Revise">
+				<div class="chiprow"><a class="chip id" href="#location-and-landing">76</a><span class="chip yourcall">Your call</span></div>
+				<h3>Location and landing</h3>
+				<ul><li>Built pages land in <code>dev/workspace/artifacts/&lt;id&gt;.html</code> (D-19) — challenged by the takes above.</li><li><code>reviews/</code> keeps its meaning: reviews of completed work, plus the Stage 1 corpus.</li><li><code>filebox/</code> is temporary and purged.</li><li>Both directories archive to <code>dev/branches/&lt;branch&gt;/</code> identically.</li><li>Id collision check before copy: <code>ls dev/workspace/artifacts dev/branches/*/artifacts</code> — every <code>file://</code> page shares one origin.</li><li>Skill at <code>extensions/skills/artifact-suite/</code>, symlinked into chat-tools — release clauses withdrawn by PIVOT §1.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § File layout</p>
+			</article>
+			<article class="card" id="naming" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#naming">77</a><span class="chip integrate">Integrate</span></div>
+				<h3>Naming</h3>
+				<ul><li>Page file = <code>&lt;id&gt;.html</code>; id = <code>#page-meta.id</code> = kebab subject slug, permanent.</li><li>Card id = kebab subject slug; a stable external id (<code>ds-1</code>, <code>issue-45</code>) is valid, an ordinal is not.</li><li>Section id = lowercase slug of its h2; permanent.</li><li>Radio group name = <code>v-&lt;cardId&gt;</code>.</li><li><code>&lt;title&gt;</code> = <code>#page-meta.title</code> = h1.</li><li><code>.toc</code> for contents; <code>.rail</code> reserved; <code>layout</code>, <code>card</code>, <code>section</code>, <code>show</code> never marker names.</li><li>Reserved for demos and blocks: every shell id, <code>data-theme</code>, every token, every shell class.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Card contract, § Class inventory</p>
+			</article>
+			<article class="card" id="theme-and-tokens" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#theme-and-tokens">78</a><span class="chip integrate">Integrate</span></div>
+				<h3>Theme and tokens</h3>
+				<ul><li>Three theme blocks always: light on bare <code>:root</code>; dark under the media query guarded by <code>:not([data-theme="light"])</code>; dark again under <code>[data-theme="dark"]</code>.</li><li>14 original tokens plus exactly seven diff tokens; nothing else is ever added.</li><li>Radius hardcoded: 2px controls, 3px cards — “no token, indirection over a constant”.</li><li>Two prose measures: 68ch on card prose and section intros; 62ch on standfirst, gloss, blockquote.</li><li>No template or block names a font family, a raw colour, or restates a shell selector.</li><li>Three-way theme control; System removes the attribute and the stored key.</li><li><code>:has()</code> allowed (Chrome ≥105); only adds state the control already expresses; the one load-bearing use carries an <code>@supports</code> floor.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Tokens, § Theme control; D-4</p>
+			</article>
+			<article class="card" id="marker-regions-and-writing-a-page" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#marker-regions-and-writing-a-page">79</a><span class="chip integrate">Integrate</span></div>
+				<h3>Marker regions and writing a page</h3>
+				<ul><li>Seven regions, each exactly once. PIVOT §7 set: <code>@doc-title</code>, <code>@page-meta</code>, <code>@masthead</code>, <code>@content</code>, <code>@sidebar</code>, <code>@demo-style</code>, <code>@demo-script</code>.</li><li>Placeholder regions are replaced whole; empty regions fill by rewriting the closing marker into content plus the same marker.</li><li>One writable attribute outside the markers: the class on <code>.shell</code>.</li><li>Each section carries <code>&lt;!-- @end-&lt;sectionId&gt; --&gt;</code> before its closing tag (Edit anchor).</li><li>A page is created by <code>cp</code>, never by writing chrome. Never read the shell; never read a page copy in full — bounded Read with offset/limit, ranges found with <code>grep -n</code>.</li><li><code>splice.py</code> deleted (PIVOT §6); Edit and bounded Read replace it.</li><li>The shell carries everything reusable; nothing is spliced, lifted or pasted at build time (PIVOT §5).</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Markers; <code>plans/PIVOT.md</code> §4-7</p>
+			</article>
+			<article class="card" id="storage" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#storage">80</a><span class="chip integrate">Integrate</span></div>
+				<h3>Storage</h3>
+				<ul><li>Keys: <code>artifact-suite.page.&lt;id&gt;</code> per page; <code>artifact-suite.theme</code> shared. Nothing else is written.</li><li>One JSON document per page: <code>schema</code>, <code>pageId</code>, <code>rev</code>, <code>savedAt</code>, <code>cards{}</code>, <code>sections{}</code>, <code>orphans{}</code>; read once at boot, written once per 200ms-debounced change.</li><li>Per-card record: verdict, comment, fingerprint, answeredAt, touched, rev.</li><li>Every localStorage access in try/catch with an in-memory fallback and a footer warning when saving is off.</li><li>Demos store nothing.</li><li>Keep every answer: removed cards are held, changed cards are flagged, never cleared.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Storage document; D-6, D-7</p>
+			</article>
+			<article class="card" id="return-prompt-format" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#return-prompt-format">81</a><span class="chip integrate">Integrate</span></div>
+				<h3>Return prompt format</h3>
+				<ul><li><code>## &lt;prompt.heading or title&gt;</code>, then <code>Source:</code> joined with middle dots, <code>Untouched:</code> two bare counts, <code>Held:</code> ids only when orphans exist.</li><li><code>### Decisions</code>: touched cards in document order as <code>**&lt;cardId&gt; · &lt;h3&gt;**</code> with Verdict and Note; then touched loose sections.</li><li><code>### Next</code> from <code>META.next</code>; then a <code>Re-open:</code> line.</li><li>Multi-line notes indented two spaces; radio tokens never upper-cased; filtering never affects composition; empty prompt when nothing is touched.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Return prompt</p>
+			</article>
+			<article class="card" id="links-and-url-derivation" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#links-and-url-derivation">82</a><span class="chip integrate">Integrate</span></div>
+				<h3>Links and URL derivation</h3>
+				<ul><li>No template writes a literal href; every URL derives from <code>META.provenance</code> at load.</li><li>Disk <code>file://root/path</code>; Editor <code>vscode://file/…:line</code>; GitHub blob pinned to the commit the agent read; <code>data-commit</code> overrides.</li><li>Every outbound link <code>target="_blank" rel="noopener"</code>; in-page anchors never.</li><li>Exactly one solid <code>.ref-chip</code> per reference, chosen by origin.</li><li>Absolute checkout path accepted in the page — <b>open</b>, PIVOT §8.</li><li>Every <code>.path</code> sits inside a ref; a diff block is always preceded by a ref naming its file.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Provenance &amp; links; D-11, D-12, D-13</p>
+			</article>
+			<article class="card" id="script-dialect-and-placement" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#script-dialect-and-placement">83</a><span class="chip integrate">Integrate</span></div>
+				<h3>Script dialect and placement</h3>
+				<ul><li>Two scripts only: the pre-paint script and one engine IIFE; templates contribute no JavaScript.</li><li>prompt-builder's dialect: <code>var</code>, function declarations, string concatenation; no arrows, template literals, optional chaining or <code>class</code>.</li><li>Callers above callees under twelve fixed banners (STYLE.md); comments state constraints only (code-comments.md).</li><li>The <code>&lt;\/</code> rule for any <code>&lt;/</code> inside a script or JSON string.</li><li>One global: <code>window.SUITE = { copyText, flash, meta }</code>; one clipboard path, one status path; no <code>prompt()</code> or <code>alert()</code>.</li><li>Events delegated from <code>document</code>; capabilities probed never assumed.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Script placement and dialect; <code>extensions/rules/STYLE.md</code></p>
+			</article>
+			<article class="card" id="card-authoring" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#card-authoring">84</a><span class="chip integrate">Integrate</span></div>
+				<h3>Card authoring</h3>
+				<ul><li>Body order: chiprow, h3, optional blockquote, prose and evidence, engine <code>.respond</code> last.</li><li>The agent writes the article, chiprow, h3 and prose — nothing else.</li><li>Card edge is a border-left driven by <code>data-tag</code>.</li><li>Optional attributes: <code>data-tag</code>, <code>data-verdicts</code>, <code>data-recommended</code>, <code>data-answer</code>. Verdict sets live on the article, not in page-meta.</li><li>Quote = blockquote with <code>&lt;cite&gt;You · session YYYY-MM-DD&lt;/cite&gt;</code>; never inside <code>.respond</code>.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Card anatomy, § Card contract</p>
+			</article>
+			<article class="card" id="verification" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#verification">85</a><span class="chip integrate">Integrate</span></div>
+				<h3>Verification</h3>
+				<ul><li>Static tier S1-S10 via <code>verify.py &lt;page&gt; --static</code>: doctype/stamp, seven markers, page-meta parse, card ids, options agreement, host allow-list, one title/h1/meta, one shell class, cards inside sections. S9 deleted.</li><li>Runtime tier V1-V17 over Playwright and <code>python3 -m http.server 8787</code>: console clean, ToC and respond counts, storage keys, restore, changed strip, held answers, links, overflow at four widths, filters, clipboard fallback.</li><li>Three frozen fixtures are the regression suite; a fixture that must change is a contract change.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Verification; <code>extensions/skills/artifact-suite/references/verification-checks.md</code> (planned)</p>
+			</article>
+			<article class="card" id="sizes-and-ceilings" data-tag="defer" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#sizes-and-ceilings">86</a><span class="chip defer">Defer</span></div>
+				<h3>Sizes and ceilings</h3>
+				<ul><li>Shell 36KB hard / 32KB target — dropped by PIVOT §5 in favour of one recorded byte measurement.</li><li>Templates 3-9KB; blocks 1.5-2.5KB; references ~80-130 lines; SKILL.md 260-320 lines; fixtures 48-60KB.</li><li>A 10-card review ≈ 95 authored lines, none of it chrome.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Ceilings; <code>plans/PIVOT.md</code> §5</p>
+			</article>
+			<article class="card" id="build-procedure" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#build-procedure">87</a><span class="chip integrate">Integrate</span></div>
+				<h3>Build procedure</h3>
+				<ul><li>Nine steps after PIVOT §6, referred to by title never by number: Open the Build · Load the Page Kind · Resolve Provenance · Instantiate the Shell · Write the Content · Verify the Page · Revise a Published Page · Hand the Page Over · Handle a Build Problem.</li><li>Every Bash call is a fresh shell; re-assign paths at the head of each command.</li><li>One page template per page; a shape no template covers is a hard bail and an issue.</li><li>Git facts run once from the repo root; detached HEAD → branch null; issue never guessed.</li><li>Updates edit one card in place; a whole-file rewrite is a defect.</li><li>Plain SKILL.md first; DraftHorse conversion is a later interactive task (PIVOT §2).</li><li>Plugin assets run from the last installed release, so the skill runs by hand from the working tree.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § SKILL.md shape; <code>plans/PIVOT.md</code> §1, §2, §6</p>
+			</article>
+			<article class="card" id="workspace-level-conventions" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#workspace-level-conventions">88</a><span class="chip integrate">Integrate</span><span class="chip">dw</span></div>
+				<h3>Workspace-level conventions</h3>
+				<ul><li>Workspace dirs: context, plans, prompts, reviews, artifacts, research, tasks, filebox, history — each with a <code>.keep</code>.</li><li>History transcripts <code>&lt;8-hex&gt;_&lt;kebab-summary&gt;.txt</code> via conversation-capture.</li><li>Branches are domain-scoped kebab names; archives in <code>dev/branches/&lt;branch&gt;/</code>.</li><li>Prompt-template Action DSL: ownership words, <code>?</code> fallback chains, status glyphs, <code>!</code> context prefix.</li><li>Magic phrases: show your working / options / strategy / context / difficulties; use your claude space.</li><li>Verify HTML over http, never <code>file:</code> in Playwright; cache-bust after edits.</li></ul><p class="gloss">Source: <code>workspace-config.yml</code>, <code>prompts/README.md</code>, <code>WORKSPACE.md</code></p>
+			</article>
+		<!-- @end-conventions -->
+		</section>
+
+		<section id="decisions">
+			<div class="sec-head"><h2>Stage 1 decisions</h2><span class="count"></span></div>
+			<p class="sec-intro">D-1 to D-20 as recorded on 2026-08-24. Two are reopened by PIVOT and carry no default.</p>
+
+			<article class="card" id="d-1" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-1">89</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-1 — Shell layouts</h3>
+				<p>Three named layouts — <code>.shell</code> 940px, <code>.shell.rail</code> 1180px with 232px left rail at 1040px, <code>.shell.board</code> 1340px with sticky right rail at 1060px.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-2" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-2">90</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-2 — ToC below 1040px</h3>
+				<p>Sticky pill row rendered from the same generated list.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-3" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-3">91</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-3 — Chip vocabulary</h3>
+				<code>integrate</code> / <code>yourcall</code> / <code>defer</code> across markup, chips, card edge and filter buttons. Filter bar is a shell feature.<p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-4" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-4">92</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-4 — Theme control</h3>
+				<p>Three-way System / Light / Dark. System removes the attribute and the stored key.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-5" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-5">93</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-5 — Naming</h3>
+				<p>Contents is <code>.toc</code>; <code>.rail</code> stays reserved for folder-picker rows.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-6" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-6">94</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-6 — Storage</h3>
+				<p>One localStorage JSON document per page keyed by the page id in the meta block; theme one shared key.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-7" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-7">95</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-7 — Republish</h3>
+				<p>Keep every answer; changed card shows an amber strip; removed card's answer held; every regeneration bumps rev.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-8" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-8">96</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-8 — Defaults</h3>
+				<p>Recommended option pre-checked; only touched cards enter the return prompt; Accept all records the defaults.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-9" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-9">97</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-9 — Page data</h3>
+				<p>One <code>#page-meta</code> JSON block holds provenance, id, rev, prompt heading and next steps.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-10" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-10">98</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-10 — Copy controls</h3>
+				<p>Floating pair (Copy prompt, View prompt), bottom right.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-11" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-11">99</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-11 — File reference block</h3>
+				<p>Three links — disk, editor, GitHub blob — plus copy-path. Absolute checkout path acceptable in the page.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-12" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-12">100</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-12 — GitHub pinning</h3>
+				<p>Links pin to the commit the agent read; other branches open via the archive mirror, marked archived copy.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-13" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-13">101</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-13 — Outbound links</h3>
+				<p>Every outbound link opens in a new tab with <code>rel="noopener"</code>.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-14" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-14">102</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-14 — Three templates</h3>
+				<p>Review, options and issue-breakdown share one card anatomy differing by verdict vocabulary; six kinds map onto three.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-15" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-15">103</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-15 — Interview republish</h3>
+				<p>Answered questions rewritten as <code>.answered</code> record cards.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-16" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-16">104</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-16 — Demo page</h3>
+				<p>No fixed shape; fully customisable by the building agent, who must know the available structure, classes and integration points.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-17" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-17">105</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-17 — Panel/modal</h3>
+				<p>Optional block, not part of the shell. PIVOT §5 ships its implementation in the shell while presence stays optional.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-18" data-tag="yourcall">
+				<div class="chiprow"><a class="chip id" href="#d-18">106</a><span class="chip yourcall">Your call</span><span class="chip">stage 1</span></div>
+				<h3>D-18 — File form</h3>
+				<p>Bare fragment, disk-primary links; Artifact-tool publishing open. <b>Reopened</b> by PIVOT §3/§8.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-19" data-tag="yourcall">
+				<div class="chiprow"><a class="chip id" href="#d-19">107</a><span class="chip yourcall">Your call</span><span class="chip">stage 1</span></div>
+				<h3>D-19 — Packaging</h3>
+				<p>Ship as a skill. <b>Amended</b> by PIVOT §1: skill kept, versioning and release withdrawn. Landing dir settled in the tech plan.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+			<article class="card" id="d-20" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#d-20">108</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<h3>D-20 — Corpus</h3>
+				<p>Eight reference files; <code>filebox/review.html</code> excluded.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
+			</article>
+		<!-- @end-decisions -->
+		</section>
+
+		<section id="open" data-loose="Anything else to settle">
+			<div class="sec-head"><h2>Open questions in the docs</h2><span class="count"></span></div>
+			<p class="sec-intro">Questions the plan and PIVOT leave standing, plus the unresolved lists earlier reviews left behind.</p>
+
+			<article class="card" id="q-provenance-root-carries-the-absolute-checkout-path" data-tag="yourcall" data-verdicts="Keep it|Strip at publish|Revise (note)" data-recommended="Keep it">
+				<div class="chiprow"><a class="chip id" href="#q-provenance-root-carries-the-absolute-checkout-path">109</a><span class="chip yourcall">Your call</span><span class="chip">pivot §8</span></div>
+				<h3>Q: <code>provenance.root</code> carries the absolute checkout path?</h3>
+				<p>Blocks WP-3. It holds the absolute path because that is what makes the Disk and Editor chips resolve; a published page then carries the home-directory name. PIVOT builds against keeping it; the alternative is blanking root at publish time.</p><p class="gloss">Source: <code>plans/PIVOT.md</code> §8; plan-review card <code>root-path-exposure</code></p>
+			</article>
+			<article class="card" id="q-bash-kill-for-the-verification-server" data-tag="yourcall" data-verdicts="Grant kill|User runs server|Defer">
+				<div class="chiprow"><a class="chip id" href="#q-bash-kill-for-the-verification-server">110</a><span class="chip yourcall">Your call</span><span class="chip">plan Q2</span></div>
+				<h3>Q: <code>Bash(kill:*)</code> for the verification server</h3>
+				<p>Whether the skill may kill the <code>http.server</code> it starts, or the user starts and stops it.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Unresolved questions</p>
+			</article>
+			<article class="card" id="q-fixtures-inside-the-released-plugin-payload" data-tag="defer" data-answer="none">
+				<div class="chiprow"><a class="chip id" href="#q-fixtures-inside-the-released-plugin-payload">111</a><span class="chip defer">Defer</span><span class="chip">plan Q3</span></div>
+				<h3>Q: fixtures inside the released plugin payload?</h3>
+				<p>Deferred with release packaging; fixtures stay in the repo regardless.</p><p class="gloss">Source: <code>plans/PIVOT.md</code> §8</p>
+			</article>
+			<article class="card" id="q-confirm-the-skill-s-tool-set" data-tag="yourcall" data-verdicts="Confirm|Revise (note)" data-recommended="Confirm">
+				<div class="chiprow"><a class="chip id" href="#q-confirm-the-skill-s-tool-set">112</a><span class="chip yourcall">Your call</span><span class="chip">plan Q5</span></div>
+				<h3>Q: confirm the skill's tool set</h3>
+				<p>With <code>splice.py</code> gone: Read with offset/limit plus Edit, and the invariant that the shell and full page copies are never read whole.</p><p class="gloss">Source: <code>plans/PIVOT.md</code> §8</p>
+			</article>
+			<article class="card" id="unresolved-lists-left-in-earlier-reviews" data-tag="yourcall" data-verdicts="Roll in|Stay parked|Triage separately" data-recommended="Triage separately">
+				<div class="chiprow"><a class="chip id" href="#unresolved-lists-left-in-earlier-reviews">113</a><span class="chip yourcall">Your call</span><span class="chip">backlog</span></div>
+				<h3>Unresolved lists left in earlier reviews</h3>
+				<p>Investigation § Gaps the lenses missed (16 items); export-import discovery § new capability flag and § watch items; section-ledger § open questions; mock-4-proposals § Deferred and § Your call. None has a recorded verdict. Say whether they roll into the FlightDeck conventions doc or stay parked.</p>
+			</article>
+		<!-- @end-open -->
+		</section>
+
+	</main>
+
+	<aside class="sidebar"></aside>
+	<footer id="foot"></footer>
+</div>
+<div class="floater"><span class="status" id="status" role="status"></span>
+	<button class="ghost tiny" type="button" id="accept-all" hidden>Accept all</button>
+	<button class="ghost" type="button" id="view-prompt">View prompt</button>
+	<button type="button" id="copy-prompt">Copy prompt</button>
+</div>
+<div id="outwrap" hidden><textarea id="out" readonly aria-label="Return prompt as plain text"></textarea></div>
+
+<script>
+(function () {
+	"use strict";
+
+	/* ================= Boot ================= */
+
+	var META = null;
+	var STATE = null;
+	var MEM = {};
+	var SAVE_TIMER = null;
+	var STATUS_TIMER = null;
+
+	var DEFAULT_VERDICTS = {review: ["Agree", "Revise", "Reject"], issue: ["Accept", "Amend", "Defer"], options: [], interview: [], demo: []};
+	var KIND_LABEL = {review: "Review", options: "Options", issue: "Issue breakdown", interview: "Interview", demo: "Demo"};
+	var TAGS = ["integrate", "yourcall", "defer"];
+	var TAG_LABEL = {integrate: "Integrate", yourcall: "Your call", defer: "Defer", all: "All", unanswered: "Unanswered"};
+
+	function boot() {
+		readMeta();
+		capabilityGate();
+		loadState();
+		validateCards();
+		var cards = cardList();
+		var i;
+		for (i = 0; i < cards.length; i++) { attachRespond(cards[i]); }
+		for (i = 0; i < cards.length; i++) { restoreCard(cards[i]); }
+		var loose = document.querySelectorAll("section[data-loose]");
+		for (i = 0; i < loose.length; i++) { attachLoose(loose[i]); }
+		collectOrphans();
+		renderEyebrow();
+		var refs = document.querySelectorAll("details.ref");
+		for (i = 0; i < refs.length; i++) { expandRef(refs[i]); }
+		auditPaths();
+		buildToc();
+		observeSections();
+		buildFilters();
+		countSections();
+		wireEvents();
+		wireBlocks();
+		wireDemos();
+		checkTitles();
+		revealTarget();
+		renderFoot();
+	}
+
+	/* ================= Meta and capabilities ================= */
+
+	var CAN_LS = (function () {
+		try {
+			localStorage.setItem("artifact-suite.__probe", "1");
+			localStorage.removeItem("artifact-suite.__probe");
+			return true;
+		} catch (e) { return false; }
+	})();
+	var CAN_FS = typeof window.showSaveFilePicker === "function";
+
+	function readMeta() {
+		var node = document.getElementById("page-meta");
+		try {
+			META = JSON.parse(node.textContent);
+		} catch (e) {
+			META = {id: "unknown-page", kind: "review", rev: 1, title: document.title, provenance: {}, prompt: {}, next: []};
+			flash("Page data could not be read — answers will not be saved.", true);
+		}
+		if (!META.provenance) META.provenance = {};
+		if (!META.prompt) META.prompt = {};
+		if (!META.next) META.next = [];
+	}
+
+	function capabilityGate() {
+		if (!CAN_FS) {
+			var fs = document.querySelectorAll('[data-needs="fs"]');
+			for (var i = 0; i < fs.length; i++) { fs[i].parentNode.removeChild(fs[i]); }
+		}
+	}
+
+	/* ================= Storage ================= */
+
+	function stateKey() { return "artifact-suite.page." + META.id; }
+
+	function readStore(k) { try { return JSON.parse((CAN_LS ? localStorage.getItem(k) : MEM[k]) || "null"); } catch (e) { return null; } }
+	function writeStore(k, v) { try { if (CAN_LS) { localStorage.setItem(k, JSON.stringify(v)); } else { MEM[k] = JSON.stringify(v); } } catch (e) { MEM[k] = JSON.stringify(v); } }
+	function dropStore(k) { try { if (CAN_LS) { localStorage.removeItem(k); } else { delete MEM[k]; } } catch (e) { delete MEM[k]; } }
+
+	function loadState() {
+		STATE = readStore(stateKey());
+		if (!STATE || typeof STATE !== "object") STATE = {schema: 1, pageId: META.id, rev: META.rev, cards: {}, sections: {}, orphans: {}};
+		if (!STATE.cards) STATE.cards = {};
+		if (!STATE.sections) STATE.sections = {};
+		if (!STATE.orphans) STATE.orphans = {};
+	}
+
+	function saveState() {
+		STATE.pageId = META.id;
+		STATE.rev = META.rev;
+		STATE.savedAt = new Date().toISOString();
+		writeStore(stateKey(), STATE);
+	}
+
+	function saveSoon() {
+		if (SAVE_TIMER) clearTimeout(SAVE_TIMER);
+		SAVE_TIMER = setTimeout(function () { saveState(); refreshCounts(); }, 200);
+	}
+
+	/* ================= Fingerprints ================= */
+
+	function hashOf(s) {
+		var h = 5381;
+		for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+		return String(h);
+	}
+
+	function normalise(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
+
+	// Every engine-generated region is stripped, so the hash covers authored prose
+	// alone and does not move with the order boot() happens to generate things in.
+	var GENERATED = ".respond, .changed, .chip.earlier, .ref-links, details.ref > summary, .demo";
+
+	function fingerprintOf(card) {
+		var clone = card.cloneNode(true);
+		var strip = clone.querySelectorAll(GENERATED);
+		for (var i = 0; i < strip.length; i++) { strip[i].parentNode.removeChild(strip[i]); }
+		return hashOf(normalise(clone.textContent) + "|" + (card.dataset.tag || "") + "|" + (card.dataset.verdicts || ""));
+	}
+
+	/* ================= Respond surfaces ================= */
+
+	function cardList() {
+		var all = document.querySelectorAll("article.card[id]");
+		var out = [];
+		for (var i = 0; i < all.length; i++) { out.push(all[i]); }
+		return out;
+	}
+
+	function cardTitle(card) {
+		var h = card.querySelector("h3");
+		return h ? normalise(h.textContent) : card.id;
+	}
+
+	function verdictsFor(card) {
+		if (card.dataset.verdicts) return card.dataset.verdicts.split("|");
+		return DEFAULT_VERDICTS[META.kind] || [];
+	}
+
+	function validateCards() {
+		var all = document.querySelectorAll("article.card");
+		for (var i = 0; i < all.length; i++) {
+			if (!all[i].id) {
+				console.warn("artifact-suite: card without id — no response surface attached");
+				all[i].className += " needs-id";
+			} else if (/^[a-z]?\d+$/i.test(all[i].id)) {
+				console.warn("artifact-suite: card id '" + all[i].id + "' looks ordinal — ids must name their subject");
+			}
+		}
+	}
+
+	function attachRespond(card) {
+		if (card.dataset.answer === "none") return;
+		if (card.querySelector(".respond")) return;
+		if (card.className.indexOf("needs-id") !== -1) return;
+
+		var id = card.id;
+		var wrap = document.createElement("div");
+		wrap.className = "respond";
+
+		if (card.dataset.answer === "options") {
+			var box = card.querySelector(".options");
+			if (box) box.setAttribute("data-card", id);
+		} else {
+			var set = verdictsFor(card);
+			if (set.length) {
+				var v = document.createElement("div");
+				v.className = "verdicts";
+				v.setAttribute("data-card", id);
+				for (var i = 0; i < set.length; i++) {
+					var label = document.createElement("label");
+					var isRec = card.dataset.recommended === set[i];
+					if (isRec) label.className = "recommended";
+					var input = document.createElement("input");
+					input.type = "radio";
+					input.name = "v-" + id;
+					input.value = set[i];
+					label.appendChild(input);
+					label.appendChild(document.createTextNode(set[i]));
+					if (isRec) {
+						var rec = document.createElement("span");
+						rec.className = "rec";
+						rec.appendChild(document.createTextNode("recommended"));
+						label.appendChild(rec);
+					}
+					v.appendChild(label);
+				}
+				wrap.appendChild(v);
+			}
+		}
+
+		var ta = document.createElement("textarea");
+		ta.setAttribute("data-card", id);
+		ta.placeholder = "Comment on " + id + "…";
+		wrap.appendChild(ta);
+
+		var clear = document.createElement("button");
+		clear.type = "button";
+		clear.className = "quiet tiny clear";
+		clear.setAttribute("data-card", id);
+		clear.setAttribute("data-act", "clear");
+		clear.appendChild(document.createTextNode("Clear"));
+		wrap.appendChild(clear);
+
+		card.appendChild(wrap);
+	}
+
+	function attachLoose(section) {
+		if (section.querySelector(".loose")) return;
+		var box = document.createElement("div");
+		box.className = "loose";
+		var lab = document.createElement("span");
+		lab.className = "lab";
+		lab.appendChild(document.createTextNode(section.dataset.loose));
+		var ta = document.createElement("textarea");
+		ta.setAttribute("data-section", section.id);
+		var stored = STATE.sections[section.id];
+		if (stored && stored.comment) ta.value = stored.comment;
+		box.appendChild(lab);
+		box.appendChild(ta);
+		section.appendChild(box);
+	}
+
+	/* ================= Restore ================= */
+
+	function entryFor(id) { return STATE.cards[id] || null; }
+
+	function restoreCard(card) {
+		var id = card.id;
+		if (!id) return;
+		if (STATE.orphans[id]) { STATE.cards[id] = STATE.orphans[id]; delete STATE.orphans[id]; }
+		var entry = entryFor(id);
+		if (card.dataset.answer === "none") return;
+		if (!entry) {
+			if (card.dataset.recommended) preCheck(card);
+			return;
+		}
+		if (entry.verdict) {
+			var input = card.querySelector('input[name="v-' + id + '"][value="' + cssEscape(entry.verdict) + '"]');
+			if (input) input.checked = true;
+		}
+		var ta = card.querySelector('textarea[data-card="' + id + '"]');
+		if (ta && entry.comment) ta.value = entry.comment;
+
+		var now = fingerprintOf(card);
+		if (entry.fingerprint && entry.fingerprint !== now) {
+			markChanged(card, entry);
+		} else {
+			addEarlierChip(card);
+		}
+	}
+
+	function cssEscape(s) { return String(s).replace(/"/g, '\\"'); }
+
+	function preCheck(card) {
+		var input = card.querySelector('input[name="v-' + card.id + '"][value="' + cssEscape(card.dataset.recommended) + '"]');
+		if (input) input.checked = true;
+	}
+
+	function addEarlierChip(card) {
+		var row = card.querySelector(".chiprow");
+		if (!row || row.querySelector(".chip.earlier")) return;
+		var chip = document.createElement("span");
+		chip.className = "chip earlier";
+		chip.appendChild(document.createTextNode("Answered earlier"));
+		row.appendChild(chip);
+	}
+
+	function markChanged(card, entry) {
+		if (card.querySelector(".changed")) return;
+		var strip = document.createElement("div");
+		strip.className = "changed";
+		strip.appendChild(document.createTextNode("Changed since you answered (rev " + (entry.rev || 1) + ")."));
+		var btn = document.createElement("button");
+		btn.type = "button";
+		btn.className = "quiet tiny";
+		btn.setAttribute("data-card", card.id);
+		btn.setAttribute("data-act", "dismiss");
+		btn.appendChild(document.createTextNode("Dismiss"));
+		strip.appendChild(btn);
+		card.insertBefore(strip, card.firstChild);
+	}
+
+	function dismissChanged(id) {
+		var card = document.getElementById(id);
+		if (!card) return;
+		var strip = card.querySelector(".changed");
+		if (strip) strip.parentNode.removeChild(strip);
+		var entry = entryFor(id);
+		if (entry) { entry.fingerprint = fingerprintOf(card); entry.rev = META.rev; saveSoon(); }
+	}
+
+	function collectOrphans() {
+		var held = 0, id;
+		for (id in STATE.cards) {
+			if (!STATE.cards.hasOwnProperty(id)) continue;
+			if (!document.getElementById(id)) {
+				STATE.orphans[id] = STATE.cards[id];
+				delete STATE.cards[id];
+			}
+		}
+		for (id in STATE.orphans) { if (STATE.orphans.hasOwnProperty(id)) held++; }
+		if (held) saveState();
+	}
+
+	function heldIds() {
+		var out = [];
+		for (var id in STATE.orphans) { if (STATE.orphans.hasOwnProperty(id)) out.push(id); }
+		return out;
+	}
+
+	function discardHeld() { STATE.orphans = {}; saveState(); renderFoot(); flash("Held answers discarded."); }
+
+	/* ================= Recording ================= */
+
+	function ensureEntry(id) {
+		if (!STATE.cards[id]) STATE.cards[id] = {verdict: null, comment: "", fingerprint: null, answeredAt: null, touched: false, rev: META.rev};
+		return STATE.cards[id];
+	}
+
+	function recordVerdict(id, value) {
+		var card = document.getElementById(id);
+		var e = ensureEntry(id);
+		e.verdict = value;
+		e.touched = true;
+		e.answeredAt = new Date().toISOString();
+		e.rev = META.rev;
+		if (card) e.fingerprint = fingerprintOf(card);
+		saveSoon();
+	}
+
+	function recordComment(id, text) {
+		var card = document.getElementById(id);
+		var e = ensureEntry(id);
+		e.comment = text;
+		e.touched = true;
+		e.answeredAt = new Date().toISOString();
+		e.rev = META.rev;
+		if (card) e.fingerprint = fingerprintOf(card);
+		saveSoon();
+	}
+
+	function recordSection(id, text) {
+		if (!STATE.sections[id]) STATE.sections[id] = {comment: "", touched: false, answeredAt: null};
+		STATE.sections[id].comment = text;
+		STATE.sections[id].touched = true;
+		STATE.sections[id].answeredAt = new Date().toISOString();
+		saveSoon();
+	}
+
+	function clearCard(id) {
+		var card = document.getElementById(id);
+		if (!card) return;
+		var inputs = card.querySelectorAll('input[name="v-' + id + '"]');
+		for (var i = 0; i < inputs.length; i++) { inputs[i].checked = false; }
+		var ta = card.querySelector('textarea[data-card="' + id + '"]');
+		if (ta) ta.value = "";
+		var strip = card.querySelector(".changed");
+		if (strip) strip.parentNode.removeChild(strip);
+		var chip = card.querySelector(".chip.earlier");
+		if (chip) chip.parentNode.removeChild(chip);
+		delete STATE.cards[id];
+		if (card.dataset.recommended) preCheck(card);
+		saveState();
+		refreshCounts();
+		flash("Cleared " + id + ".");
+	}
+
+	function acceptAll() {
+		var cards = cardList(), done = 0, skipped = 0;
+		for (var i = 0; i < cards.length; i++) {
+			var c = cards[i];
+			if (c.dataset.answer === "none") continue;
+			if (!c.dataset.recommended) { skipped++; continue; }
+			var e = entryFor(c.id);
+			if (e && e.touched) continue;
+			preCheck(c);
+			recordVerdict(c.id, c.dataset.recommended);
+			done++;
+		}
+		saveState();
+		refreshCounts();
+		flash(done + " cards recorded as agreed; " + skipped + " without a recommendation skipped.");
+	}
+
+	/* ================= Provenance ================= */
+
+	function encPath(p) { return String(p).split("/").map(encodeURIComponent).join("/"); }
+	function lineAnchor(lines) {
+		if (!lines) return "";
+		var m = String(lines).match(/^(\d+)(?:-(\d+))?$/);
+		if (!m) return "";
+		return m[2] ? "#L" + m[1] + "-L" + m[2] : "#L" + m[1];
+	}
+	function firstLine(lines) {
+		var m = String(lines || "").match(/^(\d+)/);
+		return m ? m[1] : "";
+	}
+	function mirrorPath(path, branch) {
+		var pre = "dev/workspace/";
+		if (path.indexOf(pre) !== 0) return null;
+		return "dev/branches/" + branch + "/" + path.slice(pre.length);
+	}
+
+	function anchor(cls, href, title, text) {
+		var a = document.createElement("a");
+		a.className = "ref-chip " + cls;
+		a.href = href;
+		a.target = "_blank";
+		a.rel = "noopener";
+		if (title) a.title = title;
+		a.appendChild(document.createTextNode(text));
+		return a;
+	}
+
+	function span(cls, text) {
+		var s = document.createElement("span");
+		s.className = cls;
+		s.appendChild(document.createTextNode(text));
+		return s;
+	}
+
+	function renderEyebrow() {
+		var bar = document.getElementById("eyebrow");
+		var spacer = bar.querySelector(".spacer");
+		var p = META.provenance;
+		var cells = [];
+
+		cells.push(span("pv-kind", KIND_LABEL[META.kind] || META.kind));
+		cells.push(span("pv-rev", "rev " + META.rev));
+
+		if (p.issue !== null && p.issue !== undefined) cells.push(linkCell("pv-issue", "Issue #" + p.issue, p.repo ? p.repo + "/issues/" + p.issue : null));
+		if (p.pr !== null && p.pr !== undefined) cells.push(linkCell("pv-pr", "PR #" + p.pr, p.repo ? p.repo + "/pull/" + p.pr : null));
+		if (p.branch) cells.push(codeCell("pv-branch", "branch", p.branch, p.repo ? p.repo + "/tree/" + p.branch : null));
+		if (p.commit) cells.push(linkCell("pv-commit", p.commit.slice(0, 7), p.repo ? p.repo + "/commit/" + p.commit : null, p.commit));
+		if (p.date) cells.push(span("pv-date", p.date));
+
+		for (var i = 0; i < cells.length; i++) {
+			if (i) bar.insertBefore(sepSpan(), spacer);
+			bar.insertBefore(cells[i], spacer);
+		}
+	}
+
+	function sepSpan() {
+		var s = document.createElement("span");
+		s.className = "sep";
+		s.setAttribute("aria-hidden", "true");
+		return s;
+	}
+
+	function linkCell(cls, text, href, title) {
+		var wrap = document.createElement("span");
+		wrap.className = cls;
+		if (href) {
+			var a = document.createElement("a");
+			a.href = href;
+			a.target = "_blank";
+			a.rel = "noopener";
+			if (title) a.title = title;
+			a.appendChild(document.createTextNode(text));
+			wrap.appendChild(a);
+		} else {
+			var c = document.createElement("code");
+			c.appendChild(document.createTextNode(text));
+			wrap.appendChild(c);
+		}
+		return wrap;
+	}
+
+	function codeCell(cls, label, text, href) {
+		var wrap = document.createElement("span");
+		wrap.className = cls;
+		wrap.appendChild(document.createTextNode(label + " "));
+		var code = document.createElement("code");
+		code.appendChild(document.createTextNode(text));
+		if (href) {
+			var a = document.createElement("a");
+			a.href = href;
+			a.target = "_blank";
+			a.rel = "noopener";
+			a.appendChild(code);
+			wrap.appendChild(a);
+		} else {
+			wrap.appendChild(code);
+		}
+		return wrap;
+	}
+
+	function expandRef(el) {
+		if (el.querySelector("summary")) return;
+		var p = META.provenance;
+		var path = el.dataset.path || "";
+		var url = el.dataset.url || "";
+		var lines = el.dataset.lines || "";
+		var branch = el.dataset.branch || "";
+		var nodisk = el.className.indexOf("ref--nodisk") !== -1;
+
+		if ((path && url) || (!path && !url) || (url && url.indexOf("https://") !== 0) || (path && (path.charAt(0) === "/" || path.indexOf("./") === 0 || path.indexOf("..") !== -1))) {
+			el.className += " ref--broken";
+			var bs = document.createElement("summary");
+			bs.appendChild(span("path", path || url || "(no reference given)"));
+			bs.appendChild(span("loc", "malformed reference"));
+			el.appendChild(bs);
+			console.warn("artifact-suite: malformed reference", el);
+			return;
+		}
+		if (lines && !/^\d+(?:-\d+)?$/.test(lines)) lines = "";
+
+		var diskPath = path;
+		var mirrored = false;
+		if (path && branch && !nodisk) {
+			var mp = mirrorPath(path, branch);
+			if (mp) { diskPath = mp; mirrored = true; }
+		}
+
+		var sum = document.createElement("summary");
+		if (url) {
+			var u = url.replace(/^https:\/\//, "");
+			sum.appendChild(span("path", u));
+		} else {
+			sum.appendChild(span("path", diskPath));
+		}
+		if (lines) sum.appendChild(span("lines", "L" + lines.replace("-", "-")));
+		if (el.dataset.loc) sum.appendChild(span("loc", el.dataset.loc));
+		if (mirrored) sum.appendChild(span("mirror", "archived copy"));
+		el.appendChild(sum);
+
+		var links = document.createElement("div");
+		links.className = "ref-links";
+
+		if (url) {
+			links.appendChild(anchor("ref-site", url, url, "Open site"));
+		} else {
+			var abs = p.root ? p.root + "/" + diskPath : null;
+			if (abs && !nodisk) {
+				links.appendChild(anchor("ref-disk", "file://" + encPath(abs), abs, "Open file"));
+				if (p.editor) {
+					links.appendChild(anchor("ref-editor", p.editor + "://file" + encPath(abs) + (lines ? ":" + firstLine(lines) : ""), p.editor + (lines ? " · line " + firstLine(lines) : ""), "Editor"));
+				}
+			}
+			if (p.repo) {
+				var ref = el.dataset.commit || (branch ? branch : p.commit);
+				links.appendChild(anchor("ref-gh", p.repo + "/blob/" + ref + "/" + encPath(path) + lineAnchor(lines), "blob/" + String(ref).slice(0, 7), "GitHub"));
+			}
+		}
+
+		var copy = document.createElement("button");
+		copy.type = "button";
+		copy.className = "ref-chip ref-copy";
+		copy.setAttribute("data-copy-path", (url ? url : diskPath) + (lines ? ":" + lines : ""));
+		copy.appendChild(document.createTextNode("Copy path"));
+		links.appendChild(copy);
+
+		el.appendChild(links);
+	}
+
+	function auditPaths() {
+		var paths = document.querySelectorAll(".path");
+		for (var i = 0; i < paths.length; i++) {
+			var el = paths[i];
+			if (el.closest(".ref") || el.closest(".ref-link")) continue;
+			el.className += " path--unlinked";
+			console.warn("artifact-suite: path printed outside a reference", el.textContent);
+		}
+	}
+
+	/* ================= Navigation and filters ================= */
+
+	function buildToc() {
+		var col = document.getElementById("toc-column");
+		var pills = document.getElementById("toc-pills");
+		var sections = document.querySelectorAll("main section[id]");
+		var i, j;
+		for (i = 0; i < sections.length; i++) {
+			var sec = sections[i];
+			var h2 = sec.querySelector(".sec-head h2");
+			var label = h2 ? normalise(h2.textContent) : sec.id;
+
+			var head = document.createElement("h4");
+			head.appendChild(document.createTextNode(label));
+			col.appendChild(head);
+
+			var ol = document.createElement("ol");
+			var cards = sec.querySelectorAll("article.card[id]");
+			for (j = 0; j < cards.length; j++) {
+				var card = cards[j];
+				if (card.parentNode.closest && card.parentNode.closest("article.card")) continue;
+				var chip = card.querySelector(".chip.id");
+				var text = (chip ? normalise(chip.textContent) + " · " : "") + cardTitle(card);
+				var li = document.createElement("li");
+				li.setAttribute("data-for", card.id);
+				var a = document.createElement("a");
+				a.href = "#" + card.id;
+				a.appendChild(document.createTextNode(text));
+				li.appendChild(a);
+				ol.appendChild(li);
+			}
+			col.appendChild(ol);
+
+			var pill = document.createElement("a");
+			pill.href = "#" + sec.id;
+			pill.setAttribute("data-sec", sec.id);
+			pill.appendChild(document.createTextNode(label));
+			pills.appendChild(pill);
+		}
+	}
+
+	function observeSections() {
+		var sections = document.querySelectorAll("main section[id]");
+		if (!window.IntersectionObserver || !sections.length) return;
+		var obs = new IntersectionObserver(function (entries) {
+			for (var i = 0; i < entries.length; i++) {
+				if (!entries[i].isIntersecting) continue;
+				setCurrent(entries[i].target.id);
+			}
+		}, {rootMargin: "-20% 0px -70% 0px"});
+		for (var i = 0; i < sections.length; i++) { obs.observe(sections[i]); }
+	}
+
+	function setCurrent(secId) {
+		var pills = document.querySelectorAll("#toc-pills a");
+		var i;
+		for (i = 0; i < pills.length; i++) {
+			if (pills[i].getAttribute("data-sec") === secId) { pills[i].setAttribute("aria-current", "true"); }
+			else { pills[i].removeAttribute("aria-current"); }
+		}
+		var sec = document.getElementById(secId);
+		var first = sec ? sec.querySelector("article.card[id]") : null;
+		var links = document.querySelectorAll("#toc-column a");
+		for (i = 0; i < links.length; i++) { links[i].removeAttribute("aria-current"); }
+		if (first) {
+			var target = document.querySelector('#toc-column a[href="#' + first.id + '"]');
+			if (target) target.setAttribute("aria-current", "true");
+		}
+	}
+
+	function tagCounts() {
+		var cards = cardList();
+		var counts = {all: 0, unanswered: 0, integrate: 0, yourcall: 0, defer: 0};
+		for (var i = 0; i < cards.length; i++) {
+			var c = cards[i];
+			if (c.parentNode.closest && c.parentNode.closest("article.card")) continue;
+			counts.all++;
+			var t = c.dataset.tag;
+			if (counts.hasOwnProperty(t)) counts[t]++;
+			var e = entryFor(c.id);
+			if (!e || !e.touched) counts.unanswered++;
+		}
+		return counts;
+	}
+
+	function buildFilters() {
+		var bar = document.getElementById("filters");
+		var counts = tagCounts();
+		var present = [];
+		for (var i = 0; i < TAGS.length; i++) { if (counts[TAGS[i]]) present.push(TAGS[i]); }
+		if (present.length < 2) return;
+
+		var order = ["all"].concat(present, ["unanswered"]);
+		for (var j = 0; j < order.length; j++) {
+			var name = order[j];
+			var b = document.createElement("button");
+			b.type = "button";
+			b.className = "quiet tiny";
+			b.setAttribute("data-filter", name);
+			b.setAttribute("aria-pressed", name === "all" ? "true" : "false");
+			b.appendChild(document.createTextNode(TAG_LABEL[name]));
+			var n = document.createElement("span");
+			n.className = "n";
+			n.appendChild(document.createTextNode(String(counts[name])));
+			b.appendChild(n);
+			bar.appendChild(b);
+		}
+		bar.hidden = false;
+	}
+
+	function refreshCounts() {
+		var counts = tagCounts();
+		var btns = document.querySelectorAll("#filters button");
+		for (var i = 0; i < btns.length; i++) {
+			var n = btns[i].querySelector(".n");
+			var name = btns[i].getAttribute("data-filter");
+			if (n && counts.hasOwnProperty(name)) n.textContent = String(counts[name]);
+		}
+		renderFoot();
+	}
+
+	function applyFilter(name) {
+		var cards = cardList();
+		for (var i = 0; i < cards.length; i++) {
+			var c = cards[i];
+			if (c.parentNode.closest && c.parentNode.closest("article.card")) continue;
+			var show = true;
+			if (name === "unanswered") {
+				var e = entryFor(c.id);
+				show = !e || !e.touched;
+			} else if (name !== "all") {
+				show = c.dataset.tag === name;
+			}
+			c.hidden = !show;
+			var li = document.querySelector('#toc-column li[data-for="' + c.id + '"]');
+			if (li) li.hidden = !show;
+		}
+		var btns = document.querySelectorAll("#filters button");
+		for (var j = 0; j < btns.length; j++) {
+			btns[j].setAttribute("aria-pressed", btns[j].getAttribute("data-filter") === name ? "true" : "false");
+		}
+	}
+
+	function countSections() {
+		var sections = document.querySelectorAll("main section[id]");
+		for (var i = 0; i < sections.length; i++) {
+			var slot = sections[i].querySelector(".sec-head .count");
+			if (!slot) continue;
+			var n = 0;
+			var cards = sections[i].querySelectorAll("article.card[id]");
+			for (var j = 0; j < cards.length; j++) {
+				if (cards[j].parentNode.closest && cards[j].parentNode.closest("article.card")) continue;
+				n++;
+			}
+			slot.textContent = n + (n === 1 ? " card" : " cards");
+		}
+	}
+
+	function revealTarget() {
+		function go() {
+			var id = location.hash.slice(1);
+			if (!id) return;
+			var el = document.getElementById(id);
+			if (el && el.hidden) { el.hidden = false; }
+			if (el) el.scrollIntoView();
+		}
+		go();
+		window.addEventListener("hashchange", go);
+	}
+
+	/* ================= Return prompt ================= */
+
+	function touchedCards() {
+		var cards = cardList(), out = [];
+		for (var i = 0; i < cards.length; i++) {
+			var c = cards[i];
+			if (c.dataset.answer === "none") continue;
+			var e = entryFor(c.id);
+			if (e && e.touched) out.push({card: c, entry: e});
+		}
+		return out;
+	}
+
+	function pageFile() {
+		var p = META.provenance;
+		if (!p.root || !p.self) return p.self || META.id + ".html";
+		return p.root + "/" + p.self;
+	}
+
+	function pageHref() {
+		try { return location.protocol === "file:" ? decodeURIComponent(location.href) : location.href; }
+		catch (e) { return location.href; }
+	}
+
+	function provenanceLine() {
+		var p = META.provenance, bits = [pageFile()];
+		if (p.branch) bits.push("branch " + p.branch);
+		if (p.issue !== null && p.issue !== undefined && p.repo) bits.push(p.repo + "/issues/" + p.issue);
+		if (p.pr !== null && p.pr !== undefined && p.repo) bits.push(p.repo + "/pull/" + p.pr);
+		bits.push("rev " + META.rev);
+		if (p.date) bits.push("built " + p.date);
+		return "Source: " + bits.join(" · ");
+	}
+
+	function untouchedLine() {
+		var cards = cardList(), rec = 0, plain = 0;
+		for (var i = 0; i < cards.length; i++) {
+			var c = cards[i];
+			if (c.dataset.answer === "none") continue;
+			if (c.parentNode.closest && c.parentNode.closest("article.card")) continue;
+			var e = entryFor(c.id);
+			if (e && e.touched) continue;
+			if (c.dataset.recommended) rec++; else plain++;
+		}
+		var parts = [];
+		if (rec) parts.push(rec + " left at their recommended default");
+		if (plain) parts.push(plain + " unanswered");
+		if (!parts.length) return "";
+		return "Untouched: " + parts.join(", ") + ".";
+	}
+
+	function formatNote(text) {
+		var t = String(text || "").replace(/\s+$/, "");
+		if (!t) return [];
+		var lines = t.split("\n");
+		if (lines.length === 1) return ["- Note: " + lines[0].trim()];
+		var out = ["- Note:"];
+		for (var i = 0; i < lines.length; i++) {
+			var line = lines[i].replace(/\s+$/, "");
+			out.push(line ? "  " + line : "");
+		}
+		return out;
+	}
+
+	function composePrompt() {
+		var touched = touchedCards();
+		var held = heldIds();
+		var sectionBits = [];
+		var sid;
+		for (sid in STATE.sections) {
+			if (!STATE.sections.hasOwnProperty(sid)) continue;
+			var s = STATE.sections[sid];
+			if (s.touched && normalise(s.comment)) sectionBits.push(sid);
+		}
+		if (!touched.length && !sectionBits.length && !held.length) return "";
+
+		var L = [];
+		L.push("## " + (META.prompt.heading || META.title));
+		L.push("");
+		L.push(provenanceLine());
+		var ut = untouchedLine();
+		if (ut) L.push(ut);
+		if (held.length) L.push("Held: " + held.length + " answers for cards no longer on this page (" + held.join(", ") + ").");
+		L.push("");
+
+		if (touched.length || sectionBits.length) {
+			L.push("### Decisions");
+			L.push("");
+			var i, j;
+			for (i = 0; i < touched.length; i++) {
+				var card = touched[i].card, entry = touched[i].entry;
+				L.push("**" + card.id + " · " + cardTitle(card) + "**");
+				if (entry.verdict) L.push("- Verdict: " + entry.verdict);
+				var note = formatNote(entry.comment);
+				for (j = 0; j < note.length; j++) { L.push(note[j]); }
+				var demos = card.querySelectorAll(".demo[data-report]");
+				for (j = 0; j < demos.length; j++) {
+					if (demos[j].dataset.state) L.push("- " + demos[j].dataset.report + ": " + demos[j].dataset.state);
+				}
+				L.push("");
+			}
+			for (i = 0; i < sectionBits.length; i++) {
+				var sec = document.getElementById(sectionBits[i]);
+				var h2 = sec ? sec.querySelector(".sec-head h2") : null;
+				L.push("**" + sectionBits[i] + " · " + (h2 ? normalise(h2.textContent) : sectionBits[i]) + "**");
+				var snote = formatNote(STATE.sections[sectionBits[i]].comment);
+				for (j = 0; j < snote.length; j++) { L.push(snote[j]); }
+				L.push("");
+			}
+		}
+
+		if (META.next && META.next.length) {
+			L.push("### Next");
+			L.push("");
+			for (var k = 0; k < META.next.length; k++) { L.push("- " + META.next[k]); }
+			L.push("");
+		}
+
+		L.push("Re-open: " + pageHref());
+		return L.join("\n");
+	}
+
+	/* ================= Clipboard and status ================= */
+
+	function copyText(text, onDone) {
+		function fallback() {
+			var ta = document.createElement("textarea");
+			ta.value = text;
+			ta.style.position = "fixed";
+			ta.style.opacity = "0";
+			document.body.appendChild(ta);
+			ta.select();
+			var ok = false;
+			try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+			document.body.removeChild(ta);
+			if (ok) { if (onDone) onDone(true); return; }
+			var wrap = document.getElementById("outwrap");
+			var out = document.getElementById("out");
+			out.value = text;
+			wrap.hidden = false;
+			out.select();
+			flash("Clipboard blocked — select the text below and copy.", true);
+			if (onDone) onDone(false);
+		}
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).then(function () { if (onDone) onDone(true); }, fallback);
+		} else {
+			fallback();
+		}
+	}
+
+	function flash(msg, bad) {
+		var el = document.getElementById("status");
+		el.textContent = msg;
+		if (bad) { el.className = "status bad"; } else { el.className = "status"; }
+		if (STATUS_TIMER) clearTimeout(STATUS_TIMER);
+		if (!bad) STATUS_TIMER = setTimeout(function () { el.textContent = ""; }, 2500);
+	}
+
+	function copyPrompt() {
+		var text = composePrompt();
+		if (!text) { flash("Nothing answered yet — nothing to copy."); return; }
+		copyText(text, function (ok) { if (ok) flash("Return prompt copied."); });
+	}
+
+	function viewPrompt() {
+		var wrap = document.getElementById("outwrap");
+		var out = document.getElementById("out");
+		if (!wrap.hidden) { wrap.hidden = true; return; }
+		out.value = composePrompt() || "_No responses entered._";
+		wrap.hidden = false;
+	}
+
+	/* ================= Theme ================= */
+
+	function setTheme(mode) {
+		if (mode === "light" || mode === "dark") {
+			document.documentElement.setAttribute("data-theme", mode);
+			try { localStorage.setItem("artifact-suite.theme", mode); } catch (e) { /* storage blocked */ }
+		} else {
+			document.documentElement.removeAttribute("data-theme");
+			try { localStorage.removeItem("artifact-suite.theme"); } catch (e) { /* storage blocked */ }
+		}
+		var btns = document.querySelectorAll("[data-theme-set]");
+		for (var i = 0; i < btns.length; i++) {
+			btns[i].setAttribute("aria-pressed", btns[i].getAttribute("data-theme-set") === mode ? "true" : "false");
+		}
+	}
+
+	function currentTheme() {
+		try {
+			var t = localStorage.getItem("artifact-suite.theme");
+			return (t === "light" || t === "dark") ? t : "system";
+		} catch (e) { return "system"; }
+	}
+
+	/* ================= Wiring ================= */
+
+	function wireEvents() {
+		document.addEventListener("change", function (ev) {
+			var t = ev.target;
+			if (t.matches && t.matches('input[type="radio"][name^="v-"]')) {
+				var host = t.closest("[data-card]");
+				if (host) recordVerdict(host.getAttribute("data-card"), t.value);
+				return;
+			}
+			if (t.matches && t.matches("[data-theme-set]")) return;
+		});
+
+		document.addEventListener("input", function (ev) {
+			var t = ev.target;
+			if (t.tagName !== "TEXTAREA") return;
+			if (t.getAttribute("data-card")) { recordComment(t.getAttribute("data-card"), t.value); return; }
+			if (t.getAttribute("data-section")) { recordSection(t.getAttribute("data-section"), t.value); return; }
+		});
+
+		document.addEventListener("click", function (ev) {
+			var t = ev.target;
+
+			var themeBtn = t.closest("[data-theme-set]");
+			if (themeBtn) { setTheme(themeBtn.getAttribute("data-theme-set")); return; }
+
+			var filterBtn = t.closest("[data-filter]");
+			if (filterBtn) { applyFilter(filterBtn.getAttribute("data-filter")); return; }
+
+			var heldBtn = t.closest("[data-held]");
+			if (heldBtn) {
+				if (heldBtn.getAttribute("data-held") === "discard") { discardHeld(); }
+				else { showHeld(); }
+				return;
+			}
+
+			var copyPath = t.closest("[data-copy-path]");
+			if (copyPath) {
+				copyText(copyPath.getAttribute("data-copy-path"), function (ok) { if (ok) flash("Path copied."); });
+				return;
+			}
+
+			var act = t.closest("[data-act]");
+			if (act) {
+				var id = act.getAttribute("data-card");
+				if (act.getAttribute("data-act") === "clear") { clearCard(id); }
+				else if (act.getAttribute("data-act") === "dismiss") { dismissChanged(id); }
+				return;
+			}
+
+			if (t.matches && t.matches('input[type="radio"][name^="v-"]')) {
+				var host = t.closest("[data-card]");
+				if (host) recordVerdict(host.getAttribute("data-card"), t.value);
+			}
+		});
+
+		document.getElementById("copy-prompt").addEventListener("click", copyPrompt);
+		document.getElementById("view-prompt").addEventListener("click", viewPrompt);
+
+		var accept = document.getElementById("accept-all");
+		var anyRec = document.querySelector("article.card[data-recommended]");
+		if (anyRec) accept.hidden = false;
+		accept.addEventListener("click", acceptAll);
+
+		setTheme(currentTheme());
+	}
+
+	function showHeld() {
+		var ids = heldIds(), bits = [];
+		for (var i = 0; i < ids.length; i++) {
+			var o = STATE.orphans[ids[i]];
+			bits.push(ids[i] + (o && o.title ? " — " + o.title : ""));
+		}
+		var wrap = document.getElementById("outwrap");
+		var out = document.getElementById("out");
+		out.value = "Held answers\n\n" + bits.join("\n");
+		wrap.hidden = false;
+	}
+
+	function renderFoot() {
+		var foot = document.getElementById("foot");
+		foot.textContent = "";
+		var p = META.provenance;
+		foot.appendChild(span("", (KIND_LABEL[META.kind] || META.kind) + " · rev " + META.rev));
+		foot.appendChild(sepSpan());
+		foot.appendChild(span("", p.self || META.id));
+		foot.appendChild(sepSpan());
+		foot.appendChild(span("", "built " + (p.date || "—")));
+
+		if (!CAN_LS) {
+			var note = document.createElement("span");
+			note.id = "storage-note";
+			note.appendChild(document.createTextNode("This browser is not saving answers — copy the prompt before you close the page."));
+			foot.appendChild(note);
+		}
+
+		var ids = heldIds();
+		if (ids.length) {
+			var held = document.createElement("span");
+			held.id = "held-note";
+			held.appendChild(document.createTextNode(ids.length + " answers held for cards no longer on this page. "));
+			held.appendChild(mini("show", "Show"));
+			held.appendChild(document.createTextNode(" "));
+			held.appendChild(mini("discard", "Discard"));
+			foot.appendChild(held);
+		}
+	}
+
+	function mini(act, text) {
+		var b = document.createElement("button");
+		b.type = "button";
+		b.className = "quiet tiny";
+		b.setAttribute("data-held", act);
+		b.appendChild(document.createTextNode(text));
+		return b;
+	}
+
+	function checkTitles() {
+		var h1 = document.querySelector("h1");
+		if (!h1) return;
+		if (normalise(h1.textContent) !== normalise(META.title) || normalise(document.title) !== normalise(META.title)) {
+			console.warn("artifact-suite: title, h1 and page-meta.title disagree");
+		}
+	}
+
+	/* ================= Blocks ================= */
+
+	function wireBlocks() {
+		var diffs = document.querySelectorAll('.diff[data-copy="adds"]');
+		for (var i = 0; i < diffs.length; i++) {
+			(function (d) {
+				var b = document.createElement("button");
+				b.type = "button";
+				b.className = "quiet tiny";
+				b.appendChild(document.createTextNode("Copy added lines"));
+				b.addEventListener("click", function () {
+					var rows = d.querySelectorAll(".diff-row.add .tx"), out = [];
+					for (var j = 0; j < rows.length; j++) { out.push(rows[j].textContent); }
+					copyText(out.join("\n"), function (ok) { if (ok) flash("Added lines copied."); });
+				});
+				var row = document.createElement("div");
+				row.className = "btnrow";
+				row.style.margin = "0 0 14px";
+				row.appendChild(b);
+				d.parentNode.insertBefore(row, d.nextSibling);
+			})(diffs[i]);
+		}
+
+		document.addEventListener("click", function (ev) {
+			var open = ev.target.closest("[data-panel]");
+			if (open) {
+				var dlg = document.getElementById(open.getAttribute("data-panel"));
+				if (dlg && dlg.showModal) dlg.showModal();
+				return;
+			}
+			if (ev.target.closest("[data-panel-close]")) {
+				var d = ev.target.closest("dialog");
+				if (d) d.close();
+				return;
+			}
+			if (ev.target.tagName === "DIALOG") ev.target.close();
+		});
+	}
+
+	/* ================= Demos ================= */
+
+	function wireDemos() {
+		wireTokenDemo();
+		wireFingerprintDemo();
+		wireOriginDemo();
+	}
+
+	function wireTokenDemo() {
+		var names = ["--add-bg", "--add-ink", "--del-bg", "--del-ink", "--keep-ink", "--add-mark", "--del-mark"];
+		var host = document.getElementById("d-tokens");
+		if (!host) return;
+		var strip = document.getElementById("tok-swatches");
+		var out = document.getElementById("tok-out");
+
+		function read() {
+			var cs = getComputedStyle(document.documentElement);
+			strip.textContent = "";
+			var lines = [];
+			for (var i = 0; i < names.length; i++) {
+				var val = cs.getPropertyValue(names[i]).trim();
+				var s = document.createElement("span");
+				s.className = "swatch";
+				s.style.background = "var(" + names[i] + ")";
+				s.style.color = names[i].indexOf("-bg") !== -1 ? "var(--ink)" : "var(--paper)";
+				s.appendChild(document.createTextNode(names[i].slice(2)));
+				strip.appendChild(s);
+				lines.push(names[i] + ": " + val);
+			}
+			out.textContent = lines.join("\n");
+			host.dataset.state = "read in " + (document.documentElement.getAttribute("data-theme") || "system") + " theme";
+			document.getElementById("tok-note").textContent = "read " + names.length + " tokens";
+		}
+
+		document.getElementById("tok-read").addEventListener("click", read);
+		read();
+		host.dataset.state = "";
+	}
+
+	function wireFingerprintDemo() {
+		var host = document.getElementById("d-fingerprint");
+		if (!host) return;
+		var out = document.getElementById("fp-out");
+		var note = document.getElementById("fp-note");
+
+		document.getElementById("fp-run").addEventListener("click", function () {
+			var v = document.getElementById("fp-in").value;
+			var n = normalise(v);
+			out.textContent = "normalised: " + n + "\nhash:       " + hashOf(n);
+			note.textContent = n.length + " chars";
+			host.dataset.state = "hashed a sample string";
+		});
+
+		document.getElementById("fp-self").addEventListener("click", function () {
+			var card = host.closest("article.card");
+			out.textContent = "card:  " + card.id + "\nhash:  " + fingerprintOf(card) + "\nstored: " + ((entryFor(card.id) || {}).fingerprint || "(not answered yet)");
+			note.textContent = "live card fingerprint";
+			host.dataset.state = "fingerprinted this card";
+		});
+	}
+
+	function wireOriginDemo() {
+		var host = document.getElementById("d-origin");
+		if (!host) return;
+		var out = document.getElementById("origin-out");
+		var real = document.documentElement.dataset.origin;
+
+		function report() {
+			var mode = document.documentElement.dataset.origin;
+			var ref = host.querySelector("details.ref");
+			var solid = "none";
+			var chips = ref.querySelectorAll(".ref-chip");
+			for (var i = 0; i < chips.length; i++) {
+				var bg = getComputedStyle(chips[i]).backgroundColor;
+				var surface = getComputedStyle(document.documentElement).getPropertyValue("--surface").trim();
+				if (bg !== toRGB(surface)) solid = normalise(chips[i].textContent);
+			}
+			out.textContent = "data-origin: " + mode + "\nreal origin: " + real + "\nprimary chip: " + solid;
+			host.dataset.state = "viewed as " + mode;
+		}
+
+		var picks = document.getElementById("origin-picks");
+		var start = picks.querySelector('input[value="' + real + '"]');
+		if (start) start.checked = true;
+		picks.addEventListener("change", function (ev) {
+			document.documentElement.dataset.origin = ev.target.value;
+			report();
+		});
+		report();
+		host.dataset.state = "";
+	}
+
+	function toRGB(hex) {
+		var h = String(hex).replace("#", "");
+		if (h.length !== 6) return hex;
+		return "rgb(" + parseInt(h.slice(0, 2), 16) + ", " + parseInt(h.slice(2, 4), 16) + ", " + parseInt(h.slice(4, 6), 16) + ")";
+	}
+
+	/* ================= Go ================= */
+
+	window.SUITE = {copyText: copyText, flash: flash, meta: null};
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", function () { boot(); window.SUITE.meta = META; });
+	} else {
+		boot();
+		window.SUITE.meta = META;
+	}
+})();
+</script>
+</body>
+</html>

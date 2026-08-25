@@ -1,0 +1,83 @@
+{
+  "version": 4,
+  "state": {
+    "task": {
+      "text": "Search through git history across branches in agent-library for examples of html artifacts that fit a certain shape.  Extract a unique signal from the source document that team members can search with."
+    },
+    "problem": {
+      "text": ""
+    },
+    "context": {
+      "text": "",
+      "files": [
+        {
+          "a": "extensions/artifacts/prompt-builder/prompt-builder.html",
+          "b": "key file that will provide the search signal"
+        }
+      ]
+    },
+    "goals": {
+      "items": []
+    },
+    "features": {
+      "items": []
+    },
+    "references": {
+      "items": []
+    },
+    "scope": {
+      "inside": [
+        "Any html artifacts with the same style as the key file"
+      ],
+      "outside": [
+        "html artifacts with significantly different styling"
+      ]
+    },
+    "constraints": {
+      "text": "",
+      "picked": []
+    },
+    "verify": {
+      "criteria": [],
+      "gates": [],
+      "items": []
+    },
+    "guardrails": {
+      "text": "",
+      "picked": []
+    },
+    "architecture": {
+      "language": [],
+      "framework": [],
+      "storage": [],
+      "patterns": [],
+      "infra": [],
+      "text": ""
+    },
+    "output": {
+      "deliverable": [
+        "Review",
+        "Artifact"
+      ],
+      "depth": ""
+    },
+    "tone": {
+      "pick": "",
+      "text": ""
+    },
+    "process": {
+      "stages": []
+    },
+    "skills": {
+      "picked": [],
+      "other": []
+    },
+    "exec": {
+      "strategy": "Agent team",
+      "economy": "Optimal per task",
+      "roster": [],
+      "text": ""
+    }
+  },
+  "recipes": []
+}

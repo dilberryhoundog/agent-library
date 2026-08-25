@@ -1,0 +1,649 @@
+<meta charset="utf-8">
+<title>Paper/Ink Fingerprint</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+	/* This page is a specimen of its own subject: the palette, the type triple
+	   and the shell/masthead/eyebrow/standfirst scaffold below are the Paper/Ink
+	   system lifted from extensions/artifacts/prompt-builder/prompt-builder.html. */
+	:root {
+		--paper:        #F4F6F6;
+		--surface:      #FFFFFF;
+		--surface-sunk: #ECF0EF;
+		--ink:          #14191A;
+		--ink-soft:     #4E5B5C;
+		--ink-faint:    #78878A;
+		--rule:         #D6DEDD;
+		--accent:       #0D6B64;
+		--accent-soft:  #E2EFED;
+		--warn:         #8A5B00;
+		--warn-soft:    #F6EBD6;
+		--stop:         #93332A;
+		--stop-soft:    #F7E5E2;
+		--shadow:       0 1px 2px rgba(20, 25, 26, .05), 0 8px 24px rgba(20, 25, 26, .05);
+
+		--serif:        "Source Serif 4", Georgia, "Times New Roman", serif;
+		--disp:         Bitter, "Source Serif 4", Georgia, serif;
+		--mono:         "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--paper:        #0E1313;
+			--surface:      #161C1C;
+			--surface-sunk: #1D2525;
+			--ink:          #E7EDEC;
+			--ink-soft:     #A9B6B5;
+			--ink-faint:    #7D8B8A;
+			--rule:         #293333;
+			--accent:       #59C5B9;
+			--accent-soft:  #16302E;
+			--warn:         #D9A44F;
+			--warn-soft:    #2E2617;
+			--stop:         #E08277;
+			--stop-soft:    #331C19;
+			--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+		}
+	}
+	:root[data-theme="dark"] {
+		--paper:        #0E1313;
+		--surface:      #161C1C;
+		--surface-sunk: #1D2525;
+		--ink:          #E7EDEC;
+		--ink-soft:     #A9B6B5;
+		--ink-faint:    #7D8B8A;
+		--rule:         #293333;
+		--accent:       #59C5B9;
+		--accent-soft:  #16302E;
+		--warn:         #D9A44F;
+		--warn-soft:    #2E2617;
+		--stop:         #E08277;
+		--stop-soft:    #331C19;
+		--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+	}
+
+	* { box-sizing: border-box; }
+
+	body {
+		margin:                 0;
+		background:             var(--paper);
+		color:                  var(--ink);
+		font-family:            var(--serif);
+		font-size:              17px;
+		line-height:            1.6;
+		-webkit-font-smoothing: antialiased;
+	}
+
+	h1, h2, h3 { font-family: var(--disp); text-wrap: balance; }
+	code, .mono { font-family: var(--mono); }
+
+	.shell { max-width: 940px; margin: 0 auto; padding: 0 22px 96px; }
+
+	/* ---------- masthead ---------- */
+
+	.masthead { padding: 40px 0 0; }
+	.eyebrow {
+		font-family:    var(--mono);
+		font-size:      12px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		display:        flex;
+		flex-wrap:      wrap;
+		gap:            8px 14px;
+		align-items:    center;
+	}
+	h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.05; font-weight: 600; margin: 14px 0 8px; letter-spacing: -.02em; }
+	.standfirst { max-width: 62ch; color: var(--ink-soft); font-size: 18px; margin: 0 0 8px; }
+
+	hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 40px 0 0; }
+
+	/* ---------- sections ---------- */
+
+	section { margin: 44px 0 0; }
+	.sec-head {
+		display:        flex;
+		align-items:    baseline;
+		gap:            12px;
+		border-bottom:  1px solid var(--rule);
+		padding-bottom: 8px;
+		margin-bottom:  20px;
+	}
+	.sec-head h2 { font-size: 21px; font-weight: 600; margin: 0; letter-spacing: -.01em; }
+	.sec-head .count {
+		font-family:          var(--mono);
+		font-size:            12px;
+		color:                var(--ink-faint);
+		margin-left:          auto;
+		font-variant-numeric: tabular-nums;
+	}
+	p { max-width: 68ch; }
+	p.lede { color: var(--ink-soft); }
+
+	/* ---------- the signal ---------- */
+
+	.signal {
+		background:    var(--surface);
+		border:        1px solid var(--rule);
+		border-left:   3px solid var(--accent);
+		border-radius: 3px;
+		box-shadow:    var(--shadow);
+		padding:       24px 26px;
+		margin:        0 0 22px;
+	}
+	.signal .label {
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--accent);
+		display:        block;
+		margin-bottom:  10px;
+	}
+	.signal .token {
+		font-family:    var(--mono);
+		font-size:      clamp(24px, 4.4vw, 38px);
+		font-weight:    500;
+		color:          var(--ink);
+		letter-spacing: -.02em;
+		display:        block;
+		overflow-x:     auto;
+		white-space:    nowrap;
+		padding-bottom: 4px;
+	}
+	.signal .why { margin: 12px 0 0; color: var(--ink-soft); font-size: 16px; max-width: 62ch; }
+
+	pre.cmd {
+		font-family:   var(--mono);
+		font-size:     13px;
+		line-height:   1.7;
+		background:    var(--surface-sunk);
+		border:        1px solid var(--rule);
+		border-radius: 3px;
+		padding:       14px 16px;
+		margin:        0 0 12px;
+		overflow-x:    auto;
+	}
+	pre.cmd .c { color: var(--ink-faint); }
+
+	/* ---------- alternates ---------- */
+
+	.alts { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+	.alt {
+		display:               grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap:                   10px 16px;
+		align-items:           baseline;
+		background:            var(--surface);
+		padding:               12px 16px;
+	}
+	.alt .name { font-family: var(--mono); font-size: 14px; color: var(--ink); }
+	.alt .note { grid-column: 1 / -1; font-size: 14px; color: var(--ink-soft); margin: 0; max-width: none; }
+	.verdict {
+		font-family:    var(--mono);
+		font-size:      10px;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+		padding:        3px 8px;
+		border-radius:  2px;
+		white-space:    nowrap;
+	}
+	.verdict.pick { background: var(--accent); color: var(--paper); }
+	.verdict.ok { background: var(--accent-soft); color: var(--accent); }
+	.verdict.risk { background: var(--warn-soft); color: var(--warn); }
+
+	/* ---------- palette specimens ---------- */
+
+	.families { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+	.fam {
+		background:    var(--surface);
+		border:        1px solid var(--rule);
+		border-radius: 3px;
+		padding:       20px;
+	}
+	.fam.out { border-style: dashed; }
+	.fam h3 { font-size: 17px; margin: 0 0 2px; font-weight: 600; }
+	.fam .tag {
+		font-family:    var(--mono);
+		font-size:      10px;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		display:        block;
+		margin-bottom:  14px;
+	}
+	.fam.out .tag { color: var(--stop); }
+	.swatches { display: flex; border-radius: 2px; overflow: hidden; border: 1px solid var(--rule); margin: 0 0 14px; }
+	.swatches i { flex: 1; height: 46px; display: block; }
+	.fam dl { margin: 0; font-size: 14px; }
+	.fam dt {
+		font-family:    var(--mono);
+		font-size:      10px;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+		color:          var(--ink-faint);
+		margin:         12px 0 3px;
+	}
+	.fam dd { margin: 0; color: var(--ink-soft); }
+	.fam dd code { font-size: 13px; color: var(--ink); }
+
+	/* ---------- roster ---------- */
+
+	.roster { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+	.doc { background: var(--surface); padding: 14px 16px; }
+	.doc .top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+	.doc .title { font-family: var(--disp); font-weight: 600; font-size: 16px; }
+	.doc .branch {
+		font-family:   var(--mono);
+		font-size:     11px;
+		color:         var(--ink-faint);
+		border:        1px solid var(--rule);
+		border-radius: 2px;
+		padding:       2px 7px;
+	}
+	.doc .vers { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+	.doc .path { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); margin: 7px 0 0; word-break: break-all; max-width: none; }
+	.doc.ref { background: var(--accent-soft); }
+	.doc.ref .path { color: var(--ink-soft); }
+	.refmark {
+		font-family:    var(--mono);
+		font-size:      10px;
+		letter-spacing: .1em;
+		text-transform: uppercase;
+		color:          var(--accent);
+	}
+
+	/* ---------- fingerprint checklist ---------- */
+
+	ul.print { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+	ul.print li {
+		display:               grid;
+		grid-template-columns: 22px minmax(0, 1fr);
+		gap:                   10px;
+		align-items:           start;
+		font-size:             16px;
+		color:                 var(--ink-soft);
+		max-width:             72ch;
+	}
+	ul.print li b { color: var(--ink); font-weight: 600; font-family: var(--disp); }
+	ul.print .mark { font-family: var(--mono); font-size: 12px; color: var(--accent); padding-top: 3px; }
+
+	h3.tier {
+		display:       flex;
+		align-items:   baseline;
+		gap:           10px;
+		font-size:     13px;
+		font-weight:   600;
+		margin:        26px 0 12px;
+		padding-bottom: 6px;
+		border-bottom: 1px solid var(--rule);
+	}
+	h3.tier:first-of-type { margin-top: 4px; }
+	h3.tier span {
+		font-family:          var(--mono);
+		font-size:            11px;
+		font-weight:          400;
+		color:                var(--ink-faint);
+		margin-left:          auto;
+		font-variant-numeric: tabular-nums;
+	}
+
+	/* ---------- notes ---------- */
+
+	.note {
+		background:    var(--warn-soft);
+		border-left:   3px solid var(--warn);
+		border-radius: 0 3px 3px 0;
+		padding:       16px 18px;
+		margin:        20px 0 0;
+	}
+	.note p { margin: 0; font-size: 16px; max-width: 66ch; }
+	.note p + p { margin-top: 10px; }
+	.note .h {
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .12em;
+		text-transform: uppercase;
+		color:          var(--warn);
+		display:        block;
+		margin-bottom:  8px;
+	}
+
+	code.tok { font-family: var(--mono); font-size: .88em; background: var(--surface-sunk); border-radius: 2px; padding: 1px 5px; word-break: break-all; }
+
+	blockquote {
+		margin:      20px 0;
+		padding:     0 0 0 20px;
+		border-left: 2px solid var(--accent);
+	}
+	blockquote p {
+		margin:      0;
+		color:       var(--ink-soft);
+		font-size:   16px;
+		font-style:  italic;
+		max-width:   62ch;
+	}
+	blockquote p + p { margin-top: 10px; }
+
+	footer { margin: 56px 0 0; padding-top: 18px; border-top: 1px solid var(--rule); color: var(--ink-faint); font-size: 14px; }
+	footer p { margin: 0; }
+</style>
+
+<div class="shell">
+
+    <header class="masthead">
+        <div class="eyebrow">
+            <span>Review</span>
+            <span>·</span>
+            <span>agent-library</span>
+            <span>·</span>
+            <span>280 commits, 8 branches</span>
+            <span>·</span>
+            <span>2026-08-23</span>
+        </div>
+        <h1>Paper/Ink Fingerprint</h1>
+        <p class="standfirst">Every HTML artifact in this repository built on the prompt-builder's design system, and the one string that finds all of them and nothing else.</p>
+    </header>
+
+    <hr class="rule">
+
+    <section>
+        <div class="sec-head">
+            <h2>The signal</h2>
+            <span class="count">15/15 · 0 collisions</span>
+        </div>
+
+        <div class="signal">
+            <span class="label">Search for this</span>
+            <code class="token">--surface-sunk</code>
+            <p class="why">A CSS custom property from the Paper/Ink palette. It appears 5–10 times in every family member, survives partial copies, and — unlike every rival below — is not a word anyone would write in prose.</p>
+        </div>
+
+        <pre class="cmd"><span class="c"># current branch, including the dev/branches/ archives</span>
+grep -rl --exclude-dir=.git -- '--surface-sunk' .
+
+<span class="c"># every commit on every branch</span>
+git grep -l -- '--surface-sunk' $(git rev-list --all) -- '*.html' \
+  | awk -F: '{print $2}' | sort -u</pre>
+
+        <p class="lede">Note the <code class="tok">--</code> before the pattern. Without it <code class="tok">grep</code> reads <code class="tok">--surface-sunk</code> as a bundle of options and silently returns nothing.</p>
+
+        <h3 style="font-size:15px;margin:28px 0 12px;font-weight:600;">Rivals tested</h3>
+        <p class="lede" style="margin-top:0;">Nine candidates were run against all 88 unique HTML blobs in history. Six scored a perfect 15/15 with zero false positives, so recall did not decide it — collision risk did.</p>
+
+        <div class="alts">
+            <div class="alt">
+                <span class="name">--surface-sunk</span>
+                <span class="verdict pick">Pick</span>
+                <p class="note">15/15. No natural-language failure mode; "sunk" is an idiosyncratic name for a recessed surface, which is exactly what makes it safe.</p>
+            </div>
+            <div class="alt">
+                <span class="name">--ink-faint</span>
+                <span class="verdict ok">Backup</span>
+                <p class="note">15/15, equally safe. Denser than the pick — 10–35 hits per file — so it is the better choice when confirming a suspected match rather than sweeping.</p>
+            </div>
+            <div class="alt">
+                <span class="name">Source Serif 4</span>
+                <span class="verdict ok">Backup</span>
+                <p class="note">15/15. Reliable inside HTML, but any document that merely <em>describes</em> the system will name the font too.</p>
+            </div>
+            <div class="alt">
+                <span class="name">standfirst</span>
+                <span class="verdict risk">Rejected</span>
+                <p class="note">15/15 here, but it is a real journalism term. It will match prose about the design as readily as the design itself.</p>
+            </div>
+            <div class="alt">
+                <span class="name">Bitter</span>
+                <span class="verdict risk">Rejected</span>
+                <p class="note">15/15 here, and a common English adjective. Useless the moment the search widens past <code>*.html</code>.</p>
+            </div>
+            <div class="alt">
+                <span class="name">class="shell"</span>
+                <span class="verdict risk">Rejected</span>
+                <p class="note">15/15 here purely by luck. <code>shell</code> is among the most generic class names in circulation and will not transfer to another repository.</p>
+            </div>
+            <div class="alt">
+                <span class="name">--paper &nbsp;/&nbsp; #ECF0EF</span>
+                <span class="verdict ok">Wider net</span>
+                <p class="note">16 hits — the 15, plus <code>fsa-probe.html</code>, which carries the palette's hex values under abbreviated token names. Use these two to trace the <em>palette</em> lineage rather than the full design system.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="sec-head">
+            <h2>Two families, not one</h2>
+            <span class="count">88 blobs sorted</span>
+        </div>
+        <p class="lede">The repository's HTML artifacts split cleanly in two. Both are hand-authored, both ship light and dark themes, and both are self-contained single files — but they share no tokens, no typography and no scaffold. The signal above separates them exactly.</p>
+
+        <div class="families">
+            <div class="fam">
+                <h3>Paper/Ink</h3>
+                <span class="tag">In scope · 15 blobs · 20 paths</span>
+                <div class="swatches">
+                    <i style="background:#F4F6F6"></i><i style="background:#ECF0EF"></i><i style="background:#D6DEDD"></i><i style="background:#0D6B64"></i><i style="background:#4E5B5C"></i><i style="background:#14191A"></i>
+                </div>
+                <dl>
+                    <dt>Tokens</dt>
+                    <dd><code>--paper --surface --surface-sunk --ink --ink-soft --ink-faint --rule --accent --warn --stop</code>, each with a <code>-soft</code> companion.</dd>
+                    <dt>Type</dt>
+                    <dd>Bitter display, Source Serif 4 body, JetBrains Mono data — loaded from Google Fonts with system fallbacks.</dd>
+                    <dt>Scaffold</dt>
+                    <dd><code>.shell</code> wrapper, <code>.masthead</code> with <code>.eyebrow</code> and <code>.standfirst</code>.</dd>
+                    <dt>Reads as</dt>
+                    <dd>A teal-accented editorial page. Serif prose, generous measure, quiet rules.</dd>
+                </dl>
+            </div>
+
+            <div class="fam out">
+                <h3>Diff-Review</h3>
+                <span class="tag">Out of scope · different system</span>
+                <div class="swatches">
+                    <i style="background:#fbfaf8"></i><i style="background:#f4f0e9"></i><i style="background:#e2ded7"></i><i style="background:#7a5c2e"></i><i style="background:#6b6862"></i><i style="background:#1c1b19"></i>
+                </div>
+                <dl>
+                    <dt>Tokens</dt>
+                    <dd><code>--bg --panel --ink --muted --line --accent</code>, plus <code>--del-bg / --add-bg</code> for diff hunks.</dd>
+                    <dt>Type</dt>
+                    <dd><code>ui-monospace</code> throughout. No web fonts, no <code>&lt;link&gt;</code> to a font host.</dd>
+                    <dt>Scaffold</dt>
+                    <dd>None shared. Bare <code>&lt;main&gt;</code> or <code>&lt;body&gt;</code>, per-document classes.</dd>
+                    <dt>Reads as</dt>
+                    <dd>A warm-cream terminal report. Brown accent, red/green diff bands, monospace headings.</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="note">
+            <span class="h">Worth knowing</span>
+            <p>The two families are not split by branch. <code>drafthorse-condition-precedence</code> carries both: <code>issue-45-diffs.html</code> and <code>issue-45-review.html</code> are Paper/Ink, while <code>skill-condition-diffs.html</code> and the <code>wave4-*.html</code> set on the same branch are Diff-Review. Sort by the signal, never by location.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="sec-head">
+            <h2>The roster</h2>
+            <span class="count">8 documents · 15 versions</span>
+        </div>
+        <p class="lede">Paths below are the live location on each document's own branch. Every one is also readable from any branch under <code class="tok">dev/branches/&lt;branch&gt;/</code>, where <code class="tok">dev-workspace archive</code> mirrors it — so nothing here requires a checkout to inspect.</p>
+
+        <p class="lede">Fifteen blobs reduce to eight documents. The <em>Prompt Builder</em> genuinely revises five times; the three drafthorse documents each show a second blob that is only their archived copy after a whitespace reformat on 21 August — tabs and a <code class="tok">&lt;meta charset&gt;</code> line, zero content change. Counting those as versions would overstate the history.</p>
+
+        <div class="roster">
+
+            <div class="doc ref">
+                <div class="top">
+                    <span class="title">Prompt Builder</span>
+                    <span class="branch">artifacts</span>
+                    <span class="refmark">Reference</span>
+                    <span class="vers">5 versions · 08-21 → 08-23 · 1,501 → 3,685 L</span>
+                </div>
+                <p class="path">extensions/artifacts/prompt-builder/prompt-builder.html<br>dev/workspace/filebox/prompt-builder.html · prompt-builder.bak.html</p>
+            </div>
+
+            <div class="doc">
+                <div class="top">
+                    <span class="title">Prompt Engine</span>
+                    <span class="branch">artifacts</span>
+                    <span class="vers">1 version · 08-21 · 1,286 L</span>
+                </div>
+                <p class="path">dev/workspace/filebox/prompt-engine.html · prompt-engine.bak.html</p>
+            </div>
+
+            <div class="doc">
+                <div class="top">
+                    <span class="title">Mock 4 Proposals</span>
+                    <span class="branch">artifacts</span>
+                    <span class="vers">1 version · 08-22 · 986 L</span>
+                </div>
+                <p class="path">dev/workspace/reviews/mock-4-proposals.html</p>
+            </div>
+
+            <div class="doc">
+                <div class="top">
+                    <span class="title">Section Ledger</span>
+                    <span class="branch">artifacts</span>
+                    <span class="vers">1 version · 08-21 · 993 L</span>
+                </div>
+                <p class="path">dev/workspace/reviews/section-ledger.html</p>
+            </div>
+
+            <div class="doc">
+                <div class="top">
+                    <span class="title">Process nesting — demo</span>
+                    <span class="branch">artifacts</span>
+                    <span class="vers">1 version · 08-23 · 501 L</span>
+                </div>
+                <p class="path">dev/workspace/reviews/process-nesting-demo.html</p>
+            </div>
+
+            <div class="doc">
+                <div class="top">
+                    <span class="title">Retiring De-hold</span>
+                    <span class="branch">drafthorse-condition-precedence</span>
+                    <span class="vers">08-19 · 762 L · +archive reformat</span>
+                </div>
+                <p class="path">dev/workspace/artifacts/issue-45-review.html</p>
+            </div>
+
+            <div class="doc">
+                <div class="top">
+                    <span class="title">The De-hold Patch</span>
+                    <span class="branch">drafthorse-condition-precedence</span>
+                    <span class="vers">08-19 · 588 L · +archive reformat</span>
+                </div>
+                <p class="path">dev/workspace/artifacts/issue-45-diffs.html</p>
+            </div>
+
+            <div class="doc">
+                <div class="top">
+                    <span class="title">Spec-check Catch-up</span>
+                    <span class="branch">drafthorse-step-anatomy</span>
+                    <span class="vers">08-19 · 487 L · +archive reformat</span>
+                </div>
+                <p class="path">dev/workspace/artifacts/spec-check-45-diffs.html</p>
+            </div>
+
+        </div>
+
+        <div class="note">
+            <span class="h">Before you go looking on main</span>
+            <p>Only the three drafthorse documents are ancestors of <code class="tok">main</code>. The whole prompt-builder lineage — the builder itself, <em>Prompt Engine</em>, <em>Section Ledger</em>, <em>Mock 4 Proposals</em> and the nesting demo — exists only on <code class="tok">artifacts</code> and its remote. A search run from <code class="tok">main</code>'s working tree finds three documents and misses five.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="sec-head">
+            <h2>What makes a document in-family</h2>
+            <span class="count">measured, all 15</span>
+        </div>
+        <p class="lede">The signal is a shortcut to this. When judging a borderline file by eye, these are the marks to look for — but only the first tier is actually reliable. Each convention below was counted across all fifteen family members, and the tiers are the counts, not an ideal.</p>
+
+        <h3 class="tier">Always present <span>15 of 15</span></h3>
+        <ul class="print">
+            <li><span class="mark">✓</span><span><b>The token vocabulary.</b> A paper/surface/ink naming scheme rather than a bg/panel/text one, with <code class="tok">-soft</code> companions paired to <code class="tok">--accent</code> and <code class="tok">--warn</code>. This is what the signal detects.</span></li>
+            <li><span class="mark">✓</span><span><b>The type triple.</b> One Google Fonts link carrying Bitter, Source Serif 4 and JetBrains Mono, each declared with a real system fallback so the page still reads when opened offline from disk.</span></li>
+            <li><span class="mark">✓</span><span><b>The <code class="tok">.shell</code> wrapper</b>, holding a mono uppercase <code class="tok">.eyebrow</code> strip and a <code class="tok">.standfirst</code> capped near 62–70 characters.</span></li>
+            <li><span class="mark">✓</span><span><b>A <code class="tok">.sec-head</code> section header</b> — a heading, a rule beneath it, and a mono count pushed right. Between four and eight per document, in every one.</span></li>
+        </ul>
+
+        <h3 class="tier">Near-universal <span>14 of 15</span></h3>
+        <ul class="print">
+            <li><span class="mark">·</span><span><b>A <code class="tok">.masthead</code> header.</b> <em>Process nesting — demo</em> is the exception: it keeps the eyebrow and standfirst but hangs them off a bare <code class="tok">&lt;header&gt;</code>.</span></li>
+            <li><span class="mark">·</span><span><b>A third theme block.</b> Most carry all three — a bare <code class="tok">:root</code> light palette, a <code class="tok">prefers-color-scheme</code> block guarded by <code class="tok">:root:not([data-theme="light"])</code>, and a <code class="tok">:root[data-theme="dark"]</code> block so an explicit toggle beats the OS in both directions. The same demo file stops at two, because it has no toggle to honour.</span></li>
+        </ul>
+
+        <h3 class="tier">Tool-only <span>5 of 15</span></h3>
+        <ul class="print">
+            <li><span class="mark">·</span><span><b>A pre-paint theme restore.</b> An inline <code class="tok">&lt;script&gt;</code> in the head reading a remembered theme from <code class="tok">localStorage</code> and stamping <code class="tok">data-theme</code> before first paint, wrapped in <code class="tok">try/catch</code>. Every occurrence is a <em>Prompt Builder</em> version — the review documents never persist a theme.</span></li>
+        </ul>
+
+        <h3 class="tier">Late addition <span>2 of 15</span></h3>
+        <ul class="print">
+            <li><span class="mark">·</span><span><b>A data-URI SVG favicon.</b> A rounded square carrying one serif initial, tinted with the page's own accent — teal in the builder, amber in the demo. It appears only in the two most recent files, so treat it as where the system is heading rather than a test of membership.</span></li>
+        </ul>
+
+        <div class="note" style="background:var(--accent-soft);border-left-color:var(--accent);">
+            <span class="h" style="color:var(--accent);">A second signal, if you want the halves</span>
+            <p>The family has two lineages, and one string separates them without error. <code class="tok">masthead-meta</code> appears exactly three times in all six drafthorse review blobs and never once in the nine prompt-builder blobs — a clean 6/9 split with no overlap. Search it when you want the review documents specifically.</p>
+            <p>Narrower still: <code class="tok">--del-bg</code> picks out only the pages that actually render a diff — <em>The De-hold Patch</em> and <em>Spec-check Catch-up</em>. <em>Retiring De-hold</em> is prose review rather than a diff view, so it carries the masthead-meta mark but none of the diff colours.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="sec-head">
+            <h2>The one edge case</h2>
+            <span class="count">fsa-probe.html</span>
+        </div>
+        <p class="lede">Exactly one file in the repository sits on the boundary, and it is worth knowing about because it will surface if you search by colour instead of by token.</p>
+
+        <div class="fam" style="max-width:none;">
+            <h3>Storage Probe</h3>
+            <span class="tag">Palette cousin · 274 L · branch <code>artifacts</code></span>
+            <div class="swatches">
+                <i style="background:#F4F6F6"></i><i style="background:#ECF0EF"></i><i style="background:#D6DEDD"></i><i style="background:#0D6B64"></i><i style="background:#4E5B5C"></i><i style="background:#14191A"></i>
+            </div>
+            <dl>
+                <dt>What it shares</dt>
+                <dd>Every hex value, light and dark, matched exactly against the reference implementation.</dd>
+                <dt>What it does not</dt>
+                <dd>Token <em>names</em> are abbreviated — <code>--sunk</code>, <code>--soft</code>, <code>--faint</code>, and <code>--ok</code>/<code>--no</code> where the system says <code>--accent</code>/<code>--stop</code>. No web fonts are loaded. The wrapper is <code>.wrap</code>, the intro is <code>.lede</code>, and there is no masthead or third theme block.</dd>
+                <dt>Verdict</dt>
+                <dd>Not a family member. A throwaway diagnostic — it checks whether Chrome grants the File System Access API from <code>file://</code> — that borrowed the colours and nothing else.</dd>
+            </dl>
+        </div>
+
+        <p style="margin-top:20px;">This is the practical difference between the two kinds of signal. <code class="tok">--surface-sunk</code> asks <em>does this follow the system</em>, and excludes the probe. <code class="tok">#ECF0EF</code> asks <em>where did this palette travel</em>, and includes it. Pick the question you actually mean.</p>
+    </section>
+
+    <section>
+        <div class="sec-head">
+            <h2>Where it started</h2>
+            <span class="count">2026-08-19</span>
+        </div>
+        <p>The design system did not begin in the prompt-builder. The three oldest family members all date to <b>19 August</b> and all sit on drafthorse review branches — <em>Retiring De-hold</em>, <em>The De-hold Patch</em> and <em>Spec-check Catch-up</em>, each a compact 487–762 line review document. The prompt-builder's first version in this style lands two days later on <b>21 August</b> at 1,501 lines and grows to 3,685 by <b>23 August</b>.</p>
+
+        <p>The session transcript that produced the builder says so outright. Two lines from <code class="tok">dev/workspace/history/ea347861_prompt-builder-design-and-build.txt</code>:</p>
+
+        <blockquote>
+            <p>Confirm the palette: issue-45's teal-on-paper with Bitter / Source Serif 4 / JetBrains Mono, versus the tuner's Anthropic clay-on-ivory.</p>
+            <p>Palette, fonts, chips, and card treatment lifted from issue-45.</p>
+        </blockquote>
+
+        <p>So the system was worked out on short review pages and then scaled up into a tool — which is why the reference implementation carries component vocabulary (chips, rows, stages, meters) the review documents never needed, and why the builder is the last place to look for the system's origin despite being its fullest expression.</p>
+
+        <div class="note">
+            <span class="h">Nothing specifies this</span>
+            <p>The system exists only as copied HTML. No skill, rule, template or README in the repository defines these tokens — nothing in <code class="tok">extensions/rules</code>, <code class="tok">extensions/skills</code>, <code class="tok">docs/</code>, or any <code class="tok">CLAUDE.md</code>. The only non-HTML mentions anywhere in history are two session transcripts in <code class="tok">dev/workspace/history/</code>, including the one quoted above. Both are records of a conversation, not a spec, and neither gives the system a name.</p>
+            <p>That is the practical reason a search signal is worth having: until the system is written down, <code class="tok">--surface-sunk</code> is the only reliable way to find every page that follows it.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Method: 119 HTML blob references across all 280 commits and 8 branches, reduced to 88 unique blobs, each tested against nine candidate signals. Reference implementation: <code>extensions/artifacts/prompt-builder/prompt-builder.html</code>.</p>
+    </footer>
+
+</div>

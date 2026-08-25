@@ -1,0 +1,2405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Artifact suite — plan review</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230D6B64'/%3E%3Crect x='4' y='4' width='8' height='2' fill='%23F4F6F6'/%3E%3Crect x='4' y='8' width='8' height='2' fill='%23F4F6F6'/%3E%3Crect x='4' y='12' width='5' height='2' fill='%23F4F6F6'/%3E%3C/svg%3E">
+<script>
+	/* Runs before first paint so a remembered theme does not flash the default. */
+	try {
+		var t = localStorage.getItem("artifact-suite.theme");
+		if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+	} catch (e) { /* storage blocked; the system theme applies */ }
+	document.documentElement.dataset.origin = location.protocol === "file:" ? "disk" : "web";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+	:root {
+		--paper:        #F4F6F6;
+		--surface:      #FFFFFF;
+		--surface-sunk: #ECF0EF;
+		--ink:          #14191A;
+		--ink-soft:     #4E5B5C;
+		--ink-faint:    #78878A;
+		--rule:         #D6DEDD;
+		--accent:       #0D6B64;
+		--accent-soft:  #E2EFED;
+		--warn:         #8A5B00;
+		--warn-soft:    #F6EBD6;
+		--stop:         #93332A;
+		--stop-soft:    #F7E5E2;
+		--shadow:       0 1px 2px rgba(20, 25, 26, .05), 0 8px 24px rgba(20, 25, 26, .05);
+
+		--add-bg:       #E4F1E9;
+		--add-ink:      #17603E;
+		--del-bg:       #FAE8E5;
+		--del-ink:      #8E332A;
+		--keep-ink:     #4E5B5C;
+		--add-mark:     #17603E;
+		--del-mark:     #8E332A;
+
+		--serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+		--disp:  Bitter, "Source Serif 4", Georgia, serif;
+		--mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--paper:        #0E1313;
+			--surface:      #161C1C;
+			--surface-sunk: #1D2525;
+			--ink:          #E7EDEC;
+			--ink-soft:     #A9B6B5;
+			--ink-faint:    #7D8B8A;
+			--rule:         #293333;
+			--accent:       #59C5B9;
+			--accent-soft:  #16302E;
+			--warn:         #D9A44F;
+			--warn-soft:    #2E2617;
+			--stop:         #E08277;
+			--stop-soft:    #331C19;
+			--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+
+			--add-bg:       #13291F;
+			--add-ink:      #7FCFA3;
+			--del-bg:       #2C1A18;
+			--del-ink:      #E29288;
+			--keep-ink:     #A9B6B5;
+			--add-mark:     #7FCFA3;
+			--del-mark:     #E29288;
+		}
+	}
+	:root[data-theme="dark"] {
+		--paper:        #0E1313;
+		--surface:      #161C1C;
+		--surface-sunk: #1D2525;
+		--ink:          #E7EDEC;
+		--ink-soft:     #A9B6B5;
+		--ink-faint:    #7D8B8A;
+		--rule:         #293333;
+		--accent:       #59C5B9;
+		--accent-soft:  #16302E;
+		--warn:         #D9A44F;
+		--warn-soft:    #2E2617;
+		--stop:         #E08277;
+		--stop-soft:    #331C19;
+		--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+
+		--add-bg:       #13291F;
+		--add-ink:      #7FCFA3;
+		--del-bg:       #2C1A18;
+		--del-ink:      #E29288;
+		--keep-ink:     #A9B6B5;
+		--add-mark:     #7FCFA3;
+		--del-mark:     #E29288;
+	}
+
+	/* radius: 2px on controls, 3px on cards. No token — indirection over a constant. */
+	* { box-sizing: border-box; }
+	body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+	h1, h2, h3, h4, h5 { font-family: var(--disp); text-wrap: balance; }
+	code, .mono, kbd { font-family: var(--mono); }
+	code { font-size: .87em; background: var(--surface-sunk); padding: 1px 5px; border-radius: 2px; }
+	a { color: var(--accent); }
+	main { min-width: 0; }
+	section { margin-bottom: 64px; }
+	html { scroll-behavior: smooth; }
+	@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+	@media print { .toc, .filters, .themeset, .floater, #outwrap { display: none; } }
+
+	/* ---------- layouts ---------- */
+	.shell { display: grid; grid-template-columns: 1fr; max-width: 940px; margin: 0 auto; padding: 0 22px 96px; }
+	.shell.rail { max-width: 1180px; }
+	.shell.board { max-width: 1340px; }
+	.masthead, footer { grid-column: 1 / -1; }
+	.shell:not(.board) > .sidebar { display: none; }
+	@media (min-width: 1040px) {
+		.shell.rail { grid-template-columns: 232px minmax(0, 1fr); gap: 56px; padding-right: 32px; }
+	}
+	@media (min-width: 1060px) {
+		.shell.board { grid-template-columns: minmax(0, 1fr) 440px; gap: 44px; }
+		.shell.board > .sidebar { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; }
+	}
+
+	/* ---------- masthead ---------- */
+	.masthead { border-bottom: 1px solid var(--rule); padding: 40px 0 26px; margin-bottom: 34px; }
+	.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+	.eyebrow .spacer { margin-left: auto; }
+	.eyebrow a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--rule); }
+	.eyebrow .pv-branch code { color: var(--accent); }
+	.eyebrow .sep { color: var(--ink-faint); }
+	.eyebrow .sep::before { content: "\00B7"; }
+	h1 { font-size: clamp(26px, 3.6vw, 36px); line-height: 1.1; font-weight: 600; margin: 16px 0 10px; letter-spacing: -.015em; }
+	.standfirst { max-width: 62ch; color: var(--ink-soft); font-size: 18px; margin: 0; }
+	.masthead-meta { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 22px; font-size: 14px; color: var(--ink-soft); }
+	.masthead-meta b { color: var(--ink); font-weight: 600; }
+
+	/* ---------- table of contents ---------- */
+	.toc.column { display: none; }
+	.toc.column h4 { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 22px 0 10px; font-weight: 500; }
+	.toc.column ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+	.toc.column a { text-decoration: none; color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; display: block; border-left: 2px solid var(--rule); padding-left: 10px; }
+	.toc.column a:hover, .toc.column a:focus-visible, .toc.column a[aria-current="true"] { color: var(--accent); border-left-color: var(--accent); }
+	.toc.pills { position: sticky; top: 0; z-index: 6; display: flex; gap: 8px; overflow-x: auto; margin: 0 0 26px; padding: 10px 0; background: var(--paper); border-bottom: 1px solid var(--rule); }
+	.toc.pills a { flex: none; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; white-space: nowrap; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--rule); border-radius: 2px; padding: 5px 11px; }
+	.toc.pills a[aria-current="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+	.toc li[hidden], .toc a[hidden] { display: none; }
+	@media (min-width: 1040px) {
+		.shell.rail > .toc.column { display: block; position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; padding-bottom: 20px; }
+		.shell.rail main > .toc.pills { display: none; }
+	}
+	[id] { scroll-margin-top: 72px; }
+	@media (min-width: 1040px) { .shell.rail [id] { scroll-margin-top: 24px; } }
+	article[id]:target, section[id]:target { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+	/* ---------- chips and filters ---------- */
+	.chiprow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+	.chip { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; background: var(--surface-sunk); color: var(--ink-soft); white-space: nowrap; text-decoration: none; }
+	.chip.id { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); }
+	.chip.integrate { background: var(--accent-soft); color: var(--accent); }
+	.chip.yourcall { background: var(--warn-soft); color: var(--warn); }
+	.chip.defer { background: transparent; border: 1px dashed var(--rule); color: var(--ink-faint); }
+	.chip.dead { background: transparent; border: 1px dashed var(--rule); color: var(--ink-faint); text-decoration: line-through; }
+	.chip.earlier { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); }
+	.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 26px; }
+	.filters button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+	.filters .n { margin-left: 6px; font-variant-numeric: tabular-nums; opacity: .75; }
+	.filters[hidden] { display: none; }
+
+	/* ---------- cards and section furniture ---------- */
+	.card { background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--rule); border-radius: 3px; box-shadow: var(--shadow); padding: 22px 24px; margin-bottom: 22px; }
+	.card > *:first-child { margin-top: 0; }
+	.card h3 { font-size: 19.5px; margin: 0 0 8px; font-weight: 600; line-height: 1.3; }
+	.card p, .card ul, .card ol { max-width: 68ch; }
+	.card ul, .card ol { padding-left: 20px; }
+	.card li { margin-bottom: 6px; }
+	.card p:last-child { margin-bottom: 0; }
+	.card[hidden] { display: none; }
+	.card[data-tag="integrate"] { border-left-color: var(--accent); }
+	.card[data-tag="yourcall"] { border-left-color: var(--warn); }
+	.card[data-tag="defer"] { border-left-color: var(--ink-faint); }
+	.card.dead { border-left-color: var(--ink-faint); background: var(--surface-sunk); }
+	.card.dead h3 { color: var(--ink-soft); }
+	.card.needs-id { border-left-color: var(--warn); }
+	.changed { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--warn); background: var(--warn-soft); border-left: 2px solid var(--warn); padding: 6px 10px; margin: 0 0 12px; display: flex; gap: 10px; align-items: center; }
+	.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 10px; }
+	.sec-head h2 { font-size: 25px; margin: 0; font-weight: 600; letter-spacing: -.01em; }
+	.sec-head .count { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+	.sec-intro { color: var(--ink-soft); max-width: 68ch; margin: 14px 0 30px; }
+	.gloss { color: var(--ink-soft); font-size: 14.5px; margin: 0 0 18px; max-width: 62ch; }
+
+	/* ---------- response surface ---------- */
+	.respond { margin-top: 18px; border-top: 1px dashed var(--rule); padding-top: 14px; }
+	.verdicts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+	.verdicts label { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 4px 10px; cursor: pointer; color: var(--ink-soft); user-select: none; background: var(--surface); }
+	.verdicts input { position: absolute; opacity: 0; width: 0; height: 0; }
+	.verdicts label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+	.verdicts label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+	.verdicts label.recommended .rec { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-left: 7px; }
+	@supports not (selector(:has(*))) { .verdicts input { position: static; opacity: 1; width: auto; height: auto; } }
+	textarea { width: 100%; min-height: 68px; resize: vertical; background: var(--surface-sunk); color: var(--ink); border: 1px solid var(--rule); border-radius: 2px; padding: 10px 12px; font-family: var(--serif); font-size: 15.5px; line-height: 1.5; }
+	textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+	textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+	.loose { border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); padding: 16px 18px; margin-top: 22px; box-shadow: var(--shadow); }
+	.loose .lab { margin-bottom: 9px; }
+
+	/* ---------- quote, micro-label, disclosure ---------- */
+	blockquote { margin: 14px 0; padding: 4px 0 4px 16px; border-left: 2px solid var(--accent); color: var(--ink-soft); font-style: italic; max-width: 62ch; }
+	blockquote code { font-style: normal; }
+	blockquote cite, .q, .lab { display: block; margin-top: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; font-style: normal; color: var(--ink-faint); }
+	details { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 14px; margin: 14px 0; }
+	details summary { cursor: pointer; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--ink-soft); }
+
+	/* ---------- buttons ---------- */
+	button { font-family: var(--mono); font-size: 12px; letter-spacing: .07em; text-transform: uppercase; padding: 9px 15px; border-radius: 2px; border: 1px solid var(--accent); background: var(--accent); color: var(--paper); cursor: pointer; }
+	button.ghost { background: transparent; color: var(--accent); }
+	button.quiet { background: transparent; color: var(--ink-faint); border-color: var(--rule); }
+	button.quiet:hover { color: var(--accent); border-color: var(--accent); }
+	button.amber { background: var(--warn); border-color: var(--warn); color: var(--paper); }
+	button.amber.ghost { background: transparent; color: var(--warn); }
+	button:hover { filter: brightness(1.08); }
+	button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+	button.tiny { padding: 6px 11px; font-size: 11px; }
+	button:disabled { opacity: .4; cursor: default; filter: none; }
+
+	/* ---------- theme, floater, foot ---------- */
+	.themeset { display: flex; gap: 4px; }
+	.themeset button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+	.floater { position: fixed; right: 22px; bottom: 22px; z-index: 40; display: flex; gap: 8px; align-items: center; }
+	.floater .status { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); background: var(--paper); padding: 2px 6px; border-radius: 2px; }
+	.floater .status.bad { color: var(--stop); }
+	.floater [hidden] { display: none; }
+	#outwrap { position: fixed; right: 22px; bottom: 74px; z-index: 39; width: min(560px, calc(100vw - 44px)); background: var(--surface); border: 1px solid var(--rule); border-left: 2px solid var(--accent); border-radius: 3px; box-shadow: var(--shadow); padding: 10px; }
+	#outwrap[hidden] { display: none; }
+	#out { width: 100%; height: min(52vh, 460px); font-family: var(--mono); font-size: 12.5px; line-height: 1.55; }
+	#foot { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); padding-top: 18px; border-top: 1px solid var(--rule); display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+	#foot .sep { color: var(--ink-faint); }
+	#held-note, #storage-note { flex-basis: 100%; color: var(--warn); }
+	@media (max-width: 620px) {
+		.floater { left: 14px; right: 14px; justify-content: flex-end; }
+		#outwrap { left: 14px; right: 14px; width: auto; }
+	}
+
+	/* ---------- reference block ---------- */
+	details.ref { padding: 0; border-left: 2px solid var(--rule); border-radius: 2px; margin: 12px 0; }
+	details.ref summary { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 9px 14px; background: var(--surface-sunk); }
+	.ref .path { font-family: var(--mono); font-size: 12.5px; color: var(--ink); word-break: break-all; }
+	.ref .lines, .ref .loc { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+	.ref .mirror { margin-left: auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; background: var(--warn-soft); color: var(--warn); padding: 3px 8px; border-radius: 2px; }
+	.ref-links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 14px; }
+	.ref-chip { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 4px 10px; color: var(--ink-soft); background: var(--surface); text-decoration: none; cursor: pointer; }
+	.refs { display: grid; gap: 8px; margin: 14px 0; }
+	.path--unlinked { text-decoration: underline dotted var(--warn); }
+	.ref--broken > summary { border-left: 2px solid var(--stop); }
+	.ref--broken .path { color: var(--stop); }
+	:root[data-origin="web"] .ref-disk, .ref--nodisk .ref-disk, .ref--nodisk .ref-editor { display: none; }
+	:root[data-origin="disk"] .ref:not(.ref--nodisk) .ref-disk, :root[data-origin="web"] .ref-gh, .ref--nodisk .ref-gh, .ref-site { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+
+	/* ---------- template scope: review ---------- */
+	.verdict-strip { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 3px; padding: 18px 22px; margin-bottom: 34px; }
+	.verdict-strip h3 { font-size: 18px; margin: 0 0 8px; color: var(--accent); }
+	.verdict-strip p { margin: 0 0 8px; max-width: 68ch; }
+	.verdict-strip p:last-child { margin-bottom: 0; }
+	.stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 0; }
+	.stat { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 14px; }
+	.stat b { display: block; font-family: var(--disp); font-size: 20px; font-variant-numeric: tabular-nums; }
+	.stat span { font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-faint); }
+	.src { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); background: var(--surface-sunk); border-left: 2px solid var(--rule); padding: 10px 14px; margin: 12px 0; overflow-x: auto; white-space: pre; }
+	.delta { display: grid; gap: 10px; margin: 14px 0; }
+	@media (min-width: 700px) { .delta { grid-template-columns: 1fr 1fr; } }
+	.delta > div { background: var(--surface-sunk); border-radius: 2px; padding: 10px 14px; font-size: 14.5px; }
+	.delta .now { border-left: 2px solid var(--stop); }
+	.delta .next { border-left: 2px solid var(--accent); }
+	.delta b { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 5px; }
+	.options { display: grid; gap: 10px; margin: 14px 0 0; }
+	.option { display: flex; gap: 12px; background: var(--surface); border: 1px solid var(--rule); border-left: 2px solid var(--rule); border-radius: 2px; padding: 11px 14px; cursor: pointer; }
+	.option:has(input:checked) { border-left-color: var(--accent); }
+	.option input { margin-top: 6px; accent-color: var(--accent); }
+	.option b { font-family: var(--disp); font-size: 15.5px; display: block; }
+	.option span { color: var(--ink-soft); font-size: 14.5px; }
+	.option .rec { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-left: 7px; }
+	.option.recommended { background: var(--accent-soft); border-left-color: var(--accent); }
+
+	/* ---------- template scope: interview ---------- */
+	.card.answered { border-left-color: var(--accent); }
+	.card.answered h3 { font-size: 16.5px; margin: 0 0 6px; }
+	.q.rec { color: var(--ink); text-transform: none; letter-spacing: 0; font-family: var(--serif); font-size: 15px; }
+	.q.rec b { color: var(--accent); }
+
+	/* ---------- block scope: diff ---------- */
+	.diff { font-family: var(--mono); font-size: 12.5px; line-height: 1.65; border: 1px solid var(--rule); border-radius: 2px; background: var(--surface-sunk); overflow-x: auto; margin: 4px 0 14px; }
+	.diff-row { display: grid; grid-template-columns: 1.6em minmax(0, 1fr); }
+	.diff-row::before { content: ""; grid-column: 1; grid-row: 1; text-align: center; user-select: none; }
+	.diff-row > .tx { grid-column: 2; grid-row: 1; padding: 3px 12px 3px 4px; white-space: pre-wrap; word-break: break-word; }
+	.diff.numbered .diff-row { grid-template-columns: 3.4em 1.6em minmax(0, 1fr); }
+	.diff.numbered .diff-row::after { content: attr(data-ln); grid-column: 1; grid-row: 1; text-align: right; padding-right: 10px; color: var(--ink-faint); user-select: none; font-variant-numeric: tabular-nums; }
+	.diff.numbered .diff-row::before { grid-column: 2; }
+	.diff.numbered .diff-row > .tx { grid-column: 3; }
+	.diff-row.add::before { content: "+"; color: var(--add-mark); }
+	.diff-row.del::before { content: "\2212"; color: var(--del-mark); }
+	.diff-row.ctx > .tx { color: var(--keep-ink); }
+	.diff-row.add > .tx { background: var(--add-bg); color: var(--add-ink); }
+	.diff-row.del > .tx { background: var(--del-bg); color: var(--del-ink); }
+	.diff-row.gap > .tx { color: var(--ink-faint); opacity: .7; }
+
+	/* ---------- block scope: panel ---------- */
+	dialog.panel { max-width: 640px; width: calc(100vw - 44px); background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 3px; box-shadow: var(--shadow); padding: 24px 26px; }
+	dialog.panel::backdrop { background: rgba(20, 25, 26, .5); }
+	dialog.panel h2 { font-size: 21px; margin: 0 0 8px; }
+	dialog.panel .lede { color: var(--ink-soft); margin: 0 0 16px; }
+	dialog.panel h3 { font-size: 15.5px; margin: 16px 0 4px; }
+	dialog.panel p { margin: 0 0 8px; font-size: 15px; }
+	dialog.panel ol { padding-left: 20px; font-size: 15px; }
+	dialog.panel li { margin-bottom: 7px; }
+	dialog.panel .close { position: absolute; top: 14px; right: 16px; }
+
+	/* ---------- block scope: figure ---------- */
+	figure.fig { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 16px 18px; margin: 16px 0; overflow-x: auto; }
+	figure.fig svg { display: block; min-width: 640px; max-width: 100%; height: auto; }
+	figcaption.cap { font-size: 14px; color: var(--ink-faint); margin: 10px 0 0; }
+	svg text { font-family: var(--mono); fill: var(--ink); }
+	svg .lanebg { fill: var(--surface-sunk); }
+	svg .lanelbl { font-size: 10px; letter-spacing: .09em; fill: var(--ink-faint); }
+	svg .box { fill: var(--surface); stroke: var(--rule); stroke-width: 1.5; }
+	svg .box.a { stroke: var(--accent); }
+	svg .box.b { stroke: var(--warn); }
+	svg .box.c { stroke: var(--ink-soft); }
+	svg .t { font-size: 11px; }
+	svg .ts { font-size: 9.5px; fill: var(--ink-faint); }
+	svg .arw { stroke: var(--ink-faint); stroke-width: 1.4; fill: none; }
+	svg .track { stroke: var(--rule); stroke-width: 2; }
+	svg .dot { fill: var(--surface); stroke-width: 2; }
+	details.more { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 14px; }
+	details.more .body { margin-top: 10px; font-size: 15px; color: var(--ink-soft); }
+
+	/* ---------- demo scope ---------- */
+	.demo { border: 1px dashed var(--rule); border-radius: 3px; background: var(--surface-sunk); padding: 14px 16px; margin: 16px 0; }
+	.demo > .tag { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+	.demo .sub { margin: 0 0 10px; font-size: 14.5px; color: var(--ink-soft); max-width: 68ch; }
+	.demo .note { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+	.demo .readout { font-family: var(--mono); font-size: 12px; line-height: 1.6; background: var(--surface); border-left: 2px solid var(--accent); border-radius: 2px; padding: 9px 12px; margin-top: 10px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; }
+	.demo .readout .muted { color: var(--ink-faint); }
+	.demo .btnrow { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; margin-top: 4px; }
+	.demo .picks { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+	.demo .picks label { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 4px 10px; cursor: pointer; color: var(--ink-soft); background: var(--surface); user-select: none; }
+	.demo .picks label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+	.demo .picks input { position: absolute; opacity: 0; width: 0; height: 0; }
+	.demo .field { width: 100%; min-height: 54px; }
+	.demo .help { font-size: 13.5px; color: var(--ink-faint); margin: 8px 0 0; }
+	.swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+	.swatch { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 5px 9px; }
+</style>
+</head>
+<body>
+
+<script type="application/json" id="page-meta">
+{
+  "id": "artifact-suite-plan-review",
+  "kind": "review",
+  "rev": 1,
+  "title": "Artifact suite — plan review",
+  "provenance": {
+    "repo": "https://github.com/dilberryhoundog/agent-library",
+    "root": "/Users/dylangraham/Projects/agent-library",
+    "self": "dev/workspace/reviews/artifact-suite-plan-review.html",
+    "branch": "artifacts",
+    "commit": "b966a43ec62ab53e5218074f39493bd2f970c545",
+    "issue": null,
+    "pr": null,
+    "date": "2026-08-24",
+    "builtAt": "2026-08-23T21:38:19Z",
+    "editor": "vscode"
+  },
+  "prompt": {
+    "heading": "Response — artifact suite implementation plan (Stage 2 gate)"
+  },
+  "next": [
+    "Author the Stage 3 dynamic workflow from the accepted cards: one phase per work package, in the WP-1..WP-10 dependency order the plan sets out.",
+    "Treat every card left at its recommended default as accepted as written — build it exactly as the plan states.",
+    "Apply each Revise note to the plan section its card names, and re-read that section before writing code against it.",
+    "Settle the five options cards under Unresolved questions before starting WP-1; WP-1, WP-7 and WP-8 all depend on them.",
+    "Ask rather than guess where a card is marked Revise with no note."
+  ]
+}
+</script>
+
+<div class="shell rail">
+	<header class="masthead">
+		<div class="eyebrow" id="eyebrow"><span class="spacer"></span>
+			<div class="themeset" role="group" aria-label="Theme">
+				<button class="quiet tiny" type="button" data-theme-set="system" aria-pressed="true">System</button>
+				<button class="quiet tiny" type="button" data-theme-set="light" aria-pressed="false">Light</button>
+				<button class="quiet tiny" type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+			</div>
+		</div>
+		<h1>Artifact suite — plan review</h1>
+		<p class="standfirst">Every implementation the Stage 2 tech plan proposes, one card at a time. Answer the cards you care about, leave the rest at their recommended default, then copy the return prompt into the workflow that builds Stage 3.</p>
+		<div class="masthead-meta">
+			<span><b>Stage</b> 2 of 6 — Tech Plan gate</span>
+			<span><b>Plan</b> 1166 lines</span>
+			<span><b>Decisions</b> D-1..D-20 binding</span>
+			<span><b>Findings carried</b> 75</span>
+		</div>
+		<div class="stats">
+			<div class="stat"><b>70</b><span>cards</span></div>
+			<div class="stat"><b>10</b><span>work packages</span></div>
+			<div class="stat"><b>17</b><span>files to write</span></div>
+			<div class="stat"><b>5</b><span>open questions</span></div>
+			<div class="stat"><b>31</b><span>verification checks</span></div>
+		</div>
+	</header>
+
+	<nav class="toc column" id="toc-column" aria-label="Contents"></nav>
+
+	<main>
+		<nav class="toc pills" id="toc-pills" aria-label="Contents"></nav>
+		<div class="filters" id="filters" hidden></div>
+
+		<section id="package">
+			<div class="sec-head"><h2>What ships</h2><span class="count"></span></div>
+			<p class="sec-intro">The plan's deliverable is one skill directory of seventeen files, symlinked into an existing plugin and released as a minor version. These cards settle the package boundary — what is a file, where built pages land, and which two Python scripts do all the writing.</p>
+
+			<div class="verdict-strip">
+				<h3>Where the plan landed</h3>
+				<p>One skill, <code>extensions/skills/artifact-suite/</code>, ships a copyable page shell plus three page templates, three card-level blocks and a DraftHorse build procedure. The shell carries tokens, three layouts, a generated table of contents, a tag filter bar, a three-way theme control and one engine script. Content is spliced into seven marked regions by <code>splice.py</code>; the agent never opens the shell and never writes chrome.</p>
+				<p>This review page is itself built to that specification — the eyebrow above, the contents rail, the filter bar, every reference block, the diff, the figure and the floating <b>Copy prompt</b> pair are the plan's own components, running.</p>
+			</div>
+
+			<article class="card" id="one-skill-package" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#one-skill-package">01</a><span class="chip integrate">Integrate</span><span class="chip">packaging</span></div>
+				<h3>One skill, not a plugin of its own</h3>
+				<p>Everything lands in <code>extensions/skills/artifact-suite/</code>: <code>SKILL.md</code>, three <code>assets/</code> scripts, three <code>assets/blocks/</code> files, three <code>assets/templates/</code> files, four <code>references/</code> files and three <code>tests/fixtures/</code> pages. Seventeen files plus one symlink — one release unit.</p>
+				<details class="ref" data-path="dev/workspace/plans/artifact-suite-implementation.md" data-lines="35-58" data-loc="§ File layout"></details>
+			</article>
+
+			<article class="card" id="landing-directory" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#landing-directory">02</a><span class="chip integrate">Integrate</span><span class="chip">paths</span></div>
+				<h3>Built pages land in <code>dev/workspace/artifacts/</code></h3>
+				<p>The file name is <code>&lt;id&gt;.html</code> where <code>id</code> is <code>#page-meta.id</code>. <code>dev/workspace/reviews/</code> keeps its documented meaning — reviews of completed work — and holds the Stage 1 corpus. Both directories archive into <code>dev/branches/&lt;branch&gt;/</code> identically, so the mirror route works for either.</p>
+				<p>Before any copy, <code>ls dev/workspace/artifacts dev/branches/*/artifacts</code> confirms the id is unused: on <code>file://</code> every local page shares one origin, so a duplicate id silently merges two pages' stored answers.</p>
+			</article>
+
+			<article class="card" id="splice-py" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#splice-py">03</a><span class="chip integrate">Integrate</span><span class="chip">tooling</span></div>
+				<h3><code>splice.py</code> is the only thing that writes a page</h3>
+				<p>About ninety lines, seven forms: fill a marker region from stdin or by lifting a named part out of a template or block file; replace one card by id; append a card before a section's closing tag; set the layout class on <code>.shell</code>; and two read-only forms, <code>show page-meta</code> and <code>show cards</code>. It asserts each marker appears exactly once and refuses a second insert of the same sourced part.</p>
+				<p>The refusal is byte-level: the lifted content with delimiters stripped and trailing whitespace normalised is tested against the page; a hit exits 0 with <code>already present</code> on stderr and writes nothing.</p>
+				<details class="ref" data-path="dev/workspace/plans/artifact-suite-implementation.md" data-lines="43" data-loc="§ File layout — splice.py row"></details>
+			</article>
+
+			<article class="card" id="verify-py" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#verify-py">04</a><span class="chip integrate">Integrate</span><span class="chip">tooling</span></div>
+				<h3><code>verify.py</code> runs the static tier as one command</h3>
+				<p>About 120 lines implementing checks S1-S10 as subcommands of a single script, run as <code>python3 $S/verify.py &lt;page&gt; --static</code>. It also writes the doctype-wrapped copy that runtime check V6a serves. It exits non-zero on the first failing check, naming it.</p>
+			</article>
+
+			<article class="card" id="plugin-placement" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#plugin-placement">05</a><span class="chip integrate">Integrate</span><span class="chip">release</span></div>
+				<h3>Symlinked into <code>chat-tools</code>, released as 2.2.0</h3>
+				<p><code>plugins/chat-tools/skills/artifact-suite -&gt; ../../../extensions/skills/artifact-suite</code>. <code>chat-tools</code> already holds <code>markdown</code>, whose output this is the HTML counterpart of; <code>agent-tools</code> is harness-extension authoring and <code>dev-tools</code> is git and releases. Release runs through <code>/dev-tools:versioning</code>, which resolves symlink targets at runtime.</p>
+				<p>Plugin assets run from the last installed release, so through Stage 3 the skill is executed by hand from the working tree. The release is cut only after the acceptance test passes.</p>
+			</article>
+
+			<article class="card" id="drafthorse-format" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#drafthorse-format">06</a><span class="chip integrate">Integrate</span><span class="chip">skill</span></div>
+				<h3>The skill is a DraftHorse procedure</h3>
+				<p><code>harness-format: DraftHorse</code>, matching <code>classroom</code>, <code>corpus-sweep</code> and <code>versioning</code>. Body: global invariants, inline references (marker table, landing rule, token economy, six-kind mapping), ten steps and a terms list. 260-320 lines.</p>
+				<p>Both invocation fields are omitted, so the skill is model-invocable and user-invocable — the agent reaches for it before hand-authoring chrome.</p>
+			</article>
+		</section>
+
+		<section id="shell">
+			<div class="sec-head"><h2>The shell</h2><span class="count"></span></div>
+			<p class="sec-intro">One file, copied per page, carrying every byte of chrome. A 36KB hard ceiling with a 32KB target: CSS ≤ 16KB, engine ≤ 17KB, head and scaffold ≤ 3KB. These cards cover its form, its editable regions and each piece of furniture it owns.</p>
+
+			<article class="card" id="bare-fragment" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#bare-fragment">07</a><span class="chip integrate">Integrate</span><span class="chip">form</span></div>
+				<h3>The shell is a bare fragment, no doctype</h3>
+				<p>No <code>&lt;!doctype&gt;</code>, <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code> or <code>&lt;body&gt;</code>. Chrome builds the missing structure from <code>file://</code>; the Artifact tool supplies its own skeleton, so one file serves both. The cost is quirks mode on disk, and the shell is written to avoid all four differences that matter: lowercase class and id names only, explicit font and line-height on <code>td</code>/<code>th</code>, no percentage heights, no image inside a table.</p>
+				<p>Non-ASCII glyphs in CSS <code>content</code> are written as escapes (<code>\2212</code>, <code>\00B7</code>) because the fragment's <code>&lt;meta charset&gt;</code> is inert under the wrapper. A cheaper cure — ship a doctype and strip it at publish — is open as question Q4 below.</p>
+				<p class="gloss">This review page carries a doctype and a full document, because it is hand-authored rather than built by the suite. Its rendering is standards mode; the shell's would be quirks mode from disk.</p>
+			</article>
+
+			<article class="card" id="seven-markers" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#seven-markers">08</a><span class="chip integrate">Integrate</span><span class="chip">form</span></div>
+				<h3>Seven marked regions, filled two ways</h3>
+				<p>HTML regions are <code>&lt;!-- @name --&gt;</code> … <code>&lt;!-- @name:end --&gt;</code>; the one region inside <code>&lt;style&gt;</code> uses <code>/* @template-style */</code>. Three <b>placeholder</b> regions — <code>@doc-title</code>, <code>@page-meta</code>, <code>@masthead</code> — ship one element each and are replaced whole, so a page never ends with two titles or two meta blocks. Four <b>empty</b> regions — <code>@template-style</code>, <code>@content</code>, <code>@sidebar</code>, <code>@template-script</code> — take content appended before their closing marker, which therefore survives the next splice.</p>
+				<div class="delta">
+					<div class="now"><b>Placeholder region</b>Everything between the markers is replaced. Written once, never appended to.</div>
+					<div class="next"><b>Empty region</b>Content replaces the closing marker, followed by the same closing marker. Appended to repeatedly.</div>
+				</div>
+				<p><code>layout</code>, <code>card</code>, <code>section</code> and <code>show</code> are reserved keywords and never marker names.</p>
+			</article>
+
+			<article class="card" id="layout-class" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#layout-class">09</a><span class="chip integrate">Integrate</span><span class="chip">layout</span></div>
+				<h3>Three layouts; one writable attribute outside the markers</h3>
+				<p><code>.shell</code> at 940px, <code>.shell.rail</code> at 1180px with a 232px contents column from 1040px, <code>.shell.board</code> at 1340px with a 440px sticky sidebar from 1060px. The <code>class</code> attribute on the single <code>.shell</code> element is the only byte outside a marker a page may change, and only through <code>splice.py &lt;page&gt; layout rail|board</code>.</p>
+				<p>Name collision rule: the shell never defines a bare <code>.rail</code> selector — every rail rule is <code>.shell.rail</code>, so <code>.rail</code> stays free for the folder-picker row pattern it already names elsewhere.</p>
+				<p class="gloss">This page is <code>.shell.rail</code>. Narrow the window below 1040px and the contents column is replaced by the sticky pill row at the top of the content area.</p>
+			</article>
+
+			<article class="card" id="token-set" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#token-set">10</a><span class="chip integrate">Integrate</span><span class="chip">design system</span></div>
+				<h3>Fourteen tokens copied, exactly seven added</h3>
+				<p>The three theme blocks come from <code>prompt-builder.html</code> lines 21-74 unchanged, aligned colons and all: light on bare <code>:root</code>, dark inside <code>@media (prefers-color-scheme: dark)</code> guarded by <code>:root:not([data-theme="light"])</code>, dark again under <code>:root[data-theme="dark"]</code>. Seven diff tokens are added to each block. No other token is added anywhere in the suite, and no template or block declares a raw colour.</p>
+				<div class="demo" id="d-tokens" data-report="Diff token swatches, as rendered">
+					<span class="tag">live · the seven added tokens</span>
+					<p class="sub">Resolved against the theme you are reading in. Switch theme in the eyebrow and press Re-read to see both halves of each pair.</p>
+					<div class="swatches" id="tok-swatches"></div>
+					<div class="btnrow"><button class="ghost tiny" type="button" id="tok-read">Re-read computed values</button><span class="note" id="tok-note"></span></div>
+					<div class="readout" id="tok-out"></div>
+				</div>
+				<details class="ref" data-path="extensions/artifacts/prompt-builder/prompt-builder.html" data-lines="21-74" data-loc="§ token blocks"></details>
+			</article>
+
+			<article class="card" id="type-and-base" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#type-and-base">11</a><span class="chip integrate">Integrate</span><span class="chip">design system</span></div>
+				<h3>Type triple declared once; two prose measures</h3>
+				<p><code>--serif</code>, <code>--disp</code> and <code>--mono</code> are declared on bare <code>:root</code> and no template or block ever names a font family. Body is 17px on <code>--serif</code> at 1.6. Two prose measures, set once: 68ch on <code>.card p</code>, <code>.card ul</code>, <code>.card ol</code> and <code>.sec-intro</code>; 62ch on <code>.standfirst</code>, <code>.gloss</code> and <code>blockquote</code>.</p>
+				<p>Radius is a constant, not a token: 2px on controls, 3px on cards, recorded as one comment. Indirection over a value that never varies is not worth the byte.</p>
+			</article>
+
+			<article class="card" id="has-policy" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#has-policy">12</a><span class="chip integrate">Integrate</span><span class="chip">css</span></div>
+				<h3><code>:has()</code> is allowed, with one load-bearing floor</h3>
+				<p>The target is Chrome from <code>file://</code>, where <code>:has()</code> shipped in 105. A <code>:has()</code> rule may only add a visual state the native control already expresses, and never shares a selector list with a non-<code>:has()</code> selector. One exception is load-bearing — <code>.verdicts label:has(input:checked)</code> is the <i>only</i> expression of a verdict, because <code>.verdicts input</code> is visually removed — so the shell carries an <code>@supports not (selector(:has(*)))</code> floor that restores the raw radios directly beneath it.</p>
+				<div class="src">@supports not (selector(:has(*))) {
+    .verdicts input { position: static; opacity: 1; width: auto; height: auto; }
+}</div>
+			</article>
+
+			<article class="card" id="toc-two-surfaces" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#toc-two-surfaces">13</a><span class="chip integrate">Integrate</span><span class="chip">navigation</span></div>
+				<h3>One contents model, two surfaces</h3>
+				<p>The engine builds one group per <code>section[id]</code> labelled from its <code>.sec-head h2</code>, and one entry per <code>article.card[id]</code> labelled from its <code>.chip.id</code> text plus <code>h3</code>, falling back to the <code>h3</code> alone where a card carries no id chip. It renders that model into both containers: the 232px sticky column shown only in <code>.shell.rail</code> at ≥ 1040px, and the sticky pill row shown everywhere else. No viewport lacks navigation.</p>
+				<p>A single IntersectionObserver with <code>rootMargin: -20% 0px -70% 0px</code> sets <code>aria-current="true"</code> on the matching link in both surfaces at once. <code>scroll-margin-top</code> is 72px to clear the pill row, dropping to 24px only where the pill row is hidden.</p>
+				<p class="gloss">Both surfaces on this page are generated from the cards below — scroll and watch the highlight track in the rail.</p>
+			</article>
+
+			<article class="card" id="section-id-contract" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#section-id-contract">14</a><span class="chip integrate">Integrate</span><span class="chip">navigation</span></div>
+				<h3>A section id is permanent, exactly as a card id is</h3>
+				<p>A <code>&lt;section&gt;</code>'s <code>id</code> is a lowercase slug of its <code>.sec-head h2</code>. It anchors the contents group, receives the <code>:target</code> ring, and keys that section's comment under <code>sections</code> in the stored document. Once published it cannot change without orphaning a stored comment.</p>
+			</article>
+
+			<article class="card" id="filter-vocabulary" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#filter-vocabulary">15</a><span class="chip integrate">Integrate</span><span class="chip">filters</span></div>
+				<h3>Three tags, two states, one vocabulary</h3>
+				<p><code>integrate</code>, <code>yourcall</code>, <code>defer</code> appear identically in the markup attribute, the chip modifier and the card edge modifier, so they cannot disagree. The card declares <code>data-tag</code> on the <code>&lt;article&gt;</code>; the edge is a <code>border-left</code> driven by that attribute, never a second class the agent must keep in sync.</p>
+				<p>The filter bar is shell furniture, ships <code>hidden</code>, and reveals itself when the page carries two or more distinct tags. Each button's count is computed from the DOM. <code>all</code> and <code>unanswered</code> are states, not tags: they carry no chip, no card edge and no markup attribute, so the three-word vocabulary still governs everything printed. Filtering toggles <code>hidden</code> on non-matching articles and their contents entries, and the return prompt ignores it entirely.</p>
+				<p class="gloss">The bar above this section is live. <b>Unanswered</b> is the one to work through a long page with.</p>
+			</article>
+
+			<article class="card" id="card-anatomy" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#card-anatomy">16</a><span class="chip integrate">Integrate</span><span class="chip">cards</span></div>
+				<h3>One card anatomy, fixed body order</h3>
+				<p><code>.chiprow</code>, then <code>h3</code>, then an optional <code>blockquote</code>, then prose and evidence blocks, then the engine's <code>.respond</code> last. Review, options and issue-breakdown pages share this anatomy exactly; what differs between them is the verdict vocabulary as data, the chips, and which optional blocks appear.</p>
+				<p>The id chip is written as an anchor to its own card — <code>&lt;a class="chip id" href="#storage-key-scheme"&gt;03&lt;/a&gt;</code>. The chip text stays ordinal for the reader; the fragment is the subject-named id. Click one and the <code>:target</code> ring confirms the landing.</p>
+			</article>
+
+			<article class="card" id="quote-block" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#quote-block">17</a><span class="chip integrate">Integrate</span><span class="chip">cards</span></div>
+				<h3>Quoted conversation is shell CSS and nothing else</h3>
+				<p>A <code>blockquote</code> with a <code>&lt;cite&gt;</code> naming speaker and origin. One micro-label rule serves that <code>cite</code>, the interview record's <code>.q</code> and the loose box's <code>.lab</code> — one type treatment, three uses. A multi-turn exchange is consecutive blockquotes, each with its own cite. The engine generates nothing here.</p>
+				<blockquote><p>I wanted demos to be fully customisable by the building agent.</p><cite>You · session 2026-08-21</cite></blockquote>
+				<p>A quote inside a card sits between the <code>h3</code> and the prose, never inside <code>.respond</code>, so it never reads as an answer already given.</p>
+			</article>
+
+			<article class="card" id="theme-three-way" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#theme-three-way">18</a><span class="chip integrate">Integrate</span><span class="chip">theme</span></div>
+				<h3>Three-way theme: System, Light, Dark</h3>
+				<p>Three buttons carrying <code>data-theme-set</code> and <code>aria-pressed</code>. <b>System</b> removes both the <code>data-theme</code> attribute and the stored key, so the three-tier cascade governs again — it is a real third state, not "light". A pre-paint script is the first script in the fragment, above <code>&lt;style&gt;</code>, so a remembered theme never flashes the default.</p>
+				<p>The theme is the one key in storage that is not per-page: <code>artifact-suite.theme</code>, shared across every suite page.</p>
+				<p class="gloss">Live in the eyebrow at the top of this page.</p>
+			</article>
+
+			<article class="card" id="floating-pair" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#floating-pair">19</a><span class="chip integrate">Integrate</span><span class="chip">controls</span></div>
+				<h3>Floating Copy / View pair, bottom right</h3>
+				<p><b>Copy prompt</b> filled, <b>View prompt</b> ghosted, <b>Accept all</b> ghosted-tiny and hidden until a card carries a recommendation, with <code>#status</code> to their left. The shell defines no actions bar. Accept all and the status line share the container because both belong to the same act of answering, and both are hidden or empty until they apply — so the resting state is still just the pair.</p>
+			</article>
+
+			<article class="card" id="class-inventory" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#class-inventory">20</a><span class="chip integrate">Integrate</span><span class="chip">contract</span></div>
+				<h3>A published class inventory, and a reserved list</h3>
+				<p>Every class the shell owns is listed with its purpose and who writes it — agent, shell or engine. Reserved for demos and blocks to avoid: every shell id, <code>data-theme</code>, every token, and every shell class — <code>.status</code>, <code>.card</code>, <code>.chip</code>, <code>.respond</code>, <code>.toc</code>, <code>.filters</code>, <code>.floater</code> included — even where the shell's own rule is scoped elsewhere.</p>
+				<p>This is the contract that lets a demo be freely composed without a collision hunt.</p>
+			</article>
+		</section>
+
+		<section id="runtime">
+			<div class="sec-head"><h2>Runtime &amp; state</h2><span class="count"></span></div>
+			<p class="sec-intro">One engine IIFE at the foot of the shell, in prompt-builder's dialect — <code>var</code>, function declarations, string concatenation, no arrow functions, template literals, optional chaining or <code>class</code>. It generates every response surface, persists one document per page, and composes the return prompt.</p>
+
+			<article class="card" id="page-meta-block" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#page-meta-block">21</a><span class="chip integrate">Integrate</span><span class="chip">data</span></div>
+				<h3>One <code>#page-meta</code> JSON block, and prose stays in markup</h3>
+				<p>The sole agent-authored data surface: <code>id</code>, <code>kind</code>, <code>rev</code>, <code>title</code>, a <code>provenance</code> object, a <code>prompt.heading</code> and a <code>next</code> array. Unknown keys are ignored. Any <code>&lt;/</code> inside a string is written <code>&lt;\/</code>, because a literal <code>&lt;/</code> ends the script block.</p>
+				<p><code>readMeta()</code> parses it once into <code>META</code>; on failure it flashes a red notice and falls back to a safe stub so the page still works.</p>
+				<details class="ref" data-path="dev/workspace/plans/artifact-suite-implementation.md" data-lines="419-471" data-loc="§ #page-meta schema"></details>
+			</article>
+
+			<article class="card" id="verdicts-on-article" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#verdicts-on-article">22</a><span class="chip integrate">Integrate</span><span class="chip">data</span></div>
+				<h3>Verdict vocabulary lives on the card, not in the JSON</h3>
+				<p>The Stage 1 review placed per-card option sets in <code>#page-meta</code>; the plan overrules that. They live on the <code>&lt;article&gt;</code> as <code>data-verdicts="Agree|Revise|Reject"</code>, beside the card they govern, because a card-keyed map in JSON drifts from the cards it names. <code>#page-meta</code> therefore carries nothing per-card at all.</p>
+				<div class="src">var DEFAULT_VERDICTS = {review: ["Agree", "Revise", "Reject"], issue: ["Accept", "Amend", "Defer"], options: [], interview: [], demo: []};</div>
+				<p>An empty resolved set yields a comment-only <code>.respond</code>. Options and interview cards always carry <code>data-verdicts</code> or <code>data-answer="options"</code>, because their options <i>are</i> the page's content.</p>
+			</article>
+
+			<article class="card" id="card-id-contract" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#card-id-contract">23</a><span class="chip integrate">Integrate</span><span class="chip">contract</span></div>
+				<h3>A card id names its subject and is permanent</h3>
+				<p>The <code>id</code> attribute is an agent-assigned kebab slug naming what the card is about — <code>id="storage-key-scheme"</code> — never a position. One attribute serves storage, the radio group name, the contents anchor and the deep link. A stable identifier the subject already carries outside the page (<code>ds-1</code>, <code>issue-45</code>) is a valid card id; a counter of the card's place on the page is not.</p>
+				<p><code>validateCards()</code> runs first in <code>boot()</code>: a card without an id gets a console warning, class <code>needs-id</code> and no response surface; a card whose id matches <code>/^[a-z]?\d+$/i</code> gets a warning naming the ordinal hazard but is still wired.</p>
+			</article>
+
+			<article class="card" id="generated-respond" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#generated-respond">24</a><span class="chip integrate">Integrate</span><span class="chip">engine</span></div>
+				<h3>The engine writes every input on the page</h3>
+				<p><code>attachRespond(card)</code> appends the radios, textarea and Clear button as the card's last child, returning early where a <code>.respond</code> already exists or the card carries <code>data-answer="none"</code>. The radio group name is <code>v-&lt;cardId&gt;</code>. The agent writes the article, the chiprow, the heading and the prose, and nothing else.</p>
+				<p>Events are delegated from <code>document</code> — one <code>change</code>, one <code>input</code>, one <code>click</code> — dispatching on <code>closest("[data-card],[data-section],[data-filter],[data-held]")</code>. Every response surface on this page arrived that way.</p>
+			</article>
+
+			<article class="card" id="storage-document" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#storage-document">25</a><span class="chip integrate">Integrate</span><span class="chip">storage</span></div>
+				<h3>One stored document per page, keyed by page id</h3>
+				<p><code>artifact-suite.page.&lt;id&gt;</code> holds a single JSON document — <code>schema</code>, <code>pageId</code>, <code>rev</code>, <code>savedAt</code>, and maps of <code>cards</code>, <code>sections</code> and <code>orphans</code>. Read once at boot, written once per debounced change at 200ms. On <code>file://</code> every local page shares one origin, which is exactly why the key carries the page id.</p>
+				<p>Accessors are prompt-builder's <code>readStore</code> / <code>writeStore</code> / <code>dropStore</code>, each wrapped in try/catch with an in-memory fallback map. Where storage is refused outright, the foot renders a warning: <i>This browser is not saving answers — copy the prompt before you close the page.</i></p>
+				<details class="ref" data-path="extensions/artifacts/prompt-builder/prompt-builder.html" data-lines="1693-1705" data-loc="§ hashOf and store accessors"></details>
+			</article>
+
+			<article class="card" id="fingerprint-changed" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#fingerprint-changed">26</a><span class="chip integrate">Integrate</span><span class="chip">storage</span></div>
+				<h3>Per-card fingerprints raise the amber changed strip</h3>
+				<p><code>fingerprintOf(card)</code> clones the card, removes <code>.respond</code>, <code>.changed</code> and <code>.chip.earlier</code>, then hashes normalised text plus <code>data-tag</code> plus <code>data-verdicts</code> with prompt-builder's DJB2. Per card, never per file — a whole-file rewrite that raises the strip on every card is a defect, not a feature.</p>
+				<p>Normalised text rather than <code>innerHTML</code>, so re-indenting during an unrelated edit does not read as a change, while every prose, option and tag change still is. Equal fingerprint restores silently with an <i>Answered earlier</i> chip; a different one restores and inserts the amber strip with a Dismiss button. Dismiss re-fingerprints and leaves <code>touched</code> alone.</p>
+				<div class="demo" id="d-fingerprint" data-report="Fingerprint demo, as run">
+					<span class="tag">live · fingerprintOf, running on this card</span>
+					<p class="sub">Type into the box to stand in for an edited card body, then hash it. This is the exact function the shell would run.</p>
+					<textarea class="field" id="fp-in">Per-card fingerprints raise the amber changed strip</textarea>
+					<div class="btnrow"><button class="ghost tiny" type="button" id="fp-run">Fingerprint it</button><button class="quiet tiny" type="button" id="fp-self">Fingerprint this whole card</button><span class="note" id="fp-note"></span></div>
+					<div class="readout" id="fp-out"><span class="muted">No hash yet.</span></div>
+				</div>
+			</article>
+
+			<article class="card" id="fingerprint-boot-order" data-tag="yourcall" data-verdicts="Strip generated regions|Fix the boot order|Leave it" data-recommended="Strip generated regions">
+				<div class="chiprow"><a class="chip id" href="#fingerprint-boot-order">27</a><span class="chip yourcall">Your call</span><span class="chip">defect found</span></div>
+				<h3>The specified boot order fingerprints too early</h3>
+				<p>Building this page surfaced a real defect in the plan's own boot sequence. <code>boot()</code> runs <code>restoreCard</code> — which fingerprints — before <code>expandRef</code> and before any block or demo script has filled its container. A card holding a reference or a demo therefore hashes one way when the answer is recorded, after boot has finished, and a different way on the next load, before the reference has been expanded. Every such card shows the amber strip on reload with nothing having changed.</p>
+				<p>It reproduced here on the first reload, on the <a href="#storage-document">storage-document</a> card, which holds a reference. On the acceptance rebuild it would fire on all 75 cards at once, since every finding carries evidence — and check V12 would only catch it after the whole shell was written.</p>
+				<div class="delta">
+					<div class="now"><b>Strip generated regions</b>Exclude <code>.ref-links</code>, a reference summary and any <code>.demo</code> from the clone alongside <code>.respond</code>. The hash then covers authored prose alone and is order-independent.</div>
+					<div class="next"><b>Fix the boot order</b>Move <code>expandRef</code>, the block wiring and the demo wiring above <code>restoreCard</code>. Cheaper, but any future generator added below restore reintroduces it.</div>
+				</div>
+				<p>This page runs the first option; its fingerprints are stable across reloads. A live demo of the function is on the card above.</p>
+			</article>
+
+			<article class="card" id="held-answers" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#held-answers">28</a><span class="chip integrate">Integrate</span><span class="chip">storage</span></div>
+				<h3>An answer to a removed card is held, not dropped</h3>
+				<p><code>collectOrphans()</code> moves every stored id with no matching card into <code>orphans</code>, keeping its last title, and renders a note in the foot: <i>N answers held for cards no longer on this page</i>, with <b>Show</b> and <b>Discard</b>. When a card returns under the same id its orphan moves back into <code>cards</code> and is marked changed.</p>
+				<p>A held answer also enters the return prompt as a <code>Held:</code> line naming the ids — a prompt carrying nothing but that line is still emitted, because a held answer is a fact the agent needs.</p>
+			</article>
+
+			<article class="card" id="touched-rule" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#touched-rule">29</a><span class="chip integrate">Integrate</span><span class="chip">prompt</span></div>
+				<h3>Only touched cards enter the return prompt</h3>
+				<p><code>touched</code> flips true on the first genuine change on a card's radios or input on its textarea. A pre-checked recommendation left alone stays untouched and stays out of the prompt — which is precisely the kickoff's requirement that history be preserved without re-entering the prompt unless edited.</p>
+				<p>Affirmation is carried by the click handler rather than <code>change</code>: clicking an already-checked radio fires no <code>change</code> event, so the click handler records it anyway. Recording a value the card already holds is a no-op apart from <code>touched</code> — which is the point. A deliberate click on the recommendation is a decision; a card left alone is not.</p>
+			</article>
+
+			<article class="card" id="accept-all" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#accept-all">30</a><span class="chip integrate">Integrate</span><span class="chip">prompt</span></div>
+				<h3>Accept all agrees every untouched recommendation</h3>
+				<p>For every card carrying <code>data-recommended</code> whose entry is untouched, set the recommended verdict, mark it touched, stamp the time and revision, save, then report <i>N cards recorded as agreed; M without a recommendation skipped.</i> The button is shown only where at least one card carries a recommendation.</p>
+				<p class="gloss">Live bottom-right on this page. It skips the five options cards under Unresolved questions that carry no recommendation.</p>
+			</article>
+
+			<article class="card" id="return-prompt-format" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#return-prompt-format">31</a><span class="chip integrate">Integrate</span><span class="chip">prompt</span></div>
+				<h3>The return prompt has one exact shape</h3>
+				<p>Heading from <code>prompt.heading</code>; a <code>Source:</code> line joining page file, branch, issue or PR, revision and build date with a middle dot; an <code>Untouched:</code> line of two bare counts naming no card; a <code>Held:</code> line where orphans exist; <code>### Decisions</code> listing touched cards in document order as <code>**&lt;cardId&gt; · &lt;h3 text&gt;**</code>; then <code>### Next</code> from <code>META.next</code>; then a <code>Re-open:</code> line.</p>
+				<p>Multi-line notes survive: one line emits <code>- Note: text</code>, many emit <code>- Note:</code> then each line indented two spaces with empty lines emitted bare, so paragraph breaks reach the agent intact. A radio token is never upper-cased. Nothing answered yields the empty string, and Copy says so rather than writing an empty prompt.</p>
+				<div class="src">## Response — artifact suite implementation plan (Stage 2 gate)
+
+Source: /Users/…/artifact-suite-plan-review.html · branch artifacts · rev 1 · built 2026-08-24
+Untouched: 4 left at their recommended default, 3 unanswered.
+
+### Decisions
+
+**storage-document · One stored document per page, keyed by page id**
+- Verdict: Revise
+- Note:
+  Two paragraphs
+
+  of rationale.</div>
+				<p class="gloss">Press <b>View prompt</b> bottom-right to watch this compose from your own answers as you go.</p>
+			</article>
+
+			<article class="card" id="loose-sections" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#loose-sections">32</a><span class="chip integrate">Integrate</span><span class="chip">prompt</span></div>
+				<h3>A section can take a comment of its own</h3>
+				<p>A <code>&lt;section&gt;</code> carrying <code>data-loose="&lt;label&gt;"</code> gets a labelled comment box appended by the engine, keyed on the section id and stored under <code>sections</code>. Touched section comments follow the cards in the prompt as <code>**&lt;sectionId&gt; · &lt;h2 text&gt;**</code>.</p>
+				<p class="gloss">The last section of this page carries one. Anything a card missed goes there.</p>
+			</article>
+
+			<article class="card" id="engine-dialect" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#engine-dialect">33</a><span class="chip integrate">Integrate</span><span class="chip">engine</span></div>
+				<h3>One dialect, one banner order, one global</h3>
+				<p>Order follows invocation order: <code>boot()</code> first under a <b>Boot</b> banner, callees below it in call order under <b>Meta and capabilities</b>, <b>Storage</b>, <b>Fingerprints</b>, <b>Respond surfaces</b>, <b>Restore</b>, <b>Recording</b>, <b>Provenance</b>, <b>Navigation and filters</b>, <b>Return prompt</b>, <b>Clipboard and status</b>, <b>Theme</b>. Comments state constraints only; exactly three earn one.</p>
+				<p>The engine exposes one global for blocks and demos and nothing else:</p>
+				<div class="src">window.SUITE = { copyText: copyText, flash: flash, meta: META };</div>
+			</article>
+
+			<article class="card" id="clipboard-a11y" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#clipboard-a11y">34</a><span class="chip integrate">Integrate</span><span class="chip">a11y</span></div>
+				<h3>One clipboard path, one status line</h3>
+				<p><code>copyText(text, onDone)</code> is the suite's only clipboard path: feature-test the async API, pass the fallback as the rejection handler, and where that fails too, reveal the output textarea, select it and say <i>Clipboard blocked — select the text below and copy.</i> Every transient message in the suite routes through <code>flash</code>, which writes into a <code>role="status"</code> element and clears after 2500ms unless the message is bad.</p>
+				<p>No <code>prompt()</code> or <code>alert()</code> anywhere in the suite.</p>
+			</article>
+
+			<article class="card" id="capabilities-gate" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#capabilities-gate">35</a><span class="chip integrate">Integrate</span><span class="chip">a11y</span></div>
+				<h3>Capabilities are probed, never assumed</h3>
+				<p><code>CAN_LS</code> probes localStorage with a write-and-remove; <code>CAN_FS</code> tests for the File System Access picker. <code>capabilityGate()</code> removes every <code>[data-needs="fs"]</code> element where the picker is missing and renders the storage warning where localStorage is refused. The required surface is localStorage plus clipboard plus inline CSS and JS — which works from <code>file://</code> and under the Artifact content-security policy alike.</p>
+			</article>
+
+			<article class="card dead" id="file-system-access" data-tag="defer" data-answer="none">
+				<div class="chiprow"><a class="chip id" href="#file-system-access">36</a><span class="chip dead">Withdrawn</span><span class="chip defer">Defer</span><span class="chip">storage</span></div>
+				<h3>Save-to-disk through the File System Access API</h3>
+				<p>No File System Access affordance ships in this release. The gate stays in the engine so a later release can add one without a shell change, and the runtime tier tests it by injecting an element the page does not otherwise carry.</p>
+				<p class="gloss">This card is on the page as a demonstration of the withdrawn state: it keeps its id forever, keeps its tag, stays in the contents and the filter counts, and takes no new answers.</p>
+			</article>
+		</section>
+
+		<section id="provenance">
+			<div class="sec-head"><h2>Provenance &amp; links</h2><span class="count"></span></div>
+			<p class="sec-intro">Every URL on a page is derived at load from <code>#page-meta.provenance</code> — no template ever writes a literal href. This is the half of the plan that answers the kickoff's first two goals: navigate straight to the file in question, and see where the work originates.</p>
+
+			<article class="card" id="url-derivation" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#url-derivation">37</a><span class="chip integrate">Integrate</span><span class="chip">links</span></div>
+				<h3>Four URL templates, one encoder</h3>
+				<p><code>encPath(p)</code> percent-encodes each path segment; line suffixes append after encoding. Disk is <code>file://</code> over the absolute checkout root with no line fragment, since a markdown file over <code>file://</code> has no line anchors. Editor is <code>vscode://file&lt;abs&gt;:&lt;line&gt;</code>. GitHub is a blob URL pinned to a ref. Issue, PR, branch and commit are the four obvious repository URLs.</p>
+				<p>The Stage 1 review proposed a relative-root prefix; the plan drops it. The absolute checkout path is accepted, so the disk href is <code>file://</code> over that root and nothing in the suite emits a relative file href.</p>
+			</article>
+
+			<article class="card" id="ref-block" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#ref-block">38</a><span class="chip integrate">Integrate</span><span class="chip">links</span></div>
+				<h3>The agent writes attributes; the engine builds the reference</h3>
+				<p>One empty element carries everything: <code>data-path</code> or <code>data-url</code>, optional <code>data-lines</code>, <code>data-loc</code>, <code>data-branch</code>, <code>data-commit</code>, <code>data-label</code>. The engine expands it into a collapsed disclosure whose summary shows the path, a line badge and a locator, and whose body holds <b>Open file</b>, <b>Editor</b>, <b>GitHub</b> and <b>Copy path</b>.</p>
+				<div class="src">&lt;details class="ref" data-path="docs/drafthorse/framework/steps.md" data-lines="111-128" data-loc="§ Dispositions"&gt;&lt;/details&gt;</div>
+				<p>A reference carries <code>data-path</code> or <code>data-url</code>, never both and never neither; violating that renders a broken-state reference with a red edge, no chips and a console warning. A malformed <code>data-lines</code> is treated as absent. A diff block is always preceded by a reference naming its file.</p>
+				<p class="gloss">Every reference on this page is one of these, expanded at load. Open one — the chips are real and point at real files in this checkout.</p>
+				<div class="refs">
+					<details class="ref" data-path="docs/drafthorse/framework/steps.md" data-lines="111-128" data-loc="§ Dispositions"></details>
+					<details class="ref" data-path="dev/workspace/plans/artifact-suite-implementation.md" data-lines="705-757" data-loc="§ link-to-site"></details>
+					<details class="ref" data-url="https://github.com/dilberryhoundog/agent-library" data-loc="the repository this page cites"></details>
+				</div>
+			</article>
+
+			<article class="card" id="origin-gating" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#origin-gating">39</a><span class="chip integrate">Integrate</span><span class="chip">links</span></div>
+				<h3>CSS alone decides which chip is primary</h3>
+				<p>The pre-paint script sets <code>data-origin="disk"</code> or <code>"web"</code> on the root element. Two CSS rules then hide what cannot work and fill exactly one chip per reference: from disk, <b>Open file</b> is solid; from the web, the disk and editor chips are gone and <b>GitHub</b> is solid. A page published from disk therefore needs no rebuild.</p>
+				<p>One gap worth a decision: the two rules hide <code>.ref-disk</code> on the web but leave <code>.ref-editor</code> showing. A published page therefore offers a <code>vscode://</code> link built from the author's absolute checkout path, which works on exactly one machine. Hiding the editor chip alongside the disk chip on the web costs one selector.</p>
+				<div class="demo" id="d-origin" data-report="Origin gating tried">
+					<span class="tag">live · flip the origin flag</span>
+					<p class="sub">Changes <code>data-origin</code> on the root element, exactly as publishing this page would. Watch the reference below re-point without a reload.</p>
+					<div class="picks" id="origin-picks">
+						<label><input type="radio" name="d-origin-mode" value="disk" checked>Disk</label>
+						<label><input type="radio" name="d-origin-mode" value="web">Web</label>
+					</div>
+					<details class="ref" data-path="dev/workspace/reviews/section-ledger.html" data-lines="378-427" data-loc="§ response surface, lifted whole"></details>
+					<div class="readout" id="origin-out"></div>
+					<p class="help">Restored to the real origin on reload. The eyebrow is never gated — every eyebrow link is https.</p>
+				</div>
+			</article>
+
+			<article class="card" id="archive-mirror" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#archive-mirror">40</a><span class="chip integrate">Integrate</span><span class="chip">links</span></div>
+				<h3>Other branches route through the archive mirror</h3>
+				<p><code>dev/branches/&lt;branch&gt;/</code> mirrors that branch's workspace one level shallower, so <code>dev/workspace/reviews/x.html</code> on branch <code>agent-teams</code> is on disk right now at <code>dev/branches/agent-teams/reviews/x.html</code>. A reference carrying <code>data-branch</code> takes that route, wears an <b>archived copy</b> badge, and its GitHub chip uses the real branch rather than the build commit.</p>
+				<p>Where no mirror exists, the reference is marked <code>ref--nodisk</code>: the disk and editor chips are dropped and GitHub is primary at either origin. The build-time path check decides which case applies and marks the class, because the page cannot stat the filesystem.</p>
+				<div class="refs">
+					<details class="ref" data-path="dev/workspace/reviews/corpus-sweep-design.html" data-branch="agent-teams" data-lines="50-62" data-loc="§ SVG kit — the figure block's source"></details>
+					<details class="ref" data-path="dev/workspace/artifacts/issue-45-review.html" data-branch="drafthorse-condition-precedence" data-lines="191-199" data-loc="§ verdict-strip"></details>
+					<details class="ref ref--nodisk" data-path="dev/workspace/plans/prd.md" data-branch="main" data-loc="no local mirror — GitHub only"></details>
+				</div>
+			</article>
+
+			<article class="card" id="eyebrow-row" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#eyebrow-row">41</a><span class="chip integrate">Integrate</span><span class="chip">provenance</span></div>
+				<h3>The eyebrow is generated in a fixed cell order</h3>
+				<p>Kind, revision, issue, PR, branch, commit, date — inserted before the spacer, absent fields emitting nothing. Cells are collected into an array and joined with a separator span, so no separator ever strands. The commit renders as its short form with the full sha as a tooltip; the branch is the highlighted cell.</p>
+				<p class="gloss">Top of this page. The branch, commit and date came from <code>git rev-parse</code> at build time; the kind and revision from <code>#page-meta</code>.</p>
+			</article>
+
+			<article class="card" id="git-facts" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#git-facts">42</a><span class="chip integrate">Integrate</span><span class="chip">provenance</span></div>
+				<h3>Provenance is read once, at build time</h3>
+				<p>One command from the repository root supplies root, branch, commit, origin and build stamp; <code>gh pr view</code> supplies the PR number or nothing. The origin URL is normalised to an https base with <code>.git</code> stripped. A branch value of <code>HEAD</code> means detached and is written as null. The issue number is never guessed — the agent writes the number the task names, or null.</p>
+				<div class="src">cd "$(git rev-parse --show-toplevel)" &amp;&amp; printf 'root=%s\nbranch=%s\ncommit=%s\norigin=%s\nbuiltAt=%s\n' \
+  "$(git rev-parse --show-toplevel)" "$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)" \
+  "$(git remote get-url origin)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"</div>
+			</article>
+
+			<article class="card" id="path-audit" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#path-audit">43</a><span class="chip integrate">Integrate</span><span class="chip">verification</span></div>
+				<h3>Every printed path must be a link, and must exist</h3>
+				<p><code>auditPaths()</code> runs last in provenance: any <code>.path</code> element outside a reference gets a dotted amber underline and a console warning, so a path printed as inert text is visible as a defect rather than passing quietly.</p>
+				<p>At build time the path check confirms each <code>data-path</code> resolves to a file that exists, that the end of <code>data-lines</code> is within that file's line count, that a mirrored reference with no mirror is instead reachable by <code>git cat-file -e &lt;branch&gt;:&lt;path&gt;</code>, and that every <code>data-url</code> is https. Any output other than <code>OK</code> is a build failure.</p>
+			</article>
+
+			<article class="card" id="root-path-exposure" data-tag="yourcall" data-verdicts="Accept the exposure|Strip root on publish|Revise">
+				<div class="chiprow"><a class="chip id" href="#root-path-exposure">44</a><span class="chip yourcall">Your call</span><span class="chip">risk</span></div>
+				<h3>The absolute checkout path is in the page</h3>
+				<p><code>provenance.root</code> holds <code>/Users/dylangraham/Projects/agent-library</code>. That is what makes the disk and editor chips work, and it is the decision D-11 already took. But a page published through the Artifact tool carries the home directory name to whoever opens it.</p>
+				<p>The plan lists this as a risk and takes no action. The alternatives are to accept it, or to have the publish step blank <code>root</code> — which costs nothing on the web, since origin gating hides the disk chips there anyway.</p>
+			</article>
+
+			<article class="card dead" id="relroot-prefix" data-tag="defer" data-answer="none">
+				<div class="chiprow"><a class="chip id" href="#relroot-prefix">45</a><span class="chip dead">Withdrawn</span><span class="chip defer">Defer</span><span class="chip">links</span></div>
+				<h3>A relative-root prefix for file hrefs</h3>
+				<p>Two Stage 1 findings asked for a <code>relRoot</code> so file links could be relative. Superseded: D-11 accepts the absolute checkout path, so no relative prefix is needed and nothing in the suite emits a relative file href.</p>
+			</article>
+
+			<article class="card" id="data-find-reserved" data-tag="defer" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#data-find-reserved">46</a><span class="chip defer">Defer</span><span class="chip">links</span></div>
+				<h3><code>data-find</code> is reserved, not implemented</h3>
+				<p>Scroll-to-text fragments would let a reference land on a quoted phrase rather than a line number, surviving edits that shift lines. The attribute name is reserved so a later release can add it without a contract change; nothing implements it in this one.</p>
+			</article>
+		</section>
+
+		<section id="blocks">
+			<div class="sec-head"><h2>Blocks &amp; templates</h2><span class="count"></span></div>
+			<p class="sec-intro">Three page templates cover the six kickoff kinds; three block files cover the optional pieces; one demo kit supplies fragments any page can compose from. All of it is spliced mechanically — the agent never retypes a scoped style or a block script.</p>
+
+			<article class="card" id="css-residency" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#css-residency">47</a><span class="chip integrate">Integrate</span><span class="chip">css</span></div>
+				<h3>Three tiers of CSS, each spliced once</h3>
+				<p>The shell holds everything shared. A template's scoped style is spliced once per page. A block's scoped style is spliced the first time that block appears, and <code>splice.py</code> refuses a second insert. No template or block declares a font family, a raw colour or a token, and none restates a shell selector.</p>
+				<p>Every block file opens with an instruction comment stating what it is, what to paste where, and that its style is safe to inline once.</p>
+			</article>
+
+			<article class="card" id="diff-block" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#diff-block">48</a><span class="chip integrate">Integrate</span><span class="chip">blocks</span></div>
+				<h3>The diff marker moves into a real gutter</h3>
+				<p>The corpus renderer puts the <code>+</code> and <code>-</code> inside the content box as literal text, which makes a context line start with <code>-</code> and produces <code>- - **De-hold**</code> where a markdown bullet follows a diff marker. The block replaces that with a grid: a fixed 1.6em gutter cell whose glyph comes from CSS <code>content</code>, and a text cell that carries the tint. The gutter has no background and is <code>user-select: none</code>, so copying a hunk yields clean source.</p>
+				<details class="ref" data-path="dev/workspace/artifacts/issue-45-diffs.html" data-branch="drafthorse-condition-precedence" data-lines="146-149" data-loc="§ the renderer being replaced"></details>
+				<div class="diff numbered" data-copy="adds">
+					<div class="diff-row ctx" data-ln="146"><span class="tx">.diff { font-family: var(--mono); background: var(--surface-sunk); }</span></div>
+					<div class="diff-row del" data-ln="147"><span class="tx">.diff div { padding: 3px 12px; white-space: pre-wrap; word-break: break-word; }</span></div>
+					<div class="diff-row del" data-ln="148"><span class="tx">.diff .add { background: var(--add-bg); color: var(--add-ink); }</span></div>
+					<div class="diff-row add"><span class="tx">.diff-row { display: grid; grid-template-columns: 1.6em minmax(0, 1fr); }</span></div>
+					<div class="diff-row add"><span class="tx">.diff-row::before { content: ""; grid-column: 1; text-align: center; user-select: none; }</span></div>
+					<div class="diff-row add"><span class="tx">.diff-row.add::before { content: "+"; color: var(--add-mark); }</span></div>
+					<div class="diff-row add"><span class="tx">.diff-row.add &gt; .tx { background: var(--add-bg); color: var(--add-ink); }</span></div>
+					<div class="diff-row gap"><span class="tx">…</span></div>
+					<div class="diff-row ctx" data-ln="277"><span class="tx">&lt;div class="diff-row ctx"&gt;&lt;span class="tx"&gt;**Insufficient references** — hard bail.&lt;/span&gt;&lt;/div&gt;</span></div>
+				</div>
+				<p>Seven new tokens carry it: added and removed background and ink, a context ink, and separate marker colours. The block's script adds a <b>Copy added lines</b> button to any diff opted in with <code>data-copy="adds"</code>, joining the added text and calling <code>SUITE.copyText</code>.</p>
+			</article>
+
+			<article class="card" id="panel-block" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#panel-block">49</a><span class="chip integrate">Integrate</span><span class="chip">blocks</span></div>
+				<h3>The panel is an optional block, never shell furniture</h3>
+				<p>An opener button anywhere, a <code>&lt;dialog class="panel"&gt;</code> as a sibling of the section, and one delegated click handler that opens with <code>showModal()</code> and closes on the close button or a backdrop click. Its style is prompt-builder's help dialog under a new name. Nothing inside a dialog is ever collected into the return prompt.</p>
+				<div class="btnrow" style="margin-top:14px"><button class="ghost tiny" type="button" data-panel="panel-steps">Open the ten build steps</button></div>
+			</article>
+
+			<article class="card" id="figure-block" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#figure-block">50</a><span class="chip integrate">Integrate</span><span class="chip">blocks</span></div>
+				<h3>The figure block retokenises the corpus SVG kit</h3>
+				<p>A scrolling <code>figure.fig</code> wrapper, a caption, and a class set for the SVG: lane backgrounds, boxes in three actor colours, two text sizes, arrows, a track and dots. The source kit's own palette maps onto the suite's tokens — panel to surface, line to rule, muted to ink-faint — and its <code>.rail</code> class is renamed <code>.track</code> so it cannot collide with the rail layout. A <code>style</code> attribute on an SVG element is a build error; colour comes from the class.</p>
+				<p>The same file carries a <code>details.more</code> disclosure for collapsed evidence, which never shares a class with a reference disclosure.</p>
+				<figure class="fig">
+					<svg viewBox="0 0 980 250" role="img" aria-label="Work package dependency graph, WP-1 through WP-10">
+						<rect class="lanebg" x="0" y="0" width="980" height="250" rx="4"></rect>
+						<text class="lanelbl" x="12" y="20">BUILD ORDER — WP-1 THROUGH WP-10</text>
+
+						<rect class="box a" x="14" y="100" width="104" height="42" rx="3"></rect>
+						<text class="t" x="30" y="120">WP-1 shell</text>
+						<text class="ts" x="30" y="134">chrome + splice</text>
+
+						<rect class="box a" x="150" y="100" width="104" height="42" rx="3"></rect>
+						<text class="t" x="166" y="120">WP-2 engine</text>
+						<text class="ts" x="166" y="134">same file</text>
+
+						<rect class="box b" x="286" y="44" width="104" height="42" rx="3"></rect>
+						<text class="t" x="302" y="64">WP-3 prov.</text>
+						<text class="ts" x="302" y="78">refs + eyebrow</text>
+
+						<rect class="box b" x="286" y="164" width="104" height="42" rx="3"></rect>
+						<text class="t" x="302" y="184">WP-5 blocks</text>
+						<text class="ts" x="302" y="198">diff/panel/fig</text>
+
+						<rect class="box b" x="422" y="44" width="104" height="42" rx="3"></rect>
+						<text class="t" x="438" y="64">WP-4 tmpl.</text>
+						<text class="ts" x="438" y="78">review + interview</text>
+
+						<rect class="box c" x="558" y="44" width="104" height="42" rx="3"></rect>
+						<text class="t" x="574" y="64">WP-6 refs</text>
+						<text class="ts" x="574" y="78">runtime, kinds</text>
+
+						<rect class="box c" x="558" y="164" width="104" height="42" rx="3"></rect>
+						<text class="t" x="574" y="184">WP-8 verify</text>
+						<text class="ts" x="574" y="198">S1-S10, fixtures</text>
+
+						<rect class="box c" x="694" y="44" width="104" height="42" rx="3"></rect>
+						<text class="t" x="710" y="64">WP-7 SKILL</text>
+						<text class="ts" x="710" y="78">ten steps</text>
+
+						<rect class="box a" x="830" y="100" width="104" height="42" rx="3"></rect>
+						<text class="t" x="846" y="120">WP-9 accept</text>
+						<text class="ts" x="846" y="134">then WP-10</text>
+
+						<path class="arw" d="M118 121 H150"></path>
+						<path class="arw" d="M254 121 H270 V65 H286"></path>
+						<path class="arw" d="M254 121 H270 V185 H286"></path>
+						<path class="arw" d="M390 65 H422"></path>
+						<path class="arw" d="M526 65 H558"></path>
+						<path class="arw" d="M390 185 H558"></path>
+						<path class="arw" d="M526 78 V150 H558 V172"></path>
+						<path class="arw" d="M662 65 H694"></path>
+						<path class="arw" d="M798 65 H814 V121 H830"></path>
+						<path class="arw" d="M662 185 H814 V121 H830"></path>
+						<circle class="dot" cx="814" cy="121" r="4" stroke="currentColor"></circle>
+					</svg>
+					<figcaption class="cap">WP-6 and WP-8 both gate on WP-3, WP-4 and WP-5; only the longest edge of each is drawn. WP-5 runs alongside WP-3 because it depends on WP-1 and WP-2 alone. Nothing is released before WP-9.</figcaption>
+				</figure>
+			</article>
+
+			<article class="card" id="three-templates" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#three-templates">51</a><span class="chip integrate">Integrate</span><span class="chip">templates</span></div>
+				<h3>Six kickoff kinds onto three template files</h3>
+				<p>Review, options and issue-breakdown all read <code>review.html</code> — they share one card anatomy and differ only in verdict vocabulary, chips and which blocks appear. Interview reads <code>interview.html</code>. Demo reads no page template at all: it reads the kit, whose last part supplies a page scaffold and a meta exemplar so a demo page has the same authoring floor as any other.</p>
+				<ul>
+					<li><b>review</b> — <code>.shell.rail</code>, verdicts Agree / Revise / Reject</li>
+					<li><b>options</b> — <code>.shell</code> up to eight cards, <code>.shell.rail</code> from nine; option rows instead of verdicts</li>
+					<li><b>issue</b> — <code>.shell.rail</code>, verdicts Accept / Amend / Defer, stats or masthead meta, a verdict strip</li>
+					<li><b>interview</b> — <code>.shell</code>, each question carrying its own vocabulary</li>
+					<li><b>demo</b> — <code>.shell.board</code> for a board, <code>.shell</code> for inline strips</li>
+				</ul>
+				<p>One page template per page. Where a template does not cover the shape, the build hard-bails and raises an issue — it never writes a third page template on the fly.</p>
+			</article>
+
+			<article class="card" id="options-card" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#options-card">52</a><span class="chip integrate">Integrate</span><span class="chip">templates</span></div>
+				<h3>An options card carries its own radios</h3>
+				<p>With <code>data-answer="options"</code>, the agent writes the option rows — each a label with a radio already named <code>v-&lt;cardId&gt;</code>, a bold name and a one-line consequence — and the engine binds them and appends only the textarea and Clear. The recommended row carries <code>checked</code>, class <code>recommended</code>, and a matching <code>data-recommended</code> on the article; a disagreement between those three is a build error.</p>
+				<p class="gloss">The five cards in the last section are options cards. Two of them deliberately carry no recommendation.</p>
+			</article>
+
+			<article class="card" id="interview-record" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#interview-record">53</a><span class="chip integrate">Integrate</span><span class="chip">templates</span></div>
+				<h3>An answered question is rewritten as a record</h3>
+				<p>On republish the agent replaces the question card with an answered record keeping the same id, so the stored answer stays attached, and carrying <code>data-answer="none"</code> so no second response surface appears. Records sit in an <code>#answered</code> section above the open questions.</p>
+				<article class="card answered" id="example-answered-record" data-tag="integrate" data-answer="none" style="margin:14px 0 0">
+					<p class="q">Q1 · where built pages land</p>
+					<h3>A directory of their own</h3>
+					<p>Built pages go to <code>dev/workspace/artifacts/</code>; <code>reviews/</code> keeps its documented meaning. Both archive identically, so the mirror route works either way.</p>
+				</article>
+				<p class="gloss">The nested card above is a live answered record — it takes no answer, and would still hold one made against its id before it was rewritten.</p>
+			</article>
+
+			<article class="card" id="withdrawn-card" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#withdrawn-card">54</a><span class="chip integrate">Integrate</span><span class="chip">templates</span></div>
+				<h3>A dropped card is withdrawn, never deleted</h3>
+				<p><code>.card.dead</code> with a struck-through <b>Withdrawn</b> chip and <code>data-answer="none"</code>. It keeps its id, keeps its tag, stays in the contents and the filter counts, and stops taking new answers while its stored record is held. Withdrawal is a state, not a removal — because deleting the card would orphan the answer.</p>
+				<p class="gloss">Two live examples on this page: <a href="#file-system-access">file-system-access</a> and <a href="#relroot-prefix">relroot-prefix</a>.</p>
+			</article>
+
+			<article class="card" id="demo-kit" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#demo-kit">55</a><span class="chip integrate">Integrate</span><span class="chip">demos</span></div>
+				<h3>The demo kit is a kit, not a template</h3>
+				<p>A demo has no fixed shape. The kit documents a scoped style set, two proven skeletons — an inline strip inside a card, and a board with controls in the content column and live rendering in the sidebar — the integration points, the rules, one complete worked example, and a page scaffold. A page of any kind reads the kit in addition to its page template whenever it carries a demo.</p>
+				<p>Integration is four names: <code>SUITE.flash</code> for announcements, <code>SUITE.copyText</code> for the clipboard, <code>SUITE.meta</code> read-only, and <code>data-report</code> plus a current <code>dataset.state</code> to put a line in the return prompt. The rules are equally short: no external asset, no localStorage of its own, no theme or token edits, no shell class or reserved id, and no <code>data-card</code> on a demo control.</p>
+				<p class="gloss">The three demos on this page are inline strips. Each carries <code>data-report</code>, so anything you tried shows up in the prompt under the card you tried it in.</p>
+			</article>
+		</section>
+
+		<section id="procedure">
+			<div class="sec-head"><h2>Procedure &amp; verification</h2><span class="count"></span></div>
+			<p class="sec-intro">The build is ten DraftHorse steps and thirty-one checks in two tiers. This is where the token-economy promise is actually kept: the agent types cards and nothing else.</p>
+
+			<article class="card" id="ten-steps" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#ten-steps">56</a><span class="chip integrate">Integrate</span><span class="chip">procedure</span></div>
+				<h3>Ten steps, with the error step standing alone</h3>
+				<p>Open the build; load the page kind; resolve provenance; instantiate the shell by copying it; splice the template; write the cards; revise a published page (dormant); verify; hand over; handle a build problem. Each is its own heading with its own start and finish conditions.</p>
+				<div class="btnrow" style="margin-top:14px"><button class="ghost tiny" type="button" data-panel="panel-steps">Read the ten steps</button></div>
+			</article>
+
+			<article class="card" id="never-read-the-shell" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#never-read-the-shell">57</a><span class="chip integrate">Integrate</span><span class="chip">procedure</span></div>
+				<h3>The agent never opens the shell or the page copy</h3>
+				<p>A page is created by <code>cp</code>, never by writing chrome. Every subsequent write goes through <code>splice.py</code> under Bash. Read and Edit are not granted, because both refuse a path they have not read in the same session, and reading the copy would pull the whole shell back into context — which is the exact cost the design exists to avoid.</p>
+				<p>The page's own state is read back only through the two read-only forms, <code>show page-meta</code> and <code>show cards</code>.</p>
+			</article>
+
+			<article class="card" id="revise-procedure" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#revise-procedure">58</a><span class="chip integrate">Integrate</span><span class="chip">procedure</span></div>
+				<h3>A revision touches only the cards that changed</h3>
+				<p>Open with the two show forms to read the current revision, the meta body and the ids already on the page. Published ids are permanent; a dropped card becomes withdrawn; only changed cards are spliced. The revision bumps by one, and date, build stamp and commit update in the same meta splice. The resulting git diff touches the meta block and the edited cards, and nothing else.</p>
+				<p>This is what makes the fingerprint honest: a whole-file rewrite would raise the changed strip on every card at once.</p>
+			</article>
+
+			<article class="card" id="token-economy" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#token-economy">59</a><span class="chip integrate">Integrate</span><span class="chip">procedure</span></div>
+				<h3>Roughly ninety-five authored lines for a ten-card review</h3>
+				<p>Never typed: tokens, layout rules and the engine (supplied by the copy); the response surfaces, contents, pill row, filter bar and theme control (supplied by the engine); every file, editor and GitHub URL (derived from attributes and provenance); the eyebrow markup; the return prompt text; a template's scoped CSS and a block's CSS and script (lifted by <code>splice.py</code>, never read); and a whole file on update.</p>
+				<p>The measure the plan sets: about 95 authored lines and 8-10KB for a ten-card review, none of it chrome, against 3-4K output tokens of chrome per page under hand-authoring.</p>
+			</article>
+
+			<article class="card" id="static-checks" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#static-checks">60</a><span class="chip integrate">Integrate</span><span class="chip">verification</span></div>
+				<h3>Ten static checks, no browser</h3>
+				<p>No document tags and a shell stamp on line 1; all seven marker pairs present exactly once; the meta block parses and carries its seven keys; every card has a unique, non-ordinal id; option cards agree with themselves and every printed path sits inside a reference; no host but the two font hosts and no literal href anywhere; exactly one title, one h1, one meta block and no surviving placeholder; exactly one shell element with a permitted class; every spliced part byte-identical to its source; every card inside a section with an id.</p>
+			</article>
+
+			<article class="card" id="runtime-checks" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#runtime-checks">61</a><span class="chip integrate">Integrate</span><span class="chip">verification</span></div>
+				<h3>Twenty-one runtime checks over a local server</h3>
+				<p>Playwright over <code>python3 -m http.server</code> bound to loopback, with the pid recorded and killed at the end. They cover a clean console; generated counts matching card counts; theme; the pre-paint script's position; persistence across reload with line breaks intact; the storage key prefix; Clear; the empty and one-answer prompts; Accept all; the changed strip on exactly one mutated card; held answers and their recovery; loose section comments; every reference route and chip; four viewport widths with no horizontal scroll; each filter; a deleted clipboard API; the contents highlight; and the deliberate click on an already-checked recommendation.</p>
+				<p>One check is unusual and worth keeping: the same fixture is served twice, bare and wrapped in a doctype, and the two must render byte-identically at 1100px — the wrapper standing in for the Artifact tool's skeleton, so quirks mode is proved harmless without publishing anything.</p>
+			</article>
+
+			<article class="card" id="fixtures-regression" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#fixtures-regression">62</a><span class="chip integrate">Integrate</span><span class="chip">verification</span></div>
+				<h3>Three frozen fixtures are the regression suite</h3>
+				<p>A review, an interview and a demo page with frozen provenance — a zero commit, a fixed date, a branch named <code>fixture</code>. After any change to the shell, a template or a block, both tiers run over all three before committing. A fixture that must change to keep passing <i>is</i> a contract change, and is re-committed with the shell change that caused it.</p>
+				<p class="gloss">Whether they ship inside the released plugin payload is question Q3 below.</p>
+			</article>
+		</section>
+
+		<section id="delivery">
+			<div class="sec-head"><h2>Delivery &amp; risk</h2><span class="count"></span></div>
+			<p class="sec-intro">Ten work packages, one acceptance test, seven recorded risks. This is the part a Stage 3 workflow is authored directly from.</p>
+
+			<article class="card" id="work-packages" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#work-packages">63</a><span class="chip integrate">Integrate</span><span class="chip">delivery</span></div>
+				<h3>Ten work packages, each with a done-check</h3>
+				<p>The shell chrome and <code>splice.py</code>; the engine (same file, landing together); provenance inside the engine; the two page templates; the three blocks and the demo kit; the two remaining references; the skill itself; the verifier and fixtures; the acceptance rebuild; then the symlink and release. Every package carries an explicit done-check rather than a description — <i>a bare copy renders an empty valid page in both themes</i>, <i>a fresh agent builds a review page by following it with no question back</i>.</p>
+				<p>WP-5 runs alongside WP-3 because it depends only on the shell and the engine. Nothing is released before WP-9. See the dependency graph on <a href="#figure-block">figure-block</a> above.</p>
+				<details class="ref" data-path="dev/workspace/plans/artifact-suite-implementation.md" data-lines="1118-1133" data-loc="§ Stage 3 work packages"></details>
+			</article>
+
+			<article class="card" id="acceptance-test" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#acceptance-test">64</a><span class="chip integrate">Integrate</span><span class="chip">delivery</span></div>
+				<h3>The acceptance test rebuilds the Stage 1 review</h3>
+				<p>All 75 findings of the investigation page, rebuilt onto the shell as a review on the rail layout, five lens sections, each card's id the lowercased finding id, each finding's evidence a reference with a path and a line range. The original stays in place as the baseline.</p>
+				<p>It passes when all 75 cards survive intact and both tiers pass; when answering the thirteen your-call cards as they were actually answered yields a prompt carrying exactly those thirteen subjects and verdicts, nothing lost and nothing invented; when untouched cards stay out; when reloading restores every answer and editing one card raises the strip on that card alone; when every evidence reference opens the cited file on disk and pins its GitHub chip to the build commit; and when the authored byte count is recorded against the original's 244KB.</p>
+				<details class="ref" data-path="dev/workspace/reviews/artifact-suite-investigation.html" data-loc="the 244KB baseline"></details>
+			</article>
+
+			<article class="card" id="risk-register" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#risk-register">65</a><span class="chip integrate">Integrate</span><span class="chip">risk</span></div>
+				<h3>Seven risks, each with its stated response</h3>
+				<ul>
+					<li><b>Shell budget</b> — measured at ~15.5KB CSS plus an engine of ~54 functions; if the engine overruns 17KB, move the reference CSS and its expander into a block before cutting any behaviour.</li>
+					<li><b>Storage on <code>file://</code></b> — two Stage 1 findings disagree on whether Chrome throws; the runtime tier therefore runs over localhost, with the memory fallback and the foot warning covering the throwing case. Check once by hand from disk during WP-2.</li>
+					<li><b><code>:has()</code> with no fallback</b> beyond the verdict floor — acceptable for Chrome; re-check if ever published.</li>
+					<li><b>Quirks mode</b> from disk — the four differences are avoided by construction; a doctype stripped at publish would remove the risk outright.</li>
+					<li><b>Absolute checkout path</b> in the meta block — see <a href="#root-path-exposure">root-path-exposure</a>.</li>
+					<li><b>Fingerprint blind spot</b> — attribute-only edits other than the tag and the vocabulary do not raise the strip; changing a recommendation alone goes unnoticed.</li>
+					<li><b>Broad <code>kill</code> grant</b> and a model-invocable description that could fire on unrelated HTML work — both bounded by wording rather than by mechanism.</li>
+				</ul>
+			</article>
+		</section>
+
+		<section id="questions" data-loose="Anything the five questions missed">
+			<div class="sec-head"><h2>Unresolved questions</h2><span class="count"></span></div>
+			<p class="sec-intro">Five owner review items. The plan's body value stands and Stage 3 builds against it unless you overrule it here — so each card's pre-checked option, where there is one, is what happens if you say nothing. Two carry no recommendation, because the plan takes no position.</p>
+
+			<article class="card" id="q-shell-budget" data-tag="yourcall" data-answer="options" data-recommended="36KB hard, 32KB target">
+				<div class="chiprow"><a class="chip id" href="#q-shell-budget">Q1</a><span class="chip yourcall">Your call</span><span class="chip">budget</span></div>
+				<h3>The shell budget more than doubled</h3>
+				<p>Stage 1 sized the shell at 14-18KB, before persistence, contents, filters and provenance were in scope. Measured against this plan's own rules it comes out near 15.5KB of CSS plus an engine of roughly 54 functions, so the plan sets the ceiling at 36KB hard with a 32KB target. A ten-card page then lands near 48KB, well inside a 120KB working budget.</p>
+				<div class="options">
+					<label class="option recommended"><input type="radio" name="v-q-shell-budget" value="36KB hard, 32KB target" checked>
+						<div><b>36KB hard, 32KB target<span class="rec">recommended</span></b><span>The plan's value. Keeps every feature in the shell where it belongs.</span></div>
+					</label>
+					<label class="option"><input type="radio" name="v-q-shell-budget" value="Hold 24KB, split the reference block out">
+						<div><b>Hold 24KB, split the reference block out</b><span>Reference CSS and its expander move to a block file from the start, not as a contingency.</span></div>
+					</label>
+					<label class="option"><input type="radio" name="v-q-shell-budget" value="No ceiling until WP-2 measures it">
+						<div><b>No ceiling until WP-2 measures it</b><span>Build the engine first, set the number from the real byte count.</span></div>
+					</label>
+				</div>
+			</article>
+
+			<article class="card" id="q-kill-grant" data-tag="yourcall" data-answer="options" data-recommended="Keep Bash(kill:*), scoped to the recorded pid">
+				<div class="chiprow"><a class="chip id" href="#q-kill-grant">Q2</a><span class="chip yourcall">Your call</span><span class="chip">permissions</span></div>
+				<h3>Who stops the verification server</h3>
+				<p>The runtime tier needs a local HTTP server for the duration of the checks. The plan grants <code>Bash(kill:*)</code> and scopes its use by wording — the skill kills only the pid it recorded. The grant itself is broader than that.</p>
+				<div class="options">
+					<label class="option recommended"><input type="radio" name="v-q-kill-grant" value="Keep Bash(kill:*), scoped to the recorded pid" checked>
+						<div><b>Keep <code>Bash(kill:*)</code><span class="rec">recommended</span></b><span>The plan's value. The skill runs the tier unattended.</span></div>
+					</label>
+					<label class="option"><input type="radio" name="v-q-kill-grant" value="User starts and stops the server">
+						<div><b>You start and stop the server</b><span>The skill pauses and asks. Narrow grant, but the tier stops being automatic.</span></div>
+					</label>
+					<label class="option"><input type="radio" name="v-q-kill-grant" value="Drop the runtime tier from the skill">
+						<div><b>Drop the runtime tier from the skill</b><span>Static checks only at build time; the runtime tier becomes a maintainer task against the fixtures.</span></div>
+					</label>
+				</div>
+			</article>
+
+			<article class="card" id="q-fixtures-payload" data-tag="yourcall" data-answer="options">
+				<div class="chiprow"><a class="chip id" href="#q-fixtures-payload">Q3</a><span class="chip yourcall">Your call</span><span class="chip">release</span></div>
+				<h3>Do the fixtures ship inside the released plugin</h3>
+				<p>Three fixture pages at 48-60KB each. They are the regression suite, so they must live in the repository; whether an installed copy of <code>chat-tools</code> also carries them is a separate question. The plan takes no position — this card carries no recommendation, so Accept all skips it and the untouched count treats it as unanswered.</p>
+				<div class="options">
+					<label class="option"><input type="radio" name="v-q-fixtures-payload" value="Ship them in the payload">
+						<div><b>Ship them in the payload</b><span>An installed skill can self-verify. Adds ~170KB to the plugin.</span></div>
+					</label>
+					<label class="option"><input type="radio" name="v-q-fixtures-payload" value="Repository only">
+						<div><b>Repository only</b><span>Smaller payload; verification is a maintainer activity in the working tree.</span></div>
+					</label>
+					<label class="option"><input type="radio" name="v-q-fixtures-payload" value="Ship one, keep three">
+						<div><b>Ship one, keep three</b><span>The review fixture travels as a worked example; the other two stay behind.</span></div>
+					</label>
+				</div>
+			</article>
+
+			<article class="card" id="q-doctype" data-tag="yourcall" data-answer="options" data-recommended="Keep the bare fragment">
+				<div class="chiprow"><a class="chip id" href="#q-doctype">Q4</a><span class="chip yourcall">Your call</span><span class="chip">form</span></div>
+				<h3>Bare fragment, or a doctype stripped at publish</h3>
+				<p>D-18 made the shell a bare fragment so one file serves both disk and the Artifact tool. The cost is quirks mode from disk, which the shell avoids by construction — lowercase selectors, explicit table type, no percentage heights, no image in a table. The cheaper cure is a doctype on line 1 and one <code>sed</code> at publish time, at the price of a publish step that can be forgotten.</p>
+				<div class="options">
+					<label class="option recommended"><input type="radio" name="v-q-doctype" value="Keep the bare fragment" checked>
+						<div><b>Keep the bare fragment<span class="rec">recommended</span></b><span>The plan's value. One file, no publish step, four documented avoidances.</span></div>
+					</label>
+					<label class="option"><input type="radio" name="v-q-doctype" value="Ship a doctype and strip it at publish">
+						<div><b>Ship a doctype, strip it at publish</b><span>Standards mode everywhere; the four quirks rules become unnecessary. Adds a publish step.</span></div>
+					</label>
+					<label class="option"><input type="radio" name="v-q-doctype" value="Bare fragment, and drop V6a">
+						<div><b>Bare fragment, and drop V6a</b><span>Keep the fragment but stop paying for the double-serve equivalence check.</span></div>
+					</label>
+				</div>
+			</article>
+
+			<article class="card" id="q-tool-set" data-tag="yourcall" data-answer="options" data-recommended="Confirm: splice only, no Edit or Write">
+				<div class="chiprow"><a class="chip id" href="#q-tool-set">Q5</a><span class="chip yourcall">Your call</span><span class="chip">permissions</span></div>
+				<h3>Confirm the skill's tool set</h3>
+				<p>Edit and Write are absent from the skill's allowed tools. Every write to a page goes through <code>splice.py</code>, and the agent never reads the shell or a page copy — which is what keeps the chrome out of context. The kickoff named no tool set, so this is a confirmation rather than a change.</p>
+				<div class="options">
+					<label class="option recommended"><input type="radio" name="v-q-tool-set" value="Confirm: splice only, no Edit or Write" checked>
+						<div><b>Confirm: splice only<span class="rec">recommended</span></b><span>The plan's value. The token economy depends on it.</span></div>
+					</label>
+					<label class="option"><input type="radio" name="v-q-tool-set" value="Grant Write for the initial page only">
+						<div><b>Grant Write for the initial page only</b><span>An escape hatch where a splice form is missing. Weakens the never-read rule.</span></div>
+					</label>
+					<label class="option"><input type="radio" name="v-q-tool-set" value="Grant Edit and Write, keep splice as the default">
+						<div><b>Grant both, keep splice as the default</b><span>Maximum flexibility; the invariant becomes a convention rather than a constraint.</span></div>
+					</label>
+				</div>
+			</article>
+		</section>
+	</main>
+
+	<aside class="sidebar"></aside>
+	<footer id="foot"></footer>
+</div>
+
+<dialog class="panel" id="panel-steps">
+	<button class="quiet tiny close" type="button" data-panel-close>Close</button>
+	<h2>The ten build steps</h2>
+	<p class="lede">Each is its own DraftHorse heading with its own start and finish conditions. The error step stands alone as step 10.</p>
+	<ol>
+		<li><b>Open the build</b> — decide kind, layout class and id slug, verify the slug is unused, decide new page versus revision.</li>
+		<li><b>Load the page kind</b> — read the kinds reference, then the one page template the kind maps to. Never a second page template. Read it for its exemplars and instruction comment only.</li>
+		<li><b>Resolve provenance</b> — run the git facts, derive repo, root, self, branch, commit, date and build stamp; PR from <code>gh</code>; issue from the task or null.</li>
+		<li><b>Instantiate the shell</b> — <code>cp</code> the shell, fill the three placeholder regions, set the layout class. Never read the shell or the copy.</li>
+		<li><b>Splice the template</b> — lift each part mechanically, once per page. Never retype a scoped style or a block script.</li>
+		<li><b>Write the cards</b> — one splice per card into its section. The agent types only the cards.</li>
+		<li><b>Revise a published page</b> (dormant) — open with the two show forms, splice only the changed cards, bump the revision.</li>
+		<li><b>Verify the page</b> — static tier, then runtime tier. Repair before hand-over; report a skipped tier with its reason.</li>
+		<li><b>Hand the page over</b> (success) — report the path, id, revision, card count and checks run.</li>
+		<li><b>Handle a build problem</b> (error) — missing marker, slug collision, unparseable meta, splice failure, no browser, or a shape no template covers. The last one hard-bails and raises an issue.</li>
+	</ol>
+</dialog>
+
+<div class="floater"><span class="status" id="status" role="status"></span>
+	<button class="ghost tiny" type="button" id="accept-all" hidden>Accept all</button>
+	<button class="ghost" type="button" id="view-prompt">View prompt</button>
+	<button type="button" id="copy-prompt">Copy prompt</button>
+</div>
+<div id="outwrap" hidden><textarea id="out" readonly aria-label="Return prompt as plain text"></textarea></div>
+
+<script>
+(function () {
+	"use strict";
+
+	/* ================= Boot ================= */
+
+	var META = null;
+	var STATE = null;
+	var MEM = {};
+	var SAVE_TIMER = null;
+	var STATUS_TIMER = null;
+
+	var DEFAULT_VERDICTS = {review: ["Agree", "Revise", "Reject"], issue: ["Accept", "Amend", "Defer"], options: [], interview: [], demo: []};
+	var KIND_LABEL = {review: "Review", options: "Options", issue: "Issue breakdown", interview: "Interview", demo: "Demo"};
+	var TAGS = ["integrate", "yourcall", "defer"];
+	var TAG_LABEL = {integrate: "Integrate", yourcall: "Your call", defer: "Defer", all: "All", unanswered: "Unanswered"};
+
+	function boot() {
+		readMeta();
+		capabilityGate();
+		loadState();
+		validateCards();
+		var cards = cardList();
+		var i;
+		for (i = 0; i < cards.length; i++) { attachRespond(cards[i]); }
+		for (i = 0; i < cards.length; i++) { restoreCard(cards[i]); }
+		var loose = document.querySelectorAll("section[data-loose]");
+		for (i = 0; i < loose.length; i++) { attachLoose(loose[i]); }
+		collectOrphans();
+		renderEyebrow();
+		var refs = document.querySelectorAll("details.ref");
+		for (i = 0; i < refs.length; i++) { expandRef(refs[i]); }
+		auditPaths();
+		buildToc();
+		observeSections();
+		buildFilters();
+		countSections();
+		wireEvents();
+		wireBlocks();
+		wireDemos();
+		checkTitles();
+		revealTarget();
+		renderFoot();
+	}
+
+	/* ================= Meta and capabilities ================= */
+
+	var CAN_LS = (function () {
+		try {
+			localStorage.setItem("artifact-suite.__probe", "1");
+			localStorage.removeItem("artifact-suite.__probe");
+			return true;
+		} catch (e) { return false; }
+	})();
+	var CAN_FS = typeof window.showSaveFilePicker === "function";
+
+	function readMeta() {
+		var node = document.getElementById("page-meta");
+		try {
+			META = JSON.parse(node.textContent);
+		} catch (e) {
+			META = {id: "unknown-page", kind: "review", rev: 1, title: document.title, provenance: {}, prompt: {}, next: []};
+			flash("Page data could not be read — answers will not be saved.", true);
+		}
+		if (!META.provenance) META.provenance = {};
+		if (!META.prompt) META.prompt = {};
+		if (!META.next) META.next = [];
+	}
+
+	function capabilityGate() {
+		if (!CAN_FS) {
+			var fs = document.querySelectorAll('[data-needs="fs"]');
+			for (var i = 0; i < fs.length; i++) { fs[i].parentNode.removeChild(fs[i]); }
+		}
+	}
+
+	/* ================= Storage ================= */
+
+	function stateKey() { return "artifact-suite.page." + META.id; }
+
+	function readStore(k) { try { return JSON.parse((CAN_LS ? localStorage.getItem(k) : MEM[k]) || "null"); } catch (e) { return null; } }
+	function writeStore(k, v) { try { if (CAN_LS) { localStorage.setItem(k, JSON.stringify(v)); } else { MEM[k] = JSON.stringify(v); } } catch (e) { MEM[k] = JSON.stringify(v); } }
+	function dropStore(k) { try { if (CAN_LS) { localStorage.removeItem(k); } else { delete MEM[k]; } } catch (e) { delete MEM[k]; } }
+
+	function loadState() {
+		STATE = readStore(stateKey());
+		if (!STATE || typeof STATE !== "object") STATE = {schema: 1, pageId: META.id, rev: META.rev, cards: {}, sections: {}, orphans: {}};
+		if (!STATE.cards) STATE.cards = {};
+		if (!STATE.sections) STATE.sections = {};
+		if (!STATE.orphans) STATE.orphans = {};
+	}
+
+	function saveState() {
+		STATE.pageId = META.id;
+		STATE.rev = META.rev;
+		STATE.savedAt = new Date().toISOString();
+		writeStore(stateKey(), STATE);
+	}
+
+	function saveSoon() {
+		if (SAVE_TIMER) clearTimeout(SAVE_TIMER);
+		SAVE_TIMER = setTimeout(function () { saveState(); refreshCounts(); }, 200);
+	}
+
+	/* ================= Fingerprints ================= */
+
+	function hashOf(s) {
+		var h = 5381;
+		for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+		return String(h);
+	}
+
+	function normalise(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
+
+	// Every engine-generated region is stripped, so the hash covers authored prose
+	// alone and does not move with the order boot() happens to generate things in.
+	var GENERATED = ".respond, .changed, .chip.earlier, .ref-links, details.ref > summary, .demo";
+
+	function fingerprintOf(card) {
+		var clone = card.cloneNode(true);
+		var strip = clone.querySelectorAll(GENERATED);
+		for (var i = 0; i < strip.length; i++) { strip[i].parentNode.removeChild(strip[i]); }
+		return hashOf(normalise(clone.textContent) + "|" + (card.dataset.tag || "") + "|" + (card.dataset.verdicts || ""));
+	}
+
+	/* ================= Respond surfaces ================= */
+
+	function cardList() {
+		var all = document.querySelectorAll("article.card[id]");
+		var out = [];
+		for (var i = 0; i < all.length; i++) { out.push(all[i]); }
+		return out;
+	}
+
+	function cardTitle(card) {
+		var h = card.querySelector("h3");
+		return h ? normalise(h.textContent) : card.id;
+	}
+
+	function verdictsFor(card) {
+		if (card.dataset.verdicts) return card.dataset.verdicts.split("|");
+		return DEFAULT_VERDICTS[META.kind] || [];
+	}
+
+	function validateCards() {
+		var all = document.querySelectorAll("article.card");
+		for (var i = 0; i < all.length; i++) {
+			if (!all[i].id) {
+				console.warn("artifact-suite: card without id — no response surface attached");
+				all[i].className += " needs-id";
+			} else if (/^[a-z]?\d+$/i.test(all[i].id)) {
+				console.warn("artifact-suite: card id '" + all[i].id + "' looks ordinal — ids must name their subject");
+			}
+		}
+	}
+
+	function attachRespond(card) {
+		if (card.dataset.answer === "none") return;
+		if (card.querySelector(".respond")) return;
+		if (card.className.indexOf("needs-id") !== -1) return;
+
+		var id = card.id;
+		var wrap = document.createElement("div");
+		wrap.className = "respond";
+
+		if (card.dataset.answer === "options") {
+			var box = card.querySelector(".options");
+			if (box) box.setAttribute("data-card", id);
+		} else {
+			var set = verdictsFor(card);
+			if (set.length) {
+				var v = document.createElement("div");
+				v.className = "verdicts";
+				v.setAttribute("data-card", id);
+				for (var i = 0; i < set.length; i++) {
+					var label = document.createElement("label");
+					var isRec = card.dataset.recommended === set[i];
+					if (isRec) label.className = "recommended";
+					var input = document.createElement("input");
+					input.type = "radio";
+					input.name = "v-" + id;
+					input.value = set[i];
+					label.appendChild(input);
+					label.appendChild(document.createTextNode(set[i]));
+					if (isRec) {
+						var rec = document.createElement("span");
+						rec.className = "rec";
+						rec.appendChild(document.createTextNode("recommended"));
+						label.appendChild(rec);
+					}
+					v.appendChild(label);
+				}
+				wrap.appendChild(v);
+			}
+		}
+
+		var ta = document.createElement("textarea");
+		ta.setAttribute("data-card", id);
+		ta.placeholder = "Comment on " + id + "…";
+		wrap.appendChild(ta);
+
+		var clear = document.createElement("button");
+		clear.type = "button";
+		clear.className = "quiet tiny clear";
+		clear.setAttribute("data-card", id);
+		clear.setAttribute("data-act", "clear");
+		clear.appendChild(document.createTextNode("Clear"));
+		wrap.appendChild(clear);
+
+		card.appendChild(wrap);
+	}
+
+	function attachLoose(section) {
+		if (section.querySelector(".loose")) return;
+		var box = document.createElement("div");
+		box.className = "loose";
+		var lab = document.createElement("span");
+		lab.className = "lab";
+		lab.appendChild(document.createTextNode(section.dataset.loose));
+		var ta = document.createElement("textarea");
+		ta.setAttribute("data-section", section.id);
+		var stored = STATE.sections[section.id];
+		if (stored && stored.comment) ta.value = stored.comment;
+		box.appendChild(lab);
+		box.appendChild(ta);
+		section.appendChild(box);
+	}
+
+	/* ================= Restore ================= */
+
+	function entryFor(id) { return STATE.cards[id] || null; }
+
+	function restoreCard(card) {
+		var id = card.id;
+		if (!id) return;
+		if (STATE.orphans[id]) { STATE.cards[id] = STATE.orphans[id]; delete STATE.orphans[id]; }
+		var entry = entryFor(id);
+		if (card.dataset.answer === "none") return;
+		if (!entry) {
+			if (card.dataset.recommended) preCheck(card);
+			return;
+		}
+		if (entry.verdict) {
+			var input = card.querySelector('input[name="v-' + id + '"][value="' + cssEscape(entry.verdict) + '"]');
+			if (input) input.checked = true;
+		}
+		var ta = card.querySelector('textarea[data-card="' + id + '"]');
+		if (ta && entry.comment) ta.value = entry.comment;
+
+		var now = fingerprintOf(card);
+		if (entry.fingerprint && entry.fingerprint !== now) {
+			markChanged(card, entry);
+		} else {
+			addEarlierChip(card);
+		}
+	}
+
+	function cssEscape(s) { return String(s).replace(/"/g, '\\"'); }
+
+	function preCheck(card) {
+		var input = card.querySelector('input[name="v-' + card.id + '"][value="' + cssEscape(card.dataset.recommended) + '"]');
+		if (input) input.checked = true;
+	}
+
+	function addEarlierChip(card) {
+		var row = card.querySelector(".chiprow");
+		if (!row || row.querySelector(".chip.earlier")) return;
+		var chip = document.createElement("span");
+		chip.className = "chip earlier";
+		chip.appendChild(document.createTextNode("Answered earlier"));
+		row.appendChild(chip);
+	}
+
+	function markChanged(card, entry) {
+		if (card.querySelector(".changed")) return;
+		var strip = document.createElement("div");
+		strip.className = "changed";
+		strip.appendChild(document.createTextNode("Changed since you answered (rev " + (entry.rev || 1) + ")."));
+		var btn = document.createElement("button");
+		btn.type = "button";
+		btn.className = "quiet tiny";
+		btn.setAttribute("data-card", card.id);
+		btn.setAttribute("data-act", "dismiss");
+		btn.appendChild(document.createTextNode("Dismiss"));
+		strip.appendChild(btn);
+		card.insertBefore(strip, card.firstChild);
+	}
+
+	function dismissChanged(id) {
+		var card = document.getElementById(id);
+		if (!card) return;
+		var strip = card.querySelector(".changed");
+		if (strip) strip.parentNode.removeChild(strip);
+		var entry = entryFor(id);
+		if (entry) { entry.fingerprint = fingerprintOf(card); entry.rev = META.rev; saveSoon(); }
+	}
+
+	function collectOrphans() {
+		var held = 0, id;
+		for (id in STATE.cards) {
+			if (!STATE.cards.hasOwnProperty(id)) continue;
+			if (!document.getElementById(id)) {
+				STATE.orphans[id] = STATE.cards[id];
+				delete STATE.cards[id];
+			}
+		}
+		for (id in STATE.orphans) { if (STATE.orphans.hasOwnProperty(id)) held++; }
+		if (held) saveState();
+	}
+
+	function heldIds() {
+		var out = [];
+		for (var id in STATE.orphans) { if (STATE.orphans.hasOwnProperty(id)) out.push(id); }
+		return out;
+	}
+
+	function discardHeld() { STATE.orphans = {}; saveState(); renderFoot(); flash("Held answers discarded."); }
+
+	/* ================= Recording ================= */
+
+	function ensureEntry(id) {
+		if (!STATE.cards[id]) STATE.cards[id] = {verdict: null, comment: "", fingerprint: null, answeredAt: null, touched: false, rev: META.rev};
+		return STATE.cards[id];
+	}
+
+	function recordVerdict(id, value) {
+		var card = document.getElementById(id);
+		var e = ensureEntry(id);
+		e.verdict = value;
+		e.touched = true;
+		e.answeredAt = new Date().toISOString();
+		e.rev = META.rev;
+		if (card) e.fingerprint = fingerprintOf(card);
+		saveSoon();
+	}
+
+	function recordComment(id, text) {
+		var card = document.getElementById(id);
+		var e = ensureEntry(id);
+		e.comment = text;
+		e.touched = true;
+		e.answeredAt = new Date().toISOString();
+		e.rev = META.rev;
+		if (card) e.fingerprint = fingerprintOf(card);
+		saveSoon();
+	}
+
+	function recordSection(id, text) {
+		if (!STATE.sections[id]) STATE.sections[id] = {comment: "", touched: false, answeredAt: null};
+		STATE.sections[id].comment = text;
+		STATE.sections[id].touched = true;
+		STATE.sections[id].answeredAt = new Date().toISOString();
+		saveSoon();
+	}
+
+	function clearCard(id) {
+		var card = document.getElementById(id);
+		if (!card) return;
+		var inputs = card.querySelectorAll('input[name="v-' + id + '"]');
+		for (var i = 0; i < inputs.length; i++) { inputs[i].checked = false; }
+		var ta = card.querySelector('textarea[data-card="' + id + '"]');
+		if (ta) ta.value = "";
+		var strip = card.querySelector(".changed");
+		if (strip) strip.parentNode.removeChild(strip);
+		var chip = card.querySelector(".chip.earlier");
+		if (chip) chip.parentNode.removeChild(chip);
+		delete STATE.cards[id];
+		if (card.dataset.recommended) preCheck(card);
+		saveState();
+		refreshCounts();
+		flash("Cleared " + id + ".");
+	}
+
+	function acceptAll() {
+		var cards = cardList(), done = 0, skipped = 0;
+		for (var i = 0; i < cards.length; i++) {
+			var c = cards[i];
+			if (c.dataset.answer === "none") continue;
+			if (!c.dataset.recommended) { skipped++; continue; }
+			var e = entryFor(c.id);
+			if (e && e.touched) continue;
+			preCheck(c);
+			recordVerdict(c.id, c.dataset.recommended);
+			done++;
+		}
+		saveState();
+		refreshCounts();
+		flash(done + " cards recorded as agreed; " + skipped + " without a recommendation skipped.");
+	}
+
+	/* ================= Provenance ================= */
+
+	function encPath(p) { return String(p).split("/").map(encodeURIComponent).join("/"); }
+	function lineAnchor(lines) {
+		if (!lines) return "";
+		var m = String(lines).match(/^(\d+)(?:-(\d+))?$/);
+		if (!m) return "";
+		return m[2] ? "#L" + m[1] + "-L" + m[2] : "#L" + m[1];
+	}
+	function firstLine(lines) {
+		var m = String(lines || "").match(/^(\d+)/);
+		return m ? m[1] : "";
+	}
+	function mirrorPath(path, branch) {
+		var pre = "dev/workspace/";
+		if (path.indexOf(pre) !== 0) return null;
+		return "dev/branches/" + branch + "/" + path.slice(pre.length);
+	}
+
+	function anchor(cls, href, title, text) {
+		var a = document.createElement("a");
+		a.className = "ref-chip " + cls;
+		a.href = href;
+		a.target = "_blank";
+		a.rel = "noopener";
+		if (title) a.title = title;
+		a.appendChild(document.createTextNode(text));
+		return a;
+	}
+
+	function span(cls, text) {
+		var s = document.createElement("span");
+		s.className = cls;
+		s.appendChild(document.createTextNode(text));
+		return s;
+	}
+
+	function renderEyebrow() {
+		var bar = document.getElementById("eyebrow");
+		var spacer = bar.querySelector(".spacer");
+		var p = META.provenance;
+		var cells = [];
+
+		cells.push(span("pv-kind", KIND_LABEL[META.kind] || META.kind));
+		cells.push(span("pv-rev", "rev " + META.rev));
+
+		if (p.issue !== null && p.issue !== undefined) cells.push(linkCell("pv-issue", "Issue #" + p.issue, p.repo ? p.repo + "/issues/" + p.issue : null));
+		if (p.pr !== null && p.pr !== undefined) cells.push(linkCell("pv-pr", "PR #" + p.pr, p.repo ? p.repo + "/pull/" + p.pr : null));
+		if (p.branch) cells.push(codeCell("pv-branch", "branch", p.branch, p.repo ? p.repo + "/tree/" + p.branch : null));
+		if (p.commit) cells.push(linkCell("pv-commit", p.commit.slice(0, 7), p.repo ? p.repo + "/commit/" + p.commit : null, p.commit));
+		if (p.date) cells.push(span("pv-date", p.date));
+
+		for (var i = 0; i < cells.length; i++) {
+			if (i) bar.insertBefore(sepSpan(), spacer);
+			bar.insertBefore(cells[i], spacer);
+		}
+	}
+
+	function sepSpan() {
+		var s = document.createElement("span");
+		s.className = "sep";
+		s.setAttribute("aria-hidden", "true");
+		return s;
+	}
+
+	function linkCell(cls, text, href, title) {
+		var wrap = document.createElement("span");
+		wrap.className = cls;
+		if (href) {
+			var a = document.createElement("a");
+			a.href = href;
+			a.target = "_blank";
+			a.rel = "noopener";
+			if (title) a.title = title;
+			a.appendChild(document.createTextNode(text));
+			wrap.appendChild(a);
+		} else {
+			var c = document.createElement("code");
+			c.appendChild(document.createTextNode(text));
+			wrap.appendChild(c);
+		}
+		return wrap;
+	}
+
+	function codeCell(cls, label, text, href) {
+		var wrap = document.createElement("span");
+		wrap.className = cls;
+		wrap.appendChild(document.createTextNode(label + " "));
+		var code = document.createElement("code");
+		code.appendChild(document.createTextNode(text));
+		if (href) {
+			var a = document.createElement("a");
+			a.href = href;
+			a.target = "_blank";
+			a.rel = "noopener";
+			a.appendChild(code);
+			wrap.appendChild(a);
+		} else {
+			wrap.appendChild(code);
+		}
+		return wrap;
+	}
+
+	function expandRef(el) {
+		if (el.querySelector("summary")) return;
+		var p = META.provenance;
+		var path = el.dataset.path || "";
+		var url = el.dataset.url || "";
+		var lines = el.dataset.lines || "";
+		var branch = el.dataset.branch || "";
+		var nodisk = el.className.indexOf("ref--nodisk") !== -1;
+
+		if ((path && url) || (!path && !url) || (url && url.indexOf("https://") !== 0) || (path && (path.charAt(0) === "/" || path.indexOf("./") === 0 || path.indexOf("..") !== -1))) {
+			el.className += " ref--broken";
+			var bs = document.createElement("summary");
+			bs.appendChild(span("path", path || url || "(no reference given)"));
+			bs.appendChild(span("loc", "malformed reference"));
+			el.appendChild(bs);
+			console.warn("artifact-suite: malformed reference", el);
+			return;
+		}
+		if (lines && !/^\d+(?:-\d+)?$/.test(lines)) lines = "";
+
+		var diskPath = path;
+		var mirrored = false;
+		if (path && branch && !nodisk) {
+			var mp = mirrorPath(path, branch);
+			if (mp) { diskPath = mp; mirrored = true; }
+		}
+
+		var sum = document.createElement("summary");
+		if (url) {
+			var u = url.replace(/^https:\/\//, "");
+			sum.appendChild(span("path", u));
+		} else {
+			sum.appendChild(span("path", diskPath));
+		}
+		if (lines) sum.appendChild(span("lines", "L" + lines.replace("-", "-")));
+		if (el.dataset.loc) sum.appendChild(span("loc", el.dataset.loc));
+		if (mirrored) sum.appendChild(span("mirror", "archived copy"));
+		el.appendChild(sum);
+
+		var links = document.createElement("div");
+		links.className = "ref-links";
+
+		if (url) {
+			links.appendChild(anchor("ref-site", url, url, "Open site"));
+		} else {
+			var abs = p.root ? p.root + "/" + diskPath : null;
+			if (abs && !nodisk) {
+				links.appendChild(anchor("ref-disk", "file://" + encPath(abs), abs, "Open file"));
+				if (p.editor) {
+					links.appendChild(anchor("ref-editor", p.editor + "://file" + encPath(abs) + (lines ? ":" + firstLine(lines) : ""), p.editor + (lines ? " · line " + firstLine(lines) : ""), "Editor"));
+				}
+			}
+			if (p.repo) {
+				var ref = el.dataset.commit || (branch ? branch : p.commit);
+				links.appendChild(anchor("ref-gh", p.repo + "/blob/" + ref + "/" + encPath(path) + lineAnchor(lines), "blob/" + String(ref).slice(0, 7), "GitHub"));
+			}
+		}
+
+		var copy = document.createElement("button");
+		copy.type = "button";
+		copy.className = "ref-chip ref-copy";
+		copy.setAttribute("data-copy-path", (url ? url : diskPath) + (lines ? ":" + lines : ""));
+		copy.appendChild(document.createTextNode("Copy path"));
+		links.appendChild(copy);
+
+		el.appendChild(links);
+	}
+
+	function auditPaths() {
+		var paths = document.querySelectorAll(".path");
+		for (var i = 0; i < paths.length; i++) {
+			var el = paths[i];
+			if (el.closest(".ref") || el.closest(".ref-link")) continue;
+			el.className += " path--unlinked";
+			console.warn("artifact-suite: path printed outside a reference", el.textContent);
+		}
+	}
+
+	/* ================= Navigation and filters ================= */
+
+	function buildToc() {
+		var col = document.getElementById("toc-column");
+		var pills = document.getElementById("toc-pills");
+		var sections = document.querySelectorAll("main section[id]");
+		var i, j;
+		for (i = 0; i < sections.length; i++) {
+			var sec = sections[i];
+			var h2 = sec.querySelector(".sec-head h2");
+			var label = h2 ? normalise(h2.textContent) : sec.id;
+
+			var head = document.createElement("h4");
+			head.appendChild(document.createTextNode(label));
+			col.appendChild(head);
+
+			var ol = document.createElement("ol");
+			var cards = sec.querySelectorAll("article.card[id]");
+			for (j = 0; j < cards.length; j++) {
+				var card = cards[j];
+				if (card.parentNode.closest && card.parentNode.closest("article.card")) continue;
+				var chip = card.querySelector(".chip.id");
+				var text = (chip ? normalise(chip.textContent) + " · " : "") + cardTitle(card);
+				var li = document.createElement("li");
+				li.setAttribute("data-for", card.id);
+				var a = document.createElement("a");
+				a.href = "#" + card.id;
+				a.appendChild(document.createTextNode(text));
+				li.appendChild(a);
+				ol.appendChild(li);
+			}
+			col.appendChild(ol);
+
+			var pill = document.createElement("a");
+			pill.href = "#" + sec.id;
+			pill.setAttribute("data-sec", sec.id);
+			pill.appendChild(document.createTextNode(label));
+			pills.appendChild(pill);
+		}
+	}
+
+	function observeSections() {
+		var sections = document.querySelectorAll("main section[id]");
+		if (!window.IntersectionObserver || !sections.length) return;
+		var obs = new IntersectionObserver(function (entries) {
+			for (var i = 0; i < entries.length; i++) {
+				if (!entries[i].isIntersecting) continue;
+				setCurrent(entries[i].target.id);
+			}
+		}, {rootMargin: "-20% 0px -70% 0px"});
+		for (var i = 0; i < sections.length; i++) { obs.observe(sections[i]); }
+	}
+
+	function setCurrent(secId) {
+		var pills = document.querySelectorAll("#toc-pills a");
+		var i;
+		for (i = 0; i < pills.length; i++) {
+			if (pills[i].getAttribute("data-sec") === secId) { pills[i].setAttribute("aria-current", "true"); }
+			else { pills[i].removeAttribute("aria-current"); }
+		}
+		var sec = document.getElementById(secId);
+		var first = sec ? sec.querySelector("article.card[id]") : null;
+		var links = document.querySelectorAll("#toc-column a");
+		for (i = 0; i < links.length; i++) { links[i].removeAttribute("aria-current"); }
+		if (first) {
+			var target = document.querySelector('#toc-column a[href="#' + first.id + '"]');
+			if (target) target.setAttribute("aria-current", "true");
+		}
+	}
+
+	function tagCounts() {
+		var cards = cardList();
+		var counts = {all: 0, unanswered: 0, integrate: 0, yourcall: 0, defer: 0};
+		for (var i = 0; i < cards.length; i++) {
+			var c = cards[i];
+			if (c.parentNode.closest && c.parentNode.closest("article.card")) continue;
+			counts.all++;
+			var t = c.dataset.tag;
+			if (counts.hasOwnProperty(t)) counts[t]++;
+			var e = entryFor(c.id);
+			if (!e || !e.touched) counts.unanswered++;
+		}
+		return counts;
+	}
+
+	function buildFilters() {
+		var bar = document.getElementById("filters");
+		var counts = tagCounts();
+		var present = [];
+		for (var i = 0; i < TAGS.length; i++) { if (counts[TAGS[i]]) present.push(TAGS[i]); }
+		if (present.length < 2) return;
+
+		var order = ["all"].concat(present, ["unanswered"]);
+		for (var j = 0; j < order.length; j++) {
+			var name = order[j];
+			var b = document.createElement("button");
+			b.type = "button";
+			b.className = "quiet tiny";
+			b.setAttribute("data-filter", name);
+			b.setAttribute("aria-pressed", name === "all" ? "true" : "false");
+			b.appendChild(document.createTextNode(TAG_LABEL[name]));
+			var n = document.createElement("span");
+			n.className = "n";
+			n.appendChild(document.createTextNode(String(counts[name])));
+			b.appendChild(n);
+			bar.appendChild(b);
+		}
+		bar.hidden = false;
+	}
+
+	function refreshCounts() {
+		var counts = tagCounts();
+		var btns = document.querySelectorAll("#filters button");
+		for (var i = 0; i < btns.length; i++) {
+			var n = btns[i].querySelector(".n");
+			var name = btns[i].getAttribute("data-filter");
+			if (n && counts.hasOwnProperty(name)) n.textContent = String(counts[name]);
+		}
+		renderFoot();
+	}
+
+	function applyFilter(name) {
+		var cards = cardList();
+		for (var i = 0; i < cards.length; i++) {
+			var c = cards[i];
+			if (c.parentNode.closest && c.parentNode.closest("article.card")) continue;
+			var show = true;
+			if (name === "unanswered") {
+				var e = entryFor(c.id);
+				show = !e || !e.touched;
+			} else if (name !== "all") {
+				show = c.dataset.tag === name;
+			}
+			c.hidden = !show;
+			var li = document.querySelector('#toc-column li[data-for="' + c.id + '"]');
+			if (li) li.hidden = !show;
+		}
+		var btns = document.querySelectorAll("#filters button");
+		for (var j = 0; j < btns.length; j++) {
+			btns[j].setAttribute("aria-pressed", btns[j].getAttribute("data-filter") === name ? "true" : "false");
+		}
+	}
+
+	function countSections() {
+		var sections = document.querySelectorAll("main section[id]");
+		for (var i = 0; i < sections.length; i++) {
+			var slot = sections[i].querySelector(".sec-head .count");
+			if (!slot) continue;
+			var n = 0;
+			var cards = sections[i].querySelectorAll("article.card[id]");
+			for (var j = 0; j < cards.length; j++) {
+				if (cards[j].parentNode.closest && cards[j].parentNode.closest("article.card")) continue;
+				n++;
+			}
+			slot.textContent = n + (n === 1 ? " card" : " cards");
+		}
+	}
+
+	function revealTarget() {
+		function go() {
+			var id = location.hash.slice(1);
+			if (!id) return;
+			var el = document.getElementById(id);
+			if (el && el.hidden) { el.hidden = false; }
+			if (el) el.scrollIntoView();
+		}
+		go();
+		window.addEventListener("hashchange", go);
+	}
+
+	/* ================= Return prompt ================= */
+
+	function touchedCards() {
+		var cards = cardList(), out = [];
+		for (var i = 0; i < cards.length; i++) {
+			var c = cards[i];
+			if (c.dataset.answer === "none") continue;
+			var e = entryFor(c.id);
+			if (e && e.touched) out.push({card: c, entry: e});
+		}
+		return out;
+	}
+
+	function pageFile() {
+		var p = META.provenance;
+		if (!p.root || !p.self) return p.self || META.id + ".html";
+		return p.root + "/" + p.self;
+	}
+
+	function pageHref() {
+		try { return location.protocol === "file:" ? decodeURIComponent(location.href) : location.href; }
+		catch (e) { return location.href; }
+	}
+
+	function provenanceLine() {
+		var p = META.provenance, bits = [pageFile()];
+		if (p.branch) bits.push("branch " + p.branch);
+		if (p.issue !== null && p.issue !== undefined && p.repo) bits.push(p.repo + "/issues/" + p.issue);
+		if (p.pr !== null && p.pr !== undefined && p.repo) bits.push(p.repo + "/pull/" + p.pr);
+		bits.push("rev " + META.rev);
+		if (p.date) bits.push("built " + p.date);
+		return "Source: " + bits.join(" · ");
+	}
+
+	function untouchedLine() {
+		var cards = cardList(), rec = 0, plain = 0;
+		for (var i = 0; i < cards.length; i++) {
+			var c = cards[i];
+			if (c.dataset.answer === "none") continue;
+			if (c.parentNode.closest && c.parentNode.closest("article.card")) continue;
+			var e = entryFor(c.id);
+			if (e && e.touched) continue;
+			if (c.dataset.recommended) rec++; else plain++;
+		}
+		var parts = [];
+		if (rec) parts.push(rec + " left at their recommended default");
+		if (plain) parts.push(plain + " unanswered");
+		if (!parts.length) return "";
+		return "Untouched: " + parts.join(", ") + ".";
+	}
+
+	function formatNote(text) {
+		var t = String(text || "").replace(/\s+$/, "");
+		if (!t) return [];
+		var lines = t.split("\n");
+		if (lines.length === 1) return ["- Note: " + lines[0].trim()];
+		var out = ["- Note:"];
+		for (var i = 0; i < lines.length; i++) {
+			var line = lines[i].replace(/\s+$/, "");
+			out.push(line ? "  " + line : "");
+		}
+		return out;
+	}
+
+	function composePrompt() {
+		var touched = touchedCards();
+		var held = heldIds();
+		var sectionBits = [];
+		var sid;
+		for (sid in STATE.sections) {
+			if (!STATE.sections.hasOwnProperty(sid)) continue;
+			var s = STATE.sections[sid];
+			if (s.touched && normalise(s.comment)) sectionBits.push(sid);
+		}
+		if (!touched.length && !sectionBits.length && !held.length) return "";
+
+		var L = [];
+		L.push("## " + (META.prompt.heading || META.title));
+		L.push("");
+		L.push(provenanceLine());
+		var ut = untouchedLine();
+		if (ut) L.push(ut);
+		if (held.length) L.push("Held: " + held.length + " answers for cards no longer on this page (" + held.join(", ") + ").");
+		L.push("");
+
+		if (touched.length || sectionBits.length) {
+			L.push("### Decisions");
+			L.push("");
+			var i, j;
+			for (i = 0; i < touched.length; i++) {
+				var card = touched[i].card, entry = touched[i].entry;
+				L.push("**" + card.id + " · " + cardTitle(card) + "**");
+				if (entry.verdict) L.push("- Verdict: " + entry.verdict);
+				var note = formatNote(entry.comment);
+				for (j = 0; j < note.length; j++) { L.push(note[j]); }
+				var demos = card.querySelectorAll(".demo[data-report]");
+				for (j = 0; j < demos.length; j++) {
+					if (demos[j].dataset.state) L.push("- " + demos[j].dataset.report + ": " + demos[j].dataset.state);
+				}
+				L.push("");
+			}
+			for (i = 0; i < sectionBits.length; i++) {
+				var sec = document.getElementById(sectionBits[i]);
+				var h2 = sec ? sec.querySelector(".sec-head h2") : null;
+				L.push("**" + sectionBits[i] + " · " + (h2 ? normalise(h2.textContent) : sectionBits[i]) + "**");
+				var snote = formatNote(STATE.sections[sectionBits[i]].comment);
+				for (j = 0; j < snote.length; j++) { L.push(snote[j]); }
+				L.push("");
+			}
+		}
+
+		if (META.next && META.next.length) {
+			L.push("### Next");
+			L.push("");
+			for (var k = 0; k < META.next.length; k++) { L.push("- " + META.next[k]); }
+			L.push("");
+		}
+
+		L.push("Re-open: " + pageHref());
+		return L.join("\n");
+	}
+
+	/* ================= Clipboard and status ================= */
+
+	function copyText(text, onDone) {
+		function fallback() {
+			var ta = document.createElement("textarea");
+			ta.value = text;
+			ta.style.position = "fixed";
+			ta.style.opacity = "0";
+			document.body.appendChild(ta);
+			ta.select();
+			var ok = false;
+			try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+			document.body.removeChild(ta);
+			if (ok) { if (onDone) onDone(true); return; }
+			var wrap = document.getElementById("outwrap");
+			var out = document.getElementById("out");
+			out.value = text;
+			wrap.hidden = false;
+			out.select();
+			flash("Clipboard blocked — select the text below and copy.", true);
+			if (onDone) onDone(false);
+		}
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).then(function () { if (onDone) onDone(true); }, fallback);
+		} else {
+			fallback();
+		}
+	}
+
+	function flash(msg, bad) {
+		var el = document.getElementById("status");
+		el.textContent = msg;
+		if (bad) { el.className = "status bad"; } else { el.className = "status"; }
+		if (STATUS_TIMER) clearTimeout(STATUS_TIMER);
+		if (!bad) STATUS_TIMER = setTimeout(function () { el.textContent = ""; }, 2500);
+	}
+
+	function copyPrompt() {
+		var text = composePrompt();
+		if (!text) { flash("Nothing answered yet — nothing to copy."); return; }
+		copyText(text, function (ok) { if (ok) flash("Return prompt copied."); });
+	}
+
+	function viewPrompt() {
+		var wrap = document.getElementById("outwrap");
+		var out = document.getElementById("out");
+		if (!wrap.hidden) { wrap.hidden = true; return; }
+		out.value = composePrompt() || "_No responses entered._";
+		wrap.hidden = false;
+	}
+
+	/* ================= Theme ================= */
+
+	function setTheme(mode) {
+		if (mode === "light" || mode === "dark") {
+			document.documentElement.setAttribute("data-theme", mode);
+			try { localStorage.setItem("artifact-suite.theme", mode); } catch (e) { /* storage blocked */ }
+		} else {
+			document.documentElement.removeAttribute("data-theme");
+			try { localStorage.removeItem("artifact-suite.theme"); } catch (e) { /* storage blocked */ }
+		}
+		var btns = document.querySelectorAll("[data-theme-set]");
+		for (var i = 0; i < btns.length; i++) {
+			btns[i].setAttribute("aria-pressed", btns[i].getAttribute("data-theme-set") === mode ? "true" : "false");
+		}
+	}
+
+	function currentTheme() {
+		try {
+			var t = localStorage.getItem("artifact-suite.theme");
+			return (t === "light" || t === "dark") ? t : "system";
+		} catch (e) { return "system"; }
+	}
+
+	/* ================= Wiring ================= */
+
+	function wireEvents() {
+		document.addEventListener("change", function (ev) {
+			var t = ev.target;
+			if (t.matches && t.matches('input[type="radio"][name^="v-"]')) {
+				var host = t.closest("[data-card]");
+				if (host) recordVerdict(host.getAttribute("data-card"), t.value);
+				return;
+			}
+			if (t.matches && t.matches("[data-theme-set]")) return;
+		});
+
+		document.addEventListener("input", function (ev) {
+			var t = ev.target;
+			if (t.tagName !== "TEXTAREA") return;
+			if (t.getAttribute("data-card")) { recordComment(t.getAttribute("data-card"), t.value); return; }
+			if (t.getAttribute("data-section")) { recordSection(t.getAttribute("data-section"), t.value); return; }
+		});
+
+		document.addEventListener("click", function (ev) {
+			var t = ev.target;
+
+			var themeBtn = t.closest("[data-theme-set]");
+			if (themeBtn) { setTheme(themeBtn.getAttribute("data-theme-set")); return; }
+
+			var filterBtn = t.closest("[data-filter]");
+			if (filterBtn) { applyFilter(filterBtn.getAttribute("data-filter")); return; }
+
+			var heldBtn = t.closest("[data-held]");
+			if (heldBtn) {
+				if (heldBtn.getAttribute("data-held") === "discard") { discardHeld(); }
+				else { showHeld(); }
+				return;
+			}
+
+			var copyPath = t.closest("[data-copy-path]");
+			if (copyPath) {
+				copyText(copyPath.getAttribute("data-copy-path"), function (ok) { if (ok) flash("Path copied."); });
+				return;
+			}
+
+			var act = t.closest("[data-act]");
+			if (act) {
+				var id = act.getAttribute("data-card");
+				if (act.getAttribute("data-act") === "clear") { clearCard(id); }
+				else if (act.getAttribute("data-act") === "dismiss") { dismissChanged(id); }
+				return;
+			}
+
+			if (t.matches && t.matches('input[type="radio"][name^="v-"]')) {
+				var host = t.closest("[data-card]");
+				if (host) recordVerdict(host.getAttribute("data-card"), t.value);
+			}
+		});
+
+		document.getElementById("copy-prompt").addEventListener("click", copyPrompt);
+		document.getElementById("view-prompt").addEventListener("click", viewPrompt);
+
+		var accept = document.getElementById("accept-all");
+		var anyRec = document.querySelector("article.card[data-recommended]");
+		if (anyRec) accept.hidden = false;
+		accept.addEventListener("click", acceptAll);
+
+		setTheme(currentTheme());
+	}
+
+	function showHeld() {
+		var ids = heldIds(), bits = [];
+		for (var i = 0; i < ids.length; i++) {
+			var o = STATE.orphans[ids[i]];
+			bits.push(ids[i] + (o && o.title ? " — " + o.title : ""));
+		}
+		var wrap = document.getElementById("outwrap");
+		var out = document.getElementById("out");
+		out.value = "Held answers\n\n" + bits.join("\n");
+		wrap.hidden = false;
+	}
+
+	function renderFoot() {
+		var foot = document.getElementById("foot");
+		foot.textContent = "";
+		var p = META.provenance;
+		foot.appendChild(span("", (KIND_LABEL[META.kind] || META.kind) + " · rev " + META.rev));
+		foot.appendChild(sepSpan());
+		foot.appendChild(span("", p.self || META.id));
+		foot.appendChild(sepSpan());
+		foot.appendChild(span("", "built " + (p.date || "—")));
+
+		if (!CAN_LS) {
+			var note = document.createElement("span");
+			note.id = "storage-note";
+			note.appendChild(document.createTextNode("This browser is not saving answers — copy the prompt before you close the page."));
+			foot.appendChild(note);
+		}
+
+		var ids = heldIds();
+		if (ids.length) {
+			var held = document.createElement("span");
+			held.id = "held-note";
+			held.appendChild(document.createTextNode(ids.length + " answers held for cards no longer on this page. "));
+			held.appendChild(mini("show", "Show"));
+			held.appendChild(document.createTextNode(" "));
+			held.appendChild(mini("discard", "Discard"));
+			foot.appendChild(held);
+		}
+	}
+
+	function mini(act, text) {
+		var b = document.createElement("button");
+		b.type = "button";
+		b.className = "quiet tiny";
+		b.setAttribute("data-held", act);
+		b.appendChild(document.createTextNode(text));
+		return b;
+	}
+
+	function checkTitles() {
+		var h1 = document.querySelector("h1");
+		if (!h1) return;
+		if (normalise(h1.textContent) !== normalise(META.title) || normalise(document.title) !== normalise(META.title)) {
+			console.warn("artifact-suite: title, h1 and page-meta.title disagree");
+		}
+	}
+
+	/* ================= Blocks ================= */
+
+	function wireBlocks() {
+		var diffs = document.querySelectorAll('.diff[data-copy="adds"]');
+		for (var i = 0; i < diffs.length; i++) {
+			(function (d) {
+				var b = document.createElement("button");
+				b.type = "button";
+				b.className = "quiet tiny";
+				b.appendChild(document.createTextNode("Copy added lines"));
+				b.addEventListener("click", function () {
+					var rows = d.querySelectorAll(".diff-row.add .tx"), out = [];
+					for (var j = 0; j < rows.length; j++) { out.push(rows[j].textContent); }
+					copyText(out.join("\n"), function (ok) { if (ok) flash("Added lines copied."); });
+				});
+				var row = document.createElement("div");
+				row.className = "btnrow";
+				row.style.margin = "0 0 14px";
+				row.appendChild(b);
+				d.parentNode.insertBefore(row, d.nextSibling);
+			})(diffs[i]);
+		}
+
+		document.addEventListener("click", function (ev) {
+			var open = ev.target.closest("[data-panel]");
+			if (open) {
+				var dlg = document.getElementById(open.getAttribute("data-panel"));
+				if (dlg && dlg.showModal) dlg.showModal();
+				return;
+			}
+			if (ev.target.closest("[data-panel-close]")) {
+				var d = ev.target.closest("dialog");
+				if (d) d.close();
+				return;
+			}
+			if (ev.target.tagName === "DIALOG") ev.target.close();
+		});
+	}
+
+	/* ================= Demos ================= */
+
+	function wireDemos() {
+		wireTokenDemo();
+		wireFingerprintDemo();
+		wireOriginDemo();
+	}
+
+	function wireTokenDemo() {
+		var names = ["--add-bg", "--add-ink", "--del-bg", "--del-ink", "--keep-ink", "--add-mark", "--del-mark"];
+		var host = document.getElementById("d-tokens");
+		if (!host) return;
+		var strip = document.getElementById("tok-swatches");
+		var out = document.getElementById("tok-out");
+
+		function read() {
+			var cs = getComputedStyle(document.documentElement);
+			strip.textContent = "";
+			var lines = [];
+			for (var i = 0; i < names.length; i++) {
+				var val = cs.getPropertyValue(names[i]).trim();
+				var s = document.createElement("span");
+				s.className = "swatch";
+				s.style.background = "var(" + names[i] + ")";
+				s.style.color = names[i].indexOf("-bg") !== -1 ? "var(--ink)" : "var(--paper)";
+				s.appendChild(document.createTextNode(names[i].slice(2)));
+				strip.appendChild(s);
+				lines.push(names[i] + ": " + val);
+			}
+			out.textContent = lines.join("\n");
+			host.dataset.state = "read in " + (document.documentElement.getAttribute("data-theme") || "system") + " theme";
+			document.getElementById("tok-note").textContent = "read " + names.length + " tokens";
+		}
+
+		document.getElementById("tok-read").addEventListener("click", read);
+		read();
+		host.dataset.state = "";
+	}
+
+	function wireFingerprintDemo() {
+		var host = document.getElementById("d-fingerprint");
+		if (!host) return;
+		var out = document.getElementById("fp-out");
+		var note = document.getElementById("fp-note");
+
+		document.getElementById("fp-run").addEventListener("click", function () {
+			var v = document.getElementById("fp-in").value;
+			var n = normalise(v);
+			out.textContent = "normalised: " + n + "\nhash:       " + hashOf(n);
+			note.textContent = n.length + " chars";
+			host.dataset.state = "hashed a sample string";
+		});
+
+		document.getElementById("fp-self").addEventListener("click", function () {
+			var card = host.closest("article.card");
+			out.textContent = "card:  " + card.id + "\nhash:  " + fingerprintOf(card) + "\nstored: " + ((entryFor(card.id) || {}).fingerprint || "(not answered yet)");
+			note.textContent = "live card fingerprint";
+			host.dataset.state = "fingerprinted this card";
+		});
+	}
+
+	function wireOriginDemo() {
+		var host = document.getElementById("d-origin");
+		if (!host) return;
+		var out = document.getElementById("origin-out");
+		var real = document.documentElement.dataset.origin;
+
+		function report() {
+			var mode = document.documentElement.dataset.origin;
+			var ref = host.querySelector("details.ref");
+			var solid = "none";
+			var chips = ref.querySelectorAll(".ref-chip");
+			for (var i = 0; i < chips.length; i++) {
+				var bg = getComputedStyle(chips[i]).backgroundColor;
+				var surface = getComputedStyle(document.documentElement).getPropertyValue("--surface").trim();
+				if (bg !== toRGB(surface)) solid = normalise(chips[i].textContent);
+			}
+			out.textContent = "data-origin: " + mode + "\nreal origin: " + real + "\nprimary chip: " + solid;
+			host.dataset.state = "viewed as " + mode;
+		}
+
+		var picks = document.getElementById("origin-picks");
+		var start = picks.querySelector('input[value="' + real + '"]');
+		if (start) start.checked = true;
+		picks.addEventListener("change", function (ev) {
+			document.documentElement.dataset.origin = ev.target.value;
+			report();
+		});
+		report();
+		host.dataset.state = "";
+	}
+
+	function toRGB(hex) {
+		var h = String(hex).replace("#", "");
+		if (h.length !== 6) return hex;
+		return "rgb(" + parseInt(h.slice(0, 2), 16) + ", " + parseInt(h.slice(2, 4), 16) + ", " + parseInt(h.slice(4, 6), 16) + ")";
+	}
+
+	/* ================= Go ================= */
+
+	window.SUITE = {copyText: copyText, flash: flash, meta: null};
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", function () { boot(); window.SUITE.meta = META; });
+	} else {
+		boot();
+		window.SUITE.meta = META;
+	}
+})();
+</script>
+</body>
+</html>
