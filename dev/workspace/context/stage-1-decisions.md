@@ -33,6 +33,6 @@ Recorded 2026-08-24 from the user's responses to `dev/workspace/reviews/artifact
 
 ## Packaging & build
 
-- D-18 File form: bare fragment (no doctype/html/head/body), disk-primary links; publishing via the Artifact tool stays open.
-- D-19 Packaging: ship as a skill (invocable, versioned, released with the plugins). Deviates from the review's recommendation (bare assets); accepted as the user's call. Where built pages land is settled in the Tech Plan.
+- D-18 File form: Ordinary HTML document with doctype; disk-primary links; no Artifact-tool compatibility requirement (amended 2026-08-25 per PIVOT §8).
+- D-19 Packaging: Ship as a skill under extensions/skills/; versioning and release withdrawn (PIVOT §1). Deviates from the review's recommendation (bare assets); accepted as the user's call. Where built pages land is settled in the Tech Plan.
 - D-20 Corpus: eight reference files. `dev/workspace/filebox/review.html` is not part of it.
