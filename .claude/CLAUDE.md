@@ -4,10 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Repository Is
 
-A custom Claude Code plugin and skill library — a personal marketplace for distributing reusable extensions (skills, agents, rules) to Claude Code installations. It is also the authoritative source of documentation standards (the agent-agnostic framework).
+A custom Claude Code plugin and skill library — a personal marketplace for distributing reusable extensions (skills, agents, rules) to Claude Code installations. It is also the authoritative source of documentation standards (the agent-agnostic framework). The DraftHorse framework documentation lives in `packages/drafthorse/docs/`.
 
 ## Repository Structure
 
+- `packages/` — self-contained plugins that have outgrown the grab-bag (currently `drafthorse`, `classroom`). A package owns every file it needs: no symlinks out, no citations outside its directory, so it installs whole and can be lifted into its own repository with `git filter-repo --path packages/<name>`. Tests and orchestration runs for a package live inside it.
 - `plugins/` — versioned, installable packages. Each plugin is an independent release unit with its own `plugin.json`, `CHANGELOG.md`, and `skills/` or `agents/` directories (populated by symlinks).
 - `extensions/` — the shared asset library (`skills/`, `agents/`, `commands/`, `output-styles/`, `rules/`) that plugins symlink from. Single source of truth; one asset can feed multiple plugins.
 - `docs/` — A mix of official and local guides for maintaining the marketplace and authoring plugins/skills.
@@ -29,8 +30,8 @@ Versioning is managed by the `versioning` skill (in `dev-tools` plugin). Units a
 
 Key rules:
 
-- Plugin versions live in `plugins/<name>/.claude-plugin/plugin.json` (field: `version`).
-- Each unit gets its own git tag: `agent-tools/v{version}`, `chat-tools/v{version}`, `dev-tools/v{version}`
+- Plugin versions live in `plugins/<name>/.claude-plugin/plugin.json` or `packages/<name>/.claude-plugin/plugin.json` (field: `version`).
+- Each unit gets its own git tag: `agent-tools/v{version}`, `chat-tools/v{version}`, `classroom/v{version}`, `dev-tools/v{version}`, `drafthorse/v{version}`
 
 ## Documentation Standards
 

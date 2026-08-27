@@ -22,8 +22,13 @@
       "category": "development"
     },
     {
+      "name": "drafthorse",
+      "source": "./packages/drafthorse",
+      "category": "development"
+    },
+    {
       "name": "classroom",
-      "source": "./plugins/classroom",
+      "source": "./packages/classroom",
       "category": "learning"
     }
   ]

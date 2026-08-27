@@ -177,6 +177,7 @@ tree:
       - .claude-plugin
       - docs
       - extensions
+      - packages
       - plugins
     # depth: 3
     # ignores:

@@ -2,7 +2,7 @@
 
 Read by the versioning skill (dev-tools plugin). Defines this repository's versioned units.
 
-Only plugins are versioned. Repository-root files (docs, rules, marketplace listing) have
+Only plugins and packages are versioned. Repository-root files (docs, rules, marketplace listing) have
 no release consumers; their history lives in git alone.
 
 ## Path resolution rule
@@ -13,6 +13,9 @@ records content changes against the symlink targets, so compute each unit's path
 runtime: the plugin directory plus the repo-relative target of every symlink inside it
 (`find plugins/<name> -type l`, resolve each with `readlink`). Never filter history by the
 plugin directory alone.
+
+Packages (`packages/<name>`) own their files outright and contain no symlinks; a package
+unit's paths are its directory alone.
 
 ## Units
 
@@ -34,10 +37,18 @@ plugin directory alone.
 
 ### classroom
 
-- paths: plugins/classroom plus resolved symlink targets
-- manifest: plugins/classroom/.claude-plugin/plugin.json (field: version)
-- changelog: plugins/classroom/CHANGELOG.md
+- paths: packages/classroom
+- manifest: packages/classroom/.claude-plugin/plugin.json (field: version)
+- changelog: packages/classroom/CHANGELOG.md
 - tag: classroom/v{version}
+- github-release: yes
+
+### drafthorse
+
+- paths: packages/drafthorse
+- manifest: packages/drafthorse/.claude-plugin/plugin.json (field: version)
+- changelog: packages/drafthorse/CHANGELOG.md
+- tag: drafthorse/v{version}
 - github-release: yes
 
 ### dev-tools
