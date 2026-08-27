@@ -1,0 +1,1752 @@
+Session: 6151b84c-bdf8-48bd-9039-86c0b503c597
+Date: 2026-08-23 21:36
+Branch: artifacts
+CWD: ~/Projects/agent-library
+
+============================================================
+[SUMMARY]
+>>>
+Built dev/workspace/reviews/artifact-suite-plan-review.html — a 70-card interactive review of the Stage 2 artifact-suite tech plan, dogfooding the plan's own shell spec (Paper/Ink tokens, rail layout, generated ToC, filter bar, reference blocks, return prompt). It was judged too sprawling to read; the plan itself was never modified.
+The discussion that followed answered four questions about the plan: the "Artifact tool" is Claude Code's claude.ai publishing tool and the sole cause of the bare-fragment rule; release packaging was scope creep the plan invented; the skill wrapper exists for auto-invocation; splice.py and verify.py are workarounds rather than features.
+Established by direct probe that the Edit tool's read precondition is per-file, not per-region — a partial Read (offset/limit) unlocks the whole file — which invalidates splice.py's stated justification. Agreed direction: all reusable CSS and JS pre-exists in the shell, templates become markup exemplars, splice.py is replaced by cp plus bounded Read plus Edit, and demos are the sole exception via @demo-style/@demo-script regions.
+Serialized all of it into dev/workspace/plans/PIVOT.md, a work order against the plan marked Binding/Proposed per section, covering nine areas plus two defects found while building the review page (fingerprints taken before the engine finishes generating; origin gating leaves the editor chip visible on the web). PIVOT was hardened across six doc-reviewer audit rounds (15→9→7→5→3→1 findings).
+Outstanding: PIVOT has not been merged into the plan, and two decisions remain open — whether to keep Artifact-tool compatibility (standing default: drop it) and whether provenance.root may carry the absolute checkout path (standing default: keep it, per D-11).
+<<<
+------------------------------------------------------------
+
+[USER]    💭: none
+## Task
+display a plan-review local html file. capturing all the implementations the plan suggests. build the file using the styling, formatting and patterns contained within.
+
+## Context
+**Read first**
+- `dev/workspace/plans/artifact-suite-implementation.md` — The plan to convert
+
+## Goals
+- The user can approve and comment on all the aspects of the plan before building.
+- The user can present their findings to a workflow agent using a return prompt
+- The review actively demos features not already in the corpus.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+I'll read the plan and the existing corpus patterns first.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: wc -l dev/workspace/plans/artifact-suite-implementation.md dev/workspace/reviews/*.html dev/workspace/context/stage-1-decisions.md dev/workspace/prompts/prompt-2026-08-23-2257.md 2>/dev/null
+Description: Check sizes of plan and review files
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cat dev/workspace/plans/artifact-suite-implementation.md
+Description: Read the implementation plan
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n '^#\{1,4\} ' dev/workspace/plans/artifact-suite-implementation.md
+Description: List plan headings
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '1,300p' dev/workspace/plans/artifact-suite-implementation.md
+Description: Read plan lines 1-300
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '15,80p' extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Read prompt-builder token block
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '370,430p' dev/workspace/reviews/section-ledger.html; echo "=== BUTTONS ==="; sed -n '555,585p' extensions/artifacts/prompt-builder/prompt-builder.html
+Description: Read respond surface and button CSS
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd dev/workspace/reviews && for f in artifact-suite-investigation.html section-ledger.html; do echo "=== $f ==="; grep -oE 'class="[^"]+"' $f | sort -u | head -60; done
+Description: Survey classes used in corpus reviews
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd dev/workspace/reviews && grep -n 'data-theme\|localStorage\|IntersectionObserver\|data-filter\|toc\|clipboard' artifact-suite-investigation.html | head -30; echo "---LINES---"; wc -c artifact-suite-investigation.html
+Description: Check investigation review features
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -c 'data-theme' artifact-suite-investigation.html; grep -c 'localStorage' artifact-suite-investigation.html; grep -c 'IntersectionObserver' artifact-suite-investigation.html; grep -c 'data-filter' artifact-suite-investigation.html; grep -n 'toc-fallback' artifact-suite-investigation.html | head -3
+Description: Count features in investigation review
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n 'class="refs"' -A4 artifact-suite-investigation.html | head -20; echo "=== filter ==="; grep -n 'data-filter' -B3 -A3 artifact-suite-investigation.html | head -20
+Description: Inspect refs and filter markup
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library && printf 'root=%s\nbranch=%s\ncommit=%s\norigin=%s\nbuiltAt=%s\n' "$(git rev-parse --show-toplevel)" "$(git rev-parse --abbrev-ref HEAD)" "$(git rev-parse HEAD)" "$(git remote get-url origin)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"; ls dev/branches/ 2>/dev/null | head
+Description: Collect build-time git facts
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: wc -l dev/workspace/plans/artifact-suite-implementation.md dev/workspace/context/stage-1-decisions.md dev/workspace/prompts/prompt-2026-08-23-2257.md extensions/artifacts/prompt-builder/prompt-builder.html dev/workspace/reviews/section-ledger.html dev/workspace/reviews/artifact-suite-investigation.html dev/branches/drafthorse-condition-precedence/artifacts/issue-45-review.html dev/branches/agent-teams/reviews/corpus-sweep-design.html extensions/rules/STYLE.md extensions/rules/code-comments.md 2>&1 | tail -12
+Description: Verify ref file paths and line counts
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ls dev/branches/drafthorse-spec-upgrade/ 2>/dev/null; echo "---"; cat dev/workspace/prompts/prompt-2026-08-23-2257.md
+Description: Check mirror dirs and read kickoff prompt
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ls dev/branches/drafthorse-spec-upgrade/plans/ dev/branches/agent-teams/reviews/ 2>&1 | head -20; echo "--- issue45 ---"; ls dev/branches/drafthorse-condition-precedence/artifacts/ 2>&1
+Description: Check mirror contents for ref demos
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Plan read (1166 lines, ~60 implementation decisions). Building the review page on the plan's own shell spec so it dogfoods the features.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+API Error: Your computer went to sleep mid-response. The response above may be incomplete.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+again
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Building now.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/artifact-suite-plan-review.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/reviews/artifact-suite-plan-review.html && python3 - "$P" <<'PY'
+import sys,re,json
+p=sys.argv[1]; s=open(p).read()
+print("bytes", len(s))
+m=re.search(r'<script type="application/json" id="page-meta">(.*?)</script>', s, re.S)
+meta=json.loads(m.group(1)); print("meta ok:", meta["id"], meta["kind"], meta["rev"])
+ids=re.findall(r'<article class="card[^"]*" id="([^"]+)"', s)
+print("cards", len(ids), "unique", len(set(ids)))
+dupes=[i for i in set(ids) if ids.count(i)>1]; print("dupes", dupes)
+ordinal=[i for i in ids if re.match(r'^[a-z]?\d+$', i, re.I)]; print("ordinal ids", ordinal)
+print("h1", s.count("<h1>"), "title", s.count("<title>"))
+print("shell class:", re.findall(r'class="shell[^"]*"', s))
+# options cards agreement
+for art in re.findall(r'<article class="card"[^>]*data-answer="options"[^>]*>.*?</article>', s, re.S):
+    rid=re.search(r'id="([^"]+)"',art).group(1)
+    rec=re.search(r'data-recommended="([^"]*)"',art)
+    checked=re.findall(r'<input type="radio" name="v-[^"]+" value="([^"]+)" checked>',art)
+    reclabel=len(re.findall(r'class="option recommended"',art))
+    print(rid,"| rec:",rec.group(1) if rec else None,"| checked:",checked,"| .recommended rows:",reclabel)
+PY
+Description: Static sanity check on the built page
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/reviews/artifact-suite-plan-review.html && python3 - "$P" <<'PY'
+import sys,re,os
+p=sys.argv[1]; s=open(p).read()
+ids=re.findall(r'<article class="card[^"]*" id="([^"]+)"', s)
+print("all article.card[id]:", len(ids))
+print("nested example-answered-record present:", "example-answered-record" in ids)
+print("top-level:", len(ids)-1)
+print()
+# ref path check
+ok=True
+for m in re.finditer(r'<details class="ref([^"]*)"([^>]*)></details>', s):
+    attrs=m.group(2)
+    path=re.search(r'data-path="([^"]+)"',attrs)
+    url=re.search(r'data-url="([^"]+)"',attrs)
+    branch=re.search(r'data-branch="([^"]+)"',attrs)
+    lines=re.search(r'data-lines="([^"]+)"',attrs)
+    nodisk="ref--nodisk" in m.group(1)
+    if url:
+        print("URL", url.group(1), "->", "OK" if url.group(1).startswith("https://") else "FAIL"); continue
+    disk=path.group(1)
+    if branch and not nodisk:
+        disk="dev/branches/%s/%s"%(branch.group(1), path.group(1)[len("dev/workspace/"):])
+    if nodisk:
+        print("NODISK", path.group(1), "branch", branch.group(1), "-> github only"); continue
+    exists=os.path.exists(disk)
+    n=sum(1 for _ in open(disk,encoding="utf8",errors="replace")) if exists else 0
+    end=int(lines.group(1).split("-")[-1]) if lines else 0
+    good = exists and (end<=n)
+    if not good: ok=False
+    print(("OK " if good else "FAIL"), disk, "lines", lines.group(1) if lines else "-", "of", n)
+print()
+print("ALL PATHS OK" if ok else "PATH CHECK FAILED")
+PY
+Description: Check every reference path resolves and line ranges fit
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n '^#' docs/drafthorse/framework/steps.md | tail -8
+Description: Find a real heading in steps.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -i '' 's|data-path="docs/drafthorse/framework/steps.md" data-lines="136-142"|data-path="docs/drafthorse/framework/steps.md" data-lines="111-128"|g' dev/workspace/reviews/artifact-suite-plan-review.html && grep -c 'data-lines="111-128"' dev/workspace/reviews/artifact-suite-plan-review.html
+Description: Fix the out-of-range line reference
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/reviews/artifact-suite-plan-review.html && \
+sed -i '' \
+ -e 's|<div class="stat"><b>64</b><span>cards</span></div>|<div class="stat"><b>69</b><span>cards</span></div>|' \
+ -e 's|<div class="stat"><b>18</b><span>files to write</span></div>|<div class="stat"><b>17</b><span>files to write</span></div>|' \
+ -e 's|<div class="stat"><b>27</b><span>verification checks</span></div>|<div class="stat"><b>31</b><span>verification checks</span></div>|' \
+ -e 's|Eighteen files, one release unit.|Seventeen files plus one symlink — one release unit.|' \
+ -e 's|<h3>Seventeen runtime checks over a local server</h3>|<h3>Twenty-one runtime checks over a local server</h3>|' \
+ -e 's|ten steps and twenty-seven checks in two tiers|ten steps and thirty-one checks in two tiers|' \
+ "$P" && grep -n '<b>69</b>\|<b>17</b>\|<b>31</b>\|Seventeen files plus\|Twenty-one runtime\|thirty-one checks' "$P"
+Description: Correct the counted figures
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/reviews/artifact-suite-plan-review.html && grep -n 'twenty-seven\|five <code>assets/</code>' "$P"
+Description: Locate remaining count text
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/reviews/artifact-suite-plan-review.html && sed -i '' -e 's|five <code>assets/</code> entries|three <code>assets/</code> scripts|' -e 's|ten DraftHorse steps and twenty-seven checks in two tiers|ten DraftHorse steps and thirty-one checks in two tiers|' "$P" && sed -n '433p;974p' "$P"
+Description: Fix remaining counts
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now the runtime check — loading it in a browser to confirm zero console errors and that every generated surface actually appears.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: (nohup python3 -m http.server 8791 --bind 127.0.0.1 >/dev/null 2>&1 & echo "pid=$!") && sleep 1 && curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8791/dev/workspace/reviews/artifact-suite-plan-review.html
+Description: Start a local server for the runtime check
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Found a real defect — the plan's boot order fingerprints cards *before* the engine finishes generating inside them, so refs and demos make every such card falsely "changed" on reload. Fixing the page and adding it as a review finding.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/artifact-suite-plan-review.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now adding the finding as a card, next to the fingerprint card it belongs with.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/artifact-suite-plan-review.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/reviews/artifact-suite-plan-review.html && python3 - "$P" <<'PY'
+import sys,re
+p=sys.argv[1]; s=open(p).read()
+s=s.replace("A live demo of the function is on the card below.","A live demo of the function is on the card above.")
+s=s.replace('<div class="stat"><b>69</b><span>cards</span></div>','<div class="stat"><b>70</b><span>cards</span></div>')
+n=[0]
+def sub(m):
+    body=m.group(2)
+    if re.fullmatch(r'\d+', body):
+        n[0]+=1
+        return '%s%02d</a>'%(m.group(1), n[0])
+    return m.group(0)
+s=re.sub(r'(<a class="chip id" href="#[^"]+">)([^<]+)</a>', sub, s)
+open(p,"w").write(s)
+print("renumbered", n[0], "ordinal chips")
+PY
+grep -c 'class="chip id"' "$P"
+Description: Renumber the ordinal id chips and update the card stat
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/artifact-suite-plan-review.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+No horizontal overflow at any width, and the contents surface swaps correctly. Screenshots:
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/plan-review-light.png
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ls -la .playwright-mcp/*.png 2>/dev/null | tail -5; find . -name 'plan-review-light.png' -newermt '-5 minutes' 2>/dev/null | head
+Description: Locate the screenshot file
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ls -la .playwright-mcp/ | tail -8
+Description: List playwright output dir
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/plan-review-light.png
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=~/Projects/agent-library/dev/workspace/reviews/artifact-suite-plan-review.html && sed -i '' 's|one skill directory of eighteen files, symlinked into|one skill directory of seventeen files, symlinked into|' "$P" && grep -c 'seventeen files, symlinked' "$P"
+Description: Fix the remaining file-count text
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/plan-review-dark-refs.png
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: ~/Projects/agent-library/.playwright-mcp/plan-review-refs.png
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/reviews/artifact-suite-plan-review.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: kill 95112 2>/dev/null; echo "server stopped"; ls -la ~/Projects/agent-library/dev/workspace/reviews/artifact-suite-plan-review.html | awk '{print $5" bytes"}'
+Description: Stop the verification server
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+`dev/workspace/reviews/artifact-suite-plan-review.html` — 153KB, 70 cards, 8 sections.
+
+**Built on the plan's own spec.** Paper/Ink tokens verbatim from prompt-builder, `.shell.rail`, seven-marker document order, engine in the plan's dialect (`var`, function decls, one IIFE, `window.SUITE`). It runs the design it reviews.
+
+**Coverage** — every implementation the plan proposes: what ships (6), the shell (14), runtime & state (14), provenance & links (10), blocks & templates (9), procedure & verification (8), delivery & risk (3), the five unresolved questions as options cards, plus a `data-loose` comment box.
+
+**Return prompt** aimed at the workflow: heading `## Response — artifact suite implementation plan (Stage 2 gate)`, `Source:` line, two-count `Untouched:` line, `### Decisions` keyed `**cardId · title**`, `### Next` with five instructions for the Stage 3 workflow author, `Re-open:`. Only touched cards enter it.
+
+**Demos of things not in the corpus** — all live, all verified running: `details.ref` blocks expanding into Disk/Editor/GitHub/Copy path against real files; archive-mirror routing with the *archived copy* badge and a GitHub-only `ref--nodisk` case; an origin-gating toggle that flips `data-origin` and re-points the chips; the gutter diff with Copy added lines; the WP dependency SVG; the `dialog.panel`; two withdrawn cards; a nested answered record; three-way theme; two-surface ToC with `aria-current`; filter bar with live counts; Accept all; live token-swatch and `fingerprintOf` readouts.
+
+**Two defects found while building it** — both are on the page as cards:
+- `fingerprint-boot-order` (Your call, card 27) — the plan's `boot()` fingerprints in `restoreCard` *before* `expandRef` and the block/demo wiring, so any card holding a reference or demo hashes differently on reload and shows the amber strip with nothing changed. Reproduced on first reload. On the 75-card acceptance rebuild it would fire on all of them, and V12 only catches it after the shell is written. This page runs the fix (strip generated regions from the clone).
+- Origin gating hides `.ref-disk` on the web but not `.ref-editor`, so a published page offers a `vscode://` link to one machine's absolute path. Noted in the `origin-gating` card.
+
+**Verified**: 0 console errors/warnings; 68 respond surfaces for 68 answerable cards; 70 ToC entries; 15 refs expanded, 0 broken, 0 unlinked paths; every `data-path` resolves and every line range fits (one bad range in the plan's own example, `steps.md` 136-142 of 133 lines, corrected to 111-128); persistence and multi-line notes survive reload; no false `.changed`; filters, theme, Accept all correct; no horizontal overflow at 390/900/1440. Storage cleared, server stopped.
+
+Uncommitted, on the `artifacts` branch.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+## Response — artifact suite implementation plan (Stage 2 gate)
+
+Source: ~/Projects/agent-library/dev/workspace/reviews/artifact-suite-plan-review.html · branch artifacts · rev 1 · built 2026-08-24
+Untouched: 62 left at their recommended default, 2 unanswered.
+
+### Decisions
+
+**plugin-placement · Symlinked into chat-tools, released as 2.2.0**
+- Verdict: Reject
+- Note: This is outside the scope of this plan. we are building a skill, not the delivery mechanism. Releasing versions is governed wholly by the "Versioning" skill. Scope creep
+
+**drafthorse-format · The skill is a DraftHorse procedure**
+- Verdict: Revise
+- Note:
+  building with DraftHorse is driven by the DraftHorse skill. There is way more involvement than this plan suggests.
+  Two options, one doesn't work with a "dynamic workflow"...
+  - build a standard skill with no trace of DraftHorse, use DraftHorse "conversion" mode. this is workflow compatible.
+  - build with DraftHorse  from the beginning. requires intense user back and forth. not workflow compatible.
+
+**bare-fragment · The shell is a bare fragment, no doctype**
+- Verdict: Revise
+- Note:
+  This needs more investigation or explanation.
+  What exactly is this "artifact tool" that builds the skeleton? If it is the skill that posts artifacts as sharable links on anthropic cloud, then this is a huge unnecessary dependency, for throw away review and interview artifacts.
+
+**diff-block · The diff marker moves into a real gutter**
+- Verdict: Agree
+
+### Next
+
+- Author the Stage 3 dynamic workflow from the accepted cards: one phase per work package, in the WP-1..WP-10 dependency order the plan sets out.
+- Treat every card left at its recommended default as accepted as written — build it exactly as the plan states.
+- Apply each Revise note to the plan section its card names, and re-read that section before writing code against it.
+- Settle the five options cards under Unresolved questions before starting WP-1; WP-1, WP-7 and WP-8 all depend on them.
+- Ask rather than guess where a card is marked Revise with no note.
+
+Re-open: http://localhost:63342/agent-library/dev/workspace/reviews/artifact-suite-plan-review.html?_ijt=d1ui697b0edl0ohnp964ss7r1&_ij_reload=RELOAD_ON_SAVE#seven-markers
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Return prompt received — applying the four decisions. First, investigating the two that need it.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -rn -i 'conversion\|convert' extensions/skills/drafthorse/SKILL.md | head -30
+Description: Find DraftHorse conversion mode
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: sed -n '1,30p' extensions/skills/drafthorse/SKILL.md; echo "=== gates ==="; grep -n 'user approv\|Gate\|gate\|approval' extensions/skills/drafthorse/SKILL.md | head -20
+Description: Check DraftHorse gating and frontmatter
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Both investigated. Applying the decisions to the plan.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n 'plugins/chat-tools/skills/artifact-suite' dev/workspace/plans/artifact-suite-implementation.md
+Description: Locate the symlink row
+
+------------------------------------------------------------
+
+[USER]    💭: none
+undo changes. this sux. I have huge questions, not changes. I can hardly read your 80 cards. alot of fancy disparate words, but very little guidance or plan interpretation. I would've been better off reading the plan file myself.
+What is the "artifact tool"?? why is the plan trying to package a release??? why is it using a skill?? what are all these python builders??
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Undoing the plan edits first.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git diff --stat dev/workspace/plans/artifact-suite-implementation.md && git checkout -- dev/workspace/plans/artifact-suite-implementation.md 2>/dev/null; git status --short dev/workspace/plans/ ; echo "--- plan restored ---"; grep -c 'chat-tools' dev/workspace/plans/artifact-suite-implementation.md
+Description: Revert plan edits
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n 'How the skill is then distributed is out of scope' dev/workspace/plans/artifact-suite-implementation.md
+Description: Check if my edit survives
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Plan restored to its original state. The review page over-indexed on completeness — 70 cards restating the plan is not interpretation. Direct answers:
+
+## What is the "artifact tool"?
+
+It's **my Artifact tool** — the claude.ai publishing tool I have in this session. It takes an HTML file, wraps it in a `<!doctype html><head></head><body>` skeleton, and hosts it as a private page on claude.ai with a shareable link, under a strict CSP (no external hosts except Google Fonts).
+
+You read it right, and the dependency is bigger than it looks. Compatibility with it is the **sole** reason the plan has:
+
+- the bare-fragment rule (no doctype/html/head/body) — D-18
+- quirks mode from disk, and four avoidance rules written to survive it
+- `\2212` / `\00B7` CSS escapes, because `<meta charset>` is inert under the wrapper
+- check V6a, which serves every fixture twice and compares screenshots
+- unresolved question Q4
+
+All of that buys one feature: a shareable cloud link. For throwaway review and interview pages that never leave your machine, it buys nothing. Drop it and the shell becomes an ordinary HTML document — standards mode everywhere, Q4 and V6a both disappear. The page I built has a doctype and works fine.
+
+## Why is the plan packaging a release?
+
+It shouldn't be. Your kickoff lists deliverables as Review, Implementation plan, Artifact; the process ends at Commit Work and a PR back to `artifacts`. No release anywhere. The plan extrapolated from D-19 ("ship as a skill") to symlink + `chat-tools` 2.1.2→2.2.0 + WP-10 on its own. It's scope creep, and versioning is the versioning skill's job regardless.
+
+## Why is it using a skill?
+
+D-19 decided that at Stage 1. The actual argument is auto-invocation: a skill with no `disable-model-invocation` gets reached for automatically, so the agent uses the shell instead of hand-writing 3-4K tokens of chrome every time. That reasoning holds — it's the one thing a plain templates folder can't do.
+
+What doesn't hold is **DraftHorse format**, which the plan added by itself. I checked: `drafthorse` is `disable-model-invocation: true` with a user gate at every phase and "NEVER proceed past a gate without the user's approval." It cannot run inside a dynamic workflow. Your conversion route is the only workable one — build a plain SKILL.md in the workflow, run `/drafthorse <path>` interactively afterwards if you want the format.
+
+## What are all these python builders?
+
+Two scripts, both workarounds rather than features:
+
+- **`splice.py`** (~90 lines, 7 subcommands) exists because Edit and Write refuse a file they haven't Read in the same session — so editing a page would mean reading 36KB of shell back into context every time. splice.py writes to marked regions from stdin without reading.
+- **`verify.py`** (~120 lines) is a lint script running the ten static checks.
+
+The constraint behind splice.py is real, but a purpose-built tool with seven forms, byte-identity assertions and duplicate-part detection is a heavy answer to it. `verify.py` is optional entirely — it could be a checklist.
+
+---
+
+My read: the shell, the engine, the card/verdict/return-prompt model and the reference block are the valuable core and are well specified. The Artifact-tool compatibility, the release packaging, the DraftHorse format and arguably `verify.py` are all bolted on, and removing them shrinks the plan without costing you a feature.
+
+Want me to cut those from the plan, or would you rather talk through them first?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+is it true that claude can edit a file if they read the lines around the proposed changes? im pretty sure conversation-capture skill does this. check pls? 
+
+if so it should be easy enough to cp the shell. read the `<main>  </main>` tags, read the page you want with premade structure and classes. claude then edits the file inplace. workable?
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: find / -path /proc -prune -o -name 'SKILL.md' -path '*conversation-capture*' -print 2>/dev/null | head
+Description: Locate conversation-capture skill
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -n -i 'offset\|limit\|Read\|head\|tail\|edit' ~/.claude/plugins/cache/DBHD-dev-workspace/dev-workspace/1.1.0/skills/conversation-capture/SKILL.md | head -30
+Description: Check how conversation-capture reads and edits
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Checking empirically rather than trusting the doc — line 58 of that skill says exactly what you remembered.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/scratchpad; mkdir -p $S; cp dev/workspace/reviews/artifact-suite-plan-review.html $S/edit-probe.html; wc -lc $S/edit-probe.html; sed -n '405,412p' $S/edit-probe.html
+Description: Make an unread copy to probe Edit preconditions
+
+------------------------------------------------------------
+
+[READ TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/scratchpad/edit-probe.html
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/scratchpad/edit-probe.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Confirmed. Now the sharper question — does reading 8 lines unlock the *whole* file, or only what I read?
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/scratchpad; grep -n 'id="panel-steps"' $S/edit-probe.html | head -2
+Description: Find a line far outside the read window
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/scratchpad/edit-probe.html
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/scratchpad; grep -n 'PROBE\|data-probe' $S/edit-probe.html; rm $S/edit-probe.html; echo "probe cleaned up"
+Description: Confirm both edits landed, then clean up
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Tested it directly. You're right, and it's stronger than you framed it.
+
+**Two probes on a 2405-line file I hadn't read:**
+
+1. Read lines 405-412 only (8 lines) → Edit inside that window → **succeeded**.
+2. Same 8-line read → Edit at line **1169**, a region I never read → **also succeeded**.
+
+So the unlock is **per-file, not per-region**. Reading any slice of a file satisfies Edit's precondition for the whole file. That matches the tool contract as written — "you must Read the file before editing" — so it's intended behaviour, not a loophole. And `conversation-capture` line 58 does exactly this: reads 20 lines of a huge transcript, then Edits.
+
+## This invalidates splice.py's stated premise
+
+The plan justifies the whole script with:
+
+> Splices are made with `assets/splice.py` under Bash, never with Edit or Write: both tools refuse a path they have not Read in the same session, and reading the copy would re-read the whole shell.
+
+The second half is false. Your flow works:
+
+1. `cp shell.html dev/workspace/artifacts/<id>.html`
+2. `Read` the copy with `limit: 5` — ~100 tokens, and it confirms the shell stamp on line 1 at the same time
+3. `Edit` each marker in place
+
+**Two conditions make step 3 safe, and the shell already meets both:**
+
+- `old_string` must match exactly, byte for byte. Fine — the markers are fixed strings the skill documents as constants (`<!-- @content -->`), so the agent never needs to read them, it already knows them.
+- `old_string` must be unique in the file. The markers are unique by design, and the plan already asserts that.
+
+## What's actually left for a script
+
+One job survives: **lifting a template's `@style`/`@script` part into the page without reading it**. Edit can't insert bytes the agent doesn't have in context, so that needs a shell command — but it's `sed -n '/@style/,/@style:end/p'` piped to an insertion point, not a 90-line tool. The rest of splice.py's seven forms collapse:
+
+- `show page-meta` / `show cards` → a partial `Read`, or `grep`
+- duplicate-part refusal → `grep -q` before appending
+- marker-exists-once assertions → `grep -c`
+- layout class on `.shell` → one `Edit`
+- card and section splices → `Edit`
+
+So: `splice.py` goes from 90 lines and 7 subcommands to roughly a 10-line part-lifter, or disappears if blocks ship their CSS and JS as separate files you `cat` in.
+
+The "never read the shell" invariant survives intact — it just no longer needs a custom tool to honour it.
+
+Worth noting `verify.py` is untouched by this; it's a lint script and stands or falls on its own merits.
+
+Want me to rewrite the plan's Shell → Form, Markers, and Build-procedure sections around Edit, and cut splice.py down to the part-lifter?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+the css classes used in templates should pre-exist in the shell. all the base js should be in the shell. the different pages; review, interview etc should have all of their JS prewritten in the shell. the only exception is demo's how would they work?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Your first three points collapse a lot of the plan. Confirming what they kill, then the demo answer — which is smaller than you'd expect.
+
+## What pre-writing everything removes
+
+- `@template-style` and `@template-script` markers
+- **splice.py entirely** — its last surviving job was lifting a template's style/script part blind. If nothing is ever lifted, nothing needs a lifter.
+- the three-tier CSS residency table → one tier: the shell
+- check S9 (every spliced part byte-identical to source)
+- templates stop being *files that get spliced* and become **markup exemplars the agent reads and imitates**
+
+## The surprise: there is almost no page-kind JS
+
+I checked the plan's engine against its five kinds. Review, options, issue, interview and demo are already handled generically, through data attributes:
+
+- options → `data-answer="options"` (engine binds the agent's radios)
+- interview records → `data-answer="none"`
+- issue/review → `data-verdicts` or the kind default
+- demo → `data-report`
+
+So there is no per-kind JS to move. The engine is already one generic engine. `@template-script` never held page-kind code — it held **block** scripts, and those are fixed and tiny:
+
+- diff "Copy added lines" — ~8 lines
+- panel open/close — ~5 lines
+- figure — none
+
+Those belong in the shell, keyed off classes that may not be present. `querySelectorAll('.diff[data-copy="adds"]')` finding nothing costs nothing. I did exactly this on the review page — one `wireBlocks()`, 25 lines, works whether or not the page has a diff.
+
+**That leaves demos as the sole occupant of a script region.**
+
+## How demos work
+
+Split a demo into two halves. Only one is bespoke.
+
+**Chrome — goes in the shell.** The plan's demo classes (`.demo`, `.tag`, `.sub`, `.note`, `.readout`, `.picks`, `.btnrow`, `.field`, `.help`) are a fixed vocabulary, exactly as reusable as `.card`. They are not bespoke and should sit in the shell with everything else. Demo *markup* then goes in `@content` alongside the card it lives in — no marker of its own.
+
+**Behaviour — authored, in one `@demo-script` region.** The agent writes this directly with Edit, which works natively because the agent authored the bytes.
+
+The shell makes that script short by exposing a scoped helper:
+
+```js
+SUITE.demo("d-origin", function (d) {
+    d.on("change", "input", function (v) {
+        document.documentElement.dataset.origin = v;
+        d.out("primary chip is now " + d.$(".ref-chip.ref-disk") ? "Open file" : "GitHub");
+        d.report("viewed as " + v);
+    });
+});
+```
+
+Four helpers cover nearly everything a demo does: `d.out(text)` writes the readout, `d.note(text)` the transient line, `d.report(state)` sets `dataset.state` so the return prompt picks it up, `d.on(evt, sel, fn)` delegates within the demo only. My three demos on the review page are 15-25 lines each; under this they'd be 6-10.
+
+Keep one small `@demo-style` region too — most demos won't need it, but my token-swatch demo did (`.swatches`/`.swatch`). One marker, near-zero cost.
+
+## Three caveats
+
+- **`</` in demo JS** ends the script block. Same rule as `#page-meta` — write `<\/`. Worth stating once as an invariant.
+- **Shared scope** if a page has several demos. `SUITE.demo(id, fn)` solves it by giving each its own function scope; without it they collide.
+- **Shell grows** by roughly 4KB (block + demo CSS) and 1KB (block JS), so ~36-37KB. That breaches the plan's 36KB ceiling — but that ceiling was arbitrary (it's Q1), and under `cp` + Edit **shell size costs no context at all**, because the agent never reads it. It costs disk and nothing else. I'd drop the ceiling rather than let it force a worse design.
+
+Net: markers go from seven to six (`@doc-title`, `@page-meta`, `@masthead`, `@content`, `@sidebar`, `@demo-script`, plus optional `@demo-style`), splice.py disappears, and the agent's entire job becomes "copy the shell, Read 5 lines, Edit markup into `@content`."
+
+Want me to rewrite the plan on this basis? It would cut the File layout, Shell → Markers, Blocks → CSS residency, Page templates and Build procedure sections substantially.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+so lets serialize this discussion into a PIVOT.md that the executing agent can read and decide what to do with their plan.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/plans/PIVOT.md; grep -n -i 'this session\|the user said\|I built\|we discussed\|earlier\|you asked\|Claude\b' $P; echo "--- Q refs ---"; grep -n 'Q1\|Q2\|Q3\|Q4\|Q5' $P; echo "--- lines/words ---"; wc -lw $P
+Description: Audit PIVOT.md for session leakage and reference errors
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Two reference errors to fix.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Running the durability audit on it.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+`dev/workspace/plans/PIVOT.md` — 131 lines, eight sections. Durability audit running in the background.
+
+**Structure:** every entry is marked **Binding** (settled owner decision) or **Proposed** (worked-out consequence still needing a call), so the executing agent knows what to obey versus what to weigh.
+
+1. **Release packaging out of scope** — Binding. Cut the symlink, the placement section, WP-10, the release clause.
+2. **DraftHorse format** — Binding, with the two routes and which survives a dynamic workflow. Cites the verified `disable-model-invocation: true` and the gate invariant.
+3. **What the Artifact tool is** — plainly stated, plus the five things that exist only to serve it, and the decision to take. Flags that Q4 sits at a default accepted before this was known.
+4. **Edit does not require a full read** — the two-probe reproduction, the per-file unlock, and the `conversation-capture` precedent. Quotes the plan's false sentence directly.
+5. **Shell carries everything reusable** — Binding, including the finding that there is no page-kind JS to move, and the list of what it deletes.
+6. **Demos** — Proposed. Chrome to shell, behaviour to `@demo-script`, the `SUITE.demo(id, fn)` helper, three constraints.
+7. **Still open** — one genuine unanswered item (`root-path-exposure`); Q1-Q5 each resolved, superseded, deferred or standing.
+8. **Two defects found** — the fingerprint boot-order bug and the editor chip left visible on the web, both with fixes.
+
+No session context: it cites the kickoff prompt, the plan, the drafthorse skill and the versioning rule by path. The Edit finding is written as a reproducible procedure rather than "I tested it".
+
+The plan file itself is back to its original state — my earlier edit to its Summary is reverted.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+<task-notification>
+<task-id>a6005756e6dbcb464</task-id>
+<tool-use-id>toolu_015xnHbhi6uVcSqq1ig7Vkei</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/tasks/a6005756e6dbcb464.output</output-file>
+<status>completed</status>
+<summary>Agent "Audit PIVOT.md durability" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>VERDICT: revise
+
+ACCEPTANCE TEST: (as supplied) An executing agent in a future session, holding only `~/Projects/agent-library/dev/workspace/plans/PIVOT.md` plus `~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md`, reconciles the two and knows what to change, what is settled, and what still needs a decision.
+
+Simulated cold: §1, §4 and §8 walk cleanly — every named plan site (`### Form`, `### Plugin placement and release`, WP-10, the Summary release clause, the File layout symlink row, `fingerprintOf`, the origin-gating rule at plan line 764) resolves, and the quoted `### Form` sentence is verbatim-accurate. §2, §3, §5, §6 and the overall deliverable question all stall. I reach the end knowing most of what to delete but not whether I am editing the plan or holding an overlay, not what replaces `splice.py`'s five non-lifting forms, not which route §2 puts me on, and not what to do when a decision the build depends on has no owner in the room.
+
+FINDINGS:
+
+1. [Stall point — ambiguous executable] §2, "Take the first route unless the executing agent is running interactively."
+   Problem: No test tells an agent whether it is "running interactively." Worse, the two clauses contradict: route two *is* "build with DraftHorse from the start," yet the next sentence orders `harness-format: DraftHorse` and the step vocabulary stripped "Either way." An interactive agent following the conditional and then the "either way" clause is instructed to build with DraftHorse and to strip DraftHorse simultaneously.
+   Fix direction: State a single unconditional route, or give a concrete discriminator (e.g. a value the invoker passes) and make the "either way" clause apply only to the route it actually governs.
+
+2. [Stall point — missing environment] §5, "`assets/splice.py`, whole"
+   Problem: The plan uses `splice.py` for five things besides lifting template parts — `show page-meta` and `show cards` (the entire step 7 revise procedure and Update procedure read a published page only through these), `card &lt;cardId&gt;` (per-card revision, the mechanism AR-6 rests on), `section &lt;sectionId&gt;` (step 6 writes every card this way), and `layout rail|board` (the one sanctioned write outside a marker, step 4). §4 replaces only the *content-into-markers* case with `cp` + `Read limit:5` + `Edit`. Steps 4, 6, 7 and the Update procedure are left with no mechanism at all.
+   Fix direction: Either scope the removal to the part-lifting forms and say what survives, or state the replacement for each of the five forms — including how the `.shell` class is written outside the markers and how a published page's `rev`, `#page-meta` body and card ids are read back without reading the file in full.
+
+3. [Stall point — unreachable meaning] §2, "The kickoff's execution strategy is a dynamic workflow. That leaves two routes, and only one of them survives it."
+   Problem: The entire Binding decision to abandon DraftHorse rests on the unstated premise that a "dynamic workflow" runs unattended. The kickoff says only "Strategy: Author a dynamic workflow for this task"; neither the kickoff, the plan, nor this document defines the term or says it forbids user gates. A reader who does not already hold that premise from the originating conversation cannot see why the gates are disqualifying — and cannot judge the decision, only obey it.
+   Fix direction: State the property being relied on in plain terms (unattended execution, no user present at gates) and where it comes from, so the incompatibility is visible from the document.
+
+4. [Stall point — ambiguous executable] §3, "**The decision to take:** whether pages that are throwaway reviews and interviews … are worth this."
+   Problem: The section is headed "Binding question, open answer" and names no decider, no default, and no gate. It is not resolvable from the two documents, yet WP-1 (shell chrome, doctype or not, the four quirks-avoidance rules) and WP-8 (`verify.py`, which writes the doctype-wrapped copy for V6a) both need the answer before they can be scoped. An agent reaching this section can neither decide nor proceed.
+   Fix direction: Name who decides and when, and state what the build does in the interim — either a standing default to build against until overruled (the pattern the plan's own Unresolved questions section uses) or an explicit hard stop naming the work packages that must wait.
+
+5. [Stall point — unreachable meaning] §6 marked **Proposed**, while §5 marked **Binding** already deletes `@template-script`
+   Problem: §5 (settled) removes the only region the plan gives demo JavaScript. §6 (a judgement call the reader may "reject with a reason") is what supplies the replacement `@demo-script`/`@demo-style` regions, the seven-marker set, and `SUITE.demo`. Reject §6 and the design has no home for demo behaviour and no marker set at all — the document provides no fallback for the rejection it invites.
+   Fix direction: Either promote the marker-set change to Binding and mark only the `SUITE.demo` API surface as Proposed, or state what the marker set and demo-JS route are if §6 is rejected.
+
+6. [Stall point — ambiguous executable] Document-level: what the reader is meant to produce
+   Problem: Line 3 frames this as an overlay ("Where the two disagree, this document wins and the plan section named here is stale"), but §1, §2 and §5 issue file edits against the plan ("Remove the symlink row from File layout", "strip `harness-format: DraftHorse` … from the plan's `### SKILL.md shape`"). A reader cannot tell whether the deliverable is a revised `artifact-suite-implementation.md`, or the plan left intact with PIVOT read beside it forever. The two produce different repositories and different Stage 3 inputs.
+   Fix direction: State the disposition once at the top — merge into the plan and retire this file, or hold as a permanent overlay — and make the section verbs match that choice.
+
+7. [Ambiguous executable] §5, "That breaches the plan's 36KB ceiling … Drop the ceiling rather than let it force a worse design."
+   Problem: The plan carries three ceilings, not one: the 36KB hard / 32KB target file ceiling, and the WP-1 done-check `CSS ≤ 16KB` and WP-2 done-check `engine ≤ 17KB`. The stated +4KB CSS pushes the shell past the 16KB CSS done-check too, so WP-1 still fails as written. "The ceiling" singular leaves the reader to guess which of the three to drop.
+   Fix direction: Name each ceiling and its disposition, including the two work-package done-checks.
+
+8. [Missing environment] §1, "Remove … the `### Plugin placement and release` section"
+   Problem: That section also carries a non-release operating instruction the build needs — plugin assets run from the last installed release, so through Stage 3 the skill is executed by hand from the working tree. Deleting the section wholesale removes it with no replacement, and an agent that later installs the plugin to test will exercise stale assets.
+   Fix direction: Say which sentences of that section survive relocation, or restate the working-tree execution rule here.
+
+9. [Missing environment] §4 and §7 Q5 versus the plan's `allowed-tools` and global invariants
+   Problem: The plan's frontmatter grants no `Edit` and its global invariants say "never Read the shell or the page copy." §4 makes both central to the build and §7 amends the invariant to "never … in full", but no entry instructs the reader to add `Edit` to `allowed-tools` or to reword the invariant in `### SKILL.md shape`. The reader must infer two concrete file edits that no section names.
+   Fix direction: Add the frontmatter and invariant amendments to the §4 consequence list explicitly.
+
+10. [Unreachable meaning] §3, "The Artifact tool is Claude Code's publishing tool … served under a content-security policy that blocks external hosts other than Google Fonts."
+    Problem: Three specific factual claims (the wrapper skeleton, claude.ai hosting, the exact CSP allowance) are stated with no source and are not general knowledge a future agent can be assumed to hold — and the plan's own gloss describes it differently, as "the claude.ai publishing tool." Yet §3 asks the reader to make a design decision entirely on these claims, and the Google-Fonts carve-out is what keeps the shell's font `&lt;link&gt;` legal.
+    Fix direction: Cite where these properties were established, or mark them as observed-in-a-prior-session assumptions to re-verify before the decision is taken.
+
+11. [Unreachable meaning — borderline] §7, "The plan's five numbered questions resolve as follows … **Q1** … **Q5**"
+    Problem: The plan's Unresolved questions are an unnumbered bullet list; Q1–Q5 is a numbering that exists only in the originating conversation. Each is glossed with its subject, so the mapping is recoverable, but §3 uses "Q4" twice before §7 introduces the scheme.
+    Fix direction: Either number the questions in the plan, or refer to each by subject alone.
+
+12. [Unreachable meaning — borderline] §8, "Both surfaced while building a page to this plan's specification"; §4, "Reproduced on a 2405-line file"
+    Problem: Neither the page nor the file is named, so a reader cannot inspect the evidence. Both claims are stated in enough detail to be re-derived independently, so no action is blocked.
+    Fix direction: Name the artefact in each case, or drop the provenance clause.
+
+13. [Unreachable meaning — borderline] §4, "The `conversation-capture` skill in the `dev-workspace` plugin already relies on it"
+    Problem: `conversation-capture` does not exist in this repository (it resolves only under an installed `dev-workspace` plugin at `~/.claude/plugins/`), so a reader in a different installation cannot check it. The two-step reproduction immediately above already establishes the point, so the citation is corroborative only.
+    Fix direction: Drop the citation, or note that it lives outside this repository.
+
+14. [Missing environment — borderline] §6, "The resulting marker set: `@doc-title`, `@page-meta`, `@masthead`, `@content`, `@sidebar`, `@demo-style`, `@demo-script`."
+    Problem: The plan specified `@template-style` as CSS-comment delimited *inside* `&lt;style&gt;` and `@template-script` as an HTML-comment region after the engine. The new `@demo-style`/`@demo-script` names are given without delimiter syntax or document-order position, and static check S2 ("all seven marker pairs present exactly once") is left silently renamed.
+    Fix direction: State the delimiter form and document-order position for the two new regions, and note S2's updated name list.
+
+15. [Ambiguous executable — borderline] §5 opening, "Proposed entries are worked-out consequences that still need a judgement call — take them, adapt them, or reject them with a reason"; §7, "needs an owner decision"
+    Problem: The actor is unnamed — the executing agent, or the owner — and there is no stated place for the reason or the decision to be recorded. Related: line 5 promises "Each entry is marked **Binding** or **Proposed**", but §7 and §8 carry no marker and §2, §3, §4 carry compound markers ("Binding, with one choice to make", "Binding question, open answer", "Binding finding"). The reader asked to separate settled from unsettled has to adjudicate the scheme itself.
+    Fix direction: Name the decider and the recording surface, and either mark every section with one of the two declared values or declare the compound values in the legend.</result>
+<usage><subagent_tokens>75859</subagent_tokens><tool_uses>12</tool_uses><duration_ms>217560</duration_ms></usage>
+</task-notification>
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Audit came back **revise** with 15 findings. Most are real — the big ones: I deleted `splice.py` "whole" without replacing five of its seven forms, §2 contradicts itself, §6 is marked Proposed while §5 already deletes the region it replaces, and the `Q1`–`Q5` numbering exists nowhere in the plan. Rewriting rather than patching.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/plans/PIVOT.md; echo "--- markers ---"; grep -n '^## \|— Binding$\|— Proposed$\|### ' $P; echo; echo "--- stale Q refs ---"; grep -c 'Q1\|Q2\|Q3\|Q4\|Q5' $P; echo "--- size ---"; wc -lw $P
+Description: Verify section markers and that invented question numbering is gone
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+One stale cross-reference in the legend from renumbering.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Rewritten — 175 lines, nine sections. Re-audit running.
+
+**What the first audit caught that mattered:**
+
+- **§6 now exists** — I'd written "delete `splice.py`, whole" having replaced only one of its seven forms. Steps 4, 6, 7 and the Update procedure would have been left with no mechanism. There's now a form-by-form replacement table, including per-section `<!-- @end-<sectionId> -->` anchors, since `</section>` isn't unique enough for an Edit.
+- **§2 no longer contradicts itself** — the old version said "take route one unless interactive" and then "either way, strip DraftHorse", which ordered both routes at once. Now one unconditional route, and the unstated premise is stated: a workflow runs unattended, so gates that halt for approval can't execute in one.
+- **Demo markers promoted to Binding** — §5 deletes `@template-script`; the replacement can't sit in a section you're invited to reject. Only the `SUITE.demo` helper stays Proposed, with the cost of rejecting it named.
+- **`Q1`–`Q5` gone** — that numbering existed only in the review page I built, not in the plan. The plan's questions are an unnumbered list; they're now referred to by subject.
+- **Three ceilings, not one** — the 36KB file ceiling plus WP-1's `CSS ≤ 16KB` and WP-2's `engine ≤ 17KB`. Dropping only the first still failed WP-1.
+- **Two `SKILL.md` edits nobody had ordered** — adding `Edit` to `allowed-tools`, and rewording the "never read the page copy" invariant, which as written forbids the very mechanism §4 introduces.
+- **A rule rescued from a deleted section** — plugin assets run from the last release, so the skill runs from the working tree through Stage 3. Deleting the release section wholesale would have taken it.
+
+**Two things I decided rather than asked**, both flagged in §8 with a standing default so the build doesn't stall:
+
+- Artifact-tool compatibility → default **drop it**, chosen because both directions are mechanical to reverse.
+- `provenance.root` → default **keep it**, which is what D-11 already decided.
+
+Overrule either; they're the two open decisions and each names the work packages it blocks.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+<task-notification>
+<task-id>ae4b9f7a576ad8658</task-id>
+<tool-use-id>toolu_01NsZ28NX9SD1A73thEeQSGy</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/tasks/ae4b9f7a576ad8658.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-audit rewritten PIVOT.md" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>VERDICT: revise
+
+ACCEPTANCE TEST: (supplied) An executing agent in a future session, holding only `~/Projects/agent-library/dev/workspace/plans/PIVOT.md` plus `~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md`, merges the two — knowing what to change, what is settled, and what still needs a decision.
+
+Simulated: the walk got through sections 1, 2, 9 cleanly (every deletion target named there resolves to a real plan heading, table row or sentence; every external claim — the `drafthorse` skill's gate invariant and conversion mode, the kickoff's deliverables and "Author a dynamic workflow", the plan's `boot()` order, `fingerprintOf` contents, and the two origin-gating rules — checks out against the files). The walk stalled seven times, mostly in sections 3–6, where deletions are ordered by class rather than by site and one instruction cancels another.
+
+FINDINGS:
+
+1. [Missing environment] Section 3, "Re-verify them before acting on section 7's first decision" and "Whether to drop it is the first decision in section 7."
+   Problem: Section 7 is "Demos are the one exception"; its first sub-section is "Chrome, regions and markers", not a decision. The Artifact-tool decision lives in section 8, "Open decisions". Both pointers send the reader to the wrong section, and section 3 is the section that carries the whole consequence list, so the reader most likely to follow the pointer is the one who needs it.
+   Fix direction: repoint both to section 8 (and check the reciprocal pointer in section 8, "Section 3 has the full consequence list", which is correct).
+
+2. [Ambiguous executable] Section 4, "drop the `python3` grant that existed for `splice.py`"
+   Problem: the plan holds a single `Bash(python3:*)` grant, and it also serves `assets/verify.py` (`python3 $S/verify.py $P --static`, plan step 8, S1–S10) and the runtime tier's `python3 -m http.server 8787`. Section 6 states "`assets/verify.py` is untouched by any of this". Dropping the grant disables the verification procedure PIVOT elsewhere preserves. The two instructions contradict.
+   Fix direction: state which grants change rather than which script motivated them — keep the python3 grant for `verify.py` and the local server, and say so, or name the narrower replacement grant explicitly.
+
+3. [Ambiguous executable] Section 3, "Drop the dependency and all five are deleted outright"
+   Problem: the five-item list omits static check S1, which asserts "no `&lt;!doctype`, `&lt;html`, `&lt;head` or `&lt;body` tag in the file (D-18)". Under section 8's build-against default (ship an ordinary document with a doctype) S1 fails on every page built. Also unlisted: the `@doc-title` marker-table note ("the Artifact tool scans only the first 8KB for it"), and the two Risks bullets on quirks mode and `:has()` under the Artifact tool.
+   Fix direction: extend the consequence list to every plan site that enforces or assumes the bare fragment, S1 first, or state a rule ("every site keyed to D-18") that the reader can apply exhaustively.
+
+4. [Unreachable meaning] Sections 1 and 8 versus the plan's binding Stage-1 decisions
+   Problem: `dev/workspace/context/stage-1-decisions.md` is declared binding by the plan's opening line. D-19 reads "ship as a skill (invocable, versioned, released with the plugins)" — section 1 says release packaging "was not asked for". D-18 reads "bare fragment (no doctype/html/head/body)" — section 8 says build against dropping it. PIVOT's precedence rule covers only PIVOT versus the plan, so the reader cannot tell whether a binding Stage-1 decision is being amended, overruled, or overlooked, nor whether the plan's "Decisions applied" rows for D-18 and D-19 should change.
+   Fix direction: name `stage-1-decisions.md` explicitly, say which decision ids PIVOT amends and on whose authority, and order the corresponding edits to the plan's decision table.
+
+5. [Ambiguous executable] Section 6, "the plan's steps 4, 6 and 7 and its `### Update procedure` must be rewritten onto them"
+   Problem: plan step 5 is "Splice the Template" — a whole step whose body is a `splice.py` block lifting template and block `@style`/`@script` parts. Section 5 deletes every lift; section 2 states "the ten steps stay". So step 5 survives as a step with no remaining content and no stated replacement, and section 6's rewrite list skips it. The reader has to invent what step 5 becomes.
+   Fix direction: name step 5 in the rewrite list and state its new work (read a template exemplar, write markup), or say explicitly that the ten steps become nine and renumber.
+
+6. [Ambiguous executable] Section 4 / section 7, the Edit precondition on a fresh page copy
+   Problem: section 4 establishes that a bounded Read unlocks Edit per file, but no instruction orders that read after `cp`, and the plan's step 4 still ends "Never Read the shell or the copy" — a site PIVOT does not amend (it amends only the same-worded global invariant in `### SKILL.md shape`). An agent following the merged plan reaches its first Edit with the file unread and the surviving sentence forbidding the fix.
+   Fix direction: order the amendment at step 4 as well, and state where the unlocking bounded read happens in the build sequence and what window it reads.
+
+7. [Ambiguous executable] Section 6, "`grep -n 'id="&lt;cardId&gt;"' &lt;page&gt;` for the line range" and "`grep -n 'id="page-meta"' &lt;page&gt;` for the line, then `Read` that range"
+   Problem: `grep -n` returns a single starting line; neither card `&lt;/article&gt;` nor the `#page-meta` `&lt;/script&gt;` is matched, so the range end is undefined. Two agents will pick different windows, and one that guesses short truncates the region it then Edits.
+   Fix direction: state how the end is obtained — a second grep for the closing token, a fixed line budget, or bounding a card by the next `article class="card"` hit — and say what to do for the last card on a page.
+
+8. [Ambiguous executable] Sections 5 and 6, deletions ordered by class rather than by site
+   Problem: section 1 names its deletion targets precisely; sections 5 and 6 do not, and several plan sites that still specify the deleted machinery go unnamed, leaving the reader unable to tell whether the omission is deliberate: the `assets/splice.py` File layout row; WP-1's work item and its done-check ("`splice.py` fills each region kind, appends into a section, and refuses a duplicate part"); the whole `### Markers` section, whose placeholder-versus-empty fill semantics are written in `splice.py` terms; two `### Token economy` rows; the first half of the `### Form` sentence section 4 quotes ("Splices are made with `assets/splice.py` under Bash, never with Edit or Write"); the File layout paragraph defining `/* @style */`, `&lt;!-- @script --&gt;` and `&lt;!-- @markup --&gt;` delimiters in template and block files; the template and block File layout rows still promising "scoped style" and a "copy-added-lines script"; WP-5's done-check "each splices once"; and the fixture rows plus the Risks "Shell budget" bullet, which still cite the 36KB shell ceiling section 5 drops.
+   Fix direction: enumerate the sites for these deletions the way section 1 does, or add a closing sweep instruction naming the search strings (`splice.py`, `@template-`, `36KB`, `lift`) whose every hit must be resolved.
+
+9. [Ambiguous executable] Section 6, "`grep -q` refuses a duplicate insert"
+   Problem: with lifting removed by section 5, it is unstated what duplicate remains to guard and what string `grep -q` tests. Edit's own uniqueness requirement (section 4) may already cover it.
+   Fix direction: name the insert being guarded and the exact string tested, or drop the guard as superseded by Edit's uniqueness precondition.
+
+Borderline (reported, not forcing the verdict):
+
+- [Ambiguous executable] Section 3, "Re-verify them before acting" — no source or method is named, and a future agent may not hold the Artifact tool. A named verification route would settle it.
+- [Unreachable meaning] Section 4's parenthetical on the `conversation-capture` skill in the installed `dev-workspace` plugin — outside this repository and unreachable, though PIVOT itself directs the reader to rely on the reproduction instead.
+- [Ambiguous executable] Section 7, "static check S2 keeps its wording with two names changed" — the plan's S2 reads "all seven marker pairs present exactly once" and carries no marker names, so "two names changed" has no site in S2 as written; the names live in the `### Markers` table.
+- [Ambiguous executable] Section 8's sub-section "The plan's own unresolved questions" sits under a heading declared marker-free because it "holds the decisions that are still open", yet three of its five items are dispositions ("superseded", "deferred", "stands unchanged"). Their binding status is left to the reader.
+- Section 1 says "Relocate it into `### Build procedure`"; the plan's heading is `### Build procedure (the ten steps)`. It resolves, but section 2 quotes the full heading, so the two references differ.
+- Rationale passages that instruct nothing: section 8's "That default is chosen for reversibility… the cheaper thing to be wrong about", and section 5's "A number that is observed rather than enforced still catches runaway growth without forcing a worse design."
+
+Verified clean: every path and document PIVOT names resolves — `dev/workspace/plans/artifact-suite-implementation.md`, `dev/workspace/prompts/prompt-2026-08-23-2257.md`, `extensions/skills/drafthorse/SKILL.md`, `.claude/rules/versioning.md`, `dev/workspace/reviews/artifact-suite-plan-review.html`. Sections 2 and 9 are accurate against the sources they cite, including the `drafthorse` gate invariant, the conversion-mode draft path, `boot()`'s ordering of `restoreCard` above `expandRef`, `fingerprintOf`'s current strip list, and both origin-gating CSS rules.</result>
+<usage><subagent_tokens>82316</subagent_tokens><tool_uses>14</tool_uses><duration_ms>266211</duration_ms></usage>
+</task-notification>
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Second audit: **revise**, nine findings, and the sharpest one is that PIVOT overrules two *Stage-1 binding decisions* (D-18, D-19) without saying on whose authority. Patching all nine.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now §3 — the wrong section pointers and the incomplete consequence list.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now the `python3` grant contradiction and the unamended step 4.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now the largest gap — §5 and §6 order deletions by class, leaving a dozen plan sites unnamed.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now §6 — step 5 left empty, the unbounded `grep -n` ranges, and the dead `grep -q` guard.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now step 5, which §2 preserves but §5 empties.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Last three: the S2 wording, the unmarked dispositions, and trimming rationale that instructs nothing.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/plans/PIVOT.md
+echo "=== stale section pointers (should be none pointing to 7 for decisions) ==="
+grep -n 'section 7\|section 8\|section 3\|section 4\|section 5' $P
+echo; echo "=== python3 grant ==="; grep -n 'python3' $P
+echo; echo "=== size ==="; wc -lw $P
+Description: Verify cross-references resolve after patching
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+One slip in my own patch — step 5 is the fifth of ten, not the tenth.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+All nine patched; sending it back to the same auditor to verify the fixes landed rather than trusting my own pass.
+
+**The two that actually changed the document's correctness:**
+
+**The Stage-1 authority gap.** The plan declares D-1..D-20 binding. §1 withdrew D-19's release clause and §8 defaults against D-18 — but PIVOT's precedence rule only covered *PIVOT versus the plan*, so an executing agent hitting `stage-1-decisions.md` would find two binding decisions contradicting their work order with no way to tell which wins. The preamble now names both ids, states they're amended by the owner who took them, orders the edits to `stage-1-decisions.md` and the plan's decision table, and adds a catch-all: any other apparent conflict with a Stage-1 decision means the decision stands and PIVOT is wrong.
+
+**The `python3` grant.** I'd said "drop the grant that existed for `splice.py`" — but the plan has one `Bash(python3:*)` grant that also runs `verify.py` and the runtime tier's `http.server`, both of which §6 explicitly preserves. Dropping it would have disabled the verification procedure. Now it's kept, and stated as kept.
+
+**The rest:** S1 added to the doctype site list (it asserts *no* doctype, so it fails on every page under the default); step 5 named and re-purposed to "Read the Template" instead of being left an empty slot; step 4's own copy of the "never read the copy" sentence amended, since amending only the `SKILL.md` invariant left the build forbidden at the point it starts; grep ranges bounded at both ends rather than left open; ~a dozen deletion sites enumerated instead of described by class; the `grep -q` guard dropped with its reason.
+
+Also caught a slip in my own patch — I'd written step 5 "stays as the tenth of ten steps".
+
+The plan file remains untouched; PIVOT is the work order against it.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+<task-notification>
+<task-id>ae4b9f7a576ad8658</task-id>
+<tool-use-id>toolu_01R9ZTHsNDwXpkCpVyPeR4k6</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/tasks/ae4b9f7a576ad8658.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-audit rewritten PIVOT.md" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>VERDICT: revise
+
+ACCEPTANCE TEST: (same, supplied) An executing agent in a future session, holding only `~/Projects/agent-library/dev/workspace/plans/PIVOT.md` plus `~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md`, merges the two — knowing what to change, what is settled, and what still needs a decision.
+
+Simulated again cold. Eight of the nine fixes land and verify against the plan: the section 3 pointers now read "section 8" in both places (lines 49, 62); the `Bash(python3:*)` grant is kept with `verify.py` and `python3 -m http.server` named, matching section 6's "verify.py is untouched"; section 3 now lists S1, the `@doc-title` 8KB note and the two Risks bullets and adds a sweep rule; the preamble names `stage-1-decisions.md`, D-18, D-19 and the authority, and orders both files amended; step 4's own "Never Read the shell or the copy" sentence is now amended and the `limit: 5` unlocking read is ordered; range bounding is stated at both ends with a one-invocation two-pattern grep; the duplicate-insert guard is dropped with its reason. The walk now stalls in fewer places, but on new ground.
+
+FINDINGS:
+
+1. [Ambiguous executable] Preamble, "where this document and a Stage 1 decision appear to conflict and the decision id is not named above, the Stage 1 decision stands and the conflict is a defect in this document" — versus section 5
+   Problem: new defect introduced by fix 4. D-17 reads "Panel/modal: shipped as an optional block, **not part of the shell**", and the plan glosses it "Optional, never shell furniture (D-17)". Section 5 (Binding) moves every block's CSS into the shell ("`### CSS residency` … becomes one tier, the shell") and every block script into the shell ("a panel's open and close about five"). D-17 is not named in the preamble, so the preamble's own rule instructs the reader to let D-17 stand and to treat section 5 — a Binding section — as defective. The document now contradicts itself on its most load-bearing architectural change.
+   Fix direction: either add D-17 to the amended list with the same treatment given D-18 and D-19, or state in section 5 how shipping a block's style and behaviour in the shell leaves D-17 satisfied (the block file remaining optional as markup), so the preamble's fallback rule does not fire.
+
+2. [Ambiguous executable] Section 6, "Step 5 keeps its slot and changes its work… becomes **"Read the Template"**"
+   Problem: new defect introduced by fix 5. The plan's step 2, "Load the Page Kind", already orders exactly this work — "read `references/page-kinds.md`, then the one page template the kind maps to… Read a template for its exemplars and instruction comment only", plus the demo kit "in addition" when the page carries a demo. Section 6 does not list step 2 among the steps rewritten, so the merged plan carries the same read ordered twice, at positions 2 and 5, with provenance and the `cp` in between. The agent cannot tell which step owns it or whether the second read is meant to be a re-read.
+   Fix direction: give step 5 work that step 2 does not already do (or fold it into step 2 and state plainly that the procedure becomes nine steps with the error step renumbered), and say what step 2 becomes either way.
+
+3. [Ambiguous executable] Sections 5, 6 and 7 — enumerations replaced the catch-all without a sweep rule
+   Problem: fix 8 landed only in part. Section 3 gained a sweep rule; sections 5, 6 and 7 gained enumerations while the previous catch-all ("every instruction to lift, splice or paste a template or block part") was removed, so sites the lists miss now have nothing to catch them. Mechanically checked against the plan, these remain unnamed and contradict the merged result: `### Script placement and dialect` ("blocks and demos put theirs in `@template-script`"); the diff block section ("The block's script, pasted into `@template-script`"); `### Block file: figure` and `### Blocks` closing prose ("Every block file opens with an instruction comment stating… what to paste where, and that its style is safe to inline once"); `### Template: demo kit` parts 1 and 3, whose integration points still read "demo CSS… in `@template-style`; demo JS in `@template-script`" and whose part 1 still owns the demo scoped style section 7 moves to the shell; `### Template: review` ("cards enter it later through `splice.py $P section findings`"); `### SKILL.md shape` ("no Edit or Write grant, since every write to a page goes through `splice.py`"); step 10's error branch ("`splice.py` non-zero → report its message and stop"); and WP-4's done-check ("each splices into a fresh shell copy").
+   Fix direction: give sections 5, 6 and 7 the same closing sweep rule section 3 now carries, naming the search strings (`splice`, `paste`, `lift`, `@template-`) whose every hit must be resolved, and add the sites above to the enumerations.
+
+4. [Ambiguous executable] Section 5, "the two `### Token economy` rows whose supplier is `splice.py` lifting a part"
+   Problem: new defect introduced by the enumeration. Only one row matches that description ("a template's scoped CSS, a block's CSS and its script | `assets/splice.py` lifting the `@style`/`@script` part"). Two other rows name `splice.py` without lifting: "the shell's contents | copied by `cp` and spliced by `splice.py`; **never Read, never Edited**" and "a whole file on update | per-card splices". The first of those contradicts section 4 head-on — the build now Reads and Edits the copy — and the reader counting to two cannot tell which pair is meant.
+   Fix direction: name the three rows by their left-hand cell and say what each becomes, calling out that the "never Read, never Edited" clause is the one section 4 overturns.
+
+5. [Ambiguous executable] Section 4's "confirms the shell stamp on line 1" versus section 8's build-against default
+   Problem: new defect introduced by fix 6. Section 8 says build against shipping an ordinary document with a doctype; the plan's stripped-doctype variant puts `&lt;!doctype html&gt;` on line 1, which displaces the version stamp the plan pins there ("Line 1 is the version stamp and the editing rule… Verification reads the stamp"). Section 3's site list does not include that `### Form` sentence, so under the default the new step-4 instruction checks the wrong line and the stamp's home is unstated.
+   Fix direction: add the `### Form` line-1 stamp sentence to section 3's site list with its resolution under each answer, and word step 4's check against the stamp rather than against a line number.
+
+6. [Ambiguous executable] Section 7, "the two renamed entries live in the `### Markers` table and the `### Document order` listing, and it is those two sites that change"
+   Problem: new defect introduced by the edits. `@template-style`/`@template-script` occur at twelve locations in the plan, including the `### Markers` prose bullets that define the CSS-comment delimiter form and list the empty regions, `### Script placement and dialect`, the diff block section and demo kit part 3. The claim that exactly two sites change is checkably false and invites the reader to stop looking.
+   Fix direction: drop the "those two sites" claim and point at the same sweep rule proposed in finding 3, or enumerate all twelve.
+
+7. [Ambiguous executable] Section 3, "**static check S1** … so it inverts or is deleted"
+   Problem: S1 carries a second clause the doctype question does not touch — "line 1 carries the shell stamp." Deleting S1 wholesale, one of the two options offered, silently removes the only static verification of the stamp, which `### Form` depends on.
+   Fix direction: say that S1's stamp clause survives either answer, and scope the inversion to its doctype assertion.
+
+Borderline (reported, not forcing the verdict):
+
+- Section 3's site list says "two bullets in `## Risks`", but a third Risks bullet — "Absolute checkout path in `#page-meta.provenance.root` (D-11): a page published through the Artifact tool exposes the home directory name" — names the Artifact tool and so is caught by section 3's own sweep rule. Section 8's second open decision governs it, so it is not orphaned, but the enumeration and the sweep rule disagree on how many exist.
+- Section 5's opening "Nothing is spliced, lifted or pasted between files" is now the only class-level rule left in the section. Read literally it also strikes the plan's authoring-time lifts into the shell itself — the theme blocks and buttons from `prompt-builder.html`, the response surface from `section-ledger.html`, the SVG kit from `corpus-sweep-design.html` — which section 5 plainly intends to keep. An explicit exemption for shell-authoring sources would close it.
+
+Confirmed resolved, not re-reported: the section 3 pointers, the python3 grant, the section 3 site list and sweep rule, the Stage 1 authority preamble, step 4's amended sentence and unlocking read, range bounding at both ends, and the dropped duplicate-insert guard.</result>
+<usage><subagent_tokens>110473</subagent_tokens><tool_uses>8</tool_uses><duration_ms>215736</duration_ms></usage>
+</task-notification>
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Seven new findings, and five are defects my own fixes introduced. All real. Fixing.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now the deletion enumerations — adding the missing sites and the sweep rule the auditor found only in §3.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now the step-5 duplication — it repeats work step 2 already does.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Renumbering ripples through several of my own references.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/plans/PIVOT.md; grep -n 'ten steps\|step 4\|step 5\|step 6\|step 7\|step 10\|steps 4\|nine steps\|The ten steps' $P
+Description: Find all step references needing renumber
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/plans/PIVOT.md
+python3 - "$P" <<'PY'
+import sys
+p=sys.argv[1]; s=open(p).read()
+subs=[
+ ("Relocate it into `### Build procedure (the ten steps)`:",
+  "Relocate it into the build procedure (retitled by section 6):"),
+ ("Amend `### Build procedure (the ten steps)` to drop the DraftHorse step vocabulary",
+  "Amend `### Build procedure (the ten steps)` — retitled by section 6 — to drop the DraftHorse step vocabulary"),
+ ("The ten steps stay; only the format they are written in changes.",
+  "The steps themselves stay; only the format they are written in changes."),
+ ('**Reword the same sentence where it recurs in step 4**, `### Build procedure (the ten steps)`, which closes "Never Read the shell or the copy" — amending only the invariant leaves step 4 forbidding what step 4 must now do. Step 4 also gains the unlocking read as an explicit action: immediately after the `cp`, read the page copy with `limit: 5`, which satisfies Edit\'s precondition for the whole file and confirms the shell stamp on line 1 in the same call. Every later Edit in the build depends on that one read having happened.',
+  '**Reword the same sentence where it recurs in the build procedure\'s "Instantiate the Shell" step**, which closes "Never Read the shell or the copy" — amending only the invariant leaves that step forbidding what it must now do. The step also gains the unlocking read as an explicit action: immediately after the `cp`, read the page copy with `limit: 5`, which satisfies Edit\'s precondition for the whole file and confirms the shell stamp in the same call. Check for the stamp text rather than for a line number, since section 8\'s first decision governs whether line 1 holds the stamp or a doctype. Every later Edit in the build depends on that one read having happened.'),
+ ("Each of the others has a replacement, and the plan's steps 4, 5, 6 and 7 and its `### Update procedure` must be rewritten onto them.",
+  "Each of the others has a replacement, and four build-procedure steps — \"Instantiate the Shell\", \"Splice the Template\", \"Write the Cards\", \"Revise a Published Page\" — plus `### Update procedure` must be rewritten onto them. Steps are named rather than numbered here because this section renumbers them."),
+ ("step 10's error branch (\"`splice.py` non-zero → report its message and stop\")",
+  "the error step's branch (\"`splice.py` non-zero → report its message and stop\")"),
+]
+for a,b in subs:
+    if a not in s: print("MISS:", a[:70]); continue
+    s=s.replace(a,b)
+open(p,"w").write(s)
+print("done")
+PY
+grep -n 'ten steps\|step 4\|step 10' "$P"
+Description: Renumber step references and name steps by title
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/plans/PIVOT.md; sed -n '143,152p' $P
+Description: Read the splice.py deletion enumeration
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Last three: the false "two sites" claim, S1's stamp clause, and the Risks bullet count.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/plans/PIVOT.md
+python3 - "$P" <<'PY'
+import sys
+p=sys.argv[1]; s=open(p).read()
+subs=[
+ # S1 has two clauses; only the doctype one inverts
+ ('- **static check S1**, which asserts no `<!doctype`, `<html`, `<head` or `<body` tag appears in the file — under section 8\'s build-against default this check fails on every page, so it inverts or is deleted;',
+  '- **static check S1**\'s first clause, asserting no `<!doctype`, `<html`, `<head` or `<body` tag appears in the file — under section 8\'s build-against default it fails on every page, so that clause inverts. S1\'s second clause, "line 1 carries the shell stamp", survives either answer and is the only static verification the stamp has;'),
+ # Form's line-1 stamp sentence is a site
+ ('- the `@doc-title` row in the `### Markers` table, whose note explains the real `<title>` tag by the Artifact tool scanning only the first 8KB;',
+  '- the `@doc-title` row in the `### Markers` table, whose note explains the real `<title>` tag by the Artifact tool scanning only the first 8KB;\n- the `### Form` sentence pinning the version stamp to line 1 — a doctype takes line 1, so the stamp moves to line 2 and every check reads it by its text rather than by position;'),
+ # Risks bullet count
+ ('- two bullets in `## Risks` — the one on quirks mode from disk, and the `:has()` bullet\'s closing clause "re-check if published through the Artifact tool";',
+  '- in `## Risks`, the quirks-mode bullet and the `:has()` bullet\'s closing clause "re-check if published through the Artifact tool". A third Risks bullet names the Artifact tool — the one on `provenance.root` exposing the home directory — but it is governed by the second open decision in section 8, not by this one;'),
+ # marker rename site claim
+ ('The marker count stays at seven, so static check S2 ("all seven marker pairs present exactly once") stands verbatim; the two renamed entries live in the `### Markers` table and the `### Document order` listing, and it is those two sites that change.',
+  'The marker count stays at seven, so static check S2 ("all seven marker pairs present exactly once") stands verbatim. The renamed entries appear in the `### Markers` table and the `### Document order` listing, and `@template-style`/`@template-script` recur well beyond those two places — section 5\'s deletion list names the ones found, and its sweep for `@template-` catches the rest.'),
+]
+for a,b in subs:
+    if a not in s: print("MISS:", a[:60]); continue
+    s=s.replace(a,b)
+open(p,"w").write(s)
+print("ok")
+PY
+grep -c 'those two sites that change' "$P"; wc -lw "$P"
+Description: Fix S1 scope, stamp line, Risks count, and the false two-sites claim
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Third pass sent for verification. Five of the seven new findings were defects my *previous* round of fixes introduced — worth naming, since it's the pattern:
+
+**D-17.** Adding the catch-all "an unnamed Stage-1 decision wins over this document" immediately fired against my own §5. D-17 says the panel is "not part of the shell"; §5 moves its CSS and handler there. Resolved by distinguishing implementation from presence — the panel ships in the shell but appears on no page unless the agent writes `<dialog class="panel">`, which is what D-17 actually protects. Stated in the preamble as explicitly *not* amended, with the reconciliation in §5.
+
+**Step 5.** I repurposed it to "Read the Template" without checking step 2 — which already reads the template, the kinds reference, and the demo kit. That ordered the same read twice with a `cp` in between. Now deleted outright: nine steps, renumbered, with the three places that count them named. PIVOT's own step references switched to titles so its advice survives its own renumber.
+
+**Enumerations without a sweep.** Replacing the vague catch-all with precise site lists was right, but I dropped the catch-all in three sections while only §3 got a replacement sweep rule. Nine more sites still specifying `@template-script` and `splice.py` were left unnamed. Sections 5 and 6 now carry the same sweep.
+
+**Token economy.** I wrote "the two rows whose supplier is `splice.py` lifting a part" — only one row matches. Of the other two, one reads "never Read, never Edited", which §4 directly overturns. All three now named individually.
+
+**The line-1 stamp.** The plan pins the shell's version stamp to line 1 and verifies it there. If the doctype default is taken, the doctype occupies line 1 — and my new step-4 instruction said "confirms the shell stamp on line 1". Now the check reads the stamp by its text, and S1 is scoped so only its doctype clause inverts while its stamp clause survives either answer.
+
+The plan file is still untouched.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+<task-notification>
+<task-id>ae4b9f7a576ad8658</task-id>
+<tool-use-id>toolu_01AYF5jetEvZzoa7kWdKuzZz</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/tasks/ae4b9f7a576ad8658.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-audit rewritten PIVOT.md" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>VERDICT: revise
+
+ACCEPTANCE TEST: (same, supplied) An executing agent in a future session, holding only `~/Projects/agent-library/dev/workspace/plans/PIVOT.md` plus `~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md`, merges the two — knowing what to change, what is settled, and what still needs a decision.
+
+All nine items from the last round land and verify: the D-17 carve-out and its implementation-versus-presence reconciliation (preamble line 14, section 5 line 100); step 5 deleted with the renumber stated; section 5's sweep rule with its five search strings; all three Token economy rows named by left-hand cell; the line-1 stamp added to section 3's list and step 4's check reworded against stamp text; the "those two sites" claim replaced by a pointer to the sweep; S1 split into its two clauses; the third Risks bullet routed to section 8's second decision; and the authoring-time lift exemption. The walk now completes the merge — except that the nine-step procedure it produces has a hole in it.
+
+FINDINGS:
+
+1. [Ambiguous executable] Section 6, "**Step 5 is deleted; the procedure becomes nine steps.**"
+   Problem: new defect introduced by the fix. The plan's step 5 did two things, not one — it spliced the template's `@style`/`@script` parts (now gone) **and** it spliced the template's `@markup` part into `@content`: `python3 $S/splice.py $P content $S/templates/review.html markup`. That `@markup` part is the page's section scaffolding — "`&lt;section id&gt;`, `.sec-head`, `.sec-intro`, optional `.verdict-strip`". Section 6 justifies the deletion solely on the reading being step 2's work, and no surviving step writes the sections: step 2 reads, step 4 fills only `@doc-title`, `@page-meta` and `@masthead`, and "Write the Cards" writes cards *into* sections that must already exist ("one splice per card into its section"). An agent executing the merged procedure reaches the card step with `@content` empty and no instruction covering it.
+   Fix direction: assign the writing of `@content`'s section skeletons — including the `&lt;!-- @end-&lt;sectionId&gt; --&gt;` markers section 6 introduces — to a named step, either by folding it into the card-writing step's opening or by keeping a step whose work is writing the scaffold rather than reading the template.
+
+2. [Ambiguous executable] Section 6, "four build-procedure steps — "Instantiate the Shell", "Splice the Template", "Write the Cards", "Revise a Published Page" — plus `### Update procedure` must be rewritten onto them"
+   Problem: new defect introduced by the fix. "Splice the Template" is not rewritten; twenty-eight lines later it is deleted outright. And the error step, whose `splice.py` branch section 6 does order rewritten in the same section's site list, is absent from the count. The opening sentence therefore names one step that should not be rewritten and omits one that must be, so a reader working from it alone applies the wrong set.
+   Fix direction: make the opening list name only the steps that survive and change — "Instantiate the Shell", "Write the Cards", "Revise a Published Page", the error step — and let the deletion of "Splice the Template" be announced only where it is explained.
+
+3. [Missing environment] Section 6, "update the two other places that count them"
+   Problem: new defect introduced by the renumber. Checked mechanically, "ten steps" occurs at three sites in the plan, not two: the `### Build procedure (the ten steps)` heading, the `### SKILL.md shape` body description, and the File layout row for `SKILL.md` — "DraftHorse procedure: frontmatter, invariants, marker table, landing rule, token economy, ten steps, terms". That third site also still calls the file a DraftHorse procedure, which section 2 amends only in `### SKILL.md shape`. Separately, `### Update procedure` opens "Revision rules are step 7"; after the shift, step 7 is "Verify the Page", so the pointer silently resolves to the wrong step rather than dangling. Section 5's sweep strings (`splice`, `@template-`, `paste`, `lift`, `36KB`) catch neither.
+   Fix direction: name the File layout `SKILL.md` row in both section 2 and section 6, name the "Revision rules are step 7" pointer with its new number or retitle it to "Revise a Published Page" in keeping with this document's own by-title convention, and add `ten steps` and `DraftHorse` to a sweep.
+
+4. [Ambiguous executable] Section 5, "**Reconciliation with D-17** … Restate this once in `### Blocks`"
+   Problem: new defect introduced by the D-17 fix. The sentence that will read as overturning D-17 after the merge is not in `### Blocks` — it is in `### Block file: panel`, which opens "Optional, never shell furniture (D-17)." Once the panel's style and handler ship in the shell, that sentence is false as written, and it is named by no list and caught by no sweep string. Restating the reconciliation elsewhere leaves the contradiction standing where a reader building the panel block will meet it.
+   Fix direction: name the `### Block file: panel` sentence as a site and state what it becomes (optional presence, shell-resident implementation), and check the figure and diff block sections for the same phrasing.
+
+5. [Missing environment] Section 6, the quoted locator "ten steps, and terms"
+   Problem: the plan's text is "ten steps, terms" — the quoted string does not occur in the file. A reader searching for the fragment to locate the site finds nothing, in a document that elsewhere insists on byte-exact match strings for Edit.
+   Fix direction: quote the fragment as it appears, or locate the site by section name alone.
+
+Borderline (reported, not forcing the verdict):
+
+- Section 3's site list addresses S1's stamp clause twice with different force: the S1 bullet says the clause "survives either answer", the stamp bullet says "every check reads it by its text rather than by position", which requires that same clause to be reworded. Both are reconcilable — the check survives, its positional wording goes — but the two bullets do not acknowledge each other.
+- Section 5's reconciliation says "unused CSS puts nothing on any page". True of rendering, not of bytes: the shell carries the panel's rules on every page whether or not a panel appears. The Ceilings sub-section already accepts that cost, so nothing misexecutes, but the sentence overstates the case it is making.
+
+Confirmed resolved, not re-reported: the D-17 conflict trap, the step 5 / step 2 duplication (replaced by the deletion, whose own gap is finding 1), the missing sweep rules, the Token economy row count, the line-1 stamp contradiction, the "those two sites" claim, S1's stamp clause, the third Risks bullet, and the authoring-time lift exemption.</result>
+<usage><subagent_tokens>131098</subagent_tokens><tool_uses>3</tool_uses><duration_ms>123980</duration_ms></usage>
+</task-notification>
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Finding 1 is a real hole I punched: step 5 also spliced the template's `@markup` — the section skeletons — so deleting it left nothing writing `@content`. Fixing all five plus both borderline items.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/plans/PIVOT.md
+python3 - "$P" <<'PY'
+import sys
+p=sys.argv[1]; s=open(p).read()
+subs=[
+ # D-17 site is the panel block section, not ### Blocks; and fix the overstatement
+ ('**Reconciliation with D-17.** Shipping the panel\'s style and handler in the shell leaves D-17 satisfied. "Not part of the shell" means the panel is never furniture a page carries by default, and it still is not: a page has no panel unless the agent writes `<dialog class="panel">` into `@content`, and unused CSS puts nothing on any page. What ships in the shell is the panel\'s *implementation*; what stays optional is its *presence*. The same reading applies to the diff and figure blocks. Restate this once in `### Blocks` so the merged plan does not read as overturning D-17.',
+  '**Reconciliation with D-17.** Shipping the panel\'s style and handler in the shell leaves D-17 satisfied. "Not part of the shell" means the panel is never furniture a page carries by default, and it still is not: a page renders no panel unless the agent writes `<dialog class="panel">` into `@content`. What ships in the shell is the panel\'s *implementation*, carried as bytes on every page; what stays optional is its *presence*. The Ceilings sub-section below accepts that byte cost. The same reading applies to the diff and figure blocks.\n\nThe sentence that would otherwise read as overturning D-17 is the opening of `### Block file: panel` — "Optional, never shell furniture (D-17)" — which is false once the style and handler ship in the shell. Rewrite it to say the panel is optional in presence and shell-resident in implementation, and check `### Block file: diff` and `### Block file: figure` for the same phrasing. No sweep string catches this site.'),
+ # sweep strings
+ ('search the plan for `splice`, `@template-`, `paste`, `lift` and `36KB`, and resolve every remaining hit against the sections above.',
+  'search the plan for `splice`, `@template-`, `paste`, `lift`, `36KB`, `ten steps` and `DraftHorse`, and resolve every remaining hit against the sections above.'),
+ # S1 / stamp bullets acknowledge each other
+ ('- **static check S1**\'s first clause, asserting no `<!doctype`, `<html`, `<head` or `<body` tag appears in the file — under section 8\'s build-against default it fails on every page, so that clause inverts. S1\'s second clause, "line 1 carries the shell stamp", survives either answer and is the only static verification the stamp has;',
+  '- **static check S1**\'s first clause, asserting no `<!doctype`, `<html`, `<head` or `<body` tag appears in the file — under section 8\'s build-against default it fails on every page, so that clause inverts. S1\'s second clause, "line 1 carries the shell stamp", is the only static verification the stamp has and survives either answer, though its positional wording changes with the bullet below;'),
+]
+for a,b in subs:
+    if a not in s: print("MISS:", a[:60]); continue
+    s=s.replace(a,b)
+open(p,"w").write(s)
+print("ok")
+PY
+grep -n 'ten steps, and terms\|### Blocks` so the merged' "$P"; wc -lw "$P"
+Description: Fix D-17 site, sweep strings, and S1 bullet cross-reference
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Fourth pass sent. The one that mattered:
+
+**I punched a hole in the build procedure.** Step 5 did two jobs — lift the template's `@style`/`@script` parts, *and* splice its `@markup` part, which is the page's section scaffolding. I deleted the step justifying it only on the reading half, so nothing wrote `@content`: step 4 fills the masthead and meta, and the card step writes cards *into* sections that must already exist. An agent following the merged plan would have reached the card step with an empty `@content` and no instruction covering it.
+
+Fixed by widening the card step to **"Write the Content"** — it now writes the section skeletons and their `<!-- @end-<sectionId> -->` markers first, then the cards, with a matching finish condition.
+
+Also caught: `### Update procedure` opens "Revision rules are step 7". After the renumber, step 7 becomes "Verify the Page" — so that pointer would have resolved to the *wrong step* rather than visibly dangling. It's now written by step name, which is the same reason PIVOT's own step references are by title.
+
+And the D-17 reconciliation was pointed at `### Blocks` when the offending sentence is in `### Block file: panel` ("Optional, never shell furniture") — restating it elsewhere would have left the contradiction exactly where someone building the panel meets it.
+
+That's four rounds. The auditor's own summary this time was that the merge now completes, so I'd expect this pass to be about confirming rather than finding — but I'll report what comes back rather than assume it.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+<task-notification>
+<task-id>ae4b9f7a576ad8658</task-id>
+<tool-use-id>toolu_01P5vUbUCvhh39AXYyoT1Zaz</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/tasks/ae4b9f7a576ad8658.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-audit rewritten PIVOT.md" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>VERDICT: revise
+
+ACCEPTANCE TEST: (same, supplied) An executing agent in a future session, holding only `~/Projects/agent-library/dev/workspace/plans/PIVOT.md` plus `~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md`, merges the two — knowing what to change, what is settled, and what still needs a decision.
+
+All five findings and both borderline items from the last round land and verify against the plan: the `@markup` hole is closed by the widened, retitled "Write the Content" step with its added finish-condition clause (line 176); section 6's opening list now names four surviving steps plus the separately announced deletion (line 146); three counting sites are named including the File layout `SKILL.md` row and its stale "DraftHorse procedure" wording (line 180); the `### Update procedure` pointer is retitled by step name (line 182); the D-17 site is named as `### Block file: panel`'s opening sentence with what it becomes and a diff/figure check (line 102); the misquote is gone and the cell is quoted as it appears; S1's second clause cross-references the stamp bullet (line 58); and the "unused CSS" claim now distinguishes rendering from bytes and points at Ceilings (line 100). The merge now walks end to end. Three things remain.
+
+FINDINGS:
+
+1. [Ambiguous executable] Section 6, "**The scaffolding needs a home, or the procedure has a hole.** Nothing else writes `@content`: step 4 fills only `@doc-title`, `@page-meta` and `@masthead`"
+   Problem: the enumeration is right about `@content` and silent about `@sidebar`, which is left with no owning step in the nine-step procedure. The marker set keeps `@sidebar` ("the right column of `.shell.board` only"), the demo kit's board shape puts "controls in `@content`, live rendering in `@sidebar`", and the options kind can land on `.shell.board` — so a board page reaches hand-over with an empty sidebar and no instruction covering it. The new step's title, "Write the Content", reads as though it might cover every content region, which makes the omission ambiguous rather than merely absent.
+   Fix direction: state whether the widened step owns `@sidebar` as well as `@content`, and if it does, extend its opening sentence and its finish condition to say so; if some other step owns it, name that step.
+
+2. [Unreachable meaning] Section 6, "Step 2 is unchanged and keeps sole ownership of reading templates."
+   Problem: step 2 ends "Read a template for its exemplars and instruction comment only; its `@style` and `@script` parts are never read into context" — a clause about template parts that section 5 abolishes and whose delimiter definitions section 5 deletes. Asserting the step unchanged tells the merging agent to leave a sentence that will, after the merge, describe parts no longer in existence. Checked mechanically, this site carries none of the seven sweep strings (`splice`, `@template-`, `paste`, `lift`, `36KB`, `ten steps`, `DraftHorse`), so nothing catches it. The same is true of the surviving `@markup` references in `### Template: review` ("The skeleton is the whole `@markup` part… card exemplars sit outside the `@markup` delimiters"), though the `splice` sweep does land a reader on that sentence. In fairness: this residue predates this round's edits and I did not report it in the last two rounds; what is new is the sentence that now certifies the step as needing no change.
+   Fix direction: name step 2's `@style`/`@script` clause and the `### Template: review` `@markup` clauses as sites, and add `@style`, `@script` and `@markup` to the sweep strings, since `@template-` does not match them.
+
+3. [No-op] Section 6, "Add `ten steps` and `DraftHorse` to the sweep strings in section 5; neither is caught by the five already listed."
+   Problem: new this round. Section 5's sweep already lists all seven strings, `ten steps` and `DraftHorse` included, so the instruction asks for an edit already made — and its count is wrong, referring to "the five already listed" where seven now stand. A merging agent following it looks for a five-item list, finds a seven-item one, and has to work out whether a different list was meant.
+   Fix direction: delete the sentence; section 5's sweep already carries the strings.
+
+Nothing else blocks the acceptance test. Finding 1 is the only one that could produce a wrong build, and only for board-layout pages; findings 2 and 3 leave the merged plan carrying a dead clause and an already-satisfied instruction. The document is otherwise executable as a merge order end to end.</result>
+<usage><subagent_tokens>155772</subagent_tokens><tool_uses>4</tool_uses><duration_ms>147816</duration_ms></usage>
+</task-notification>
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Three findings, all real. The `@sidebar` one could produce a wrong build on board pages.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/plans/PIVOT.md
+python3 - "$P" <<'PY'
+import sys
+p=sys.argv[1]; s=open(p).read()
+subs=[
+ # 3. remove the no-op sweep instruction
+ ("\n\nAdd `ten steps` and `DraftHorse` to the sweep strings in section 5; neither is caught by the five already listed.", ""),
+ # 2a. step 2 is not wholly unchanged
+ ('Step 2 is unchanged and keeps sole ownership of reading templates.',
+  'Step 2 keeps sole ownership of reading templates, and changes in one clause. It closes "Read a template for its exemplars and instruction comment only; its `@style` and `@script` parts are never read into context" — section 5 abolishes those parts and deletes the paragraph defining their delimiters, so the clause describes something that will no longer exist. Cut it; what survives is that a template is read for its exemplars and its instruction comment.'),
+ # 2b. sweep strings must catch bare @style/@script/@markup
+ ('search the plan for `splice`, `@template-`, `paste`, `lift`, `36KB`, `ten steps` and `DraftHorse`, and resolve every remaining hit against the sections above.',
+  'search the plan for `splice`, `@template-`, `@style`, `@script`, `@markup`, `paste`, `lift`, `36KB`, `ten steps` and `DraftHorse`, and resolve every remaining hit against the sections above. The three bare part names are listed separately because `@template-` does not match them.'),
+ # 2c. name the Template: review @markup sites
+ ('- in `### Template: review`, "cards enter it later through `splice.py $P section findings`".',
+  '- in `### Template: review`, "cards enter it later through `splice.py $P section findings`", and the two `@markup` clauses around it — "The skeleton is the whole `@markup` part" and "card exemplars sit outside the `@markup` delimiters". With the delimiters gone the file is a plain exemplar: it shows a section skeleton to imitate and card exemplars beside it, and nothing in it is delimited for machine extraction. The same `@markup` wording recurs in the File layout paragraph and in the marker table\'s note on template parts.'),
+]
+for a,b in subs:
+    if a not in s: print("MISS:", a[:60]); continue
+    s=s.replace(a,b)
+open(p,"w").write(s)
+print("ok")
+PY
+grep -c 'Add `ten steps` and `DraftHorse` to the sweep' "$P"; grep -n 'sweep' "$P" | head -4; wc -lw "$P"
+Description: Fix dead step-2 clause, sweep strings, and the no-op instruction
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Final pass sent. The three:
+
+**`@sidebar` had no owning step** — and unlike the `@content` hole, this one predated my edits; no step ever wrote it. It only bites board-layout pages (the demo kit's board shape, and the options kind above eight cards), which would have reached hand-over with an empty right column. The widened step now owns it, ordered after the cards and skipped on other layouts, with a matching finish condition.
+
+**Step 2 wasn't "unchanged"** — I'd certified it as needing no edit, but it closes with a clause about a template's `@style` and `@script` parts *never being read into context*, and §5 abolishes those parts entirely. Certifying it would have left the merged plan describing machinery that no longer exists. Same residue in `### Template: review`'s `@markup` clauses.
+
+Worth noting why the sweep missed both: I'd listed `@template-` as a search string, which doesn't match bare `@style`, `@script` or `@markup`. Those three are now listed separately with a note explaining why.
+
+**A no-op I wrote** — "add `ten steps` and `DraftHorse` to the sweep strings", when I'd added them in the same edit. It also miscounted the list as five when seven stood.
+
+That's five audit rounds. Findings went 15 → 9 → 7 → 5 → 3, and the last round's were all cosmetic-to-narrow rather than structural. The auditor's read after round four was that the merge walks end to end.
+
+The plan file remains untouched — PIVOT is the work order against it, and nothing has been merged. Two decisions still need you: whether to keep Artifact-tool compatibility, and whether `provenance.root` may carry the absolute checkout path. Both have standing defaults so the build isn't blocked either way.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+<task-notification>
+<task-id>ae4b9f7a576ad8658</task-id>
+<tool-use-id>toolu_01XVUsjjm4vurB16YUoChfMR</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/6151b84c-bdf8-48bd-9039-86c0b503c597/tasks/ae4b9f7a576ad8658.output</output-file>
+<status>completed</status>
+<summary>Agent "Re-audit rewritten PIVOT.md" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>VERDICT: revise
+
+ACCEPTANCE TEST: (same, supplied) An executing agent in a future session, holding only `~/Projects/agent-library/dev/workspace/plans/PIVOT.md` plus `~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md`, merges the two — knowing what to change, what is settled, and what still needs a decision.
+
+Two of the three fixes land cleanly. Step 2's `@style`/`@script` clause is now named as a site and ordered cut with what survives stated (line 182); the `### Template: review` `@markup` clauses join the deletion list with the plain-exemplar consequence spelled out (line 122); the sweep gained `@style`, `@script` and `@markup` with the reason `@template-` misses them (line 130); and the no-op sweep instruction is gone. The `@sidebar` fix lands structurally — ownership, ordering after the cards, the skip on other layouts, and the second finish-condition clause are all stated — but it carries one factual error about which pages are board pages.
+
+FINDINGS:
+
+1. [Unreachable meaning] Section 6, "A page on `.shell.board` — the demo kit's board shape, and the options kind above eight cards — carries its live rendering there"
+   Problem: new defect introduced by the `@sidebar` fix. Checked against the plan's `### Six kinds onto three templates` table, the options kind maps to "`.shell` up to eight cards, `.shell.rail` from nine" — rail, never board. The demo page is the only kind mapped to `.shell.board`. A rail page has no sidebar at all (`.shell:not(.board) &gt; .sidebar { display: none; }`), and an options page has no live rendering to put in one. An agent applying this sentence writes a sidebar into a page that hides it, or sets `.shell.board` on a nine-card options page against the plan's own layout table and against step 4's card-count rule — and the new finish condition, "a board page has a non-empty `@sidebar`", then gates hand-over on the wrong condition for that kind.
+   Fix direction: name the demo board shape as the board case, drop the options clause or restate it as the rail case it actually is, and check that the finish condition fires only on pages whose `.shell` class is `board`.
+
+Borderline (not blocking): section 5's added sentence says the `@markup` wording "recurs in the File layout paragraph and in the marker table's note on template parts". It recurs in the File layout paragraph, but the marker table carries no `@markup` wording — `@markup` occurs at exactly three sites in the plan, all now named or deleted. The locator sends a reader somewhere the string is not; the sweep for `@markup` covers the ground regardless.
+
+Nothing else blocks the acceptance test. With that one sentence corrected, the merge walks end to end: every deletion names its site, every replacement names what supersedes it, the nine-step procedure has an owner for each marker region, and the two open decisions carry their blocked work packages and build-against values.</result>
+<usage><subagent_tokens>166422</subagent_tokens><tool_uses>3</tool_uses><duration_ms>55950</duration_ms></usage>
+</task-notification>
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+One factual error I introduced — options maps to `.shell.rail` from nine cards, never `.shell.board`. Demo is the only board kind.
+
+------------------------------------------------------------
+
+[EDIT TOOL]
+File: ~/Projects/agent-library/dev/workspace/plans/PIVOT.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: P=dev/workspace/plans/PIVOT.md
+python3 - "$P" <<'PY'
+import sys
+p=sys.argv[1]; s=open(p).read()
+a="The same `@markup` wording recurs in the File layout paragraph and in the marker table's note on template parts."
+b="The same `@markup` wording recurs in the File layout paragraph that defines the delimiters."
+print("ok" if a in s else "MISS")
+s=s.replace(a,b); open(p,"w").write(s)
+PY
+echo "--- verify board claim against plan ---"
+grep -n 'shell.board' dev/workspace/plans/artifact-suite-implementation.md | grep -i 'options\|demo' | head -3
+echo "--- PIVOT board sentence ---"; grep -n 'only one the plan maps to' "$P"; wc -lw "$P"
+Description: Fix the @markup locator and confirm the board claim against the plan
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Verified against the plan directly — line 946 maps only `demo page` to `.shell.board`, and line 1000 confirms the board shape puts live rendering in `@sidebar`. My "options kind above eight cards" claim was wrong; options is `.shell` up to eight, `.shell.rail` from nine.
+
+Both corrected. `dev/workspace/plans/PIVOT.md` — 250 lines.
+
+**Where it landed.** Six audit rounds: 15 → 9 → 7 → 5 → 3 → 1 findings. The last was a fact I'd invented about the layout table; the borderline was a locator pointing at a string that isn't there.
+
+**What the document now orders**, all against named plan sites:
+
+- Release packaging out (§1), keeping the one operating rule buried in the section it deletes.
+- Plain skill now, DraftHorse conversion later (§2) — because `drafthorse` gates on human approval and a workflow runs unattended.
+- The Artifact tool named, with the eight plan sites that exist only to serve it (§3).
+- `splice.py` replaced form by form (§4, §6), the build reduced to `cp` → 5-line read → Edit.
+- Everything reusable pre-written in the shell (§5), with authoring-time lifts exempted and D-17 reconciled rather than overruled.
+- Demos: chrome to the shell, behaviour to `@demo-script` (§7).
+- Nine steps, with `@content` and `@sidebar` each given an owner.
+- Two defects found by building a page to the spec (§9).
+
+**Two decisions are yours**, each with a standing default so nothing blocks: whether to keep Artifact-tool compatibility (default: drop it), and whether `provenance.root` may carry the absolute checkout path (default: keep it, per D-11).
+
+Nothing has been merged — the plan file is untouched, and PIVOT says to merge then delete itself.
+
+One caveat on the audit: it verified PIVOT's internal consistency and its references into the plan. It did not re-derive my claims about the Artifact tool, which is why §3 tells the executing agent to re-verify those before acting.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+## Response — FlightDeck naming and conventions (rev 2)
+
+Source: ~/Projects/agent-library/dev/workspace/reviews/flightdeck-naming-review.html · branch artifacts · rev 2 · built 2026-08-25
+Untouched: 79 left at their recommended default, 3 unanswered.
+
+### Decisions
+
+**flightdeck-as-the-family-name · FlightDeck as the family name**
+- Verdict: FlightDeck
+- Note: FlightDeck is in the lead. However come up with 10 other naming possibilities. create a specialized naming flightdeck that we can discuss an iterate on.
+
+**two-profiles-under-one-family-deck-and-page · Two profiles under one family: deck and page**
+- Note:
+  after reviewing my words below, it seems i use 'page' alot for anything you produce. does it differentiate enough? if i say...
+   build a review, you give me something in markdown
+  build a review artifact, you give me a sharable artifact
+  but if i say...
+  build a review page, will you create a standalone html page just from your priors?
+
+  also i probably wont use 'deck' instead 'flightdeck' . im thinking of skill trigger words, (flightdeck & page).
+
+**landing-rule-page-kind-decides-the-directory · Landing rule: page kind decides the directory**
+- Verdict: Kind decides
+- Note: Yes Claude can also use 'research' , and he sometimes uses 'tasks' to write agent tasks. Exploratory for now, it should settle organically as we go.
+
+**durable-decks-live-in-extensions-flightdecks · Durable decks live in extensions/flightdecks/**
+- Note: `extensions/artifacts/flightdeck/**/*` is the path naming. provided we stick with the name.
+
+**dev-workspace-integration · dev-workspace integration**
+- Note: yes killer indeed. this is another that will probably organically form once it settles.
+
+**delivery-keep-artifact-tool-compatibility · Delivery: keep Artifact-tool compatibility**
+- Verdict: Drop compat, plain doctype
+- Note: This is being actively worked on currently else where. my prefered method is to have plain first, and a strip tool for compat. although i have a hunch the artifact sharing skill may handle plain html also
+
+**answered-interview-page-where-does-it-land · Answered interview page: where does it land?**
+- Verdict: Stays in plans/
+
+**which-plugin-hosts-prompt-builder-and-the-skill · Which plugin hosts prompt-builder and the skill?**
+- Verdict: chat-tools
+- Note: big hitter skill for chat tools.
+
+**rename-the-skill-and-the-plan-now · Rename the skill and the plan now?**
+- Verdict: Rename after build
+
+**sweep-scope-prompt-builder-internals-and-archives · Sweep scope: prompt-builder internals and archives**
+- Verdict: Add both
+- Note: the first sweep was 180 degrees wrong. Terms and conventions should come from my writing. only a few terms hit any relevance wich i will highlight below. and zero conventions where conventions, all of them architecture decisions. remember conventions are guiding lights.
+
+**term-shell · Shell**
+- Note: One of the few terms in this list that I coined. It is the universal page structure for artifacts. Carries all the styling, layout, scripting decisions.
+
+**term-demo · Demo**
+- Note: another user coined term. It is a dynamically built html page that demonstrates some functionality in isolation.
+
+**term-card · Card**
+- Note: A unit of decision or review,
+
+**term-return-prompt · Return prompt**
+- Note: Another of my coined terms. The automatically composed prompt that the user returns to the agent indicating their decisions or comments.
+
+**term-section · Section**
+- Verdict: Reject
+
+**term-write-ones-choosing-ones · Write ones / choosing ones**
+- Note:
+  write builder
+  choose builder
+
+**term-explainer · Explainer**
+- Verdict: Reject
+
+**term-update-prompt-omakase-prompts · Update prompt / omakase prompts**
+- Verdict: Reject
+
+**term-master-prompt-prompt-window · Master prompt / prompt window**
+- Verdict: Reject
+
+**term-long-range-prompts · Long range prompts**
+- Verdict: Reject
+
+**term-discovery-artifact-html-review-html-plan-html-overview · Discovery artifact / html review / html plan / html overview**
+- Verdict: Revise
+- Note: page (review, discovery, etc)
+
+**term-link-to-site · Link to site**
+- Verdict: Revise
+- Note: active link
+
+**term-eyebrow · Eyebrow**
+- Verdict: Reject
+
+**term-filterable-tags-quoted-user-conversation-formatted-diffs · Filterable tags / quoted user conversation / formatted diffs**
+- Verdict: Reject
+
+**conv-token-efficient-building · Token efficient building**
+- Verdict: Reject
+
+**conv-reset-before-edit-no-state-to-manage · Reset before edit — no state to manage**
+- Note: restore from export
+
+**conv-sections-optional-mix-and-match · Sections optional, mix and match**
+- Note: Builders optional, mix and match
+
+**conv-hardcoded-sections-configurable-options · Hardcoded sections, configurable options**
+- Verdict: Reject
+
+**conv-test-the-agent-s-changes-not-the-user-s-browser · Test the agent's changes, not the user's browser**
+- Verdict: Reject
+
+**conv-concise-reviews-drop-settled-items · Concise reviews — drop settled items**
+- Verdict: Revise
+- Note: merge with similar conventions
+
+**conv-workspace-first-reviews-go-in-reviews · Workspace first; reviews go in reviews/**
+- Note: Utilise dev-workspace when available
+
+**conv-per-repo-instance-still-standalone · Per-repo instance, still standalone**
+
+**conv-hand-maintained-lists-agent-invocable-skill-only · Hand-maintained lists; agent-invocable skill only**
+- Verdict: Reject
+
+**conv-warn-before-destructive-saves · Warn before destructive saves**
+- Verdict: Reject
+
+**conv-reference-driven-styling · Reference-driven styling**
+- Verdict: Reject
+
+**conv-clean-encoding · Clean encoding**
+- Verdict: Reject
+
+**conv-edit-the-structure-from-the-page-itself · Edit the structure from the page itself**
+- Verdict: Revise
+- Note: similar to an above convention.
+
+**file-form · File form**
+- Verdict: Revise
+- Note: currently WIP. not in the scope of this discussion.
+
+**q-bash-kill-for-the-verification-server · Q: Bash(kill:*) for the verification server**
+- Verdict: timeout, no grant
+- Note:
+  agent must handle the server they start. is this safe or can the agent kill other things?
+  prefer timeout option
+
+**q-confirm-the-skill-s-tool-set · Q: confirm the skill's tool set**
+- Verdict: Revise (note)
+- Note: still WIP
+
+**unresolved-lists-left-in-earlier-reviews · Unresolved lists left in earlier reviews**
+- Note: parked
+
+### Next
+
+- Write docs/<family>/ (terms, conventions, profiles, delivery) from every Terms, Conventions and Goals card marked Agree, quoting the user's phrasing where the card carries it; wait for the naming page before choosing the family word.
+- Architecture decisions and Stage 1 decisions feed the skill and plan, not the conventions doc.
+- Apply each Revise note to the card it names before writing; ask where a note is missing.
+- Amend stage-1-decisions.md, artifact-suite-implementation.md and PIVOT.md for: kind-decides landing, plain doctype, chat-tools hosting, rename after build, exact-match pkill.
+- Treat every untouched card as accepted as written.
+
+Re-open: file://~/Projects/agent-library/dev/workspace/reviews/flightdeck-naming-review.html#conv-edit-the-structure-from-the-page-itself
+
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/dev-workspace:conversation-capture unknown
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ruby ~/.claude/plugins/cache/DBHD-dev-workspace/dev-workspace/1.1.0/skills/conversation-capture/scripts/conversation-capture 6151b84c-bdf8-48bd-9039-86c0b503c597
+Description: Extract session transcript
+
+------------------------------------------------------------

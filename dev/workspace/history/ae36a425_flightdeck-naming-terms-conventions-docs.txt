@@ -1,0 +1,1744 @@
+Session: ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1
+Date: 2026-08-25 05:03
+Branch: artifacts
+CWD: ~/Projects/agent-library
+
+============================================================
+[SUMMARY]
+>>>
+Named the HTML artifact family FlightDeck: a flightdeck is any one document and the trigger word; page is a plain word, artifact means a claude.ai published page. Profiles instrument / readout / demo, with kind spoken before flightdeck (review flightdeck) and profile words kept to documentation.
+Two interactive review pages drove the discussion: a naming/conventions review (rev 2) and a naming options page (rev 2), both on the plan-review shell with return prompts; answers were carried across revisions.
+A first terms sweep of agent-written plans was rejected; terms and conventions were re-mined from the owner's own transcript turns and prompts, with conventions defined as guiding lights and architecture filed separately.
+Wrote docs/flightdeck/ (README, terms, conventions, profiles, organisation) after two durability reviews; landing rule is kind-decides directory under dev-workspace, instruments at extensions/artifacts/flightdeck/, chat-tools hosts, plain doctype, timeout not kill. Committed in two commits, not pushed.
+Remaining: naming page rev 2 return prompt (head-to-head), dev-workspace scaffold task for a flightdecks/ directory, skill rename after build.
+<<<
+------------------------------------------------------------
+
+[USER]    💭: none
+We have been busy creating html artifacts on this branch, with extensions/artifacts/prompt-builder/prompt-builder.html as the key working file. As per the other stuff in this library i want to give html artifacts a name and document their conventions, usage patterns and profiles. 
+eventually i want to have a suite of html artifacts as daily drivers, providing a platform for interacting with agents, as a favorable alternative to the default chat window and markdown docs. I also want conventions on where they are located and delivered. to form reliable usage patterns here also.
+My initial instinct is to call them FlightDecks, as a fun, but understandable way of showing that these are 'interactive' kinda like a control panel. 
+Another instinct is to integrate with dev-workspace. I have an experimental 'artifacts' directory in some of them that may be able to transfer to to name i give them. also claude has been naturally placing some artifacts in reviews/plans etc which is behaviour i welcome. 
+give me your takes and we can discuss.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Quick look at existing workspace decisions before opining.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: head -60 dev/workspace/plans/PIVOT.md; echo ----; head -40 dev/workspace/context/stage-1-decisions.md; echo ----; head -50 dev/workspace/plans/artifact-suite-implementation.md; echo ----; cat dev/workspace/WORKSPACE.md | head -40; echo ----; ls dev/workspace/artifacts; grep -n "artifacts" dev/workspace/workspace-config.yml
+Description: Skim workspace plans and config
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -n "^## \|^### \|^- \*\*D-" dev/workspace/context/stage-1-decisions.md | head -40; echo ----; grep -n "^## \|^### " dev/workspace/plans/PIVOT.md dev/workspace/plans/artifact-suite-implementation.md | head -50; echo ----; grep -n -i "artifact\|name\|flightdeck" dev/workspace/WORKSPACE.md | head; echo ----; ls -la dev/workspace/artifacts; grep -n -i "artifact" dev/workspace/workspace-config.yml
+Description: Outline plan and decision headings
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; sed -n 27,40p dev/workspace/context/stage-1-decisions.md; echo ----; sed -n 35,63p dev/workspace/plans/artifact-suite-implementation.md; echo ----; sed -n 224,241p dev/workspace/plans/PIVOT.md
+Description: Read page kinds, file layout, open decisions
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; sed -n 35,63p dev/workspace/plans/artifact-suite-implementation.md | cut -c1-220; echo ----; sed -n 224,241p dev/workspace/plans/PIVOT.md | cut -c1-220
+Description: Read file layout and open decisions, truncated
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Read the workspace: Stage-1 decisions, the tech plan's file layout (`extensions/skills/artifact-suite/…`, built pages → `dev/workspace/artifacts/<id>.html`), PIVOT's open decisions. Takes below.
+
+**1. Name — FlightDeck works, with one split**
+- Fits the library's naming register (DraftHorse, git-box, magic-reply). Distinct from "artifact", which is overloaded 3 ways here (Artifact tool, `dev/workspace/artifacts/`, the skill name). That alone justifies a coined name.
+- Real issue: you have two kinds of thing, not one. (a) **durable instruments** — prompt-builder: opened daily, versioned, has state (localStorage/FSA), lives in `extensions/`. (b) **task pages** — review/interview/demo: generated once, disposable, live in the workspace, carry a return prompt. Same shell, very different lifecycle.
+- Suggest: **FlightDeck** = the family (shell + conventions + skill). Two profiles under it: **deck** (durable) and **page** (task). Resist theming the sub-names (sortie/instrument) — durable-documents rule: any coined term needs a home in the doc; two coined terms is enough.
+- Caution: "deck" collides with slide decks in chat. Minor, define it once.
+
+**2. Location — kind decides, not one bucket**
+- Claude placing reviews in `reviews/` and plans in `plans/` is right: dw dirs already carry meaning, and archive/commit/history all work on them for free. A catch-all `artifacts/` duplicates that meaning and hides the page's purpose.
+- Proposed landing rule: review page → `reviews/`; interview/options/decision page → `plans/` (or `context/` once answered = decision record); demo/dashboard/anything with no natural home → `flightdecks/` (rename of the experimental `artifacts/` dir). The plan already has a "landing rule" slot; this fills it.
+- Durable decks: `extensions/flightdecks/<name>/<name>.html` (rename `extensions/artifacts`), symlinked into a plugin like every other asset. Skill assets (shell, templates, blocks) stay inside the skill dir — they're build material, not decks.
+- Repo docs: mirror DraftHorse — `docs/flightdeck/` for framework conventions/profiles/delivery, skill at `extensions/skills/flightdeck/`, optional rule in `extensions/rules/`.
+
+**3. dw integration**
+- dev-workspace is its own repo; the scaffold change (add `flightdecks/` + `.keep`) belongs there, and the tree config picks it up automatically. Cheap.
+- Worth a named tree (`dev-workspace tree`) listing decks/pages across workspace + `dev/branches/` archives — that's your "high-level insight" surface for pages.
+- Archives are the killer feature: task pages snapshot with their context. Argues strongly for pages living *inside* `dev/workspace/`, never in scratch/tmp.
+
+**4. Delivery — settle the open decision as "keep Artifact compat"**
+- Three surfaces: disk (`file://`, disk-primary links per D-18), published Artifact (stable URL, shareable), browser-MCP for verify. Compat cost is small (verify writes the wrapped copy) and it's the only way a durable deck becomes a true daily driver across machines/projects.
+- Convention: decks publish once with a stable URL recorded in the deck's README (redeploy same path); pages stay on disk, publish only on request. Cross-project deck access otherwise goes via `${CLAUDE_PLUGIN_ROOT}` after plugin install.
+
+**5. Profiles as the documented axis**
+- deck: persistent state, versioned with a plugin, no return prompt, own README.
+- page/respond: respond surface + return prompt, kind→dir landing, disposable.
+- page/read-only: demo, dashboard, figure — no state.
+- Profile is what the skill dispatches on; templates hang under it.
+
+Questions:
+- Name confirmed as FlightDeck? Sub-terms deck/page ok?
+- Rename `extensions/artifacts` → `extensions/flightdecks`, skill `artifact-suite` → `flightdeck`? (plan/PIVOT not yet built, so cheap now)
+- Kind→dir landing vs single dir — agree?
+- Keep Artifact-tool compat (settles PIVOT §8)?
+- Answered interview → `context/` or stays `plans/`?
+- Which plugin hosts prompt-builder + skill — chat-tools, or new `flightdeck` plugin?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+lets convert this reply into a review flightdeck so I can comment and answer. lets also do a comprehensive 'conventions' and 'terms' sweep of this workspace, placing all the terms and conventions I have used into the review. I will also approve and comment on each.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Plan: (1) sweep workspace for terms/conventions via agent, (2) inspect existing review page for the shell to reuse, (3) build the review page.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; wc -c dev/workspace/reviews/*.html; echo ----; head -c 6000 dev/workspace/reviews/artifact-suite-plan-review.html
+Description: Inspect existing review page shell
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; ls -lt dev/workspace/reviews/; for f in paper-ink-fingerprint export-import-discovery; do echo "== $f"; grep -n "page-meta\|<script\|</script>\|<style\|</style>\|class=\"card\|<section\|id=\"outwrap\|floater\|data-kind\|verdict" dev/workspace/reviews/$f.html | head -60; done
+Description: Locate structure of candidate review pages
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; f=dev/workspace/reviews/artifact-suite-plan-review.html; grep -n "page-meta\|<script\|</script>\|</style>\|id=\"outwrap\|class=\"floater\|data-card\|data-id=\|class=\"card\|<section id\|respond\|textarea\|Accept all\|Clear" $f | head -80; echo; grep -c "class=\"card" $f
+Description: Locate respond engine in plan review page
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; f=dev/workspace/reviews/artifact-suite-plan-review.html; sed -n 354,430p $f; echo "=====CARD"; sed -n 430,443p $f; echo "=====YOURCALL"; sed -n 649,660p $f; echo "=====DEAD"; sed -n 731,738p $f; echo "=====TAIL"; grep -n "</main>\|<footer\|</footer>\|<aside\|</aside>\|<script>" $f | tail -8
+Description: Read page-meta, masthead, card exemplars, tail markers
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; f=dev/workspace/reviews/artifact-suite-plan-review.html; grep -n "\.chip\.\|TAGS\|tagLabel\|labels *=\|data-tag" $f | grep -v "article class" | head -30; echo ====; sed -n 1162,1200p $f; echo ====; grep -n "sec-head\|\.count\|data-section" $f | head -8; grep -n "function \w*(" $f | wc -l
+Description: Get tag vocabulary and page tail
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Still gathering the shell pieces; sweep agent running in background.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; f=dev/workspace/reviews/artifact-suite-plan-review.html; sed -n 1162,1206p $f; echo "----DEFAULTVERDICTS"; grep -n "Agree|Revise|Reject\|DEFAULT_VERDICTS\|data-verdicts\") ||" $f | head -5; echo "----NEXT/return"; grep -n "next\b\|\"next\"\|meta.next" $f | sed -n 1,8p
+Description: Read page tail and default verdict handling
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Shell pieces gathered. Waiting on the sweep agent before assembling; drafting the takes cards meanwhile.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; f=dev/workspace/reviews/artifact-suite-plan-review.html; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; mkdir -p $S; sed -n 1,353p $f > $S/head.html; sed -n 1162,1166p $f > $S/tail-a.html; sed -n 1188,9999p $f > $S/tail-b.html; head -3 $S/tail-b.html; git rev-parse HEAD; grep -n "Stage 1\|<title>" $S/head.html | head
+Description: Extract shell head and tail into scratchpad
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; f=dev/workspace/reviews/artifact-suite-plan-review.html; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; sed -n 1186,9999p $f > $S/tail-b.html; head -2 $S/tail-b.html; sed -i '' 's|<title>Artifact suite — plan review</title>|<title>FlightDeck — naming and conventions review</title>|' $S/head.html; grep -c . $S/tail-b.html
+Description: Fix tail extraction and retitle head
+
+------------------------------------------------------------
+
+[USER]    💭: none
+are you looking for conventions and terms i have used when describing prompt builder or html artifacts on this branch?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Yes — that's the sweep. Scope I gave the agent:
+
+- All of `dev/workspace/` (context, plans, PIVOT, prompts, reviews `.html`, filebox, history transcripts, WORKSPACE.md) plus `prompt-builder.html` itself.
+- Catalogue every **term** you/agents coined for HTML artifacts (shell, card, respond surface, return prompt, page-meta, fingerprint, provenance, page kinds, landing rule, etc.) and every **convention** (file form, landing dirs, `<id>.html` naming, theme tokens, storage keys, return-prompt format, URL derivation, verification checks S/V, ceilings, script dialect).
+- Plus D-1..D-20 one-liners, your quoted phrasings, and open questions.
+
+Each becomes a card with Agree/Revise/Reject + comment, grouped: Terms, Conventions (by topic), Decisions, Open questions — after the Takes section from my last reply.
+
+Anything to add/exclude? e.g. prompt-builder's internal terms (deliverables, nested, builders, tooltips), or terms from earlier archived branches in `dev/branches/`?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+<task-notification>
+<task-id>a4dc4585e9b02da92</task-id>
+<tool-use-id>toolu_0167iD9v88wZ8aTnZsaC8JZ5</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/tasks/a4dc4585e9b02da92.output</output-file>
+<status>completed</status>
+<summary>Agent "Sweep workspace terms/conventions" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Sweep complete. All 36 workspace files plus `prompt-builder.html` examined. Note up front: **no "deck" term exists anywhere in this workspace** — the container words in use are *shell*, *page*, *suite*, *corpus* and *family*.
+
+Key file paths referenced throughout:
+- P = `~/Projects/agent-library/dev/workspace/plans/artifact-suite-implementation.md` (1166 lines — the Stage 2 tech plan, the primary source of terms)
+- V = `~/Projects/agent-library/dev/workspace/plans/PIVOT.md` (250 lines — amendments, wins where it disagrees with P)
+- D = `~/Projects/agent-library/dev/workspace/context/stage-1-decisions.md`
+- K = `~/Projects/agent-library/dev/workspace/prompts/prompt-2026-08-23-2257.md` (kickoff)
+- R = `~/Projects/agent-library/dev/workspace/reviews/` (7 `.html` pages)
+- PB = `~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html`
+
+---
+
+# A) TERMS (alphabetical)
+
+**Accept all** — button recording every untouched `data-recommended` card as agreed in one act; hidden until at least one card carries a recommendation. P `### Touched, defaults, Accept all, Clear`; D-8. Settled.
+
+**Answered record** — an `.answered` card the agent writes on republish *in place of* an interview question, keeping the question's id and carrying `data-answer="none"`. P `### Template: interview`; D-15. Settled.
+
+**Archive mirror / `dev/branches/` mirror** — per-branch snapshot of another branch's `dev/workspace/`, one level shallower; how a file on a non-current branch is opened from disk, badged "archived copy". P `### Archive mirror`; D-12; `workspace-config.yml` `archive.directory: dev/branches`. Settled.
+
+**Artifact** — a self-contained hand-authored HTML page presenting work to the user; also the kickoff's Stage 3 deliverable. K `Deliverables: Review, Implementation plan, Artifact`; `WORKSPACE.md` Purpose. Settled.
+
+**Artifact tool ("the Artifact tool")** — the claude.ai publishing tool that wraps a fragment in its own `&lt;!doctype html&gt;&lt;head&gt;&lt;body&gt;` skeleton and serves it under a CSP that blocks all external hosts except Google Fonts. P opening paragraph (gloss); V §3 (full definition). **Open** — V §8 reopens whether to depend on it at all.
+
+**Artifact suite / the suite** — the whole system: shell + templates + blocks + engine + skill. P Summary. Settled.
+
+**Blast radius** — scope of what a change can break; heading in `R/export-import-discovery.html`. Settled (adjacent artifact).
+
+**Block** — a small copyable markup shape with scoped CSS (`diff`, `panel`, `figure`). P `## Blocks`. Settled in P; V §5 moves block CSS/JS into the shell, so a block becomes documentation of a markup shape only.
+
+**Board** — `.shell.board`, the 1340px layout with `main` + sticky right `.sidebar`; also "board" as a demo shape (controls in `@content`, live rendering in `@sidebar`). P `### Layouts`, `### Template: demo kit`; D-1. Settled.
+
+**Card** — `&lt;article class="card" id="&lt;cardId&gt;" data-tag="…"&gt;`; one unit of decision. P `### Card anatomy`, `### Card contract`. Settled.
+
+**Card id** — agent-assigned kebab slug naming the card's *subject*, never a position; permanent once published; sole key for storage, radio `name`, ToC anchor and deep link. P `### Card contract` (ST-2, AR-6, PR-9). Settled.
+
+**Changed strip (`.changed`)** — amber engine-inserted bar reading "Changed since you answered (rev N)." with a Dismiss button, raised when a card's fingerprint moved. P `### Fingerprints…`; D-7. Settled.
+
+**Chip** — mono uppercase pill in a `.chiprow`. Modifiers: `.id` (anchor to own card, ordinal text), `.integrate`, `.yourcall`, `.defer`, `.dead` (withdrawn), `.earlier` ("Answered earlier", engine-inserted). Unmodified chip = free topic chip. P `### Chips and the filter bar`; D-3. Settled.
+
+**Chiprow** — the fixed first child of a card holding its chips. P `### Chips and the filter bar`. Settled.
+
+**Chrome** — the shared, non-content bytes of a page (tokens, layouts, masthead, ToC, filters, floater, engine); "the agent never writes chrome". P `### Form`, `### Token economy`. Settled.
+
+**Corpus** — the eight (nominally nine) reference HTML files Stage 1 read. D-20; K `## References`. Settled.
+
+**Demo** — a live interactive fragment inside `.demo`, composed freely by the building agent; the one exception to "everything reusable ships in the shell". D-16; P `### Template: demo kit`; V §7. Settled (shape open by design).
+
+**Demo helper (`SUITE.demo(id, fn)`)** — proposed shell-exposed scoping helper giving a demo `d.out`, `d.note`, `d.report`, `d.on`. V §7 "The demo helper". **Proposed.**
+
+**Demo kit** — a *kit*, not a page template: labelled fragments, class inventory, integration points, reserved-name list, one worked micro-example. P `### Template: demo kit`; D-16. Settled.
+
+**Diff-Review** — the *other*, out-of-scope HTML design family in this repo (`--bg/--panel/--muted/--line`, monospace throughout, no web fonts). `R/paper-ink-fingerprint.html` "Two families, not one". Settled.
+
+**Disk-primary links** — the rule that a reference's solid/primary chip is the `file://` one when the page is opened from disk, GitHub when on the web. P `### Origin gating`; D-18. Settled.
+
+**Engine** — the single IIFE at the foot of the shell that generates every response surface, ToC, filter bar, eyebrow, reference chips and the return prompt. P `## Runtime &amp; state`. Settled.
+
+**Eyebrow** — mono uppercase provenance strip at the top of the masthead: kind · rev · issue · pr · branch · commit · date; entirely engine-generated. P `### Eyebrow`, `### Masthead`. Settled.
+
+**Family / in-family** — whether an HTML document belongs to the Paper/Ink design system, judged by four always-present marks (token vocabulary, type triple, `.shell` wrapper, `.sec-head`). `R/paper-ink-fingerprint.html` "What makes a document in-family". Settled.
+
+**Filter bar** — shell furniture: `all | integrate | yourcall | defer | unanswered` buttons with DOM-computed counts; `all` and `unanswered` are *states*, not tags. P `### Chips and the filter bar`; D-3. Settled.
+
+**Fingerprint** — DJB2 hash of a card's normalised `textContent` plus `data-tag` and `data-verdicts`, taken per card, never per file. P `### Fingerprints…` (AR-7). Settled; V §9 amends *what is stripped* before hashing.
+
+**Floater / floating pair** — fixed bottom-right container holding `#status`, `Accept all`, `View prompt`, `Copy prompt`. P `### Floating pair`; D-10. Settled.
+
+**Held answers** — orphan answers surfaced in `#held-note` in the footer with Show / Discard. P `### Fingerprints, changed cards, orphans` (ST-13). Settled.
+
+**Kickoff** — the originating task prompt file. K = `dev/workspace/prompts/prompt-2026-08-23-2257.md`. Settled.
+
+**Kind** — the page kind: `review`, `options`, `issue`, `interview`, `demo` (six kickoff kinds onto three templates). P `### Six kinds onto three templates`; D-14. Settled.
+
+**Landing rule** — the rule stating where a built page lands on disk (`dev/workspace/artifacts/&lt;id&gt;.html`); named as an inline reference in `SKILL.md`. P File-layout `SKILL.md` row and `### SKILL.md shape`. Settled.
+
+**Lens** — one of the five reading angles of the Stage 1 investigation (design system, component catalogue, scripting and state, architecture, provenance and navigation); each lens's findings carry a prefix. `R/artifact-suite-investigation.html` sections. Settled.
+
+**Loose box (`.loose` / `data-loose`)** — a section-level free comment box with a `.lab` micro-label, engine-appended to any `&lt;section data-loose="…"&gt;`. P `### Generated respond surface` (CO-6). Settled.
+
+**Marker / marker region** — an editable region delimited by `&lt;!-- @name --&gt;` … `&lt;!-- @name:end --&gt;` (or `/* @name */` in CSS). Everything outside a marker is fixed chrome. P `### Markers`. Settled (names changed by V §7).
+
+**Masthead** — `header.masthead`: eyebrow, `h1`, `.standfirst`, optional `.masthead-meta`. P `### Masthead`. Settled.
+
+**Orphan** — a stored answer whose card has left the page; moved into `orphans` with its last title rather than dropped. P `### Fingerprints, changed cards, orphans`; D-7. Settled.
+
+**Origin gating** — CSS-only switching of link chips off `:root[data-origin="disk"|"web"]`, set by the pre-paint script, so a page needs no rebuild when published. P `### Origin gating`. Settled; V §9 adds `.ref-editor` to the web rule.
+
+**Page kind** — see Kind.
+
+**`#page-meta`** — the sole agent-authored machine-data block: `id`, `kind`, `rev`, `title`, `provenance{}`, `prompt.heading`, `next[]`. P `### #page-meta schema`; D-9. Settled.
+
+**Paper/Ink** — the repo's canonical design system: `--paper/--surface/--surface-sunk/--ink/--ink-soft/--ink-faint/--rule/--accent/--warn/--stop` each with `-soft` companions, plus the type triple and `.shell/.masthead/.eyebrow/.standfirst` scaffold. `R/paper-ink-fingerprint.html`; PB lines 21-74. Settled.
+
+**Pill row** — `.toc.pills`, the sticky horizontal ToC shown wherever the column is hidden. P `### Table of contents`; D-2. Settled.
+
+**Pre-paint script** — first `&lt;script&gt;` in the fragment, above `&lt;style&gt;`: restores the remembered theme and stamps `data-origin`, so no theme flash. P `### Theme control`; PB head. Settled.
+
+**Provenance** — the `#page-meta.provenance` object (repo, root, self, branch, commit, issue, pr, date, builtAt, editor) from which every URL on the page is derived. P `## Provenance &amp; links`. Settled.
+
+**Reference block / link-to-site (`details.ref`)** — an empty `&lt;details class="ref" data-path=… data-lines=… data-loc=…&gt;` the agent writes; the engine expands it into a summary plus Disk / Editor / GitHub / Copy-path chips. P `### link-to-site`; D-11. Settled.
+
+**Respond surface (`.respond`)** — the engine-generated `.verdicts` + `textarea` + `Clear` appended as a card's last child; the agent never writes an input. P `### Generated respond surface` (AR-5, CO-2). Settled.
+
+**Return prompt** — the Markdown block the page composes from touched cards and hands back to the agent; the whole point of the suite. P `### Return prompt`; K Goals. Settled.
+
+**Rev** — the `#page-meta.rev` integer the agent bumps on every regeneration; also recorded per stored answer. P; D-7. Settled.
+
+**Rail** — *reserved word.* `.shell.rail` is the 1180px ToC-column layout; a bare `.rail` selector is never defined by the shell because `rail` already names the folder-picker row in `mock-4-proposals.html`. D-5; P `### Layouts` name-collision rule. Settled.
+
+**Section id contract** — a section's `id` is a lowercase slug of its `.sec-head h2`; permanent once published, exactly as a card id is. P `### Table of contents` (PR-9). Settled.
+
+**Shell** — the single copyable bare-fragment file carrying all tokens, layouts, chrome and the engine; a page is made by `cp`-ing it. P `## Shell`; K "page shell". Settled.
+
+**Shell stamp** — line 1 of the shell: `&lt;!-- artifact-suite shell v1. Write only between the @markers and the class on .shell; everything else is shared chrome. --&gt;`; verification reads it. P `### Form`. Settled (position open — V §3/§8).
+
+**Signal (the)** — `--surface-sunk`, the one string that finds every Paper/Ink document and nothing else (15/15, zero collisions). `R/paper-ink-fingerprint.html`. Settled.
+
+**Standfirst** — the lead paragraph under the h1, capped at 62ch. P `### Masthead`; `R/paper-ink-fingerprint.html`. Settled.
+
+**Stats / stat tiles** — `.stats`/`.stat` numeric tiles for an issue-breakdown masthead. P `### Issue breakdown pieces`. Settled.
+
+**Templates (page templates)** — three files: `review.html` (serving review, options and issue-breakdown), `interview.html`, plus the demo kit. P `### Six kinds onto three templates`; D-14. Settled; V §5 demotes them from spliceable files to *markup exemplars*.
+
+**Token economy** — the accounting of what the agent never types versus what supplies it; the suite's efficiency contract. P `### Token economy`; K Goals "Agent is token efficient". Settled.
+
+**Touched** — a card is touched only after a genuine `change`/`input`, or a deliberate click on an already-checked recommendation; only touched cards enter the return prompt. P `### Touched, defaults, Accept all, Clear`; D-8. Settled.
+
+**Type triple** — Bitter (display, `--disp`), Source Serif 4 (body, `--serif`), JetBrains Mono (data, `--mono`), one Google Fonts link, each with system fallbacks. P `### Type triple and base rules`; `R/paper-ink-fingerprint.html`. Settled.
+
+**Verdict** — the user's per-card answer, chosen from that card's verdict set. P. Settled.
+
+**Verdict floor** — the `@supports not (selector(:has(*)))` rule that keeps verdict radios visible where `:has()` is unsupported. P `:has()` policy. Settled.
+
+**Verdict strip (`.verdict-strip`)** — accent-ground summary panel as the first child of the first section ("where it landed"). P `### Issue breakdown pieces`. Settled.
+
+**Verdict vocabulary** — the per-kind option set, carried as *data*: `review` = Agree|Revise|Reject, `issue` = Accept|Amend|Defer, `options`/`interview`/`demo` = none (card supplies its own via `data-verdicts`). P `### Card contract`; D-14. Settled.
+
+**Withdrawn card (`.card.dead`)** — a retired card that keeps its id, its `data-tag` and its held record, carries `&lt;span class="chip dead"&gt;Withdrawn&lt;/span&gt;` and `data-answer="none"`, and never leaves the page. P `### Withdrawn card` (AR-6). Settled.
+
+**Work package (WP-1…WP-10)** — the Stage 3 build units, each with a done-check. P `## Stage 3 work packages`. Settled; WP-10 deleted by V §1.
+
+*Finding-id prefixes* (Stage 1 lenses, `R/artifact-suite-investigation.html`): **DS-** design system, **CO-** component catalogue, **ST-** scripting and state, **AR-** architecture, **PR-** provenance and navigation; **Q-** round-1 open questions. 75 findings total.
+
+---
+
+# B) CONVENTIONS (grouped by topic)
+
+## B1. File form
+
+- **Bare fragment** — the shell ships no `&lt;!doctype&gt;`, `&lt;html&gt;`, `&lt;head&gt;` or `&lt;body&gt;`; Chrome supplies them from `file://`, the Artifact tool supplies its own. P `### Form`; D-18. **Open** (V §8: build against *dropping* the dependency and shipping a real doctype).
+- **Quirks-mode avoidance (four rules)** — lowercase class/id names only; explicit `font-size`/`line-height` on `td`/`th`; no percentage heights; no image in a table. P `### Form`. Settled *conditional on* B1's open decision.
+- **Non-ASCII CSS `content` written as escapes** — `\2212` (diff minus), `\00B7` (eyebrow separator), because `&lt;meta charset&gt;` is inert under the wrapper. P `### Form`. Same condition.
+- **Version stamp on line 1**, read by text and not by line number. P `### Form`; V §3. Settled (read-by-text amendment binding).
+- **Self-contained single file** — no external asset beyond the Google Fonts link and the data-URI favicon. P; `R/paper-ink-fingerprint.html`.
+- **Data-URI SVG favicon** — rounded square in the page's own accent; the shell's is a fixed literal (teal `#0D6B64` with three `#F4F6F6` paper bars). P `### Document order`; described as a "late addition" family mark in `R/paper-ink-fingerprint.html`.
+
+## B2. Location and landing
+
+- **Built pages land in `dev/workspace/artifacts/&lt;id&gt;.html`**, where `&lt;id&gt;` is `#page-meta.id`. P File layout; D-19.
+- **`dev/workspace/reviews/`** keeps its documented meaning — reviews of completed work — and holds the Stage 1 corpus. P File layout.
+- **`dev/workspace/filebox/`** is a temporary location, purged regularly. `filebox/README.txt`.
+- **Both directories archive to `dev/branches/&lt;branch&gt;/` identically**, so the mirror route works for either (PR-8). P.
+- **Id collision check before `cp`** — `ls dev/workspace/artifacts dev/branches/*/artifacts`; on `file://` every local page shares one origin, so a duplicate id silently merges two pages' answers (AR-8, ST-3). P.
+- **Skill lives at `extensions/skills/artifact-suite/`**; symlinked into `plugins/chat-tools/skills/`. P; D-19. **Withdrawn** by V §1 (release packaging out of scope).
+
+## B3. Naming
+
+- Page file name = `&lt;id&gt;.html`; `&lt;id&gt;` = `#page-meta.id` = kebab slug of the subject, permanent once published.
+- Card id = kebab subject slug; a stable external identifier (`ds-1`, `issue-45`) is valid; an ordinal is not. Enforced by S4 (`^[a-z]?\d+$` rejected) and a runtime warning.
+- Section id = lowercase slug of its `h2`; permanent.
+- Radio group `name` = `v-&lt;cardId&gt;`.
+- `&lt;title&gt;` = `#page-meta.title` = `&lt;h1&gt;` — disagreement warns via `checkTitles()` and fails S7.
+- ToC / `.rail` naming: table of contents is `.toc`; `.rail` reserved (D-5). A block needing an element named `rail` scopes it; the figure block's SVG class is renamed `.track`.
+- `layout`, `card`, `section`, `show` are reserved keywords, never marker names.
+- Reserved for demos/blocks: every shell id, `data-theme`, every token, every shell class (`.status`, `.card`, `.chip`, `.respond`, `.toc`, `.filters`, `.floater`) even where the shell's rule is scoped elsewhere.
+
+## B4. Theme and tokens
+
+- **Three theme blocks, always** — light on bare `:root`; dark under `@media (prefers-color-scheme: dark)` guarded by `:root:not([data-theme="light"])`; dark again under `:root[data-theme="dark"]`. Copied byte-for-byte from PB lines 21-74 with aligned-colon formatting. P `### Tokens`; DS-1.
+- **14 original tokens + exactly 7 added** (`--add-bg`, `--add-ink`, `--del-bg`, `--del-ink`, `--keep-ink`, `--add-mark`, `--del-mark`). No other token is ever added. P `### Tokens`; DS-8, DS-14, DS-16.
+- **Radius is hardcoded, not tokenised** — 2px on controls, 3px on cards, stated as one comment: "No token — indirection over a constant."
+- **Two prose measures, set once** — 68ch on `.card p/ul/ol` and `.sec-intro`; 62ch on `.standfirst`, `.gloss`, `blockquote`.
+- **No template or block ever names a font family, a raw colour, or restates a shell selector.** DS-4, DS-16.
+- **Three-way theme control** — System / Light / Dark; System removes both the `data-theme` attribute and the stored key. D-4.
+- **`:has()` policy** — allowed (Chrome ≥105 target); a `:has()` rule may only add a state the native control already expresses, never shares a selector list with a non-`:has()` selector, and the one load-bearing use (`.verdicts label:has(input:checked)`) carries an `@supports` floor.
+
+## B5. Marker regions and how a page is written
+
+- **Seven marker regions, each exactly once.** Original set: `@doc-title`, `@page-meta`, `@masthead`, `@template-style`, `@content`, `@sidebar`, `@template-script`. **Amended set (V §7, binding):** `@doc-title`, `@page-meta`, `@masthead`, `@content`, `@sidebar`, `@demo-style`, `@demo-script` — count stays seven so S2 stands verbatim.
+- **Two fill semantics** — *placeholder regions* (`@doc-title`, `@page-meta`, `@masthead`) ship one element which is replaced, never appended to; *empty regions* fill by rewriting the closing marker into content-plus-the-same-closing-marker.
+- **One writable attribute outside the markers**: the `class` on the single `.shell` element (`rail` or `board`, nothing else).
+- **Every other byte outside a marker is fixed chrome.**
+- **Section end markers** — each `&lt;section&gt;` carries `&lt;!-- @end-&lt;sectionId&gt; --&gt;` before its closing tag, because `&lt;/section&gt;` is not a unique Edit anchor. V §6, binding.
+- **A page is created by `cp`, never by writing chrome.** P `### Form`; AR-1, AR-15.
+- **Never read the shell; never read a page copy in full** — bounded `Read` with `offset`/`limit` unlocks Edit for the whole file; ranges are bounded with `grep -n` and one should "err wide". P invariant as amended by V §4, binding.
+- **`splice.py`** — the original seven-form splice tool. **Deleted** by V §6; replaced form-by-form with `Edit`, bounded `Read`, and `grep -n 'article class="card'`.
+- **The shell carries everything reusable** — every CSS class a template uses pre-exists in the shell; all base JS lives in the shell; nothing is spliced, lifted or pasted between files *at build time*. V §5, binding. (Authoring the shell itself still transcribes from `prompt-builder.html`, `section-ledger.html` and `corpus-sweep-design.html`.)
+
+## B6. Storage
+
+- **Key shape**: `artifact-suite.page.&lt;id&gt;` for the page document; `artifact-suite.theme` (shared across all artifacts) for the theme. Nothing else is ever written. Enforced by V8. D-6, AR-8.
+- **One JSON document per page**, read once at boot, written once per 200ms-debounced change; `schema: 1`, `pageId`, `rev`, `savedAt`, `cards{}`, `sections{}`, `orphans{}`.
+- **Per-card record**: `verdict`, `comment` (raw newlines kept), `fingerprint`, `answeredAt`, `touched`, `rev`. Orphans add `title`.
+- **Every `localStorage` access wrapped in try/catch** with an in-memory `MEM` fallback; when `CAN_LS` is false the footer renders "This browser is not saving answers — copy the prompt before you close the page."
+- **Demos store nothing** — the page has one document under one key; demo state lives in memory or `dataset`.
+- **Keep every answer** — a removed card's answer is held, not dropped; a changed card is flagged, not cleared. D-7 (explicitly "flagged, not lost", correcting prompt-builder's discard-on-change policy).
+
+## B7. Return prompt format
+
+Exact shape (P `### Return prompt`), settled:
+
+```
+## &lt;prompt.heading or title&gt;
+
+Source: &lt;root/self&gt; · branch &lt;b&gt; · issue|pr &lt;url&gt; · rev &lt;n&gt; · built &lt;YYYY-MM-DD&gt;
+Untouched: N left at their recommended default, M unanswered.
+Held: N answers for cards no longer on this page (id, id).
+
+### Decisions
+
+**&lt;cardId&gt; · &lt;h3 text&gt;**
+- Verdict: &lt;value&gt;
+- Note:
+  &lt;two-space-indented lines, blank lines bare&gt;
+- &lt;data-report&gt;: &lt;state&gt;
+
+### Next
+
+- &lt;each META.next entry&gt;
+
+Re-open: file://…
+```
+
+Rules: heading is `"## " + (prompt.heading || title)` with no leading `##` in the data; `Source:` joins present values with ` · `, empties dropped; `Untouched:` is two bare counts naming no card, each clause dropped at zero; `Held:` lists ids only and appears only when orphans exist; `### Decisions` lists touched cards in document order, then touched `data-loose` sections as `**&lt;sectionId&gt; · &lt;h2 text&gt;**`; a single-line note is inline, a multi-line note is indented two spaces with blank lines bare; a radio token is never upper-cased; filtering never affects composition; the whole prompt is `""` when nothing is touched and no orphan is held, and Copy then flashes "Nothing answered yet — nothing to copy."
+
+## B8. Link and URL derivation
+
+- **No template ever writes a literal href** — every URL is derived at load from `META.provenance`. Enforced by S6. PR-2, PR-5, AR-12.
+- URL templates: Disk `"file://" + encPath(root + "/" + diskPath)` (no line fragment); Editor `editor + "://file" + encPath(...) + ":" + firstLine`; GitHub blob `repo + "/blob/" + ref + "/" + encPath(path) + lineAnchor`; Issue/PR/Branch/Commit `repo + "/issues/"|"/pull/"|"/tree/"|"/commit/"`.
+- `encPath(p)` percent-encodes each segment; line suffixes append *after* encoding.
+- **GitHub pins to the commit the agent read**; `ref` becomes a branch name only when the block names one; `data-commit` overrides. D-12, PR-11 ("never named `base`").
+- **Every outbound link carries `target="_blank" rel="noopener"`**; in-page `#` anchors never do. D-13; V13.
+- **Exactly one `.ref-chip` is solid per reference** (PR-10), chosen by CSS off `data-origin`.
+- **Origin gating hides `.ref-disk` and `.ref-editor` on the web** (the `.ref-editor` half is V §9's fix) and both plus GitHub-primary on `ref--nodisk`.
+- **Absolute checkout path is accepted in the page** (D-11). **Open** — V §8 second decision; build against keeping it.
+- **`data-find` (scroll-to-text) is reserved and not implemented.** PR-13.
+- **A diff block is always preceded by a `details.ref` naming its file.**
+- **Every `.path` element must sit inside a `.ref` or `.ref-link`** — `auditPaths()` flags strays with `path--unlinked` and a `console.warn`; S5 fails the build.
+
+## B9. Script dialect and placement
+
+- **Two scripts only**: the pre-paint script above `&lt;style&gt;`, and one engine IIFE `(function () { "use strict"; … })();` at the foot. Templates contribute no JavaScript.
+- **prompt-builder's dialect**: `var`, function declarations, string concatenation. **No** arrow functions, template literals, optional chaining or `class`.
+- **Callers above callees**, ordered by invocation, under twelve fixed banners: Boot, Meta and capabilities, Storage, Fingerprints, Respond surfaces, Restore, Recording, Provenance, Navigation and filters, Return prompt, Clipboard and status, Theme. (`extensions/rules/STYLE.md`.)
+- **Comments state constraints only** (`extensions/rules/code-comments.md`); exactly three earn one: the shared `file://` origin, `localStorage` throwing, and the `&lt;/` rule.
+- **The `&lt;\/` rule** — a literal `&lt;/` inside any JSON or JS string ends the script block, so it is written `&lt;\/`. ST-11; applies to `#page-meta` and `@demo-script`.
+- **One global only**: `window.SUITE = { copyText, flash, meta }` (plus `SUITE.demo` if the proposed helper is accepted).
+- **One clipboard path** (`copyText`) and **one status path** (`flash`) for every transient message; `#status` has `role="status"`; no `prompt()` or `alert()` anywhere. ST-7, ST-8.
+- **Events are delegated from `document`** — one `change`, one `input`, one `click`, dispatched on `closest("[data-card],[data-section],[data-filter],[data-held]")`.
+- **Capabilities are probed, never assumed** — `CAN_LS` by write-probe, `CAN_FS` by `typeof window.showSaveFilePicker`; `[data-needs="fs"]` elements are stripped when unavailable.
+
+## B10. Card authoring
+
+- Fixed body order: `.chiprow`, `h3`, optional `blockquote`, prose and evidence, engine `.respond` last. CO-8.
+- The agent writes the `&lt;article&gt;`, its chiprow, its `h3` and its prose — and nothing else.
+- The card edge colour is a `border-left` driven by `data-tag`, never a class kept in sync. DS-11.
+- Optional article attributes: `data-tag`, `data-verdicts` (pipe-separated), `data-recommended` (exact option text), `data-answer` (`verdict` | `options` | `none`).
+- Verdict sets live on the article, not in `#page-meta` — a card-keyed map in JSON drifts from the cards it names.
+- On an options card, `checked`, `.recommended` and `data-recommended` **must agree**; a mismatch is a build error (S5).
+- A quote is `&lt;blockquote&gt;&lt;p&gt;…&lt;/p&gt;&lt;cite&gt;You · session YYYY-MM-DD&lt;/cite&gt;&lt;/blockquote&gt;` — shell CSS only, engine generates nothing; a multi-turn exchange is consecutive blockquotes each with its own `&lt;cite&gt;`.
+
+## B11. Verification
+
+**Static tier — S1…S10** (one script, `python3 $S/verify.py &lt;page&gt; --static`, exits non-zero naming the first failure):
+- S1 no `&lt;!doctype`/`&lt;html`/`&lt;head`/`&lt;body` tag (`&lt;header` not a match); line 1 carries the shell stamp. *First clause inverts if the Artifact-tool dependency is dropped.*
+- S2 all seven marker pairs present exactly once.
+- S3 `#page-meta` parses after `&lt;\/`→`&lt;/`; carries id, kind, rev, title, provenance, prompt, next.
+- S4 every card has an id; ids unique; none matches `^[a-z]?\d+$`.
+- S5 options cards agree on checked/`.recommended`/`data-recommended`; every `.path` sits inside a ref.
+- S6 no host but `fonts.googleapis.com` / `fonts.gstatic.com`; every other absolute URL sits in `#page-meta` or a `data-url`; path check prints `OK`.
+- S7 exactly one `&lt;title&gt;`, one `&lt;h1&gt;`, one `id="page-meta"`; no placeholder text (`Untitled`, `&gt;{}&lt;`) survives.
+- S8 exactly one element with `class="shell"`/`"shell rail"`/`"shell board"` and no other class on it.
+- S9 every spliced `@style`/`@script` part byte-identical to its source. **Deleted** by V §5.
+- S10 every `article.card` is a descendant of a `section[id]`.
+
+**Runtime tier — V1…V17** (Playwright over `python3 -m http.server 8787 --bind 127.0.0.1`, pid recorded and killed): V1 zero console errors/warnings · V2 ToC count = card count, `.respond` count = eligible-card count · V3 no hand-written radio/textarea outside `.respond` (except `.options`, `.demo`) · V4 every radio group named `v-&lt;cardId&gt;` · V5 theme three-way behaviour · V6 pre-paint script first and before `&lt;style&gt;` · **V6a** bare vs doctype-wrapped double-serve: `BackCompat` vs `CSS1Compat`, identical screenshots at 1100px and identical `getBoundingClientRect()` widths · V7 reload restores verdict and multi-line comment · V8 only `artifact-suite.page.&lt;id&gt;` and `artifact-suite.theme` keys written · V9 Clear returns a card to unanswered · V10 empty-page and one-card prompt shapes · V11 Accept all · V12 mutate one card → `.changed` on that card only · **V12a** held answers, Show/Discard, `.chip.earlier` on return · **V12b** `data-loose` box and its prompt block · V13 link/chip correctness across plain, mirrored, nodisk, `data-url` and `editor: null` refs · V14 no horizontal overflow at 1440/1100/900/390px; column hidden and pills visible below 1040 · V15 filter behaviour including `unanswered` · V16 clipboard-deleted fallback, `role="status"`, `[data-needs="fs"]` stripping · **V16a** exactly one `aria-current="true"` per ToC surface · V17 clicking an already-checked recommendation marks it touched.
+
+**Fixtures** — `tests/fixtures/{review,interview,demo}-fixture.html` freeze provenance (`id: fixture-&lt;kind&gt;`, 40-zero commit, `date: 2000-01-01`, `branch: fixture`) and are the regression suite; run both tiers over all three after any change to shell, template or block; a fixture that must change to keep passing is a contract change and is re-committed with the shell change.
+
+## B12. Sizes and ceilings
+
+- Shell: **36KB hard / 32KB target** (CSS ≤16KB, engine ≤17KB, head+scaffold ≤3KB). **Dropped** by V §5 — replaced with a single recorded byte measurement in WP-2's done-check and again in the acceptance test.
+- Templates 3-9KB; blocks 1.5-2.5KB; references ~80-130 lines; `SKILL.md` 260-320 lines; fixtures 48-60KB.
+- Working budget cited as 120KB per page; a 10-card page expected near 48KB.
+- Expected authoring cost: ~95 lines / 8-10KB for a 10-card review, none of it chrome, against 3-4K output tokens of chrome per hand-authored page.
+
+## B13. Build procedure and skill
+
+- Ten steps (P) → **nine steps** (V §6): Open the Build · Load the Page Kind · Resolve Provenance · Instantiate the Shell · **Write the Content** (widened from "Write the Cards"; owns section skeletons, cards and `@sidebar`) · Verify the Page · Revise a Published Page · Hand the Page Over · Handle a Build Problem. Step 5 "Splice the Template" deleted.
+- Steps are referred to **by title, never by number**, so a renumber cannot break a pointer. V §6.
+- Every Bash call is a fresh shell — re-assign `P` and `S` at the head of each command.
+- One page template per page; the demo kit may be read alongside it; never a third page template — a shape the templates do not cover is a hard bail and an issue.
+- Build-time git facts run once from the repo root: `git rev-parse --show-toplevel/--abbrev-ref HEAD/HEAD`, `git remote get-url origin`, `date -u`, `gh pr view --json number`. `HEAD` as branch means detached → `null`; `issue` is never guessed.
+- Updates edit one card in place; a whole-file rewrite raises `.changed` on every card and is a defect.
+- **Plugin assets run from the last installed release, so the skill is executed by hand from the working tree throughout Stage 3.** V §1 (the one surviving sentence of the deleted release section).
+- Skill format: `harness-format: DraftHorse`. **Withdrawn** by V §2 — build a plain `SKILL.md`; DraftHorse conversion is a separate later interactive task, because DraftHorse gates halt for human approval and a workflow runs unattended.
+
+## B14. Workspace-level conventions (non-artifact)
+
+- Workspace dirs: `context/`, `plans/`, `prompts/`, `reviews/`, `artifacts/`, `research/`, `tasks/`, `filebox/`, `history/`, each with a `.keep`.
+- History transcripts: `&lt;8-hex session prefix&gt;_&lt;kebab-summary&gt;.txt` in `dev/workspace/history/`, written by `conversation-capture` with `$HOME`→`~` sanitisation, thinking and subagents excluded. `workspace-config.yml`.
+- Branch naming: domain-scoped kebab (`artifacts`, `agent-teams`, `drafthorse-v2`). `history/ea347861…txt`.
+- Archive: `dev/branches/&lt;branch&gt;/` via `dev-workspace archive`; workspace protection over `dev/workspace` and `.claude/rules`.
+- Prompt-template Action DSL: `action=""` ownership words (User Input, User Defined, Collaborate, Assistant Manages, Assistant Decides, Assistant Checks, Assistant Discovery), `?` fallback chains, `❌/✅/🚫` status glyphs, `!` context auto-load prefix. `prompts/README.md`.
+- Magic phrases: "show your working", "show your options", "show your strategy", "use your claude space", "show your context", "show your difficulties". `README.md`.
+- Verify HTML in a browser over http — Playwright blocks `file:`; `python3 -m http.server` from the repo root, with a cache-busting query after edits. `WORKSPACE.md` Discoveries.
+
+---
+
+# C) STAGE-1 DECISIONS D-1…D-20
+
+Source: `dev/workspace/context/stage-1-decisions.md`, recorded 2026-08-24 from the user's answers to `reviews/artifact-suite-investigation.html`. Every finding tagged `integrate` and not contradicted is accepted as written.
+
+- **D-1** Shell layouts: three named layouts — `.shell` (940px reading), `.shell.rail` (1180px grid, 232px left ToC rail, breakpoint 1040px), `.shell.board` (1340px, main + sticky right rail, breakpoint 1060px). A page picks by class.
+- **D-2** ToC below 1040px: sticky pill row rendered from the same generated list.
+- **D-3** Chip vocabulary: `integrate` / `yourcall` / `defer` across markup, chips, card edge and filter buttons. Filter bar is a shell feature.
+- **D-4** Theme control: three-way System / Light / Dark. System removes the attribute and the stored key.
+- **D-5** Naming: the table of contents is `.toc`; `.rail` stays reserved for existing folder-picker rows.
+- **D-6** Storage: one localStorage JSON document per page, keyed by a page id the agent writes in the page meta block. Theme is one shared key across artifacts.
+- **D-7** Republish: keep every answer; a changed card shows an amber "changed since you answered" strip; a removed card's answer is held for its return; every regeneration bumps `rev`.
+- **D-8** Defaults: the recommended option is pre-checked; only touched cards enter the return prompt; an explicit "Accept all" button records the pre-checked defaults as agreement.
+- **D-9** Page data: one `#page-meta` JSON block holds provenance, page id, rev, prompt heading and next-step guidance.
+- **D-10** Copy controls: floating pair (Copy prompt, View prompt), bottom right.
+- **D-11** File reference block emits three links — disk (`file://`), editor (`vscode://file/&lt;abs&gt;:&lt;line&gt;`), GitHub blob — plus a copy-path control. The absolute checkout path is acceptable in the page.
+- **D-12** GitHub links pin to the commit the agent read. Files on other branches open from disk via the `dev/branches/` archive mirror, marked "archived copy".
+- **D-13** Every outbound link opens in a new tab (`target="_blank" rel="noopener"`).
+- **D-14** Three templates. Review, options and issue-breakdown share one card anatomy differing by verdict vocabulary (data). The six kickoff kinds map onto the three in the skill's documentation.
+- **D-15** Interview page on republish: answered questions are rewritten by the agent as `.answered` record cards.
+- **D-16** Demo page: no fixed shape. Demos are fully customisable by the building agent; the suite must document the available structure, classes and integration points so the agent composes a demo from known parts. *(User's own words: "I wanted demos to be fully customisable by the building agent. but also the agent should know the available structure, classes and integration points.")*
+- **D-17** Panel/modal: shipped as an optional block, not part of the shell. *(Not amended; V §5 ships its implementation in the shell while its presence stays optional.)*
+- **D-18** File form: bare fragment (no doctype/html/head/body), disk-primary links; publishing via the Artifact tool stays open. — **REOPENED** by V §3/§8.
+- **D-19** Packaging: ship as a skill (invocable, versioned, released with the plugins). Deviates from the review's recommendation (bare assets); accepted as the user's call. Where built pages land is settled in the Tech Plan. — **AMENDED** by V §1: skill kept, versioning and release clauses withdrawn.
+- **D-20** Corpus: eight reference files. `dev/workspace/filebox/review.html` is not part of it.
+
+---
+
+# D) OPEN QUESTIONS FOUND IN THE DOCS
+
+**D1. Keep Artifact-tool compatibility?** — Amends D-18. Blocks WP-1 (doctype or not, plus the four quirks rules) and WP-8 (`verify.py`'s doctype-wrapped copy for V6a). Build against **drop the dependency** — ship an ordinary HTML document with a doctype. Record in P `### Form` and in D-18. `PIVOT.md` §8. *Open.*
+
+**D2. May `provenance.root` carry the absolute checkout path?** — Blocks WP-3. It holds the absolute path because that is what makes the Disk and Editor chips resolve; a published page then carries the home-directory name. Build against **keep it** (D-11's existing answer). Alternative: blank `root` at publish time. Record in P `### link-to-site`. `PIVOT.md` §8. *Open.*
+
+**D3. The demo helper `SUITE.demo(id, fn)`** — worked-out suggestion, explicitly marked **Proposed**; rejecting it costs nothing structural (demo scripts wire their own listeners at 3-4× the length). `PIVOT.md` §7. *Proposed.*
+
+**The plan's five original unresolved questions** (P `## Unresolved questions`, mirrored as Q1-Q5 cards in `reviews/artifact-suite-plan-review.html` §questions), with V §8's dispositions:
+- **Q1 Shell budget** — 36KB hard / 32KB target over Stage 1's 14-18KB. *Superseded* — drop the ceilings entirely rather than raise them.
+- **Q2 `Bash(kill:*)` for the verification server**, or the user starts and stops it. *Stands unchanged — still open.*
+- **Q3 Do `tests/fixtures/` ship inside the released plugin payload?** *Deferred* with release packaging; fixtures stay in the repo regardless. (Carries no recommendation — Accept all skips it.)
+- **Q4 Bare fragment vs a doctype stripped at publish.** *Superseded and re-decided as D1 above*; its old default of "keep the bare fragment" carries no weight.
+- **Q5 Confirm the skill's tool set.** *Stands with its subject changed* — with `splice.py` gone, the set to confirm is `Read` with `offset`/`limit` plus `Edit`; the invariant is unchanged in substance.
+
+**Unresolved items inside the reviews:**
+- `reviews/artifact-suite-plan-review.html` card `fingerprint-boot-order` — "Strip generated regions | Fix the boot order | Leave it" (recommended: strip). Resolved as binding in V §9.
+- Same page, card `root-path-exposure` — "Accept the exposure | Strip root on publish | Revise", *no recommendation*. Same subject as D2.
+- Same page, cards `file-system-access`, `relroot-prefix` (`data-tag="defer"`, `data-answer="none"`) — deliberately parked, no verdict taken.
+- Same page, section `#questions` carries `data-loose="Anything the five questions missed"` — an open catch-all comment slot.
+- `reviews/artifact-suite-investigation.html` §"Gaps the lenses missed" — 16 items raised by verification, no verdict taken, listed for the Tech Plan: including the "rail" terminology collision, the missing `filebox/review.html`, the absent panel/modal precedent, the `target="_blank"` gap across the whole corpus, and four numerical corrections to findings (AR-2's selector counts, AR-11's doctype split, AR-13's size range, PR-3's overstated precedent).
+- `reviews/export-import-discovery.html` §"A new capability flag is needed" and §"Watch items" — open items on File System Access export.
+- `reviews/section-ledger.html` §"Open questions" — open items on prompt-builder section design.
+- `reviews/mock-4-proposals.html` §"Deferred" (prompt library, repo browser) and §"Your call".
+
+**Risks recorded but not resolved** (P `## Risks`): shell budget vs AR-1's estimate; whether Chrome's `file://` origin throws on `localStorage` (AR-8 and CO-12 disagree — hence the localhost runtime tier plus `MEM` fallback); `:has()` with no fallback beyond the verdict floor; quirks mode from disk; absolute checkout path exposure; the fingerprint blind spot for attribute-only edits (notably changing `data-recommended` alone raises nothing); the broad `Bash(kill:*)` grant; and a model-invocable description that could fire on unrelated HTML work.</result>
+<usage><subagent_tokens>126814</subagent_tokens><tool_uses>25</tool_uses><duration_ms>302166</duration_ms></usage>
+</task-notification>
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Sweep finished (≈65 terms, 14 convention topics, D-1..D-20, open questions). No reply on scope, so proceeding with defaults: prompt-builder's internal vocabulary and `dev/branches/` archives excluded — flagged as a card so you can pull them in. Building the page via a generator.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad/gen.py
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; tail -c 300 $S/head.html; echo; echo ---; cat $S/tail-a.html; python3 $S/gen.py && grep -c 'article class="card"' dev/workspace/reviews/flightdeck-naming-review.html && grep -o 'id="[a-z0-9-]*"' dev/workspace/reviews/flightdeck-naming-review.html | sort | uniq -d
+Description: Generate page, check card count and duplicate ids
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; python3 - <<'EOF'
+S="/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad"
+p=S+"/gen.py"; s=open(p).read()
+s=s.replace('return card(name, body, tag=tag, rec=rec, verdicts=verd, topic=topic or status, src=src)','return card(name, body, tag=tag, rec=rec, verdicts=verd, topic=topic or status, src=src, cid="term-"+slug(name))')
+s=s.replace('html = head + "\\n<body>\\n\\n"','html = head + "</head>\\n<body>\\n\\n"')
+open(p,"w").write(s)
+EOF
+python3 $S/gen.py && f=dev/workspace/reviews/flightdeck-naming-review.html && grep -o 'id="[a-z0-9-]*"' $f | sort | uniq -d; grep -c '<article class="card"' $f; grep -n "</head>" $f | head -2
+Description: Fix id collisions and head close, regenerate
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now verifying in a browser: serve over http, check console, screenshot.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: (python3 -m http.server 8787 --bind 127.0.0.1 >/dev/null 2>&1 & echo $! > /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad/srv.pid); sleep 1; curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8787/dev/workspace/reviews/flightdeck-naming-review.html
+Description: Start local http server for verification
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; ls plugins/classroom/mcp/node_modules 2>/dev/null | grep -i playwright; ls ~/.cache/ms-playwright 2>/dev/null | head; which chromium google-chrome; ls /Applications | grep -i chrome
+Description: Find a headless browser option
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; C="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"; "$C" --headless=new --disable-gpu --no-first-run --user-data-dir=$S/chrome-profile --window-size=1440,1000 --screenshot=$S/shot.png --virtual-time-budget=4000 --enable-logging=stderr --v=0 "http://127.0.0.1:8787/dev/workspace/reviews/flightdeck-naming-review.html" 2>&1 | grep -i "console\|error" | grep -v "gpu\|dbus\|Fontconfig" | head; ls -la $S/shot.png; "$C" --headless=new --disable-gpu --user-data-dir=$S/chrome-profile --window-size=1440,1000 --dump-dom --virtual-time-budget=4000 "http://127.0.0.1:8787/dev/workspace/reviews/flightdeck-naming-review.html" 2>/dev/null > $S/dom.html; python3 - <<'EOF'
+import re
+S="/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad"
+d=open(S+"/dom.html").read()
+print("cards", len(re.findall(r'<article class="card',d)))
+print("respond", d.count('class="respond'))
+print("toc entries", len(re.findall(r'toc-column.*?</nav>',d,re.S)) and len(re.findall(r'<a [^>]*href="#',re.search(r'id="toc-column".*?</nav>',d,re.S).group(0))))
+print("filters hidden?", 'id="filters" hidden' in d)
+print("eyebrow", re.search(r'id="eyebrow">(.*?)<div class="themeset',d,re.S).group(1)[:300])
+print("foot", re.search(r'<footer id="foot">(.*?)</footer>',d,re.S).group(1)[:300])
+print("loose", d.count("data-loose"), d.count('class="loose'))
+EOF
+Description: Headless Chrome screenshot and DOM check of the page
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; pkill -f "chrome-profile" ; rm -rf $S/chrome-profile; python3 - <<'EOF'
+import subprocess, re
+S="/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad"
+C="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+url="http://127.0.0.1:8787/dev/workspace/reviews/flightdeck-naming-review.html"
+base=[C,"--headless","--disable-gpu","--no-sandbox","--user-data-dir="+S+"/cp","--window-size=1440,1000","--timeout=8000"]
+try:
+    r=subprocess.run(base+["--dump-dom",url],capture_output=True,text=True,timeout=40)
+    d=r.stdout
+    print("dom bytes",len(d))
+    print("cards", len(re.findall(r'<article class="card',d)))
+    print("respond", d.count('class="respond'))
+    m=re.search(r'id="toc-column".*?</nav>',d,re.S)
+    print("toc entries", len(re.findall(r'href="#',m.group(0))) if m else None)
+    print("filters hidden?", 'id="filters" hidden' in d)
+    m=re.search(r'id="eyebrow">(.*?)<div class="themeset',d,re.S); print("eyebrow", re.sub(r'<[^>]+>',' ',m.group(1))[:200] if m else None)
+    m=re.search(r'<footer id="foot">(.*?)</footer>',d,re.S); print("foot", re.sub(r'<[^>]+>',' ',m.group(1))[:200] if m else None)
+    print("loose", d.count('class="loose'))
+    err=[l for l in r.stderr.splitlines() if "CONSOLE" in l or "Uncaught" in l]
+    print("console", err[:5])
+except subprocess.TimeoutExpired as e: print("timeout", e)
+try:
+    subprocess.run(base+["--screenshot="+S+"/shot.png",url],capture_output=True,text=True,timeout=40); print("shot ok")
+except subprocess.TimeoutExpired: print("shot timeout")
+EOF
+ls -la $S/shot.png 2>/dev/null
+Description: Dump rendered DOM and screenshot with bounded timeouts
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Browser verification: Playwright MCP is locked by another session and the first headless Chrome run hung; retrying once without the cleanup commands.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; python3 - <<'EOF'
+import subprocess, re
+S="/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad"
+C="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+url="http://127.0.0.1:8787/dev/workspace/reviews/flightdeck-naming-review.html"
+base=[C,"--headless","--disable-gpu","--no-sandbox","--user-data-dir="+S+"/cp2","--window-size=1440,1000","--timeout=8000"]
+try:
+    r=subprocess.run(base+["--dump-dom",url],capture_output=True,text=True,timeout=40)
+    d=r.stdout
+    print("dom bytes",len(d))
+    print("cards", len(re.findall(r'<article class="card',d)))
+    print("respond", d.count('class="respond'))
+    m=re.search(r'id="toc-column".*?</nav>',d,re.S)
+    print("toc entries", len(re.findall(r'href="#',m.group(0))) if m else None)
+    print("filters hidden?", 'id="filters" hidden' in d)
+    m=re.search(r'id="eyebrow">(.*?)<div class="themeset',d,re.S); print("eyebrow", re.sub(r'<[^>]+>',' ',m.group(1))[:200] if m else None)
+    m=re.search(r'<footer id="foot">(.*?)</footer>',d,re.S); print("foot", re.sub(r'<[^>]+>',' ',m.group(1))[:200] if m else None)
+    print("loose", d.count('class="loose'))
+    err=[l for l in r.stderr.splitlines() if "CONSOLE" in l or "Uncaught" in l]
+    print("console", err[:5])
+except subprocess.TimeoutExpired as e: print("timeout")
+try:
+    subprocess.run(base+["--screenshot="+S+"/shot.png",url],capture_output=True,text=True,timeout=40); print("shot ok")
+except subprocess.TimeoutExpired: print("shot timeout")
+EOF
+Description: Dump rendered DOM and screenshot with bounded timeouts
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Headless Chrome hangs here. Falling back to the Chrome extension for a runtime check.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Browser extension not connected either — runtime check unavailable. Doing static checks instead, then handing over.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; python3 - <<'EOF'
+import re, json
+from html.parser import HTMLParser
+f="dev/workspace/reviews/flightdeck-naming-review.html"; d=open(f).read()
+m=re.search(r'<script type="application/json" id="page-meta">(.*?)</script>',d,re.S); meta=json.loads(m.group(1).replace("<\\/","</")); print("meta ok", meta["id"], meta["kind"])
+print("title==h1", re.search(r"<title>(.*?)</title>",d).group(1)==re.search(r"<h1>(.*?)</h1>",d).group(1))
+print("sections", re.findall(r'<section id="([a-z-]+)"',d))
+print("end markers", len(re.findall(r'<!-- @end-',d)))
+print("shell class", re.findall(r'class="shell[^"]*"',d))
+ids=re.findall(r'<article class="card" id="([^"]+)"',d); print("cards",len(ids),"dupes",[i for i in set(ids) if ids.count(i)>1],"ordinal-ids",[i for i in ids if re.match(r'^[a-z]?\d+$',i)])
+# options cards: data-recommended must be in data-verdicts
+bad=[]
+for a in re.findall(r'<article class="card"[^>]*>',d):
+    v=re.search(r'data-verdicts="([^"]*)"',a); r=re.search(r'data-recommended="([^"]*)"',a)
+    if v and r and r.group(1) not in v.group(1).split("|"): bad.append(a[:80])
+print("rec-not-in-verdicts", bad)
+# tag balance
+class P(HTMLParser):
+    void={"meta","link","br","img","input","hr"}
+    def __init__(s): super().__init__(); s.st=[]; s.err=[]
+    def handle_starttag(s,t,a):
+        if t not in s.void: s.st.append(t)
+    def handle_endtag(s,t):
+        if s.st and s.st[-1]==t: s.st.pop()
+        else: s.err.append((t,s.getpos(),s.st[-3:]))
+p=P(); p.feed(d); print("unbalanced", p.err[:5], "left", p.st)
+print("hosts", set(re.findall(r'https?://([a-z0-9.-]+)',d)))
+print("cards outside section", len(re.findall(r'</section>.*?<article',d,re.S)))
+EOF
+kill $(cat /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad/srv.pid) 2>/dev/null; echo server stopped
+Description: Static checks on the generated page, stop server
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Built `dev/workspace/reviews/flightdeck-naming-review.html` — a review page on the plan-review shell (same engine, storage, return prompt).
+
+**Contents — 113 cards, 6 sections**
+- **Takes** (7): the chat reply as cards — FlightDeck name, deck/page profiles, kind-decides landing, `extensions/flightdecks/`, dw integration, Artifact-tool compat, profiles axis. Option sets where the call is yours.
+- **Questions** (4): answered-interview landing, host plugin, rename now vs later, sweep scope (prompt-builder internals + `dev/branches/` excluded — flag if wanted).
+- **Terms** (62): every coined term found — shell, chrome, engine, card, chip, respond surface, return prompt, fingerprint, orphan, provenance, origin gating, Paper/Ink, the signal, type triple, landing rule, lens prefixes… Each: definition + source. Agree/Revise/Reject; contested ones carry Keep/Rename/Drop.
+- **Conventions** (14 topic cards): file form, location, naming, theme/tokens, markers, storage, return-prompt format, links/URLs, script dialect, card authoring, verification S/V, ceilings, build procedure, workspace-level. Bulleted rules; Revise + note strikes lines.
+- **Stage 1 decisions** (20): D-1..D-20 one each; D-18/D-19 reopened, no default.
+- **Open questions** (5): PIVOT §8 root path, `Bash(kill:*)`, fixtures, tool set, unresolved lists in earlier reviews.
+- Loose comment boxes on Questions, Terms, Conventions, Open.
+
+**Verification**: static tier passed (meta parses, title=h1, unique non-ordinal ids, recommended∈verdicts, balanced tags, hosts allow-listed, 6 end markers). **Runtime tier skipped** — Playwright MCP locked by another session, headless Chrome hung, Chrome extension not connected. Engine is byte-copied from the plan review, so risk is low; reload once to confirm answers persist.
+
+**Next**: open from disk, answer, Copy prompt → paste back; I'll write `docs/flightdeck/` and amend the plan/PIVOT/decisions from it.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+I left a few comments. the conventions and coined terms list should have mined my statements. 
+
+## Response — FlightDeck naming and conventions
+
+Source: ~/Projects/agent-library/dev/workspace/reviews/flightdeck-naming-review.html · branch artifacts · rev 1 · built 2026-08-25
+Untouched: 91 left at their recommended default, 6 unanswered.
+
+### Decisions
+
+**flightdeck-as-the-family-name · FlightDeck as the family name**
+- Note: FlightDeck is in the lead. However come up with 10 other naming possibilities. create a specialized naming flightdeck that we can discuss an iterate on.
+
+**two-profiles-under-one-family-deck-and-page · Two profiles under one family: deck and page**
+- Note: one relevant if we keep the name. constructer and presenter are alternatives. probably should include these as sub-options in the naming flightdeck.
+
+**landing-rule-page-kind-decides-the-directory · Landing rule: page kind decides the directory**
+- Verdict: Kind decides
+- Note: Yes Claude can also use 'research' , and he sometimes uses 'tasks' to write agent tasks. Exploratory for now, it should settle organically as we go.
+
+**durable-decks-live-in-extensions-flightdecks · Durable decks live in extensions/flightdecks/**
+- Note: `extensions/artifacts/flightdeck/**/*` is the path naming. provided we stick with the name.
+
+**dev-workspace-integration · dev-workspace integration**
+- Note: yes killer indeed. this is another that will probably organically form once it settles.
+
+**delivery-keep-artifact-tool-compatibility · Delivery: keep Artifact-tool compatibility**
+- Verdict: Drop compat, plain doctype
+- Note: This is being actively worked on currently else where. my prefered method is to have plain first, and a strip tool for compat. although i have a hunch the artifact sharing skill may handle plain html also
+
+**answered-interview-page-where-does-it-land · Answered interview page: where does it land?**
+- Verdict: Stays in plans/
+
+**which-plugin-hosts-prompt-builder-and-the-skill · Which plugin hosts prompt-builder and the skill?**
+- Verdict: chat-tools
+- Note: big hitter skill for chat tools.
+
+**rename-the-skill-and-the-plan-now · Rename the skill and the plan now?**
+- Verdict: Rename after build
+
+**sweep-scope-prompt-builder-internals-and-archives · Sweep scope: prompt-builder internals and archives**
+- Verdict: Add both
+- Note: the first sweep was 180 degrees wrong. Terms and conventions should come from my writing. only a few terms hit any relevance wich i will highlight below. and zero conventions where conventions, all of them architecture decisions. remember conventions are guiding lights.
+
+**term-shell · Shell**
+- Note: One of the few terms in this list that I coined. It is the universal page structure for artifacts. Carries all the styling, layout, scripting decisions.
+
+**term-demo · Demo**
+- Note: another user coined term. It is a dynamically built html page that demonstrates some functionality in isolation.
+
+**term-card · Card**
+- Note: A unit of decision or review,
+
+**term-return-prompt · Return prompt**
+- Note: Another of my coined terms. The automatically composed prompt that the user returns to the agent indicating their decisions or comments.
+
+**q-bash-kill-for-the-verification-server · Q: Bash(kill:*) for the verification server**
+- Verdict: Grant kill
+- Note: agent must handle the server they start. is this safe or can the agent kill other things?
+
+**terms · Terms**
+- Note: Builder - A prompt generation unit, that combined with other builders produces a complete prompt. Focuses on a single domain.
+
+**conventions · Conventions**
+- Note:
+  probably stuff like...
+  direct Link back to the file in question.
+  single offline file
+  data persisted within the file.
+  edit the structure from the page itself.
+
+### Next
+
+- Write docs/flightdeck/ (conventions, terms, profiles, delivery) from every card marked Agree, using the accepted name and profile terms throughout.
+- Apply each Revise or Rename note to the term or convention it names before writing the doc; ask where a note is missing.
+- Amend stage-1-decisions.md, artifact-suite-implementation.md and PIVOT.md wherever a card here overrides them (landing rule, skill name, Artifact-tool compat).
+- Record the dev-workspace scaffold change (flightdecks/ directory, named tree) as a task against the dev-workspace repository.
+- Treat every untouched card as accepted as written.
+
+Re-open: file://~/Projects/agent-library/dev/workspace/reviews/flightdeck-naming-review.html#q-bash-kill-for-the-verification-server
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Got it. Two corrections to act on: (1) terms and conventions come from *your* statements, not the agent-written plans; conventions are guiding principles, not architecture decisions. Saving that as memory, re-running the sweep over your writing only (history transcripts user turns, prompts, WORKSPACE.md, quoted "You" blocks, prompt-builder), and building the naming flightdeck in parallel.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/conventions-come-from-user-statements.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; echo '- [Conventions come from user statements](conventions-come-from-user-statements.md) — sweeps of "terms/conventions I used" mine the user'"'"'s own words (history user turns, prompts, WORKSPACE.md), not agent plans; conventions = guiding principles, not architecture' >> ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory/MEMORY.md; ls dev/workspace/history/ dev/branches/ 2>/dev/null; head -40 dev/workspace/history/ea347861_prompt-builder-design-and-build.txt | cut -c1-200; grep -c "^\[USER\]\|^USER\|^## User\|^> " dev/workspace/history/*.txt
+Description: Index memory; inspect transcript format and archives
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; python3 - <<'EOF'
+import re,glob
+S="/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad"
+out=[]
+files=sorted(glob.glob("dev/workspace/history/*.txt"))+sorted(glob.glob("dev/branches/*/history/*.txt"))+sorted(glob.glob("dev/branches/*/workspace/history/*.txt"))
+for f in files:
+    d=open(f,errors="ignore").read()
+    blocks=re.split(r"\n-{40,}\n",d)
+    turns=[b.strip() for b in blocks if b.strip().startswith("[USER]")]
+    turns=[t for t in turns if "SLASH COMMAND" not in t.split("\n")[0] or len(t)>200]
+    if "dev/branches" in f:
+        turns=[t for t in turns if re.search(r"artifact|html|prompt.builder|review page|flight|deck|shell|card",t,re.I)]
+    if turns:
+        out.append("\n\n######## FILE: %s (%d user turns)\n"%(f,len(turns)))
+        out.extend(turns)
+open(S+"/user-turns.txt","w").write("\n\n---\n\n".join(out))
+print(len(out), sum(len(x) for x in out))
+EOF
+ls dev/branches/artifacts/ dev/branches/artifacts/* | head -30
+Description: Extract user turns from all transcripts into scratch
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+While the mining agent runs, building the naming flightdeck (options page → `dev/workspace/plans/`, per your kind-decides verdict).
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad/gen2.py
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; python3 $S/gen2.py && python3 - <<'EOF'
+import re, json
+from html.parser import HTMLParser
+f="dev/workspace/plans/artifact-family-naming.html"; d=open(f).read()
+m=re.search(r'id="page-meta">(.*?)</script>',d,re.S); json.loads(m.group(1).replace("<\\/","</")); print("meta ok")
+ids=re.findall(r'<article class="card" id="([^"]+)"',d); print("cards",len(ids),"dupes",[i for i in set(ids) if ids.count(i)>1])
+allids=re.findall(r' id="([^"]+)"',d); print("global dupes",[i for i in set(allids) if allids.count(i)>1])
+bad=[a[:60] for a in re.findall(r'<article class="card"[^>]*>',d) if (r:=re.search(r'data-recommended="([^"]*)"',a)) and r.group(1) not in re.search(r'data-verdicts="([^"]*)"',a).group(1).split("|")]
+print("rec mismatch",bad)
+class P(HTMLParser):
+    void={"meta","link","br","img","input","hr"}
+    def __init__(s): super().__init__(); s.st=[]; s.err=[]
+    def handle_starttag(s,t,a):
+        if t not in s.void: s.st.append(t)
+    def handle_endtag(s,t):
+        if s.st and s.st[-1]==t: s.st.pop()
+        else: s.err.append((t,s.getpos()))
+p=P(); p.feed(d); print("unbalanced",p.err[:3],p.st)
+EOF
+Description: Generate naming page and run static checks
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -n "\.delta" /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad/head.html
+Description: Check delta block CSS
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; sed -i '' 's|<div class="now"><b>%s</b>%s</div>|<div class="next"><b>%s</b>%s</div>|' $S/gen2.py && python3 $S/gen2.py
+Description: Use accent border on score rows, regenerate
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Naming page done and statically verified. Sending it now; the review rebuild waits on the mining agent.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Interim while the mining agent finishes:
+
+**Naming flightdeck** → `dev/workspace/plans/artifact-family-naming.html` (options page, 23 cards, static checks pass): rubric · FlightDeck + 11 alternatives (Console, Cockpit, Bridge, Workbench, Switchboard, Signal Box, Gantry, Panel, Slate, Helm, Deck-alone) each scored on register / interactive feel / cold clarity / collisions / pair / slug · 6 profile pairs incl. your constructor/presenter · forms (spelling, `extensions/artifacts/<name>/**/*` confirmed, skill/doc slugs, homeless-page dir).
+
+**`Bash(kill:*)` safety** — not safe as written: permission patterns are prefix matches, so `Bash(kill:*)` lets the agent kill any pid. Two narrower forms: grant the exact string `Bash(pkill -f "http.server 8787")` (kills only that server; exact-match rule, no wildcard), or start the server with `timeout 600 python3 -m http.server …` so it dies on its own and no kill grant exists. I'd take the exact-match pkill. Will record that as the answer to Q2.
+
+**Applied from your prompt** (carried into the rev-2 rebuild): kind-decides landing incl. `research/` and `tasks/`, path `extensions/artifacts/flightdeck/**/*`, plain doctype + strip tool for compat, answered interviews stay in `plans/`, chat-tools hosts, rename after build, sweep scope both.
+
+**Pending**: review page rev 2 — Terms and Conventions sections rebuilt from your own statements (mining agent running over 107 of your turns across current + archived histories, prompts, WORKSPACE.md, "You" quotes, prompt-builder vocabulary), conventions as guiding lights, architecture moved out to Decisions. Your four term notes and the Builder definition go in verbatim. Lands as rev 2 at the same path so your answers persist and changed cards flag amber.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+<task-notification>
+<task-id>a1c5fa143f4e33403</task-id>
+<tool-use-id>toolu_01A8hREumR4d1WPvXih5CABq</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/tasks/a1c5fa143f4e33403.output</output-file>
+<status>completed</status>
+<summary>Agent "Mine user turns for terms/conventions" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>I have what I need. Findings below, mined from the user's own turns only (agent vocabulary in the review pages and plans excluded). Source shorthand: `ea347861` = dev/workspace/history/ea347861_prompt-builder-design-and-build.txt; `66039af5` = …/66039af5_prompt-builder-audit-refactor-nested-deliverables.txt; `f1f8dc4c` = …/f1f8dc4c_export-import-file-picker-refactor.txt; `kickoff` = dev/workspace/prompts/prompt-2026-08-23-2257.md; `agent-teams/073735c4` and `agent-teams/fff9aa06` = dev/branches/agent-teams/history/…; `corpus-sweep/1480a71f` = dev/branches/drafthorse-corpus-sweep/history/…; `WORKSPACE` = dev/workspace/WORKSPACE.md; `stage-1` = dev/workspace/context/stage-1-decisions.md (records a user quote verbatim in D-16).
+
+Note on scope: the only `&lt;blockquote&gt;&lt;cite&gt;You…` in the review pages is one quote in artifact-suite-plan-review.html ("I wanted demos to be fully customisable by the building agent."). flightdeck-naming-review.html is agent-authored; its 63 "terms" are agent vocabulary and none of "flightdeck / deck / constructor / presenter" appears in any user turn in the corpus I was given.
+
+## A. Coined terms (user's own usage)
+
+Already confirmed by the user, listed only for frequency/source: shell (kickoff, 2 uses: "page shell — shell for every page template"); demo (66039af5 "can you build a demo for me, so I can see it operating"; f1f8dc4c "create a working demo of these buttons. some dummy data"; kickoff "demo page — active demonstrate a portion"; stage-1 quote; ~5 turns); card (kickoff "quote section for users comments… that apply to card contents", "show only relevant cards per filter"; 1 turn); return prompt (kickoff "return prompting — each page builds a return prompt for the agent"; 1 turn, plus "doesn't enter return prompt unless edited"); builder (ea347861 "I think each section is actually a builder thats why the tab is called 'build'", "Verdict: Builder", "configure builders"; 66039af5 "process builder"; f1f8dc4c "'task' or the 'problem' builder"; ~8 turns).
+
+New terms found:
+
+- prompt builder / prompt engine — the local HTML page that composes CC prompts. Quote: "Recipes: Probably better as its own artifact. keeps the prompt builder (is this a better name than engine?) json lighter" (ea347861, section-review responses 05); "lets call this one `prompt-builder.html`". Started as "prompt engine html page that i open locally to create prompts". Frequency: ~10 turns.
+- section — a prompt input area of the builder page; superseded by "builder" ("section is probably more safe, builder is more bespoke", ea347861). Def: an input area of the page that feeds one heading of the prompt. Freq: ~6 turns.
+- write ones / choosing ones — the two groups of builders. Quote: "hmm. the writing ones and the choosing ones." (ea347861, item 08); "Constraints, Guardrails in WRITE". Def: builders where the user types prose vs builders where the user picks from option lists. Freq: 2.
+- option, key, value / display key / agent value — the option model. Quote: "each option has a display key and then the agent value. I can see an option like output.depth be `key: terse , value: terse prose, write in a short concise manner`" (ea347861, "Ok here are some thoughts…"). Def: the user sees a short key on a button; the prompt receives the long value. Freq: 3.
+- explainer (section explainer) — "Each section should have an explainer for the agent under the heading so the agent is instructed what this section is doing" (ea347861). Def: agent-facing text under each builder heading that goes into the prompt. Freq: 2 ("section explainer", "explain (even if blank) fields").
+- loadout — the whole importable configuration. Quote: "I see it as a 'loadout' I can litterally flip between loadouts by importing a new one. completely replacing the old loadout with new options, keys, values, order, visibility." (ea347861). Earlier called "flavors" ("different 'flavors' one for rails another for typescript"). Def: a complete exported/imported set of builder options, keys, values, order and visibility. Freq: 3 (loadout ×2, flavors ×2).
+- recipes — "Recipes: Probably better as its own artifact… export from prompt builder to recipes" (ea347861); "recipes editable in place — Integrate"; "recepies should also save". Def: saved, reusable premade prompts. Freq: 5.
+- utilities / utility prompt — "have the prompt that updates the file in a single place in a 'utilities' location… the utilities could be a Tab" (ea347361); "Show me this as a 'utility' prompt I can save in my prompt builder. to re-run again" (f1f8dc4c); "keep the utility prompt". Def: a tab holding premade housekeeping prompts, especially the self-update prompt. Freq: 5.
+- update prompt / "update this tool" / omakase prompts — "include some omakase prompts as 'read only'. one is... instruct the agent how to update the html with the current state of play, prebuilt update prompt" (ea347861); "refresh skills list is the reason for 'update this tool'". Def: a read-only premade prompt that instructs the agent to refresh the HTML file itself. Freq: 4.
+- launch / claude launcher — "claude launcher that you build by selecting flags and values. once ready copy and paste into terminal" (ea347861); tab list "Build . Launch . Recipes . Utilities"; "prebuilt named commands like 'cheap quick' = sonnet,low". Def: a tab that composes a `claude` terminal command from flags/presets. Freq: 4.
+- prompt window / prompt copy window / master prompt / dashboard — "injects a single premade prompt … into the prompt copy window"; "main page gives way to sections, going back updates the master prompt"; "dashboard generates as you type". Def: the live composed-prompt panel. Freq: 4.
+- edit mode / edit in place / inplace edits — "can we do inplace edits? meaning hit a special edit mode and you can edit the… options available (add, remove), section explainer, key and value" (ea347861); "drift: solved by the edit in place anyway". Def: a page mode where the user edits the page's own option data. Freq: 4.
+- deliverable(s) / nested deliverables / staging — "imports the deliverables onto the page. then you can 'nest' them inside the process chain… (- deliverable: Review)" (66039af5); "Check `Process` for when to stage deliverables, otherwise choose an appropriate stage". Def: an Output item (Review, Implementation plan, Artifact) that a Process stage can carry. Freq: 4.
+- process chain / process chooser / user gates / stage — "chain up `process`, `architecture`, `skills` and `outputs`"; "Draggable orderable list items. Grab from pre made options"; "the process might include a few separate user gates". Def: ordered stages of an agent run, with gates where the user approves. Freq: 5.
+- long range prompts / large agent runs — "this prompt builder has a usecase of building out long range prompts for use with large agent runs" (66039af5). Def: prompts that drive a multi-stage, multi-agent session. Freq: 1.
+- mock — numbered design iterations of the page ("we progress to mocking after it settles", "Mock 4 proposals", "lets solidify this file. remove the mock designations"). Def: a throwaway version of the page used to settle design. Freq: 8.
+- probe — "Storage probe" (pasted results of an agent-built capability check page, ea347861 ×2). Def: a tiny page that reports what the browser can do. Freq: 2.
+- discovery artifact / review / html plan / html overview — the output kinds the user asks for: "discovery artifact (html, broad findings)" (f1f8dc4c); "make a html plan with all findings and proposed fixed. give me comment, approval and copy functions" (agent-teams/fff9aa06); "Create a html overview of the whole proposed structure" (agent-teams/073735c4); "display your findings in a single html review file for my perusal and approval (comment, approve, copy)" (corpus-sweep/1480a71f). Freq: ~7.
+- interview page, options page, issue breakdown, link to site, quoted user conversation, filterable tags, formatted diffs, eyebrow — feature names from the kickoff ("interview page — agent asks user a series of questions"; "options page — provide the user options to choose from. recommended, extra comments"; "issue breakdown — core issue, investigation results, additional comments"; "link to site — collapsed link to file or location"; "eyebrow branch highlighting", "eyebrow issue link", "eyebrow colour splash"). Freq: 1 each (eyebrow ×3 in References).
+- page template — "page templates with all prerequisite styles and scripting so they can be edited into the shell" (kickoff). Freq: 1.
+- artifact / artifacts — the user's umbrella for local HTML pages: "major artifacts exploration and building", "Stack: Artifact", "Deliverables: Review, Implementation plan, Artifact", directory `dev/workspace/artifacts`. Freq: ~8. Also used for claude.ai published pages: "not sure about published artifact. they seem sexy, haven't looked deeply yet."
+- text-db — "yes add it to the text-db" (f1f8dc4c). Def: the JSON data blocks inside the HTML that hold options/recipes. Freq: 1 (agent-suggested name the user adopted).
+- shorthand — separate branch, but user-coined: "It is thoughts, ideas, decisions, instructions expressed as deliberate shorthand. 2-6 word length compressions" (shorthand/d2d075b6). Freq: 2.
+
+## B. Conventions (guiding principles in the user's words)
+
+- Direct link back to the file in question: "User can navigate directly to all files or sites in question, to check original content" (kickoff Goals); "link to site — collapsed link to file or location in question when available". Freq: 2.
+- Show provenance: "User can see clearly where the work originates from (branch, issue, pr)" (kickoff). Freq: 1 (+ eyebrow refs ×3).
+- Always a return path to the agent: "User can always return to the agent with a prompt that progresses the context or conversation" (kickoff); "obviously this needs a copy button for me to get it back to you" (073735c4); "write a copy script into the doc so i can return here with any changes i want" (fff9aa06); "give me comment, approval and copy functions". Freq: 6.
+- Comment + approve on every item: "make it interactive so i can comment and approve/deny/change if necessary" (073735c4); "leave a comments field under each diff for me to adjust"; "no comment and copy on the review?" (ea347861); "allowing me to comment and approve and give your recomendations to integrate or defer". Freq: 6.
+- Agent recommends, user decides: "give your recomendations to integrate or defer" (ea347861); "options page — provide the user options to choose from. recommended, extra comments". Freq: 2.
+- Agent writes content only; chrome is shared: "Agent can build artifacts repeatedly with consistent features and styling. focusing on content" (kickoff); "The core layout, styles and js can all be in a shell template". Freq: 2.
+- Token efficiency: "Agent is token efficient. strategically building or editing a document" (kickoff); "Token economy: Invoke each agent using an optimal model… user approves models"; "It will use a very cheap model" (f1f8dc4c); "judge optimal viable agent per task vs 'let er rip'". Freq: 4.
+- Preserve user history on update; only edits enter the return prompt: "Artifacts preserve users history (decision and response) when updating. but doesn't enter return prompt unless edited" (kickoff). Freq: 1.
+- Demos fully customisable by the building agent, with known parts: "I wanted demos to be fully customisable by the building agent. but also the agent should know the available structure, classes and integration points" (stage-1 D-16 quoting user; plan-review blockquote). Freq: 1.
+- Single offline local file: "html page that i open locally"; "offline font handling would be good"; "does this replace the 'all in one' html file? I kinda like import/export" (ea347861). Freq: 3.
+- Data lives in the file, editable from the page: "a JSON section in the head that will underpin some sections so that adding or removing options is easy (can this be imported)"; "is it possible to live update the json database from the page with a import button???"; "Selected folder is persisted in the file" (f1f8dc4c Goals); edit mode quote above. Freq: 5.
+- Export/import is the undo and the loadout mechanism; whole-replace, warn every time, no fussy guards: "the export/import as long as it works properly is the undo protection"; "The guard I don't like, to much handling… import consumes only if all 16 are present"; "Verdict: Warn every time"; "nope just warn, 'edit will reset current builders'". Freq: 4.
+- Reset before edit, no state to manage: "edit does a 'reset' first. no state to manage." Freq: 1.
+- Two audiences per element — what the user sees vs what the agent sees: "can we look at this from two angles; one is what the user sees, the other what the agent sees" (ea347861). Freq: 1.
+- Sections are optional, mix and match: "a prompt isn't required to have all sections… skip the one i don't want"; "mix n match". Freq: 3.
+- Universal single output, copy or write: "Universal output, single copy"; "yes have both, choose to copy or write to file"; "Copy and write, side by side — Integrate". Freq: 3.
+- Hardcoded sections, configurable options: "hardcoded sections. configurable options." Freq: 1.
+- Seed broad, prune later: "add any other general usage architecture you see fit in a broad seed. easier to remove than add." Freq: 1.
+- Report capability, don't assume Chrome: "Report what this browser can do, rather than claiming Chrome — Integrate"; "arc/chrome. not really needed though". Freq: 2.
+- Remember last location per action, no settings page for paths: "each export button press invokes: directory popup -&gt; save… export remembers last export location… first ever interaction… the user has to navigate… Next interactions are simple and easy" (f1f8dc4c). Freq: 2.
+- Prove it with a demo before integrating: "create a working demo of these buttons. some dummy data… we will get them operational first and then integrate" (f1f8dc4c); "create a mini file that shows all these new takes in the flesh… make it interactive". Freq: 3.
+- Verify in a browser / look at it: "should you have a 'look' with playwrite mcp?"; "pretty sure the google fonts aren't working as the screenshots looked identical…"; WORKSPACE discovery "verify in a browser over http (Playwright blocks file:)". Freq: 3.
+- Test the agent's changes, not the user's browser: "you focued on my browser instead of your changes." Freq: 1.
+- Modern web-page prose, helpful, concise; layout proportioned; comprehensive help: "User facing prose to be universal, helpful, concise and clear. As a modern web page would."; "Arranged layout, with good proportions and spacing"; "Comprehensive help text and popups"; "Prompt outputs concise and instructive for the agent." (66039af5). Freq: 1 turn, 4 principles.
+- Review gates before building; staged process: "fire any open questions at me next turn and then we can progress to mocking after it settles"; "once settled we can update the mock"; "Ordered. Finish each stage before starting the next, and stop at every gate" (kickoff Process); "user approves models". Freq: 5.
+- Concise reviews, drop settled items: "lets build a more concise review page. focused on how this has landed. leave out all redundant decisions/review items" (073735c4). Freq: 1.
+- Where files go: workspace first; reviews in reviews/; "workspace scratch first. mocking etc."; "leave the file here dev/workspace/artifacts"; "we have a /review folder. probably better to go there?"; "probably in /review instead of /artifacts" (073735c4); save location "defaulted to dev/workspace". Freq: 5.
+- Per-repo instance, still standalone: "should this prompt builder ship with dev workspace? then it can sit in a dedicated folder… each repo could have its own prompt builder… still support being unattached." Freq: 2 (repeated).
+- Skills list hand-maintained, agent-invocable only: "Hand-maintained"; "Skill: - agent invocatable only. - no update scripts." Freq: 2.
+- Warn before destructive saves: "send a 'backup' warning before saving is the way to go?" Freq: 1.
+- Reference-driven styling: "exactly as reference artifact has it"; "I like issue 45's deep greens. diffs, select buttons, tags etc." Freq: 2.
+- Encoding must be clean: "the artifact has a bunch of character like this `â”‚` everywhere" (073735c4). Freq: 1.
+- Commit when told: "commit this" / "yes commit" / "file changes has been commited". Freq: 5.
+
+## C. Goals / ambitions for the artifacts programme
+
+- "I will be doing major artifacts exploration and building over the next period" (ea347861, first turn) — long-lived branch.
+- "My vision is to have a whole range of sections the user can input into. this then outputs a structured prompt the user can copy into their CC session" (ea347861).
+- "this prompt builder has a usecase of building out long range prompts for use with large agent runs" (66039af5).
+- "Agent can build artifacts repeatedly with consistent features and styling. focusing on content" and "User can always return to the agent with a prompt that progresses the context or conversation" (kickoff) — pages as the round-trip surface between user and agent.
+- "have a tab that reads the latest sessions from global .claude click on one produces a 'resume' command" (ea347861) — page as a session control surface.
+- "each repo could have its own prompt builder" (ea347861) — ship with dev-workspace.
+- "not sure about published artifact. they seem sexy, haven't looked deeply yet." (ea347861) — published Artifacts are an open interest, not a commitment.
+- WORKSPACE purpose (user-maintained file): "Explore and build Claude Code Artifacts — published HTML and Markdown pages, their design patterns, runtime capabilities, and any skills, agents, or plugin assets this repository grows to support them."
+- "Daily driver", "alternative to chat window", "platform for interacting with agents" do not occur in any user turn in the corpus; those phrases are agent-authored (flightdeck-naming-review.html).
+
+## D. Naming ideas and reactions voiced by the user
+
+- Branch: "what should we call it? artifacts? artifact-building?" (settled: artifacts).
+- Page: "prompt engine" → "prompt builder (is this a better name than engine?)" → "lets call this one `prompt-builder.html`".
+- Section vs builder: "I think each section is actually a builder thats why the tab is called 'build'. section is probably more safe, builder is more bespoke." Verdict: Builder.
+- Tabs: "Build . Launch . Recipes . Utilities".
+- "prompt order" → "maybe a rename to 'configure builders'".
+- "flavors" → "loadout" (user's own re-naming).
+- "What about 'features' instead of components?"
+- "text-db" accepted ("yes add it to the text-db").
+- "full set in output" is the way (deliverable staging wording); requested exact help text "Check `Process` for when to stage deliverables, otherwise choose an appropriate stage".
+- Folder-picker label: "'No folder selected' and then just name the bound path, remove 'bound · '".
+- Directory naming: reviews belong in `/review(s)` not `/artifacts`.
+- Elsewhere: "I want to call it 'shorthand'"; corpus tool "should this become a universal corpus sweep skill?"
+- No user reaction on record to flightdeck, deck, page-as-profile, constructor or presenter — the flightdeck-naming-review.html page exists (dev/workspace/reviews/flightdeck-naming-review.html) but its user responses are not in the transcripts I was given.</result>
+<usage><subagent_tokens>112777</subagent_tokens><tool_uses>12</tool_uses><duration_ms>141076</duration_ms></usage>
+</task-notification>
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Mining done — ~30 user-coined terms and ~35 stated principles, each with your quote. Rebuilding the review as rev 2: Terms/Conventions from your words, old convention cards moved to an "Architecture decisions" section (ids kept, so no noise), new Goals section, your notes applied.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad && python3 - <<'EOF'
+p="gen.py"; s=open(p).read()
+s=s.replace('html = head + "</head>\\n<body>\\n\\n" + meta_block + body + tail_a + tail_b','if __name__=="__main__":\n  html = head + "</head>\\n<body>\\n\\n" + meta_block + body + tail_a + tail_b')
+s=s.replace('\nout = "~/Projects/agent-library/dev/workspace/reviews/flightdeck-naming-review.html"\nopen(out, "w").write(html)\nprint(total, len(html))','\n  out = "~/Projects/agent-library/dev/workspace/reviews/flightdeck-naming-review.html"\n  open(out, "w").write(html)\n  print(total, len(html))')
+open(p,"w").write(s)
+EOF
+python3 -c "import gen" && echo import-ok
+Description: Guard gen.py writes so gen3 can import its cards
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad/gen3.py
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; python3 $S/gen3.py && python3 - <<'EOF'
+import re, json
+from html.parser import HTMLParser
+f="dev/workspace/reviews/flightdeck-naming-review.html"; d=open(f).read()
+m=re.search(r'id="page-meta">(.*?)</script>',d,re.S); mt=json.loads(m.group(1).replace("<\\/","</")); print("meta ok rev",mt["rev"])
+ids=re.findall(r'<article class="card" id="([^"]+)"',d); print("cards",len(ids),"dupes",[i for i in set(ids) if ids.count(i)>1])
+allids=re.findall(r' id="([^"]+)"',d); print("global dupes",[i for i in set(allids) if allids.count(i)>1])
+print("sections",re.findall(r'<section id="([a-z-]+)"',d), "end markers",len(re.findall(r'<!-- @end-',d)))
+bad=[a[:70] for a in re.findall(r'<article class="card"[^>]*>',d) if (r:=re.search(r'data-recommended="([^"]*)"',a)) and (v:=re.search(r'data-verdicts="([^"]*)"',a)) and r.group(1) not in v.group(1).split("|")]
+print("rec mismatch",bad)
+for cid in ["term-shell","term-demo","term-card","term-return-prompt","q-bash-kill-for-the-verification-server","delivery-keep-artifact-tool-compatibility"]: print(cid, cid in ids)
+class P(HTMLParser):
+    void={"meta","link","br","img","input","hr"}
+    def __init__(s): super().__init__(); s.st=[]; s.err=[]
+    def handle_starttag(s,t,a):
+        if t not in s.void: s.st.append(t)
+    def handle_endtag(s,t):
+        if s.st and s.st[-1]==t: s.st.pop()
+        else: s.err.append((t,s.getpos()))
+p=P(); p.feed(d); print("unbalanced",p.err[:3],p.st)
+print("hosts",set(re.findall(r'https?://([a-z0-9.-]+)',d)))
+EOF
+Description: Generate rev 2 and run static checks
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: grep -c "cite" /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad/head.html
+Description: Confirm blockquote cite styling exists in shell
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Both pages delivered. Recap:
+
+**Review rev 2** — `dev/workspace/reviews/flightdeck-naming-review.html` (124 cards, same path/id so your rev 1 answers persist; changed cards flag amber)
+- **Terms** (33): only words you coined/adopted, each with your quote + transcript. Your four rev 1 definitions verbatim (shell, demo, card, return prompt) + Builder. New: prompt builder, section, write/choosing ones, display key/agent value, explainer, loadout, recipes, utilities, omakase/update prompt, launcher, master prompt, edit mode, deliverables/nesting, process chain/gates, long-range prompts, mock, probe, discovery artifact/html review/plan/overview, interview/options/issue-breakdown, link to site, eyebrow, page template, artifact (open), text-db, daily driver.
+- **Conventions** (33 guiding lights): your four (direct link back, single offline file, data in the file, edit structure from the page) + return path always, comment+approve everything, agent recommends/user decides, agent writes content only, token efficient, preserve history, demos customisable from known parts, export/import is the undo, reset before edit, two audiences, mix-and-match, copy-or-write, seed broad, report capability, remember last location, demo before integrating, look in a browser, test own changes, modern-web prose, review gates, concise follow-ups, workspace-first/reviews in reviews/, per-repo standalone, hand-maintained lists, warn before destructive saves, reference-driven styling, clean encoding.
+- **Goals** (8) in your words incl. this session's "daily drivers / platform for interacting with agents".
+- Rev 1 "conventions" → **Architecture decisions** section, unchanged ids. Takes patched with your notes (path `extensions/artifacts/flightdeck/**/*`, research/tasks landing, plain doctype). Kill card now offers exact-match pkill (recommended) / timeout / kill:*.
+
+**Naming flightdeck** — `dev/workspace/plans/artifact-family-naming.html`: 12 candidates scored on 6 rows, 6 profile pairs (deck/page, constructor/presenter, instrument/readout, tool/sheet, builder/review, none), 4 form cards.
+
+**Memory saved**: sweeps of "terms I used" mine your words, not agent plans; conventions = guiding lights.
+
+**Not done**: runtime browser check (Playwright locked, headless Chrome hung, extension disconnected) — static checks pass on both; engine is byte-copied.
+
+**Next, on your prompts back**: naming shortlist → rev 2 of naming page; review answers → `docs/<family>/` + plan/PIVOT/decisions amendments.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+## Response — naming the artifact family
+
+Source: ~/Projects/agent-library/dev/workspace/plans/artifact-family-naming.html · branch artifacts · rev 1 · built 2026-08-25
+Untouched: 4 left at their recommended default, 14 unanswered.
+
+### Decisions
+
+**flightdeck · FlightDeck**
+- Verdict: Shortlist
+- Note: this is my choice.
+
+**workbench · Workbench**
+- Verdict: Maybe
+- Note: fits with workspace
+
+**instrument-readout · instrument / readout**
+- Verdict: Pick
+
+**compound-spelling · Compound spelling**
+- Note:
+  FlightDeck - name
+  flightdeck - the document.
+
+**workspace-directory-for-homeless-pages · Workspace directory for homeless pages**
+- Verdict: Family name
+
+**candidates · Candidates**
+- Note:
+  ControlRoom
+  Canvas
+
+**pairs · Profile pairs**
+- Note:
+  Readout is good. but...
+  flightdeck ive already been using. which is stronger?
+
+  Demo flightdeck, Demo readout
+  Review flightdeck, Review readout
+  Interview flightdeck, Interview readout
+
+### Next
+
+- Take every name marked Shortlist; if more than one, republish this page at rev 2 with only the shortlist and a head-to-head card, keeping card ids.
+- Carry the picked profile pair and the form answers into the FlightDeck conventions doc under the chosen name.
+- Do not rename files, skills or plans until the family name is settled here.
+
+Re-open: file://~/Projects/agent-library/dev/workspace/plans/artifact-family-naming.html#no-pair-one-word-for-everything
+
+while I look at the new terms and conventions cards
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Take on the pair question first, then rev 2 of the naming page.
+
+**Which is stronger — "Review flightdeck" or "Review readout"?** Flightdeck. You've been using it, it carries the family name into every mention, and your spelling rule already makes `flightdeck` the document noun. So: every document is a *flightdeck* (Review flightdeck, Demo flightdeck, Interview flightdeck). *Instrument / readout* then work as the profile words in the docs, not in speech: prompt-builder is an instrument flightdeck (durable, stateful); a review is a readout flightdeck (generated, answered, handed back). You'd only say "readout" when the durable/disposable distinction is the point. Readout also fails the "Demo" test — a demo is neither instrument nor readout, which is a hint that profile is a doc axis, not a naming one.
+
+Building rev 2 now: shortlist (FlightDeck, Workbench) + your two additions (ControlRoom, Canvas), head-to-head, the speech test, spelling confirmed.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad && python3 - <<'EOF'
+s=open("gen2.py").read()
+# guard writes
+s=s.replace('html = head + "</head>\\n<body>\\n\\n" + meta_block + body + tail_a + tail_b\nout =','if __name__=="__main__":\n  html = head + "</head>\\n<body>\\n\\n" + meta_block + body + tail_a + tail_b\n  out =')
+s=s.replace('\nopen(out, "w").write(html)\nprint(n[0], len(html))','\n  open(out, "w").write(html)\n  print(n[0], len(html))')
+open("gen2.py","w").write(s)
+EOF
+python3 -c "import gen2" && echo ok
+Description: Guard gen2 writes for import
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad/gen4.py
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/scratchpad; python3 $S/gen4.py && python3 - <<'EOF'
+import re, json
+from html.parser import HTMLParser
+f="dev/workspace/plans/artifact-family-naming.html"; d=open(f).read()
+m=re.search(r'id="page-meta">(.*?)</script>',d,re.S); print("rev",json.loads(m.group(1).replace("<\\/","</"))["rev"])
+ids=re.findall(r'<article class="card" id="([^"]+)"',d); print("cards",ids)
+allids=re.findall(r' id="([^"]+)"',d); print("global dupes",[i for i in set(allids) if allids.count(i)>1])
+bad=[a[:70] for a in re.findall(r'<article class="card"[^>]*>',d) if (r:=re.search(r'data-recommended="([^"]*)"',a)) and (v:=re.search(r'data-verdicts="([^"]*)"',a)) and r.group(1) not in v.group(1).split("|")]
+print("rec mismatch",bad)
+class P(HTMLParser):
+    void={"meta","link","br","img","input","hr"}
+    def __init__(s): super().__init__(); s.st=[]; s.err=[]
+    def handle_starttag(s,t,a):
+        if t not in s.void: s.st.append(t)
+    def handle_endtag(s,t):
+        if s.st and s.st[-1]==t: s.st.pop()
+        else: s.err.append((t,s.getpos()))
+p=P(); p.feed(d); print("unbalanced",p.err[:3],p.st)
+EOF
+Description: Generate naming rev 2 and static-check
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Naming rev 2 delivered (same path, 9 cards, rev 1 answers kept):
+- **Candidates**: FlightDeck, Workbench + your ControlRoom and Canvas, scored on the same six rows (Canvas collides with the Claude Design canvas and `<canvas>`; ControlRoom doesn't lowercase into a document noun well).
+- **Decide**: one head-to-head card, recommended FlightDeck.
+- **Pairs**: speech-test card with the rule above (flightdeck in speech; instrument / readout as doc profiles, demo as a third profile row); instrument/readout confirm card.
+- **Forms**: spelling rule and `dev/workspace/flightdecks/` recorded from your answers, confirm cards.
+
+Nothing else pending on my side — waiting on your two return prompts (naming rev 2, review rev 2 terms/conventions). Then: `docs/flightdeck/` + plan/PIVOT/decisions amendments.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+leave the plan ammendments out. this is just a discussion on naming, documenting, and how to organise this, before it gets too messy. the other stuff I WIP currently, but shouldn't change conventions or terms. here is my response
+
+## Response — artifact suite investigation
+
+Source: ~/Projects/agent-library/dev/workspace/artifacts/artifact-suite-investigation.html · branch artifact-suite-skill-experimental · rev 1 · built 2026-08-25
+Untouched: 82 left at their recommended default.
+
+### Decisions
+
+**ds-3 · Five different .shell widths across seven files — the shell must pick**
+- Verdict: Agree
+
+**ds-6 · Theme storage key: one suite-wide key or one per artifact**
+- Verdict: Agree
+
+**ds-7 · Binary toggle can never return to 'follow system'**
+- Verdict: Agree
+
+**co-3 · Interview page: absent — build from the .q block plus the .answered record**
+- Verdict: Agree
+
+**co-4 · Demo page: two working shapes — inline strip and full-page board**
+- Verdict: Revise
+- Note:
+  D-16: demos have no fixed shape. They stay fully customisable by the building agent.
+
+  The .demo, .tag, .sub and .readout rules do not go in the shell — they ship in the demo kit, and the suite documents the available structure, classes and integration points so the agent composes a demo from known parts.
+
+**co-7 · Link to site: two hrefs in nine files — build this feature from nothing**
+- Verdict: Agree
+
+**co-12 · No reference persists answers — copy prompt-builder's overlay pattern**
+- Verdict: Agree
+
+**st-5 · Recommendations are prose only; no default exists to edit away from**
+- Verdict: Agree
+
+**ar-11 · Doctype or fragment decides whether one file publishes unchanged**
+- Verdict: Agree
+- Note: D-18: ordinary HTML document with doctype, disk-primary links, no Artifact-tool compatibility requirement. The finding defers the form to D-18; both of its corrections stand, and the pre-paint theme script sits inline above the style block.
+
+**ar-16 · Six page types, or three — four of them share one anatomy**
+- Verdict: Agree
+
+**pr-10 · Primary origin decides whether 'Open file' is the headline link**
+- Verdict: Agree
+
+**pr-11 · GitHub file links must pin to a branch or a commit; corpus does both**
+- Verdict: Agree
+
+**pr-12 · Which editor scheme to emit for the 'Editor' link**
+- Verdict: Agree
+- Note: D-11: vscode is the default scheme; a null editor drops the Editor chip entirely.
+
+### Next
+
+- Apply every accepted card to the plan before writing code.
+- Ask rather than guess where a card is marked Revise with no note.
+
+Re-open: http://127.0.0.1:8793/dev/workspace/artifacts/artifact-suite-investigation.html?v=4
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Noted — plan/PIVOT/decisions amendments are out; this is naming, terms, conventions and organisation only.
+
+The prompt you pasted is the **artifact-suite investigation** return prompt from the other branch (`artifact-suite-skill-experimental`, `dev/workspace/artifacts/artifact-suite-investigation.html`) — your WIP, not the naming or review pages. Nothing in it touches a term or convention (all 13 decisions are architecture: shell widths, theme key, demo kit, doctype, link pinning, editor scheme), so I'm not acting on it here. Looks like a mispaste; if you meant to hand it to the session working that branch, it's still in your clipboard history.
+
+Still waiting on two prompts from this thread:
+- naming rev 2 (`plans/artifact-family-naming.html`) — head-to-head, speech test, spelling/directory confirms
+- review rev 2 (`reviews/flightdeck-naming-review.html`) — terms, conventions, goals
+
+Then I write `docs/flightdeck/` (terms, conventions, profiles, locations/delivery) and nothing else.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+## Response — FlightDeck naming and conventions (rev 2)
+
+Source: ~/Projects/agent-library/dev/workspace/reviews/flightdeck-naming-review.html · branch artifacts · rev 2 · built 2026-08-25
+Untouched: 79 left at their recommended default, 3 unanswered.
+
+### Decisions
+
+**flightdeck-as-the-family-name · FlightDeck as the family name**
+- Note: FlightDeck is in the lead. However come up with 10 other naming possibilities. create a specialized naming flightdeck that we can discuss an iterate on.
+
+**two-profiles-under-one-family-deck-and-page · Two profiles under one family: deck and page**
+- Note:
+  after reviewing my words below, it seems i use 'page' alot for anything you produce. does it differentiate enough? if i say...
+   build a review, you give me something in markdown
+  build a review artifact, you give me a sharable artifact
+  but if i say...
+  build a review page, will you create a standalone html page just from your priors?
+
+  also i probably wont use 'deck' instead 'flightdeck' . im thinking of skill trigger words, (flightdeck & page).
+
+**landing-rule-page-kind-decides-the-directory · Landing rule: page kind decides the directory**
+- Verdict: Kind decides
+- Note: Yes Claude can also use 'research' , and he sometimes uses 'tasks' to write agent tasks. Exploratory for now, it should settle organically as we go.
+
+**durable-decks-live-in-extensions-flightdecks · Durable decks live in extensions/flightdecks/**
+- Note: `extensions/artifacts/flightdeck/**/*` is the path naming. provided we stick with the name.
+
+**dev-workspace-integration · dev-workspace integration**
+- Note: yes killer indeed. this is another that will probably organically form once it settles.
+
+**delivery-keep-artifact-tool-compatibility · Delivery: keep Artifact-tool compatibility**
+- Verdict: Drop compat, plain doctype
+- Note: This is being actively worked on currently else where. my prefered method is to have plain first, and a strip tool for compat. although i have a hunch the artifact sharing skill may handle plain html also
+
+**answered-interview-page-where-does-it-land · Answered interview page: where does it land?**
+- Verdict: Stays in plans/
+
+**which-plugin-hosts-prompt-builder-and-the-skill · Which plugin hosts prompt-builder and the skill?**
+- Verdict: chat-tools
+- Note: big hitter skill for chat tools.
+
+**rename-the-skill-and-the-plan-now · Rename the skill and the plan now?**
+- Verdict: Rename after build
+
+**sweep-scope-prompt-builder-internals-and-archives · Sweep scope: prompt-builder internals and archives**
+- Verdict: Add both
+- Note: the first sweep was 180 degrees wrong. Terms and conventions should come from my writing. only a few terms hit any relevance wich i will highlight below. and zero conventions where conventions, all of them architecture decisions. remember conventions are guiding lights.
+
+**term-shell · Shell**
+- Note: One of the few terms in this list that I coined. It is the universal page structure for artifacts. Carries all the styling, layout, scripting decisions.
+
+**term-demo · Demo**
+- Note: another user coined term. It is a dynamically built html page that demonstrates some functionality in isolation.
+
+**term-card · Card**
+- Note: A unit of decision or review,
+
+**term-return-prompt · Return prompt**
+- Note: Another of my coined terms. The automatically composed prompt that the user returns to the agent indicating their decisions or comments.
+
+**term-section · Section**
+- Verdict: Reject
+
+**term-write-ones-choosing-ones · Write ones / choosing ones**
+- Note:
+  write builder
+  choose builder
+
+**term-explainer · Explainer**
+- Verdict: Reject
+
+**term-update-prompt-omakase-prompts · Update prompt / omakase prompts**
+- Verdict: Reject
+
+**term-master-prompt-prompt-window · Master prompt / prompt window**
+- Verdict: Reject
+
+**term-long-range-prompts · Long range prompts**
+- Verdict: Reject
+
+**term-discovery-artifact-html-review-html-plan-html-overview · Discovery artifact / html review / html plan / html overview**
+- Verdict: Revise
+- Note: page (review, discovery, etc)
+
+**term-link-to-site · Link to site**
+- Verdict: Revise
+- Note: active link
+
+**term-eyebrow · Eyebrow**
+- Verdict: Reject
+
+**term-filterable-tags-quoted-user-conversation-formatted-diffs · Filterable tags / quoted user conversation / formatted diffs**
+- Verdict: Reject
+
+**conv-token-efficient-building · Token efficient building**
+- Verdict: Reject
+
+**conv-reset-before-edit-no-state-to-manage · Reset before edit — no state to manage**
+- Note: restore from export
+
+**conv-sections-optional-mix-and-match · Sections optional, mix and match**
+- Note: Builders optional, mix and match
+
+**conv-hardcoded-sections-configurable-options · Hardcoded sections, configurable options**
+- Verdict: Reject
+
+**conv-test-the-agent-s-changes-not-the-user-s-browser · Test the agent's changes, not the user's browser**
+- Verdict: Reject
+
+**conv-concise-reviews-drop-settled-items · Concise reviews — drop settled items**
+- Verdict: Revise
+- Note: merge with similar conventions
+
+**conv-workspace-first-reviews-go-in-reviews · Workspace first; reviews go in reviews/**
+- Note: Utilise dev-workspace when available
+
+**conv-per-repo-instance-still-standalone · Per-repo instance, still standalone**
+
+**conv-hand-maintained-lists-agent-invocable-skill-only · Hand-maintained lists; agent-invocable skill only**
+- Verdict: Reject
+
+**conv-warn-before-destructive-saves · Warn before destructive saves**
+- Verdict: Reject
+
+**conv-reference-driven-styling · Reference-driven styling**
+- Verdict: Reject
+
+**conv-clean-encoding · Clean encoding**
+- Verdict: Reject
+
+**conv-edit-the-structure-from-the-page-itself · Edit the structure from the page itself**
+- Verdict: Revise
+- Note: similar to an above convention.
+
+**file-form · File form**
+- Verdict: Revise
+- Note: currently WIP. not in the scope of this discussion.
+
+**q-bash-kill-for-the-verification-server · Q: Bash(kill:*) for the verification server**
+- Verdict: timeout, no grant
+- Note:
+  agent must handle the server they start. is this safe or can the agent kill other things?
+  prefer timeout option
+
+**q-confirm-the-skill-s-tool-set · Q: confirm the skill's tool set**
+- Verdict: Revise (note)
+- Note: still WIP
+
+**unresolved-lists-left-in-earlier-reviews · Unresolved lists left in earlier reviews**
+- Note: parked
+
+### Next
+
+- Write docs/<family>/ (terms, conventions, profiles, delivery) from every Terms, Conventions and Goals card marked Agree, quoting the user's phrasing where the card carries it; wait for the naming page before choosing the family word.
+- Architecture decisions and Stage 1 decisions feed the skill and plan, not the conventions doc.
+- Apply each Revise note to the card it names before writing; ask where a note is missing.
+- Amend stage-1-decisions.md, artifact-suite-implementation.md and PIVOT.md for: kind-decides landing, plain doctype, chat-tools hosting, rename after build, exact-match pkill.
+- Treat every untouched card as accepted as written.
+
+Re-open: file://~/Projects/agent-library/dev/workspace/reviews/flightdeck-naming-review.html#two-profiles-under-one-family-deck-and-page
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Naming settled enough to write (FlightDeck is your stated choice; the head-to-head confirm can still overturn by search-replace). Take on your "page" question, then I write `docs/flightdeck/`.
+
+**"page" as a trigger word — no.** Your three sentences show why: *review* → markdown, *review artifact* → shared claude.ai artifact, *review page* → an agent with no skill loaded will produce ad-hoc HTML from priors, because "page" is an ordinary word. Only *flightdeck* is unambiguous: it names the skill, so it loads the shell and conventions. Rule I'll document: **flightdeck** is the trigger and the document noun ("build a review flightdeck", "flightdeck this"); **page** stays a plain word for any document and never triggers; **artifact** means a published claude.ai artifact, as you use it. Instrument / readout are profile words in the docs only.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; sed -n 1,40p docs/drafthorse/framework/README.md | cut -c1-160; echo ----; sed -n 1,25p docs/drafthorse/framework/conventions.md | cut -c1-160; ls docs/drafthorse/framework
+Description: Check DraftHorse docs shape to mirror
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/flightdeck/README.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/flightdeck/terms.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/flightdeck/conventions.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/flightdeck/profiles.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/flightdeck/organisation.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Docs written; running the durability reviewer over all four in parallel.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+`docs/flightdeck/` drafted (4 files + README); two durability reviewers running. What's in it:
+
+- **README.md** — what a flightdeck is, the three-sentence disambiguation (review / review artifact / review flightdeck), reading order, your stated goals.
+- **terms.md** — family words (FlightDeck, flightdeck, page-not-a-trigger, artifact = published, instrument/readout/demo), structure (shell, page template, card, return prompt, active link, demo, mock, probe, text-db), readout kinds (review, discovery, plan, interview, options, issue breakdown), prompt-builder vocabulary (builder, write/choose builder, display key/agent value, loadout, recipes, utilities, launcher, edit in place, deliverables, process chain/gates). Rejected terms omitted.
+- **conventions.md** — 22 guiding lights grouped: exchange with the person, grounding, the file, building, workflow. Each with your sentence. Merges done as you noted.
+- **profiles.md** — instrument / readout / demo: lifetime, state, returns.
+- **organisation.md** — `extensions/artifacts/flightdeck/<name>/`, kind→directory table (reviews, research, plans, tasks, flightdecks/ fallback), `<id>.html` naming, archive behaviour, chat-tools hosting, skill slug, delivery (plain doctype, disk-first, publishing = separate strip tool, timeout not kill).
+
+Left out per your prompt: plan/PIVOT/decision amendments, file-form and tool-set (WIP), parked review lists.
+
+Will apply reviewer findings when they land, then send the folder.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+<task-notification>
+<task-id>a29dcb87851a98535</task-id>
+<tool-use-id>toolu_01HXG6eaMg4qjUpL6PSN4Aoe</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1/tasks/a29dcb87851a98535.output</output-file>
+<status>completed</status>
+<summary>Agent "Durability review terms+README" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>Both companion files (`conventions.md`, `profiles.md`, `organisation.md`) resolve as links; per the audit invariant I read nothing from them beyond confirming they exist, and report no findings against them.
+
+VERDICT: revise
+
+ACCEPTANCE TEST: Supplied by the invoker — a cold agent in another repository, holding only `~/Projects/agent-library/docs/flightdeck/README.md` and `~/Projects/agent-library/docs/flightdeck/terms.md`, can (a) say what a flightdeck is, (b) use every term correctly, (c) know "page" is not a trigger.
+
+Simulated result: (a) passes cleanly — README line 3 gives a complete, self-contained definition. (c) passes twice over — terms.md line 9 and README line 3 both state it plainly, and the "Three sentences" block reinforces it. (b) **fails**. The walk stalled on `instrument` and `readout` (named as two of the three profiles but never defined in either file — `profiles.md` is not in hand), on `demo` (defined two incompatible ways), and on `kind` (defined narrowly for readouts, then used loosely for every flightdeck). The agent would also have guessed at `/flightdeck`, `extensions/artifacts/flightdeck/` and `dev/workspace/flightdecks/`, none of which exist.
+
+FINDINGS:
+
+1. [Unreachable meaning — stall point] `terms.md`, "**instrument**, **readout**, **demo** — the three profiles. See [Profiles](profiles.md)."
+   Problem: the terms file promises to give every word its meaning, then delegates three of the most load-bearing words to a file the reader does not hold. `instrument` is only glancingly characterised in README line 25 ("reach into the harness") and by the prompt-builder section; `readout` is never defined at all — §"Kinds of readout" describes its kinds while assuming the noun. The agent cannot use the words correctly.
+   Fix direction: give each of the three a one-line definition in terms.md that stands without profiles.md, and let the link carry the elaboration rather than the meaning.
+
+2. [Unreachable meaning — stall point] `terms.md`, "**demo** — a dynamically built HTML page, or a fragment of one, that demonstrates some functionality in isolation" versus line 11 listing demo as one of the three profiles, and line 8's "demo flightdeck".
+   Problem: one word carries two definitions in the same file — a profile of flightdeck, and a loose HTML page or fragment that need not be a flightdeck at all. The reader cannot tell whether "build a demo" invokes the family.
+   Fix direction: decide which sense the word holds, and either scope the second sense under a distinct word or state explicitly that a demo is a flightdeck profile whose artefact may be a fragment.
+
+3. [Unreachable meaning — stall point] `terms.md`, "**kind**" in §"Kinds of readout" ("A readout's **kind** says what the person is asked to do") against line 11 ("in speech the kind plus *flightdeck* is enough") and line 8 ("Spoken with its kind in front: review flightdeck, interview flightdeck, demo flightdeck").
+   Problem: `kind` is defined as a readout property, then used as the general slot in front of every flightdeck — including `demo`, which is a profile rather than a readout kind. Line 16's "per-kind starting file" inherits the same ambiguity.
+   Fix direction: pick one scope for `kind` and give it its own entry under "The family"; where the broader slot is meant, name it separately.
+
+4. [Missing environment — stall point] `terms.md`, "`/flightdeck`, `extensions/artifacts/flightdeck/`, `dev/workspace/flightdecks/`".
+   Problem: mechanically checked — none of the three resolve. There is no `/flightdeck` skill anywhere in `extensions/`, no `extensions/artifacts/flightdeck/` directory (only `prompt-builder/`), and no `dev/workspace/flightdecks/`. A cold agent told these are the canonical locations will write to or invoke paths that do not exist.
+   Fix direction: mark these as the intended target locations not yet created, or defer the paths to organisation.md and keep only the casing rule here.
+
+5. [Missing environment] `README.md`, "Architecture (the shell's markup, storage, verification) belongs to the skill that builds flightdecks, not here."
+   Problem: the skill is never named, and no skill matching FlightDeck exists in the repository. The reader is redirected to something they cannot locate, for the exact material they need in order to build.
+   Fix direction: name the skill and its invocation id, or state that it is not yet built and what stands in until it is.
+
+6. [Unreachable meaning] `README.md`, "Each repository can carry its own instruments, shipped with dev-workspace, while an instrument still runs unattached."
+   Problem: `dev-workspace` is a named local tool with no gloss and no link — unreachable to any agent outside this machine. "runs unattached" is a coined phrase used once and never defined.
+   Fix direction: gloss dev-workspace in a clause or drop the shipping mechanism from the goal; say plainly what a flightdeck depends on at runtime instead of "unattached".
+
+7. [Unreachable meaning] `README.md`, "Published artifacts are an interest, not a commitment: a flightdeck is a plain HTML document first; a strip tool for publishing is separate work."
+   Problem: this is a decision recorded from a conversation the reader cannot access — "an interest, not a commitment" states a stance whose holder and stakes are absent, and "a strip tool" names a tool that strips something unspecified.
+   Fix direction: reduce to the durable fact (a flightdeck is a plain local HTML file; publishing is out of scope) and drop the deliberation and the unnamed tool.
+
+8. [Audience mismatch] `README.md`, §"Stated goals" (all seven bullets).
+   Problem: the section is written to the project's owner as a roadmap — aspirations, scope commitments, and what is "an interest" — inside a document whose other sections address an agent about to build. "Stated" also implies a stater the reader cannot identify. An executing agent gets no instruction from it and must decide for itself which lines constrain the build.
+   Fix direction: keep only the goals that constrain construction and rewrite them as properties every flightdeck must hold; move the roadmap material to a planning document outside this reference.
+
+9. [Unreachable meaning] `terms.md`, the coining quotes generally — "Each section is actually a builder, that's why the tab is called Build.", "An option like output.depth: key terse, value terse prose…", "link to site — collapsed link to file or location in question when available", "page shell — shell for every page template".
+   Problem: the quotes are transcribed from a session the reader cannot access, and several introduce nouns of their own that are never defined — a "Build" tab, an `output.depth` identifier, a "collapsed" link, a "link to site" that is not the term being defined. The shell quote is circular and reuses `page`, which line 9 declares a non-family word.
+   Fix direction: keep coin quotes only where they add meaning the definition lacks; where a quote introduces a new noun, either define that noun or fold the quote's content into the plain definition.
+
+10. [Unreachable meaning] `terms.md`, "**deliverable / nested deliverables** — an Output item (review, implementation plan, artifact) that a process stage can carry."
+    Problem: capital-O "Output" reads as the proper name of a builder or section in the prompt builder interface, which the reader has never been shown. The parenthetical examples do not recover what an Output item is.
+    Fix direction: name the container the reader can find, or lowercase it and define the deliverable purely by what it is.
+
+11. [Ambiguous executable] `terms.md`, "a flightdeck that needs a word not listed here adds it to this file first."
+    Problem: this is an instruction to an agent mid-build, but the acting party is a document, no path to "this file" is given, and an agent working in another repository has no copy to edit. Different agents will resolve it differently — some editing, some inventing silently.
+    Fix direction: address the agent directly, give the file's repository-relative path, and state what happens when the file is not writable from the current working context.
+
+12. [Ambiguous executable] `terms.md`, "**page template** — a per-kind starting file with all prerequisite styles and scripting, edited into the shell."
+    Problem: the direction of assembly is unreadable — whether the template is edited into the shell or the shell supplies the template. Combined with `shell` being "the universal page structure", the two definitions describe each other without either being the concrete starting artefact.
+    Fix direction: state which file the agent opens first and what it does to it.
+
+13. [Negative mirror] `README.md`, "belongs to the skill that builds flightdecks, **not here**."
+    Problem: naming the owner already excludes this document; the negative clause adds nothing.
+    Fix direction: drop the trailing negative and sharpen the positive to name the owner precisely.
+
+14. [Negative mirror] `terms.md`, "'Build a review artifact' asks for a shareable published page, **not a flightdeck**."
+    Problem: the artifact definition and the adjacent flightdeck entry already separate the two; the negative restates the contrast a third time in the file.
+    Fix direction: remove the trailing negative here and let the README's "Three sentences" block carry the contrast once.
+
+Borderline, let stand and reported for your judgement:
+
+- `README.md` "the guiding lights every flightdeck answers to" — decorative where the sharp-language rule asks for the plain word ("the rules"). No misexecution follows.
+- `README.md` §"Three sentences that tell the family apart" against terms.md lines 8–10 — the same three-way distinction stated in both files. Deliberate reinforcement of the acceptance test's third criterion, so redundancy here is arguably earned.
+- `README.md` line 3, "The word is also the trigger" — has the shape of a self trigger, but this is the family's reference document and the trigger word is itself vocabulary the test demands. Legitimate content, not invocation misplaced.
+- `terms.md` "**mock** — … Mock designations are removed when the file solidifies." — the designation's form (numbered prefix, suffix, folder) is unstated, and the file claims authority over file names. Only bites if an agent is naming mock files.
+- `terms.md` "renamed by its owner to `prompt-builder.html`" — the owner is unidentifiable provenance, and the file's location is never given (it is at `~/Projects/agent-library/extensions/artifacts/prompt-builder/prompt-builder.html`). Harmless as history; unhelpful as a referent.</result>
+<usage><subagent_tokens>24300</subagent_tokens><tool_uses>6</tool_uses><duration_ms>123103</duration_ms></usage>
+</task-notification>
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Applying the first reviewer's findings to README and terms (define the three profiles inline, single sense for demo, `kind` entry, paths marked as intended, skill named as not yet built, negatives trimmed, quotes that drag in undefined nouns cut).
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/flightdeck/README.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/flightdeck/terms.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/flightdeck/conventions.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/flightdeck/profiles.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/docs/flightdeck/organisation.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; dev-workspace tree 2>&1 | tail -3; grep -n "flightdeck" dev/workspace/context/tree.md | head; wc -l docs/flightdeck/*.md
+Description: Regenerate context tree and confirm docs listed
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Docs final; sending the folder.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Done. `docs/flightdeck/` written from your two return prompts, reviewed twice for durability, findings applied.
+
+**What's there** (190 lines)
+- `README.md` — definition, trigger rule (flightdeck triggers; page doesn't; artifact = published), reading order, the three-sentence disambiguation, "what the family is for" as properties. Skill named as not yet built (working name `artifact-suite`).
+- `terms.md` — family words incl. **kind** and **profile** entries, instrument/readout/demo defined inline; structure (shell, page template, card, return prompt, active link, mock, probe, text-db); six readout kinds; prompt-builder vocabulary with write/choose builder. Your 8 rejections omitted; quotes kept only where they sharpen.
+- `conventions.md` — 22 rules, your merges applied; gates scoped to shell/instrument work (a one-task readout builds directly); persistence and verification deferred to the skill's mechanism; "agent without the skill stops, doesn't write chrome".
+- `profiles.md` — instrument / readout / demo.
+- `organisation.md` — a dated "current state" block saying which target paths don't exist yet; binding kind→directory map; `<id>.html`; chat-tools host; delivery (plain doctype, disk-first, "publish" reserved for Artifact-tool shipping, timeout not kill).
+
+**Not done, by your instruction**: no plan/PIVOT/decisions edits; file-form, tool-set, parked review lists untouched.
+
+**Open**
+- Naming rev 2 return prompt still outstanding (head-to-head, speech test). Docs assume FlightDeck + flightdeck-in-speech; if the head-to-head goes elsewhere it's a search-replace.
+- `dev-workspace` scaffold change (`flightdecks/` dir) is a task for that repo — not recorded anywhere yet; say if you want it in `dev/workspace/tasks/`.
+- Nothing committed. Files: `docs/flightdeck/*`, `dev/workspace/reviews/flightdeck-naming-review.html`, `dev/workspace/plans/artifact-family-naming.html`.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok can we commit this work
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git status --short; git diff --stat
+Description: Show working tree status
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Only my files: `docs/flightdeck/`, the review (rev 2) and the naming page. Leaving prompt-builder.html, `extensions/skills/artifact-suite/`, `prompt.json`, `folder.txt` alone — other WIP.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; git reset -q; git add docs/flightdeck && git commit -q -F- <<'EOF'
+📝 docs(flightdeck): name the HTML artifact family, record terms, conventions, profiles, organisation
+
+FlightDeck is the family; a flightdeck is any one document and the trigger word. Terms and conventions mined from the owner's own statements; profiles instrument / readout / demo; kind-to-directory landing under dev-workspace; delivery as plain local HTML.
+
+Claude-Session: https://claude.ai/code/session_01NEz7R5iLQAFjmKASK6SZAU
+EOF
+git add dev/workspace/reviews/flightdeck-naming-review.html dev/workspace/plans/artifact-family-naming.html && git commit -q -F- <<'EOF'
+📝 workspace: flightdeck naming review rev 2, artifact family naming page rev 2
+
+Claude-Session: https://claude.ai/code/session_01NEz7R5iLQAFjmKASK6SZAU
+EOF
+git log --oneline -3; git status --short
+Description: Commit docs and workspace pages as two commits
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Committed on `artifacts`, two commits:
+- `17dedd3` docs(flightdeck) — the 5 reference files
+- `60c9190` workspace — review rev 2 + naming page rev 2
+
+Left uncommitted (not this thread's work): `prompt-builder.html` edits, `extensions/skills/artifact-suite/`, `prompts/prompt-builder/prompt.json`, `folder.txt`.
+
+Not pushed. Say the word for `dev-workspace push`.
+
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/dev-workspace:conversation-capture unknown
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ruby ~/.claude/plugins/cache/DBHD-dev-workspace/dev-workspace/1.1.0/skills/conversation-capture/scripts/conversation-capture ae36a425-bf9b-4b9b-9ecc-06721dd1d9f1
+Description: Capture session transcript
+
+------------------------------------------------------------
