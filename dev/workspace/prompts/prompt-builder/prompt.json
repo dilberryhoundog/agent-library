@@ -1,0 +1,215 @@
+{
+  "version": 4,
+  "state": {
+    "task": {
+      "text": "Build a html artifact suite. The core layout, styles and js can all be in a shell template. Then page templates with all prebuilt styles and scripting so they can be edited into the shell. "
+    },
+    "problem": {
+      "text": ""
+    },
+    "context": {
+      "text": "",
+      "files": [
+        {
+          "a": "extensions/artifacts/prompt-builder/prompt-builder.html",
+          "b": "The most recent, active example of styling and layout. "
+        },
+        {
+          "a": "dev/workspace/reviews/mock-4-proposals.html",
+          "b": "The best representation of a review or shell document. key pieces: theme selector, cards with colour sidebar, floating copy & text buttons."
+        }
+      ]
+    },
+    "goals": {
+      "items": [
+        "User can navigate directly to all files or sites in question, to check original content.",
+        "User can see clearly where the work originates from (branch, issue, pr)",
+        "User can always return to the agent with a prompt that progresses the context or conversation",
+        "Agent can build pages repeatedly with consistent features and styling. focusing on content. ",
+        "Pages preserve users history (decision and response) when updating. but doesn't enter return prompt unless edited.",
+        "Build process is simple and efficient, avoiding big reads"
+      ]
+    },
+    "features": {
+      "items": [
+        {
+          "a": "page shell",
+          "b": "shell for every page template. Has all the base styling, layout and scripting. copy prompt"
+        },
+        {
+          "a": "review page",
+          "b": "agent presents findings or results. user can approve and comment on each change"
+        },
+        {
+          "a": "interview page",
+          "b": "agent asks user a series of questions, to gain further insight."
+        },
+        {
+          "a": "demo page",
+          "b": "active demonstrate a portion or component. "
+        },
+        {
+          "a": "options page",
+          "b": "provide the user options to choose from. recommended, extra comments"
+        },
+        {
+          "a": "issue breakdown",
+          "b": "core issue, investigation results, additional comments. "
+        },
+        {
+          "a": "link to site",
+          "b": "collapsed link to file or location in question when available. "
+        },
+        {
+          "a": "quoted user conversation",
+          "b": "quote section for users comments from the chat, that apply to card contents."
+        },
+        {
+          "a": "filterable tags",
+          "b": "show only relevant cards per filter. (eg integrate, your call, defer)"
+        },
+        {
+          "a": "formatted diffs",
+          "b": "colour red gray green (remove, keep, add). The + or - marker colored & in a consistent margin next to content. not in content box. "
+        },
+        {
+          "a": "return prompting",
+          "b": "each page builds a return prompt for the agent, with advanced context guiding next steps."
+        },
+        {
+          "a": "comment, approve, copy",
+          "b": "the user interaction axis."
+        }
+      ]
+    },
+    "references": {
+      "items": [
+        {
+          "a": "Side menu example, eyebrow branch highlighting",
+          "b": "dev/workspace/reviews/section-ledger.html"
+        },
+        {
+          "a": "demo layout, eyebrow colour splash",
+          "b": "dev/workspace/reviews/process-nesting-demo.html"
+        },
+        {
+          "a": "eyebrow issue link.",
+          "b": "dev/branches/drafthorse-condition-precedence/artifacts/issue-45-review.html"
+        },
+        {
+          "a": "diff coloring, file links",
+          "b": "dev/branches/drafthorse-condition-precedence/artifacts/issue-45-diffs.html"
+        },
+        {
+          "a": "visual content (ignore styling)",
+          "b": "dev/branches/agent-teams/reviews/corpus-sweep-design.html"
+        }
+      ]
+    },
+    "scope": {
+      "inside": [
+        "Utilise focused editing. agents can target a a range to read, then edit within that range. eliminating large page reads",
+        "Utilise page templates, read a generic template for a page type (review, explainer), target write location in shell, write the custom page in the shell",
+        "Utilise a unique html tag or flag in the shell for the \"agent editable\" area. starts out empty before agent fills."
+      ],
+      "outside": [
+        "Script based injectors and validators.",
+        "packaging, releasing the suite."
+      ]
+    },
+    "constraints": {
+      "text": "Utilise the focused read functionality",
+      "picked": []
+    },
+    "verify": {
+      "criteria": [],
+      "gates": [],
+      "items": []
+    },
+    "guardrails": {
+      "text": "",
+      "picked": []
+    },
+    "architecture": {
+      "language": [],
+      "framework": [],
+      "storage": [],
+      "patterns": [],
+      "infra": [],
+      "text": ""
+    },
+    "output": {
+      "deliverable": [
+        "Review",
+        "Implementation plan",
+        "Review page",
+        "Plan page"
+      ],
+      "depth": ""
+    },
+    "tone": {
+      "pick": "",
+      "text": ""
+    },
+    "process": {
+      "stages": [
+        {
+          "id": 8,
+          "label": "Investigate",
+          "value": "Investigate",
+          "note": ""
+        },
+        {
+          "id": 15,
+          "kind": "deliv",
+          "label": "Review page",
+          "value": "HTML review page - Presentation of findings or evaluation.",
+          "note": ""
+        },
+        {
+          "id": 10,
+          "label": "Tech Plan",
+          "value": "Tech Plan",
+          "note": ""
+        },
+        {
+          "id": 11,
+          "kind": "deliv",
+          "label": "Implementation plan",
+          "value": "Implementation plan",
+          "note": ""
+        },
+        {
+          "id": 16,
+          "kind": "deliv",
+          "label": "Plan page",
+          "value": "HTML Plan viewer - supporting page for written plans, explaining key decisions and direction information from the plan",
+          "note": ""
+        },
+        {
+          "id": 12,
+          "label": "Implement",
+          "value": "Implement",
+          "note": ""
+        },
+        {
+          "id": 14,
+          "label": "Self-review",
+          "value": "Self-review",
+          "note": ""
+        }
+      ]
+    },
+    "skills": {
+      "picked": [],
+      "other": []
+    },
+    "exec": {
+      "strategy": "Workflow — custom",
+      "economy": "Optimal per task",
+      "roster": [],
+      "text": ""
+    }
+  },
+  "recipes": []
+}

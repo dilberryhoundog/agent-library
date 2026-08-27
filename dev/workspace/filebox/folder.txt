@@ -1,0 +1,22 @@
+dev/
+  orchestration/                 the memory (checked in)
+    templates/
+      spec.md                    nine parts
+      kickoff-*.md               the library: variants by run shape
+      worker.md · reviewer.md    prompt shapes for subagents
+    RUNLOG.md                    diagnosis entries, newest first
+    checks/
+
+  workspace/
+    agent-runs/
+      checks/                      command · exit · output, per check
+      specs/<name>/
+        spec.md                    frozen at a commit; status in header
+        tests-map.md               B/E number → check name
+      <spec>-<n>/
+        kickoff.md                 the version used
+        plan.md                    approved at G1
+        events.jsonl               recorded by hooks
+        review.md                  findings as returned
+        report.md                  assembled; the evidence page's twin
+tests/
