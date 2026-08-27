@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-08-27
+
+### Changed
+
+- DraftHorse ships as its own plugin, `drafthorse`, in the DBHD-Plugins marketplace. Versions up to 0.7.0 shipped inside `agent-tools`, which now depends on this plugin and installs it automatically.
+- Invocation ids move with the plugin: the builder skill is `/drafthorse:drafthorse` and the spec-checker agent is `drafthorse:drafthorse-saddler`.
+- The framework documentation and the spec-check authoring source live inside the package (`docs/framework/`, `docs/drafthorse-spec-check.md`), alongside the skill, the agent, and the rule stub.
+
 Versions 0.1.0–0.7.0 shipped inside the `agent-tools` plugin; their entries are carried here as DraftHorse's own history.
 
 ## [0.7.0] - 2026-08-21
