@@ -358,7 +358,7 @@
 {
   "id": "flightdeck-naming-review",
   "kind": "review",
-  "rev": 1,
+  "rev": 2,
   "title": "FlightDeck \u2014 naming and conventions review",
   "provenance": {
     "repo": "https://github.com/dilberryhoundog/agent-library",
@@ -373,13 +373,13 @@
     "editor": "vscode"
   },
   "prompt": {
-    "heading": "Response \u2014 FlightDeck naming and conventions"
+    "heading": "Response \u2014 FlightDeck naming and conventions (rev 2)"
   },
   "next": [
-    "Write docs/flightdeck/ (conventions, terms, profiles, delivery) from every card marked Agree, using the accepted name and profile terms throughout.",
-    "Apply each Revise or Rename note to the term or convention it names before writing the doc; ask where a note is missing.",
-    "Amend stage-1-decisions.md, artifact-suite-implementation.md and PIVOT.md wherever a card here overrides them (landing rule, skill name, Artifact-tool compat).",
-    "Record the dev-workspace scaffold change (flightdecks/ directory, named tree) as a task against the dev-workspace repository.",
+    "Write docs/<family>/ (terms, conventions, profiles, delivery) from every Terms, Conventions and Goals card marked Agree, quoting the user's phrasing where the card carries it; wait for the naming page before choosing the family word.",
+    "Architecture decisions and Stage 1 decisions feed the skill and plan, not the conventions doc.",
+    "Apply each Revise note to the card it names before writing; ask where a note is missing.",
+    "Amend stage-1-decisions.md, artifact-suite-implementation.md and PIVOT.md for: kind-decides landing, plain doctype, chat-tools hosting, rename after build, exact-match pkill.",
     "Treat every untouched card as accepted as written."
   ]
 }
@@ -395,18 +395,17 @@
 			</div>
 		</div>
 		<h1>FlightDeck — naming and conventions review</h1>
-		<p class="standfirst">A name for the HTML artifact family, where its pages live and how they are delivered — then every term and convention this branch has coined, one card each, for you to keep, rename or drop. Answer what you care about; untouched cards stand as written.</p>
+		<p class="standfirst">Rev 2. Terms and conventions now come from your own words — every card quotes you and says where. What rev 1 called conventions is filed as architecture decisions. Your rev 1 answers are kept; cards whose text changed show the amber strip.</p>
 		<div class="masthead-meta">
-			<span><b>Branch</b> artifacts</span>
-			<span><b>Swept</b> 36 workspace files + prompt-builder.html</span>
-			<span><b>Proposal</b> FlightDeck · deck / page</span>
+			<span><b>Rev 2 sources</b> 107 of your turns · kickoff prompt · WORKSPACE.md · quoted blocks · this session</span>
+			<span><b>Naming</b> see <a href="../plans/artifact-family-naming.html">artifact-family-naming</a></span>
 		</div>
 		<div class="stats">
-			<div class="stat"><b>113</b><span>cards</span></div>
-			<div class="stat"><b>7</b><span>takes</span></div>
-			<div class="stat"><b>63</b><span>terms</span></div>
-			<div class="stat"><b>14</b><span>convention topics</span></div>
-			<div class="stat"><b>20</b><span>decisions</span></div>
+			<div class="stat"><b>33</b><span>terms, yours</span></div>
+			<div class="stat"><b>33</b><span>guiding lights</span></div>
+			<div class="stat"><b>8</b><span>goals</span></div>
+			<div class="stat"><b>14</b><span>architecture</span></div>
+			<div class="stat"><b>20</b><span>stage 1</span></div>
 		</div>
 	</header>
 
@@ -418,7 +417,7 @@
 
 		<section id="takes">
 			<div class="sec-head"><h2>Takes</h2><span class="count"></span></div>
-			<p class="sec-intro">The six positions from the chat reply plus one on profiles. Each is an option set where the choice is genuinely yours; the rest are recommendations.</p>
+			<p class="sec-intro">Rev 1 positions with your notes applied: path, landing directories, delivery. Naming moved to its own page.</p>
 
 			<article class="card" id="flightdeck-as-the-family-name" data-tag="yourcall" data-verdicts="FlightDeck|Keep artifact-suite|Other name (note)" data-recommended="FlightDeck">
 				<div class="chiprow"><a class="chip id" href="#flightdeck-as-the-family-name">01</a><span class="chip yourcall">Your call</span><span class="chip">naming</span></div>
@@ -433,12 +432,12 @@
 			<article class="card" id="landing-rule-page-kind-decides-the-directory" data-tag="yourcall" data-verdicts="Kind decides|Single directory|Revise (note)" data-recommended="Kind decides">
 				<div class="chiprow"><a class="chip id" href="#landing-rule-page-kind-decides-the-directory">03</a><span class="chip yourcall">Your call</span><span class="chip">location</span></div>
 				<h3>Landing rule: page kind decides the directory</h3>
-				<p>Claude placing reviews in <code>reviews/</code> and plans in <code>plans/</code> is right. The dev-workspace directories already carry meaning, and archive, commit and history all work on them for free. A catch-all <code>artifacts/</code> duplicates that meaning and hides the page's purpose.</p><p>Proposed table: review page → <code>reviews/</code>; interview, options and decision pages → <code>plans/</code>; demo, dashboard or anything with no natural home → <code>flightdecks/</code>, a rename of the experimental <code>artifacts/</code> directory. This overrides the plan's single-directory landing rule (D-19, tech plan File layout).</p>
+				<p>Claude placing reviews in <code>reviews/</code> and plans in <code>plans/</code> is right. The dev-workspace directories already carry meaning, and archive, commit and history all work on them for free. A catch-all <code>artifacts/</code> duplicates that meaning and hides the page's purpose.</p><p>Proposed table: review page → <code>reviews/</code>; interview, options and decision pages → <code>plans/</code>; research pages → <code>research/</code>; agent task briefs → <code>tasks/</code>; demo, dashboard or anything with no natural home → <code>flightdecks/</code>, a rename of the experimental <code>artifacts/</code> directory. This overrides the plan's single-directory landing rule (D-19, tech plan File layout).</p>
 			</article>
 			<article class="card" id="durable-decks-live-in-extensions-flightdecks" data-tag="integrate" data-recommended="Agree">
 				<div class="chiprow"><a class="chip id" href="#durable-decks-live-in-extensions-flightdecks">04</a><span class="chip integrate">Integrate</span><span class="chip">location</span></div>
 				<h3>Durable decks live in <code>extensions/flightdecks/</code></h3>
-				<p>Rename <code>extensions/artifacts/</code>. Each deck at <code>extensions/flightdecks/&lt;name&gt;/&lt;name&gt;.html</code> with its own README, symlinked into a plugin like every other asset. The skill's build material (shell, templates, blocks) stays inside the skill directory; it is not a deck.</p><p>Repo docs mirror DraftHorse: <code>docs/flightdeck/</code> for conventions, profiles and delivery; skill at <code>extensions/skills/flightdeck/</code>; optional rule in <code>extensions/rules/</code>. Cheap now — the plan is not yet built.</p>
+				<p>Your rev 1 note settles the path: <code>extensions/artifacts/flightdeck/**/*</code> — <code>artifacts</code> stays the directory, the family name sits beneath it, so prompt-builder moves to <code>extensions/artifacts/flightdeck/prompt-builder/</code>. Each deck with its own README, symlinked into a plugin like every other asset. The skill's build material (shell, templates, blocks) stays inside the skill directory; it is not a deck.</p><p>Repo docs mirror DraftHorse: <code>docs/flightdeck/</code> for conventions, profiles and delivery; skill at <code>extensions/skills/flightdeck/</code>; optional rule in <code>extensions/rules/</code>. Cheap now — the plan is not yet built.</p>
 			</article>
 			<article class="card" id="dev-workspace-integration" data-tag="integrate" data-recommended="Agree">
 				<div class="chiprow"><a class="chip id" href="#dev-workspace-integration">05</a><span class="chip integrate">Integrate</span><span class="chip">dw</span></div>
@@ -448,7 +447,7 @@
 			<article class="card" id="delivery-keep-artifact-tool-compatibility" data-tag="yourcall" data-verdicts="Keep compat|Drop compat, plain doctype|Revise (note)" data-recommended="Keep compat">
 				<div class="chiprow"><a class="chip id" href="#delivery-keep-artifact-tool-compatibility">06</a><span class="chip yourcall">Your call</span><span class="chip">delivery</span></div>
 				<h3>Delivery: keep Artifact-tool compatibility</h3>
-				<p>Three surfaces: disk (<code>file://</code>, disk-primary links per D-18), a published Artifact (stable URL, shareable), and browser MCP for verification. Compat cost is small — verify writes the wrapped copy — and it is the only way a durable deck becomes a true daily driver across machines and projects.</p><p>Convention: decks publish once with a stable URL recorded in the deck's README and redeploy to the same path; pages stay on disk and publish only on request. Cross-project deck access otherwise goes through <code>${CLAUDE_PLUGIN_ROOT}</code> after plugin install. Settles PIVOT §8's first open decision.</p>
+				<p>Three surfaces: disk (<code>file://</code>, disk-primary links per D-18), a published Artifact (stable URL, shareable), and browser MCP for verification. Compat cost is small — verify writes the wrapped copy — and it is the only way a durable deck becomes a true daily driver across machines and projects.</p><p>Convention: decks publish once with a stable URL recorded in the deck's README and redeploy to the same path; pages stay on disk and publish only on request. Cross-project deck access otherwise goes through <code>${CLAUDE_PLUGIN_ROOT}</code> after plugin install. Your rev 1 verdict: <b>drop compat, plain doctype</b> — plain first, a strip tool for compat later, and the artifact-sharing skill may accept plain HTML anyway. Compat work continues elsewhere.</p>
 			</article>
 			<article class="card" id="profiles-as-the-documented-axis" data-tag="integrate" data-recommended="Agree">
 				<div class="chiprow"><a class="chip id" href="#profiles-as-the-documented-axis">07</a><span class="chip integrate">Integrate</span><span class="chip">profiles</span></div>
@@ -460,7 +459,7 @@
 
 		<section id="questions" data-loose="Anything the takes missed">
 			<div class="sec-head"><h2>Questions</h2><span class="count"></span></div>
-			<p class="sec-intro">Left open by the takes. No recommendation where the answer changes the work materially.</p>
+			<p class="sec-intro">Answered in rev 1; kept for the record.</p>
 
 			<article class="card" id="answered-interview-page-where-does-it-land" data-tag="yourcall" data-verdicts="context/ once answered|Stays in plans/|Revise (note)">
 				<div class="chiprow"><a class="chip id" href="#answered-interview-page-where-does-it-land">08</a><span class="chip yourcall">Your call</span><span class="chip">location</span></div>
@@ -485,403 +484,472 @@
 		<!-- @end-questions -->
 		</section>
 
+		<section id="goals" data-loose="Goals not captured">
+			<div class="sec-head"><h2>Stated goals</h2><span class="count"></span></div>
+			<p class="sec-intro">What you have said the programme is for, in your words. Agree confirms the doc may lead with it.</p>
+
+			<article class="card" id="goal-long-lived" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#goal-long-lived">12</a><span class="chip integrate">Integrate</span><span class="chip">goal</span></div>
+				<h3>Long-lived exploration</h3>
+				<blockquote><p>I will be doing major artifacts exploration and building over the next period</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>The <code>artifacts</code> branch is permanent.</p>
+			</article>
+			<article class="card" id="goal-structured-prompts" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#goal-structured-prompts">13</a><span class="chip integrate">Integrate</span><span class="chip">goal</span></div>
+				<h3>Structured prompts from sections</h3>
+				<blockquote><p>My vision is to have a whole range of sections the user can input into. this then outputs a structured prompt the user can copy into their CC session</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Prompt-builder's founding goal.</p>
+			</article>
+			<article class="card" id="goal-long-range" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#goal-long-range">14</a><span class="chip integrate">Integrate</span><span class="chip">goal</span></div>
+				<h3>Long-range prompts for large agent runs</h3>
+				<blockquote><p>this prompt builder has a usecase of building out long range prompts for use with large agent runs</p><cite>You · history/66039af5_prompt-builder-audit-refactor-nested-deliverables.txt</cite></blockquote><p>Process chains, gates and deliverables serve this.</p>
+			</article>
+			<article class="card" id="goal-round-trip" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#goal-round-trip">15</a><span class="chip integrate">Integrate</span><span class="chip">goal</span></div>
+				<h3>Pages as the round trip between user and agent</h3>
+				<blockquote><p>User can always return to the agent with a prompt that progresses the context or conversation</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>Every page is a turn in the conversation, not a report.</p>
+			</article>
+			<article class="card" id="goal-control-surface" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#goal-control-surface">16</a><span class="chip integrate">Integrate</span><span class="chip">goal</span></div>
+				<h3>Page as a session control surface</h3>
+				<blockquote><p>have a tab that reads the latest sessions from global .claude click on one produces a 'resume' command</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Decks reach into the harness: launch, resume, update.</p>
+			</article>
+			<article class="card" id="goal-per-repo" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#goal-per-repo">17</a><span class="chip integrate">Integrate</span><span class="chip">goal</span></div>
+				<h3>Ships with dev-workspace, per repo</h3>
+				<blockquote><p>each repo could have its own prompt builder</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Distribution path for decks.</p>
+			</article>
+			<article class="card" id="goal-daily-driver" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#goal-daily-driver">18</a><span class="chip integrate">Integrate</span><span class="chip">goal</span></div>
+				<h3>Daily drivers, alternative to the chat window</h3>
+				<blockquote><p>a suite of html artifacts as daily drivers, providing a platform for interacting with agents, as a favorable alternative to the default chat window and markdown docs</p><cite>You · this session</cite></blockquote><p>Stated this session; the umbrella goal for the family.</p>
+			</article>
+			<article class="card" id="goal-published" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#goal-published">19</a><span class="chip integrate">Integrate</span><span class="chip">goal</span></div>
+				<h3>Published Artifacts: interest, not commitment</h3>
+				<blockquote><p>not sure about published artifact. they seem sexy, haven't looked deeply yet.</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Consistent with your rev 1 verdict: plain doctype first, a strip tool for compat later.</p>
+			</article>
+		<!-- @end-goals -->
+		</section>
+
 		<section id="terms" data-loose="Terms the sweep missed">
 			<div class="sec-head"><h2>Terms</h2><span class="count"></span></div>
-			<p class="sec-intro">Every coined term found in the workspace, alphabetical by family then subject. Agree keeps it as defined; Revise means the definition or the word needs a change (say which in the note); Reject retires it. Terms already contested by the takes carry Keep / Rename / Drop instead.</p>
+			<p class="sec-intro">Only words you coined or adopted. Each card quotes you and names the transcript. Agree keeps the word and definition; Revise fixes either; Reject retires it. The Builder definition from your rev 1 note is in.</p>
 
-			<article class="card" id="term-artifact" data-tag="yourcall" data-verdicts="Keep|Rename|Drop">
-				<div class="chiprow"><a class="chip id" href="#term-artifact">12</a><span class="chip yourcall">Your call</span><span class="chip">open</span></div>
-				<h3>Artifact</h3>
-				<p>A self-contained hand-authored HTML page presenting work to the user; also the kickoff's Stage 3 deliverable. The word this review proposes to retire in favour of FlightDeck.</p><p class="gloss">Source: <code>prompts/prompt-2026-08-23-2257.md</code>, <code>WORKSPACE.md</code></p>
-			</article>
-			<article class="card" id="term-artifact-tool" data-tag="yourcall" data-verdicts="Keep|Rename|Drop">
-				<div class="chiprow"><a class="chip id" href="#term-artifact-tool">13</a><span class="chip yourcall">Your call</span><span class="chip">open</span></div>
-				<h3>Artifact tool</h3>
-				<p>The claude.ai publishing tool that wraps a fragment in its own doctype/head/body skeleton and serves it under a CSP blocking every external host except Google Fonts.</p><p class="gloss">Source: <code>plans/PIVOT.md</code> §3</p>
-			</article>
-			<article class="card" id="term-artifact-suite-the-suite" data-tag="yourcall" data-verdicts="Keep|Rename|Drop">
-				<div class="chiprow"><a class="chip id" href="#term-artifact-suite-the-suite">14</a><span class="chip yourcall">Your call</span><span class="chip">open</span></div>
-				<h3>Artifact suite / the suite</h3>
-				<p>The whole system: shell, templates, blocks, engine and skill. Candidate for renaming to FlightDeck.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> Summary</p>
-			</article>
 			<article class="card" id="term-shell" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-shell">15</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<div class="chiprow"><a class="chip id" href="#term-shell">20</a><span class="chip integrate">Integrate</span><span class="chip">3 turns</span></div>
 				<h3>Shell</h3>
-				<p>The single copyable file carrying all tokens, layouts, chrome and the engine. A page is made by copying it.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Shell</p>
-			</article>
-			<article class="card" id="term-chrome" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-chrome">16</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Chrome</h3>
-				<p>The shared non-content bytes of a page: tokens, layouts, masthead, ToC, filters, floater, engine. The agent never writes chrome.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Form, § Token economy</p>
-			</article>
-			<article class="card" id="term-engine" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-engine">17</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Engine</h3>
-				<p>The single IIFE at the foot of the shell that generates every response surface, the ToC, filter bar, eyebrow, reference chips and the return prompt.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Runtime &amp; state</p>
-			</article>
-			<article class="card" id="term-page" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-page">18</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Page</h3>
-				<p>One built HTML file: a shell copy with content in its marker regions. Proposed as the profile name for task artifacts.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> throughout</p>
-			</article>
-			<article class="card" id="term-kind-page-kind" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-kind-page-kind">19</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Kind / page kind</h3>
-				<p>The page's purpose: <code>review</code>, <code>options</code>, <code>issue</code>, <code>interview</code>, <code>demo</code>. Six kickoff kinds map onto three templates.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Six kinds onto three templates; D-14</p>
-			</article>
-			<article class="card" id="term-template" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-template">20</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Template</h3>
-				<p>One of three exemplar files — <code>review.html</code> (also serving options and issue-breakdown), <code>interview.html</code>, and the demo kit. PIVOT demotes them from spliceable files to markup exemplars.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code>; <code>plans/PIVOT.md</code> §5</p>
-			</article>
-			<article class="card" id="term-block" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-block">21</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Block</h3>
-				<p>A small copyable markup shape with scoped CSS: <code>diff</code>, <code>panel</code>, <code>figure</code>. After PIVOT §5 a block documents a shape whose CSS and JS already live in the shell.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Blocks; <code>plans/PIVOT.md</code> §5</p>
+				<blockquote><p>page shell — shell for every page template</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>The universal page structure for artifacts. Carries all the styling, layout and scripting decisions. <i>(Your definition from rev 1.)</i></p>
 			</article>
 			<article class="card" id="term-demo" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-demo">22</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<div class="chiprow"><a class="chip id" href="#term-demo">21</a><span class="chip integrate">Integrate</span><span class="chip">5 turns</span></div>
 				<h3>Demo</h3>
-				<p>A live interactive fragment inside <code>.demo</code>, composed freely by the building agent. The one exception to “everything reusable ships in the shell”.</p><p class="gloss">Source: D-16; <code>plans/PIVOT.md</code> §7</p>
-			</article>
-			<article class="card" id="term-demo-kit" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-demo-kit">23</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Demo kit</h3>
-				<p>A kit, not a page template: labelled fragments, class inventory, integration points, reserved-name list, one worked micro-example.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Template: demo kit; D-16</p>
-			</article>
-			<article class="card" id="term-demo-helper-suite-demo" data-tag="yourcall" data-verdicts="Keep|Rename|Drop" data-recommended="Keep">
-				<div class="chiprow"><a class="chip id" href="#term-demo-helper-suite-demo">24</a><span class="chip yourcall">Your call</span><span class="chip">proposed</span></div>
-				<h3>Demo helper (<code>SUITE.demo</code>)</h3>
-				<p>Proposed shell-exposed scoping helper giving a demo <code>d.out</code>, <code>d.note</code>, <code>d.report</code>, <code>d.on</code>. Rejecting it costs nothing structural.</p><p class="gloss">Source: <code>plans/PIVOT.md</code> §7</p>
+				<blockquote><p>can you build a demo for me, so I can see it operating</p><cite>You · history/66039af5_prompt-builder-audit-refactor-nested-deliverables.txt</cite></blockquote><p>A dynamically built HTML page that demonstrates some functionality in isolation. Also: “I wanted demos to be fully customisable by the building agent.” <i>(Your definition from rev 1.)</i></p>
 			</article>
 			<article class="card" id="term-card" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-card">25</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<div class="chiprow"><a class="chip id" href="#term-card">22</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
 				<h3>Card</h3>
-				<code>&lt;article class="card" id=… data-tag=…&gt;</code>; one unit of decision.<p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Card anatomy, § Card contract</p>
-			</article>
-			<article class="card" id="term-card-id" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-card-id">26</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Card id</h3>
-				<p>Agent-assigned kebab slug naming the card's subject, never a position; permanent once published; sole key for storage, radio name, ToC anchor and deep link.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Card contract</p>
-			</article>
-			<article class="card" id="term-chip-chiprow" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-chip-chiprow">27</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Chip / chiprow</h3>
-				<p>Mono uppercase pill in the card's fixed first child <code>.chiprow</code>. Modifiers: <code>.id</code>, <code>.integrate</code>, <code>.yourcall</code>, <code>.defer</code>, <code>.dead</code>, <code>.earlier</code>; an unmodified chip is a free topic chip.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Chips and the filter bar; D-3</p>
-			</article>
-			<article class="card" id="term-tag-vocabulary" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-tag-vocabulary">28</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Tag vocabulary</h3>
-				<code>integrate</code> / <code>yourcall</code> / <code>defer</code>, spelled identically in <code>data-tag</code>, the chip modifier, the card edge and the filter button.<p class="gloss">Source: D-3</p>
-			</article>
-			<article class="card" id="term-filter-bar" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-filter-bar">29</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Filter bar</h3>
-				<p>Shell furniture: <code>all | integrate | yourcall | defer | unanswered</code> with DOM-computed counts. <code>all</code> and <code>unanswered</code> are states, not tags.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Chips and the filter bar</p>
-			</article>
-			<article class="card" id="term-respond-surface" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-respond-surface">30</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Respond surface</h3>
-				<p>The engine-generated <code>.respond</code>: verdict radios, textarea and Clear, appended as a card's last child. The agent never writes an input.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Generated respond surface</p>
-			</article>
-			<article class="card" id="term-verdict" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-verdict">31</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Verdict</h3>
-				<p>The user's per-card answer, chosen from the card's verdict set.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code></p>
-			</article>
-			<article class="card" id="term-verdict-vocabulary" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-verdict-vocabulary">32</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Verdict vocabulary</h3>
-				<p>Per-kind option set carried as data: review = Agree|Revise|Reject; issue = Accept|Amend|Defer; options, interview and demo supply their own via <code>data-verdicts</code>.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Card contract; D-14</p>
-			</article>
-			<article class="card" id="term-verdict-strip" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-verdict-strip">33</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Verdict strip</h3>
-				<p>Accent-ground summary panel as the first child of the first section — “where it landed”.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Issue breakdown pieces</p>
-			</article>
-			<article class="card" id="term-verdict-floor" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-verdict-floor">34</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Verdict floor</h3>
-				<p>The <code>@supports not (selector(:has(*)))</code> rule keeping verdict radios visible where <code>:has()</code> is unsupported.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> :has() policy</p>
-			</article>
-			<article class="card" id="term-touched" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-touched">35</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Touched</h3>
-				<p>A card is touched only after a genuine change or input, or a deliberate click on an already-checked recommendation. Only touched cards enter the return prompt.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Touched, defaults, Accept all, Clear; D-8</p>
-			</article>
-			<article class="card" id="term-accept-all" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-accept-all">36</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Accept all</h3>
-				<p>Button recording every untouched recommended card as agreed in one act; hidden until a card carries a recommendation.</p><p class="gloss">Source: D-8</p>
+				<blockquote><p>quote section for users comments… that apply to card contents</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>A unit of decision or review. <i>(Your definition from rev 1.)</i></p>
 			</article>
 			<article class="card" id="term-return-prompt" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-return-prompt">37</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<div class="chiprow"><a class="chip id" href="#term-return-prompt">23</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
 				<h3>Return prompt</h3>
-				<p>The Markdown block the page composes from touched cards and hands back to the agent. The point of the suite.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Return prompt</p>
+				<blockquote><p>return prompting — each page builds a return prompt for the agent</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>The automatically composed prompt the user returns to the agent indicating their decisions or comments. <i>(Your definition from rev 1.)</i></p>
 			</article>
-			<article class="card" id="term-page-meta" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-page-meta">38</a><span class="chip integrate">Integrate</span><span class="chip">data</span></div>
-				<h3><code>#page-meta</code></h3>
-				<p>The sole agent-authored machine-data block: <code>id</code>, <code>kind</code>, <code>rev</code>, <code>title</code>, <code>provenance{}</code>, <code>prompt.heading</code>, <code>next[]</code>.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § #page-meta schema; D-9</p>
+			<article class="card" id="term-builder" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-builder">24</a><span class="chip integrate">Integrate</span><span class="chip">8 turns</span></div>
+				<h3>Builder</h3>
+				<blockquote><p>I think each section is actually a builder thats why the tab is called 'build'</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>A prompt generation unit that, combined with other builders, produces a complete prompt. Focuses on a single domain. <i>(Your definition from rev 1.)</i></p>
 			</article>
-			<article class="card" id="term-rev" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-rev">39</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Rev</h3>
-				<p>The <code>#page-meta.rev</code> integer bumped on every regeneration; also recorded per stored answer.</p><p class="gloss">Source: D-7</p>
+			<article class="card" id="term-prompt-builder" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-prompt-builder">25</a><span class="chip integrate">Integrate</span><span class="chip">10 turns</span></div>
+				<h3>Prompt builder</h3>
+				<blockquote><p>keeps the prompt builder (is this a better name than engine?) json lighter</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>The local HTML page that composes Claude Code prompts. Began as “prompt engine”; renamed by you to <code>prompt-builder.html</code>.</p>
 			</article>
-			<article class="card" id="term-fingerprint" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-fingerprint">40</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Fingerprint</h3>
-				<p>DJB2 hash of a card's normalised text plus <code>data-tag</code> and <code>data-verdicts</code>, per card never per file. PIVOT §9 strips generated regions before hashing.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Fingerprints; <code>plans/PIVOT.md</code> §9</p>
+			<article class="card" id="term-section" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-section">26</a><span class="chip integrate">Integrate</span><span class="chip">6 turns</span></div>
+				<h3>Section</h3>
+				<blockquote><p>section is probably more safe, builder is more bespoke</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>An input area of the builder page feeding one heading of the prompt. Superseded by <b>builder</b>; survives as the page-layout word.</p>
 			</article>
-			<article class="card" id="term-changed-strip" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-changed-strip">41</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Changed strip</h3>
-				<p>Amber engine-inserted bar “Changed since you answered (rev N)” with Dismiss, raised when a card's fingerprint moved.</p><p class="gloss">Source: D-7</p>
+			<article class="card" id="term-write-ones-choosing-ones" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-write-ones-choosing-ones">27</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Write ones / choosing ones</h3>
+				<blockquote><p>hmm. the writing ones and the choosing ones.</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>The two groups of builders: those where the user types prose, and those where the user picks from option lists.</p>
 			</article>
-			<article class="card" id="term-orphan-held-answer" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-orphan-held-answer">42</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Orphan / held answer</h3>
-				<p>A stored answer whose card left the page: kept under <code>orphans</code> with its last title and surfaced in the footer with Show / Discard.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Fingerprints, changed cards, orphans; D-7</p>
+			<article class="card" id="term-display-key-agent-value" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-display-key-agent-value">28</a><span class="chip integrate">Integrate</span><span class="chip">3 turns</span></div>
+				<h3>Display key / agent value</h3>
+				<blockquote><p>each option has a display key and then the agent value. I can see an option like output.depth be key: terse, value: terse prose, write in a short concise manner</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>The option model: the user sees a short key on a button; the prompt receives the long value.</p>
 			</article>
-			<article class="card" id="term-withdrawn-card" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-withdrawn-card">43</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Withdrawn card</h3>
-				<code>.card.dead</code>: a retired card that keeps its id, tag and held record, carries a Withdrawn chip and <code>data-answer="none"</code>, and never leaves the page.<p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Withdrawn card</p>
+			<article class="card" id="term-explainer" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-explainer">29</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Explainer</h3>
+				<blockquote><p>Each section should have an explainer for the agent under the heading so the agent is instructed what this section is doing</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Agent-facing text under each builder heading that goes into the prompt.</p>
 			</article>
-			<article class="card" id="term-answered-record" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-answered-record">44</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Answered record</h3>
-				<p>An <code>.answered</code> card the agent writes on republish in place of an interview question, keeping the question's id.</p><p class="gloss">Source: D-15</p>
+			<article class="card" id="term-loadout" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-loadout">30</a><span class="chip integrate">Integrate</span><span class="chip">4 turns</span></div>
+				<h3>Loadout</h3>
+				<blockquote><p>I see it as a 'loadout' I can literally flip between loadouts by importing a new one. completely replacing the old loadout with new options, keys, values, order, visibility.</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>A complete exported/imported set of builder options, keys, values, order and visibility. Earlier called <i>flavors</i>.</p>
 			</article>
-			<article class="card" id="term-loose-box" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-loose-box">45</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Loose box</h3>
-				<p>A section-level free comment box the engine appends to any <code>&lt;section data-loose="…"&gt;</code>.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Generated respond surface</p>
+			<article class="card" id="term-recipes" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-recipes">31</a><span class="chip integrate">Integrate</span><span class="chip">5 turns</span></div>
+				<h3>Recipes</h3>
+				<blockquote><p>Recipes: Probably better as its own artifact… export from prompt builder to recipes</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Saved, reusable premade prompts.</p>
 			</article>
-			<article class="card" id="term-masthead" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-masthead">46</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Masthead</h3>
-				<code>header.masthead</code>: eyebrow, <code>h1</code>, standfirst, optional <code>.masthead-meta</code>.<p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Masthead</p>
+			<article class="card" id="term-utilities-utility-prompt" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-utilities-utility-prompt">32</a><span class="chip integrate">Integrate</span><span class="chip">5 turns</span></div>
+				<h3>Utilities / utility prompt</h3>
+				<blockquote><p>Show me this as a 'utility' prompt I can save in my prompt builder. to re-run again</p><cite>You · history/f1f8dc4c_export-import-file-picker-refactor.txt</cite></blockquote><p>A tab holding premade housekeeping prompts, especially the self-update prompt.</p>
+			</article>
+			<article class="card" id="term-update-prompt-omakase-prompts" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-update-prompt-omakase-prompts">33</a><span class="chip integrate">Integrate</span><span class="chip">4 turns</span></div>
+				<h3>Update prompt / omakase prompts</h3>
+				<blockquote><p>include some omakase prompts as 'read only'. one is… instruct the agent how to update the html with the current state of play, prebuilt update prompt</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>A read-only premade prompt instructing the agent to refresh the HTML file itself.</p>
+			</article>
+			<article class="card" id="term-launch-claude-launcher" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-launch-claude-launcher">34</a><span class="chip integrate">Integrate</span><span class="chip">4 turns</span></div>
+				<h3>Launch / claude launcher</h3>
+				<blockquote><p>claude launcher that you build by selecting flags and values. once ready copy and paste into terminal</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>A tab composing a <code>claude</code> terminal command from flags and presets (“cheap quick = sonnet, low”).</p>
+			</article>
+			<article class="card" id="term-master-prompt-prompt-window" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-master-prompt-prompt-window">35</a><span class="chip integrate">Integrate</span><span class="chip">4 turns</span></div>
+				<h3>Master prompt / prompt window</h3>
+				<blockquote><p>main page gives way to sections, going back updates the master prompt</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>The live composed-prompt panel; also called the prompt copy window and the dashboard.</p>
+			</article>
+			<article class="card" id="term-edit-mode-edit-in-place" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-edit-mode-edit-in-place">36</a><span class="chip integrate">Integrate</span><span class="chip">4 turns</span></div>
+				<h3>Edit mode / edit in place</h3>
+				<blockquote><p>can we do inplace edits? meaning hit a special edit mode and you can edit the… options available (add, remove), section explainer, key and value</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>A page mode where the user edits the page's own option data from the page.</p>
+			</article>
+			<article class="card" id="term-deliverable-nested-deliverables" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-deliverable-nested-deliverables">37</a><span class="chip integrate">Integrate</span><span class="chip">4 turns</span></div>
+				<h3>Deliverable / nested deliverables</h3>
+				<blockquote><p>imports the deliverables onto the page. then you can 'nest' them inside the process chain… (- deliverable: Review)</p><cite>You · history/66039af5_prompt-builder-audit-refactor-nested-deliverables.txt</cite></blockquote><p>An Output item (Review, Implementation plan, Artifact) that a Process stage can carry.</p>
+			</article>
+			<article class="card" id="term-process-chain-stage-user-gate" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-process-chain-stage-user-gate">38</a><span class="chip integrate">Integrate</span><span class="chip">5 turns</span></div>
+				<h3>Process chain / stage / user gate</h3>
+				<blockquote><p>the process might include a few separate user gates</p><cite>You · history/66039af5_prompt-builder-audit-refactor-nested-deliverables.txt</cite></blockquote><p>Ordered stages of an agent run, with gates where the user approves before the next stage.</p>
+			</article>
+			<article class="card" id="term-long-range-prompts" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-long-range-prompts">39</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Long range prompts</h3>
+				<blockquote><p>this prompt builder has a usecase of building out long range prompts for use with large agent runs</p><cite>You · history/66039af5_prompt-builder-audit-refactor-nested-deliverables.txt</cite></blockquote><p>Prompts that drive a multi-stage, multi-agent session.</p>
+			</article>
+			<article class="card" id="term-mock" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-mock">40</a><span class="chip integrate">Integrate</span><span class="chip">8 turns</span></div>
+				<h3>Mock</h3>
+				<blockquote><p>lets solidify this file. remove the mock designations</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>A numbered throwaway version of a page used to settle design before building.</p>
+			</article>
+			<article class="card" id="term-probe" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-probe">41</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Probe</h3>
+				<blockquote><p>Storage probe</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>A tiny page that reports what the browser can do (<code>fsa-probe.html</code>).</p>
+			</article>
+			<article class="card" id="term-discovery-artifact-html-review-html-plan-html-overview" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-discovery-artifact-html-review-html-plan-html-overview">42</a><span class="chip integrate">Integrate</span><span class="chip">7 turns</span></div>
+				<h3>Discovery artifact / html review / html plan / html overview</h3>
+				<blockquote><p>display your findings in a single html review file for my perusal and approval (comment, approve, copy)</p><cite>You · dev/branches/drafthorse-corpus-sweep/history</cite></blockquote><p>The output kinds you ask for by name: a discovery artifact (broad findings), a review, a plan with findings and fixes, an overview of a proposed structure.</p>
+			</article>
+			<article class="card" id="term-interview-page" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-interview-page">43</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Interview page</h3>
+				<blockquote><p>interview page — agent asks user a series of questions</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>A page kind: the agent asks, the user answers in place.</p>
+			</article>
+			<article class="card" id="term-options-page" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-options-page">44</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Options page</h3>
+				<blockquote><p>options page — provide the user options to choose from. recommended, extra comments</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>A page kind: choices with a recommendation and room for comments.</p>
+			</article>
+			<article class="card" id="term-issue-breakdown" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-issue-breakdown">45</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Issue breakdown</h3>
+				<blockquote><p>issue breakdown — core issue, investigation results, additional comments</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>A page kind: one issue, its investigation, its comments.</p>
+			</article>
+			<article class="card" id="term-link-to-site" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-link-to-site">46</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Link to site</h3>
+				<blockquote><p>link to site — collapsed link to file or location in question when available</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>A collapsed link back to the file or location a card is about.</p>
 			</article>
 			<article class="card" id="term-eyebrow" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-eyebrow">47</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
+				<div class="chiprow"><a class="chip id" href="#term-eyebrow">47</a><span class="chip integrate">Integrate</span><span class="chip">3 turns</span></div>
 				<h3>Eyebrow</h3>
-				<p>Mono uppercase provenance strip at the top of the masthead: kind · rev · issue · pr · branch · commit · date. Entirely engine-generated.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Eyebrow</p>
+				<blockquote><p>eyebrow branch highlighting</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>The provenance strip above the title: branch, issue link, colour splash.</p>
 			</article>
-			<article class="card" id="term-standfirst" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-standfirst">48</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Standfirst</h3>
-				<p>The lead paragraph under the h1, capped at 62ch.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Masthead</p>
+			<article class="card" id="term-filterable-tags-quoted-user-conversation-formatted-diffs" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-filterable-tags-quoted-user-conversation-formatted-diffs">48</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Filterable tags / quoted user conversation / formatted diffs</h3>
+				<blockquote><p>show only relevant cards per filter</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>Three page features named in the kickoff: tag filters on cards, the user's earlier words quoted on a card, and diffs formatted in place.</p>
 			</article>
-			<article class="card" id="term-stats-stat-tiles" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-stats-stat-tiles">49</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Stats / stat tiles</h3>
-				<code>.stats</code>/<code>.stat</code> numeric tiles in an issue-breakdown masthead.<p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Issue breakdown pieces</p>
+			<article class="card" id="term-page-template" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-page-template">49</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Page template</h3>
+				<blockquote><p>page templates with all prerequisite styles and scripting so they can be edited into the shell</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>A per-kind starting file edited into the shell.</p>
 			</article>
-			<article class="card" id="term-layouts-reading-rail-board" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-layouts-reading-rail-board">50</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Layouts: reading, rail, board</h3>
-				<code>.shell</code> 940px reading; <code>.shell.rail</code> 1180px with a 232px left ToC column; <code>.shell.board</code> 1340px with main plus a sticky right sidebar. A page picks by class.<p class="gloss">Source: D-1</p>
+			<article class="card" id="term-artifact" data-tag="yourcall" data-verdicts="Keep|Rename|Drop">
+				<div class="chiprow"><a class="chip id" href="#term-artifact">50</a><span class="chip yourcall">Your call</span><span class="chip">8 turns</span></div>
+				<h3>Artifact</h3>
+				<blockquote><p>major artifacts exploration and building over the next period</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Your umbrella word for local HTML pages — and for claude.ai published pages (“they seem sexy, haven't looked deeply yet”). The word under review for replacement.</p>
 			</article>
-			<article class="card" id="term-rail-reserved" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-rail-reserved">51</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Rail (reserved)</h3>
-				<code>.shell.rail</code> is the layout; a bare <code>.rail</code> selector is never defined by the shell because it already names the folder-picker row in <code>mock-4-proposals.html</code>.<p class="gloss">Source: D-5</p>
+			<article class="card" id="term-text-db" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-text-db">51</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Text-db</h3>
+				<blockquote><p>yes add it to the text-db</p><cite>You · history/f1f8dc4c_export-import-file-picker-refactor.txt</cite></blockquote><p>The JSON data blocks inside the HTML that hold options and recipes. Agent-suggested, adopted by you.</p>
 			</article>
-			<article class="card" id="term-table-of-contents-pill-row" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-table-of-contents-pill-row">52</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Table of contents / pill row</h3>
-				<code>.toc</code>, generated by the engine into two surfaces: the sticky column in rail layout and the sticky <code>.toc.pills</code> row everywhere else.<p class="gloss">Source: D-2; <code>plans/artifact-suite-implementation.md</code> § Table of contents</p>
-			</article>
-			<article class="card" id="term-section-id-contract" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-section-id-contract">53</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Section id contract</h3>
-				<p>A section's id is the lowercase slug of its <code>.sec-head h2</code>; permanent once published, like a card id.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Table of contents</p>
-			</article>
-			<article class="card" id="term-floater-floating-pair" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-floater-floating-pair">54</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Floater / floating pair</h3>
-				<p>Fixed bottom-right container holding <code>#status</code>, Accept all, View prompt, Copy prompt.</p><p class="gloss">Source: D-10</p>
-			</article>
-			<article class="card" id="term-marker-marker-region" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-marker-marker-region">55</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Marker / marker region</h3>
-				<p>An editable region delimited by <code>&lt;!-- @name --&gt;</code> … <code>&lt;!-- @name:end --&gt;</code>. Everything outside a marker is fixed chrome.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Markers; <code>plans/PIVOT.md</code> §7</p>
-			</article>
-			<article class="card" id="term-shell-stamp" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-shell-stamp">56</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Shell stamp</h3>
-				<p>Line 1 of the shell: a version comment stating what may be written. Verification reads it by text, never by line number.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Form; <code>plans/PIVOT.md</code> §3</p>
-			</article>
-			<article class="card" id="term-pre-paint-script" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-pre-paint-script">57</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Pre-paint script</h3>
-				<p>First script above <code>&lt;style&gt;</code>: restores the remembered theme and stamps <code>data-origin</code>, so no theme flash.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Theme control; prompt-builder head</p>
-			</article>
-			<article class="card" id="term-provenance" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-provenance">58</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Provenance</h3>
-				<p>The <code>#page-meta.provenance</code> object (repo, root, self, branch, commit, issue, pr, date, builtAt, editor) from which every URL is derived.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Provenance &amp; links</p>
-			</article>
-			<article class="card" id="term-reference-block-link-to-site" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-reference-block-link-to-site">59</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Reference block / link-to-site</h3>
-				<p>An empty <code>details.ref</code> with <code>data-path</code>, <code>data-lines</code>, <code>data-loc</code> that the engine expands into a summary plus Disk / Editor / GitHub / Copy-path chips.</p><p class="gloss">Source: D-11</p>
-			</article>
-			<article class="card" id="term-disk-primary-links" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-disk-primary-links">60</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Disk-primary links</h3>
-				<p>The reference's solid chip is the <code>file://</code> one when opened from disk, GitHub when on the web.</p><p class="gloss">Source: D-18; <code>plans/artifact-suite-implementation.md</code> § Origin gating</p>
-			</article>
-			<article class="card" id="term-origin-gating" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-origin-gating">61</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Origin gating</h3>
-				<p>CSS-only switching of link chips off <code>:root[data-origin="disk"|"web"]</code>, so a page needs no rebuild when published.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Origin gating</p>
-			</article>
-			<article class="card" id="term-archive-mirror" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-archive-mirror">62</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Archive mirror</h3>
-				<p>The <code>dev/branches/&lt;branch&gt;/</code> snapshot; how a file on another branch opens from disk, badged “archived copy”.</p><p class="gloss">Source: D-12</p>
-			</article>
-			<article class="card" id="term-paper-ink" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-paper-ink">63</a><span class="chip integrate">Integrate</span><span class="chip">design</span></div>
-				<h3>Paper/Ink</h3>
-				<p>The canonical design system: paper/surface/ink/rule/accent/warn/stop tokens with <code>-soft</code> companions, the type triple, and the <code>.shell/.masthead/.eyebrow/.standfirst</code> scaffold.</p><p class="gloss">Source: <code>reviews/paper-ink-fingerprint.html</code>; prompt-builder lines 21-74</p>
-			</article>
-			<article class="card" id="term-family-in-family" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-family-in-family">64</a><span class="chip integrate">Integrate</span><span class="chip">design</span></div>
-				<h3>Family / in-family</h3>
-				<p>Whether an HTML document belongs to Paper/Ink, judged by four always-present marks: token vocabulary, type triple, <code>.shell</code>, <code>.sec-head</code>.</p><p class="gloss">Source: <code>reviews/paper-ink-fingerprint.html</code></p>
-			</article>
-			<article class="card" id="term-the-signal" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-the-signal">65</a><span class="chip integrate">Integrate</span><span class="chip">design</span></div>
-				<h3>The signal</h3>
-				<code>--surface-sunk</code>: the one string that finds every Paper/Ink document and nothing else.<p class="gloss">Source: <code>reviews/paper-ink-fingerprint.html</code></p>
-			</article>
-			<article class="card" id="term-diff-review" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-diff-review">66</a><span class="chip integrate">Integrate</span><span class="chip">design</span></div>
-				<h3>Diff-Review</h3>
-				<p>The other, out-of-scope HTML design family in this repo: <code>--bg/--panel/--muted/--line</code>, monospace throughout, no web fonts.</p><p class="gloss">Source: <code>reviews/paper-ink-fingerprint.html</code></p>
-			</article>
-			<article class="card" id="term-type-triple" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-type-triple">67</a><span class="chip integrate">Integrate</span><span class="chip">design</span></div>
-				<h3>Type triple</h3>
-				<p>Bitter (display), Source Serif 4 (body), JetBrains Mono (data) — one Google Fonts link, system fallbacks.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Type triple</p>
-			</article>
-			<article class="card" id="term-token-economy" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-token-economy">68</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Token economy</h3>
-				<p>The accounting of what the agent never types versus what supplies it; the suite's efficiency contract.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Token economy</p>
-			</article>
-			<article class="card" id="term-landing-rule" data-tag="yourcall" data-verdicts="Keep|Rename|Drop">
-				<div class="chiprow"><a class="chip id" href="#term-landing-rule">69</a><span class="chip yourcall">Your call</span><span class="chip">open</span></div>
-				<h3>Landing rule</h3>
-				<p>The rule stating where a built page lands on disk. Currently <code>dev/workspace/artifacts/&lt;id&gt;.html</code>; this review proposes kind-decides.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § File layout</p>
-			</article>
-			<article class="card" id="term-corpus" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-corpus">70</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Corpus</h3>
-				<p>The eight reference HTML files Stage 1 read.</p><p class="gloss">Source: D-20</p>
-			</article>
-			<article class="card" id="term-kickoff" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-kickoff">71</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Kickoff</h3>
-				<p>The originating task prompt file for the suite.</p><p class="gloss">Source: <code>prompts/prompt-2026-08-23-2257.md</code></p>
-			</article>
-			<article class="card" id="term-lens-and-finding-prefixes" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-lens-and-finding-prefixes">72</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Lens and finding prefixes</h3>
-				<p>The five Stage 1 reading angles and their finding ids: DS- design system, CO- component catalogue, ST- scripting and state, AR- architecture, PR- provenance and navigation; Q- open questions.</p><p class="gloss">Source: <code>reviews/artifact-suite-investigation.html</code></p>
-			</article>
-			<article class="card" id="term-work-package-wp-n" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-work-package-wp-n">73</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Work package (WP-n)</h3>
-				<p>Stage 3 build units, each with a done-check. WP-10 deleted by PIVOT §1.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Stage 3 work packages</p>
-			</article>
-			<article class="card" id="term-blast-radius" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#term-blast-radius">74</a><span class="chip integrate">Integrate</span><span class="chip">settled</span></div>
-				<h3>Blast radius</h3>
-				<p>Scope of what a change can break; used as a heading in the export/import discovery.</p><p class="gloss">Source: <code>reviews/export-import-discovery.html</code></p>
+			<article class="card" id="term-daily-driver-platform-for-interacting-with-agents" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#term-daily-driver-platform-for-interacting-with-agents">52</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Daily driver / platform for interacting with agents</h3>
+				<blockquote><p>a suite of html artifacts as daily drivers, providing a platform for interacting with agents, as a favorable alternative to the default chat window and markdown docs</p><cite>You · this session</cite></blockquote><p>The programme's ambition in your words, this session. Not yet in any transcript.</p>
 			</article>
 		<!-- @end-terms -->
 		</section>
 
 		<section id="conventions" data-loose="Conventions the sweep missed">
 			<div class="sec-head"><h2>Conventions</h2><span class="count"></span></div>
-			<p class="sec-intro">One card per topic, listing the rules the plan and PIVOT settle. Agree accepts the list whole; Revise with a note strikes or amends individual lines.</p>
+			<p class="sec-intro">Guiding lights: principles you have stated or repeatedly asked for, one each, quoted. Your four from rev 1 — direct link back, single offline file, data persisted in the file, edit the structure from the page — are here.</p>
+
+			<article class="card" id="conv-direct-link-back-to-the-file-in-question" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-direct-link-back-to-the-file-in-question">53</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Direct link back to the file in question</h3>
+				<blockquote><p>User can navigate directly to all files or sites in question, to check original content</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>Every card that discusses a file carries a link that opens it.</p>
+			</article>
+			<article class="card" id="conv-show-where-the-work-originates" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-show-where-the-work-originates">54</a><span class="chip integrate">Integrate</span><span class="chip">4 turns</span></div>
+				<h3>Show where the work originates</h3>
+				<blockquote><p>User can see clearly where the work originates from (branch, issue, pr)</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>Provenance visible on the page, at the top.</p>
+			</article>
+			<article class="card" id="conv-always-a-return-path-to-the-agent" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-always-a-return-path-to-the-agent">55</a><span class="chip integrate">Integrate</span><span class="chip">6 turns</span></div>
+				<h3>Always a return path to the agent</h3>
+				<blockquote><p>write a copy script into the doc so i can return here with any changes i want</p><cite>You · dev/branches/agent-teams/history</cite></blockquote><p>Every page hands back a prompt that progresses the conversation; a copy button is mandatory.</p>
+			</article>
+			<article class="card" id="conv-comment-and-approve-on-every-item" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-comment-and-approve-on-every-item">56</a><span class="chip integrate">Integrate</span><span class="chip">6 turns</span></div>
+				<h3>Comment and approve on every item</h3>
+				<blockquote><p>make it interactive so i can comment and approve/deny/change if necessary</p><cite>You · dev/branches/agent-teams/history</cite></blockquote><p>Each unit of review takes a verdict and a comment.</p>
+			</article>
+			<article class="card" id="conv-agent-recommends-user-decides" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-agent-recommends-user-decides">57</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Agent recommends, user decides</h3>
+				<blockquote><p>give your recommendations to integrate or defer</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>The page carries a recommendation per item; the decision stays with the user.</p>
+			</article>
+			<article class="card" id="conv-agent-writes-content-only-chrome-is-shared" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-agent-writes-content-only-chrome-is-shared">58</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Agent writes content only; chrome is shared</h3>
+				<blockquote><p>Agent can build artifacts repeatedly with consistent features and styling. focusing on content</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>Layout, styles and scripts live in the shell; the agent supplies content.</p>
+			</article>
+			<article class="card" id="conv-token-efficient-building" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-token-efficient-building">59</a><span class="chip integrate">Integrate</span><span class="chip">4 turns</span></div>
+				<h3>Token efficient building</h3>
+				<blockquote><p>Agent is token efficient. strategically building or editing a document</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>Build or edit surgically; use the cheapest capable model for each agent.</p>
+			</article>
+			<article class="card" id="conv-preserve-history-only-edits-enter-the-return-prompt" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-preserve-history-only-edits-enter-the-return-prompt">60</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Preserve history; only edits enter the return prompt</h3>
+				<blockquote><p>Artifacts preserve users history (decision and response) when updating. but doesn't enter return prompt unless edited</p><cite>You · prompts/prompt-2026-08-23-2257.md</cite></blockquote><p>Answers survive republish; untouched answers stay out of the prompt.</p>
+			</article>
+			<article class="card" id="conv-demos-fully-customisable-from-known-parts" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-demos-fully-customisable-from-known-parts">61</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Demos fully customisable, from known parts</h3>
+				<blockquote><p>I wanted demos to be fully customisable by the building agent. but also the agent should know the available structure, classes and integration points</p><cite>You · context/stage-1-decisions.md</cite></blockquote><p>No fixed demo shape; a documented parts list.</p>
+			</article>
+			<article class="card" id="conv-single-offline-local-file" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-single-offline-local-file">62</a><span class="chip integrate">Integrate</span><span class="chip">3 turns</span></div>
+				<h3>Single offline local file</h3>
+				<blockquote><p>does this replace the 'all in one' html file? I kinda like import/export</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>One HTML file, opened locally, working offline.</p>
+			</article>
+			<article class="card" id="conv-data-persisted-within-the-file-editable-from-the-page" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-data-persisted-within-the-file-editable-from-the-page">63</a><span class="chip integrate">Integrate</span><span class="chip">5 turns</span></div>
+				<h3>Data persisted within the file, editable from the page</h3>
+				<blockquote><p>is it possible to live update the json database from the page with a import button???</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>The page's own data blocks are the store; the page can edit and save them.</p>
+			</article>
+			<article class="card" id="conv-export-import-is-the-undo-whole-replace-warn-every-time" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-export-import-is-the-undo-whole-replace-warn-every-time">64</a><span class="chip integrate">Integrate</span><span class="chip">4 turns</span></div>
+				<h3>Export/import is the undo; whole-replace; warn every time</h3>
+				<blockquote><p>the export/import as long as it works properly is the undo protection</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>No fussy guards: import replaces everything, with a warning each time.</p>
+			</article>
+			<article class="card" id="conv-reset-before-edit-no-state-to-manage" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-reset-before-edit-no-state-to-manage">65</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Reset before edit — no state to manage</h3>
+				<blockquote><p>edit does a 'reset' first. no state to manage.</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Entering an edit clears derived state rather than reconciling it.</p>
+			</article>
+			<article class="card" id="conv-two-audiences-per-element" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-two-audiences-per-element">66</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Two audiences per element</h3>
+				<blockquote><p>can we look at this from two angles; one is what the user sees, the other what the agent sees</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Every element is designed twice: user-facing and agent-facing.</p>
+			</article>
+			<article class="card" id="conv-sections-optional-mix-and-match" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-sections-optional-mix-and-match">67</a><span class="chip integrate">Integrate</span><span class="chip">3 turns</span></div>
+				<h3>Sections optional, mix and match</h3>
+				<blockquote><p>a prompt isn't required to have all sections… skip the one i don't want</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Nothing is mandatory; compose what the task needs.</p>
+			</article>
+			<article class="card" id="conv-universal-single-output-copy-or-write" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-universal-single-output-copy-or-write">68</a><span class="chip integrate">Integrate</span><span class="chip">3 turns</span></div>
+				<h3>Universal single output — copy or write</h3>
+				<blockquote><p>yes have both, choose to copy or write to file</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>One composed output, delivered either to clipboard or to a file.</p>
+			</article>
+			<article class="card" id="conv-hardcoded-sections-configurable-options" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-hardcoded-sections-configurable-options">69</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Hardcoded sections, configurable options</h3>
+				<blockquote><p>hardcoded sections. configurable options.</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Structure is fixed in the page; content choices are data.</p>
+			</article>
+			<article class="card" id="conv-seed-broad-prune-later" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-seed-broad-prune-later">70</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Seed broad, prune later</h3>
+				<blockquote><p>add any other general usage architecture you see fit in a broad seed. easier to remove than add.</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>First versions over-include; trimming follows use.</p>
+			</article>
+			<article class="card" id="conv-report-capability-don-t-assume-the-browser" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-report-capability-don-t-assume-the-browser">71</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Report capability, don't assume the browser</h3>
+				<blockquote><p>Report what this browser can do, rather than claiming Chrome</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Probe features at runtime and say what is available.</p>
+			</article>
+			<article class="card" id="conv-remember-last-location-no-settings-page-for-paths" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-remember-last-location-no-settings-page-for-paths">72</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Remember last location; no settings page for paths</h3>
+				<blockquote><p>export remembers last export location… first ever interaction… the user has to navigate… Next interactions are simple and easy</p><cite>You · history/f1f8dc4c_export-import-file-picker-refactor.txt</cite></blockquote><p>Paths are learned from use, never configured.</p>
+			</article>
+			<article class="card" id="conv-prove-it-with-a-demo-before-integrating" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-prove-it-with-a-demo-before-integrating">73</a><span class="chip integrate">Integrate</span><span class="chip">3 turns</span></div>
+				<h3>Prove it with a demo before integrating</h3>
+				<blockquote><p>create a working demo of these buttons. some dummy data… we will get them operational first and then integrate</p><cite>You · history/f1f8dc4c_export-import-file-picker-refactor.txt</cite></blockquote><p>New behaviour is shown working in isolation first.</p>
+			</article>
+			<article class="card" id="conv-verify-in-a-browser-look-at-it" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-verify-in-a-browser-look-at-it">74</a><span class="chip integrate">Integrate</span><span class="chip">3 turns</span></div>
+				<h3>Verify in a browser — look at it</h3>
+				<blockquote><p>should you have a 'look' with playwright mcp?</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Static checks are not enough; render and inspect over http.</p>
+			</article>
+			<article class="card" id="conv-test-the-agent-s-changes-not-the-user-s-browser" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-test-the-agent-s-changes-not-the-user-s-browser">75</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Test the agent's changes, not the user's browser</h3>
+				<blockquote><p>you focused on my browser instead of your changes.</p><cite>You · history/f1f8dc4c_export-import-file-picker-refactor.txt</cite></blockquote><p>Reproduce in a minimal page the agent controls.</p>
+			</article>
+			<article class="card" id="conv-modern-web-page-prose-and-layout" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-modern-web-page-prose-and-layout">76</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Modern web-page prose and layout</h3>
+				<blockquote><p>User facing prose to be universal, helpful, concise and clear. As a modern web page would.</p><cite>You · history/66039af5_prompt-builder-audit-refactor-nested-deliverables.txt</cite></blockquote><p>Also: arranged layout with good proportions and spacing; comprehensive help text and popups; prompt outputs concise and instructive for the agent.</p>
+			</article>
+			<article class="card" id="conv-review-gates-before-building" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-review-gates-before-building">77</a><span class="chip integrate">Integrate</span><span class="chip">5 turns</span></div>
+				<h3>Review gates before building</h3>
+				<blockquote><p>fire any open questions at me next turn and then we can progress to mocking after it settles</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>Settle by review, then mock, then build; stop at every gate.</p>
+			</article>
+			<article class="card" id="conv-concise-reviews-drop-settled-items" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-concise-reviews-drop-settled-items">78</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Concise reviews — drop settled items</h3>
+				<blockquote><p>lets build a more concise review page. focused on how this has landed. leave out all redundant decisions/review items</p><cite>You · dev/branches/agent-teams/history</cite></blockquote><p>A follow-up review carries only what is still live.</p>
+			</article>
+			<article class="card" id="conv-workspace-first-reviews-go-in-reviews" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-workspace-first-reviews-go-in-reviews">79</a><span class="chip integrate">Integrate</span><span class="chip">5 turns</span></div>
+				<h3>Workspace first; reviews go in reviews/</h3>
+				<blockquote><p>probably in /review instead of /artifacts</p><cite>You · dev/branches/agent-teams/history</cite></blockquote><p>Scratch and mocks in the workspace; finished reviews in <code>reviews/</code>; kind decides the directory.</p>
+			</article>
+			<article class="card" id="conv-per-repo-instance-still-standalone" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-per-repo-instance-still-standalone">80</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Per-repo instance, still standalone</h3>
+				<blockquote><p>each repo could have its own prompt builder… still support being unattached</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>A deck can ship with dev-workspace per repository and also run alone.</p>
+			</article>
+			<article class="card" id="conv-hand-maintained-lists-agent-invocable-skill-only" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-hand-maintained-lists-agent-invocable-skill-only">81</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Hand-maintained lists; agent-invocable skill only</h3>
+				<blockquote><p>Skill: agent invocatable only. no update scripts.</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>No generated lists, no update scripts, no slash-menu entry.</p>
+			</article>
+			<article class="card" id="conv-warn-before-destructive-saves" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-warn-before-destructive-saves">82</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Warn before destructive saves</h3>
+				<blockquote><p>send a 'backup' warning before saving is the way to go?</p><cite>You · history/ea347861_prompt-builder-design-and-build.txt</cite></blockquote><p>A save that overwrites announces itself first.</p>
+			</article>
+			<article class="card" id="conv-reference-driven-styling" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-reference-driven-styling">83</a><span class="chip integrate">Integrate</span><span class="chip">2 turns</span></div>
+				<h3>Reference-driven styling</h3>
+				<blockquote><p>I like issue 45's deep greens. diffs, select buttons, tags etc.</p><cite>You · dev/branches/agent-teams/history</cite></blockquote><p>Style is taken from a named reference artifact, exactly as it has it.</p>
+			</article>
+			<article class="card" id="conv-clean-encoding" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-clean-encoding">84</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Clean encoding</h3>
+				<blockquote><p>the artifact has a bunch of character like this â”‚ everywhere</p><cite>You · dev/branches/agent-teams/history</cite></blockquote><p>Mojibake is a defect; write escapes where the wrapper strips charset.</p>
+			</article>
+			<article class="card" id="conv-edit-the-structure-from-the-page-itself" data-tag="integrate" data-recommended="Agree">
+				<div class="chiprow"><a class="chip id" href="#conv-edit-the-structure-from-the-page-itself">85</a><span class="chip integrate">Integrate</span><span class="chip">1 turn</span></div>
+				<h3>Edit the structure from the page itself</h3>
+				<blockquote><p>edit the structure from the page itself.</p><cite>You · this session</cite></blockquote><p>Listed in your rev 1 note; the page is its own editor for its structure, not only its data.</p>
+			</article>
+		<!-- @end-conventions -->
+		</section>
+
+		<section id="architecture">
+			<div class="sec-head"><h2>Architecture decisions</h2><span class="count"></span></div>
+			<p class="sec-intro">Rev 1 listed these as conventions; you called them architecture. Unchanged text, same ids. They feed the skill and plan, not the conventions doc.</p>
 
 			<article class="card" id="file-form" data-tag="yourcall" data-verdicts="Agree|Revise|Reject" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#file-form">75</a><span class="chip yourcall">Your call</span></div>
+				<div class="chiprow"><a class="chip id" href="#file-form">86</a><span class="chip yourcall">Your call</span></div>
 				<h3>File form</h3>
 				<ul><li>Bare fragment: no doctype/html/head/body — <b>open</b>, PIVOT §8 builds against dropping it.</li><li>Four quirks-mode rules: lowercase class/id names; explicit font-size/line-height on td/th; no percentage heights; no image in a table.</li><li>Non-ASCII CSS <code>content</code> written as escapes (<code>\2212</code>, <code>\00B7</code>).</li><li>Version stamp on line 1, read by text.</li><li>Self-contained single file; only the Google Fonts link and a data-URI SVG favicon leave the file.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Form; D-18</p>
 			</article>
 			<article class="card" id="location-and-landing" data-tag="yourcall" data-verdicts="Agree|Revise|Reject" data-recommended="Revise">
-				<div class="chiprow"><a class="chip id" href="#location-and-landing">76</a><span class="chip yourcall">Your call</span></div>
+				<div class="chiprow"><a class="chip id" href="#location-and-landing">87</a><span class="chip yourcall">Your call</span></div>
 				<h3>Location and landing</h3>
 				<ul><li>Built pages land in <code>dev/workspace/artifacts/&lt;id&gt;.html</code> (D-19) — challenged by the takes above.</li><li><code>reviews/</code> keeps its meaning: reviews of completed work, plus the Stage 1 corpus.</li><li><code>filebox/</code> is temporary and purged.</li><li>Both directories archive to <code>dev/branches/&lt;branch&gt;/</code> identically.</li><li>Id collision check before copy: <code>ls dev/workspace/artifacts dev/branches/*/artifacts</code> — every <code>file://</code> page shares one origin.</li><li>Skill at <code>extensions/skills/artifact-suite/</code>, symlinked into chat-tools — release clauses withdrawn by PIVOT §1.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § File layout</p>
 			</article>
 			<article class="card" id="naming" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#naming">77</a><span class="chip integrate">Integrate</span></div>
+				<div class="chiprow"><a class="chip id" href="#naming">88</a><span class="chip integrate">Integrate</span></div>
 				<h3>Naming</h3>
 				<ul><li>Page file = <code>&lt;id&gt;.html</code>; id = <code>#page-meta.id</code> = kebab subject slug, permanent.</li><li>Card id = kebab subject slug; a stable external id (<code>ds-1</code>, <code>issue-45</code>) is valid, an ordinal is not.</li><li>Section id = lowercase slug of its h2; permanent.</li><li>Radio group name = <code>v-&lt;cardId&gt;</code>.</li><li><code>&lt;title&gt;</code> = <code>#page-meta.title</code> = h1.</li><li><code>.toc</code> for contents; <code>.rail</code> reserved; <code>layout</code>, <code>card</code>, <code>section</code>, <code>show</code> never marker names.</li><li>Reserved for demos and blocks: every shell id, <code>data-theme</code>, every token, every shell class.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Card contract, § Class inventory</p>
 			</article>
 			<article class="card" id="theme-and-tokens" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#theme-and-tokens">78</a><span class="chip integrate">Integrate</span></div>
+				<div class="chiprow"><a class="chip id" href="#theme-and-tokens">89</a><span class="chip integrate">Integrate</span></div>
 				<h3>Theme and tokens</h3>
 				<ul><li>Three theme blocks always: light on bare <code>:root</code>; dark under the media query guarded by <code>:not([data-theme="light"])</code>; dark again under <code>[data-theme="dark"]</code>.</li><li>14 original tokens plus exactly seven diff tokens; nothing else is ever added.</li><li>Radius hardcoded: 2px controls, 3px cards — “no token, indirection over a constant”.</li><li>Two prose measures: 68ch on card prose and section intros; 62ch on standfirst, gloss, blockquote.</li><li>No template or block names a font family, a raw colour, or restates a shell selector.</li><li>Three-way theme control; System removes the attribute and the stored key.</li><li><code>:has()</code> allowed (Chrome ≥105); only adds state the control already expresses; the one load-bearing use carries an <code>@supports</code> floor.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Tokens, § Theme control; D-4</p>
 			</article>
 			<article class="card" id="marker-regions-and-writing-a-page" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#marker-regions-and-writing-a-page">79</a><span class="chip integrate">Integrate</span></div>
+				<div class="chiprow"><a class="chip id" href="#marker-regions-and-writing-a-page">90</a><span class="chip integrate">Integrate</span></div>
 				<h3>Marker regions and writing a page</h3>
 				<ul><li>Seven regions, each exactly once. PIVOT §7 set: <code>@doc-title</code>, <code>@page-meta</code>, <code>@masthead</code>, <code>@content</code>, <code>@sidebar</code>, <code>@demo-style</code>, <code>@demo-script</code>.</li><li>Placeholder regions are replaced whole; empty regions fill by rewriting the closing marker into content plus the same marker.</li><li>One writable attribute outside the markers: the class on <code>.shell</code>.</li><li>Each section carries <code>&lt;!-- @end-&lt;sectionId&gt; --&gt;</code> before its closing tag (Edit anchor).</li><li>A page is created by <code>cp</code>, never by writing chrome. Never read the shell; never read a page copy in full — bounded Read with offset/limit, ranges found with <code>grep -n</code>.</li><li><code>splice.py</code> deleted (PIVOT §6); Edit and bounded Read replace it.</li><li>The shell carries everything reusable; nothing is spliced, lifted or pasted at build time (PIVOT §5).</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Markers; <code>plans/PIVOT.md</code> §4-7</p>
 			</article>
 			<article class="card" id="storage" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#storage">80</a><span class="chip integrate">Integrate</span></div>
+				<div class="chiprow"><a class="chip id" href="#storage">91</a><span class="chip integrate">Integrate</span></div>
 				<h3>Storage</h3>
 				<ul><li>Keys: <code>artifact-suite.page.&lt;id&gt;</code> per page; <code>artifact-suite.theme</code> shared. Nothing else is written.</li><li>One JSON document per page: <code>schema</code>, <code>pageId</code>, <code>rev</code>, <code>savedAt</code>, <code>cards{}</code>, <code>sections{}</code>, <code>orphans{}</code>; read once at boot, written once per 200ms-debounced change.</li><li>Per-card record: verdict, comment, fingerprint, answeredAt, touched, rev.</li><li>Every localStorage access in try/catch with an in-memory fallback and a footer warning when saving is off.</li><li>Demos store nothing.</li><li>Keep every answer: removed cards are held, changed cards are flagged, never cleared.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Storage document; D-6, D-7</p>
 			</article>
 			<article class="card" id="return-prompt-format" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#return-prompt-format">81</a><span class="chip integrate">Integrate</span></div>
+				<div class="chiprow"><a class="chip id" href="#return-prompt-format">92</a><span class="chip integrate">Integrate</span></div>
 				<h3>Return prompt format</h3>
 				<ul><li><code>## &lt;prompt.heading or title&gt;</code>, then <code>Source:</code> joined with middle dots, <code>Untouched:</code> two bare counts, <code>Held:</code> ids only when orphans exist.</li><li><code>### Decisions</code>: touched cards in document order as <code>**&lt;cardId&gt; · &lt;h3&gt;**</code> with Verdict and Note; then touched loose sections.</li><li><code>### Next</code> from <code>META.next</code>; then a <code>Re-open:</code> line.</li><li>Multi-line notes indented two spaces; radio tokens never upper-cased; filtering never affects composition; empty prompt when nothing is touched.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Return prompt</p>
 			</article>
 			<article class="card" id="links-and-url-derivation" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#links-and-url-derivation">82</a><span class="chip integrate">Integrate</span></div>
+				<div class="chiprow"><a class="chip id" href="#links-and-url-derivation">93</a><span class="chip integrate">Integrate</span></div>
 				<h3>Links and URL derivation</h3>
 				<ul><li>No template writes a literal href; every URL derives from <code>META.provenance</code> at load.</li><li>Disk <code>file://root/path</code>; Editor <code>vscode://file/…:line</code>; GitHub blob pinned to the commit the agent read; <code>data-commit</code> overrides.</li><li>Every outbound link <code>target="_blank" rel="noopener"</code>; in-page anchors never.</li><li>Exactly one solid <code>.ref-chip</code> per reference, chosen by origin.</li><li>Absolute checkout path accepted in the page — <b>open</b>, PIVOT §8.</li><li>Every <code>.path</code> sits inside a ref; a diff block is always preceded by a ref naming its file.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Provenance &amp; links; D-11, D-12, D-13</p>
 			</article>
 			<article class="card" id="script-dialect-and-placement" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#script-dialect-and-placement">83</a><span class="chip integrate">Integrate</span></div>
+				<div class="chiprow"><a class="chip id" href="#script-dialect-and-placement">94</a><span class="chip integrate">Integrate</span></div>
 				<h3>Script dialect and placement</h3>
 				<ul><li>Two scripts only: the pre-paint script and one engine IIFE; templates contribute no JavaScript.</li><li>prompt-builder's dialect: <code>var</code>, function declarations, string concatenation; no arrows, template literals, optional chaining or <code>class</code>.</li><li>Callers above callees under twelve fixed banners (STYLE.md); comments state constraints only (code-comments.md).</li><li>The <code>&lt;\/</code> rule for any <code>&lt;/</code> inside a script or JSON string.</li><li>One global: <code>window.SUITE = { copyText, flash, meta }</code>; one clipboard path, one status path; no <code>prompt()</code> or <code>alert()</code>.</li><li>Events delegated from <code>document</code>; capabilities probed never assumed.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Script placement and dialect; <code>extensions/rules/STYLE.md</code></p>
 			</article>
 			<article class="card" id="card-authoring" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#card-authoring">84</a><span class="chip integrate">Integrate</span></div>
+				<div class="chiprow"><a class="chip id" href="#card-authoring">95</a><span class="chip integrate">Integrate</span></div>
 				<h3>Card authoring</h3>
 				<ul><li>Body order: chiprow, h3, optional blockquote, prose and evidence, engine <code>.respond</code> last.</li><li>The agent writes the article, chiprow, h3 and prose — nothing else.</li><li>Card edge is a border-left driven by <code>data-tag</code>.</li><li>Optional attributes: <code>data-tag</code>, <code>data-verdicts</code>, <code>data-recommended</code>, <code>data-answer</code>. Verdict sets live on the article, not in page-meta.</li><li>Quote = blockquote with <code>&lt;cite&gt;You · session YYYY-MM-DD&lt;/cite&gt;</code>; never inside <code>.respond</code>.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Card anatomy, § Card contract</p>
 			</article>
 			<article class="card" id="verification" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#verification">85</a><span class="chip integrate">Integrate</span></div>
+				<div class="chiprow"><a class="chip id" href="#verification">96</a><span class="chip integrate">Integrate</span></div>
 				<h3>Verification</h3>
 				<ul><li>Static tier S1-S10 via <code>verify.py &lt;page&gt; --static</code>: doctype/stamp, seven markers, page-meta parse, card ids, options agreement, host allow-list, one title/h1/meta, one shell class, cards inside sections. S9 deleted.</li><li>Runtime tier V1-V17 over Playwright and <code>python3 -m http.server 8787</code>: console clean, ToC and respond counts, storage keys, restore, changed strip, held answers, links, overflow at four widths, filters, clipboard fallback.</li><li>Three frozen fixtures are the regression suite; a fixture that must change is a contract change.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Verification; <code>extensions/skills/artifact-suite/references/verification-checks.md</code> (planned)</p>
 			</article>
 			<article class="card" id="sizes-and-ceilings" data-tag="defer" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#sizes-and-ceilings">86</a><span class="chip defer">Defer</span></div>
+				<div class="chiprow"><a class="chip id" href="#sizes-and-ceilings">97</a><span class="chip defer">Defer</span></div>
 				<h3>Sizes and ceilings</h3>
 				<ul><li>Shell 36KB hard / 32KB target — dropped by PIVOT §5 in favour of one recorded byte measurement.</li><li>Templates 3-9KB; blocks 1.5-2.5KB; references ~80-130 lines; SKILL.md 260-320 lines; fixtures 48-60KB.</li><li>A 10-card review ≈ 95 authored lines, none of it chrome.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Ceilings; <code>plans/PIVOT.md</code> §5</p>
 			</article>
 			<article class="card" id="build-procedure" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#build-procedure">87</a><span class="chip integrate">Integrate</span></div>
+				<div class="chiprow"><a class="chip id" href="#build-procedure">98</a><span class="chip integrate">Integrate</span></div>
 				<h3>Build procedure</h3>
 				<ul><li>Nine steps after PIVOT §6, referred to by title never by number: Open the Build · Load the Page Kind · Resolve Provenance · Instantiate the Shell · Write the Content · Verify the Page · Revise a Published Page · Hand the Page Over · Handle a Build Problem.</li><li>Every Bash call is a fresh shell; re-assign paths at the head of each command.</li><li>One page template per page; a shape no template covers is a hard bail and an issue.</li><li>Git facts run once from the repo root; detached HEAD → branch null; issue never guessed.</li><li>Updates edit one card in place; a whole-file rewrite is a defect.</li><li>Plain SKILL.md first; DraftHorse conversion is a later interactive task (PIVOT §2).</li><li>Plugin assets run from the last installed release, so the skill runs by hand from the working tree.</li></ul><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § SKILL.md shape; <code>plans/PIVOT.md</code> §1, §2, §6</p>
 			</article>
 			<article class="card" id="workspace-level-conventions" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#workspace-level-conventions">88</a><span class="chip integrate">Integrate</span><span class="chip">dw</span></div>
+				<div class="chiprow"><a class="chip id" href="#workspace-level-conventions">99</a><span class="chip integrate">Integrate</span><span class="chip">dw</span></div>
 				<h3>Workspace-level conventions</h3>
 				<ul><li>Workspace dirs: context, plans, prompts, reviews, artifacts, research, tasks, filebox, history — each with a <code>.keep</code>.</li><li>History transcripts <code>&lt;8-hex&gt;_&lt;kebab-summary&gt;.txt</code> via conversation-capture.</li><li>Branches are domain-scoped kebab names; archives in <code>dev/branches/&lt;branch&gt;/</code>.</li><li>Prompt-template Action DSL: ownership words, <code>?</code> fallback chains, status glyphs, <code>!</code> context prefix.</li><li>Magic phrases: show your working / options / strategy / context / difficulties; use your claude space.</li><li>Verify HTML over http, never <code>file:</code> in Playwright; cache-bust after edits.</li></ul><p class="gloss">Source: <code>workspace-config.yml</code>, <code>prompts/README.md</code>, <code>WORKSPACE.md</code></p>
 			</article>
-		<!-- @end-conventions -->
+		<!-- @end-architecture -->
 		</section>
 
 		<section id="decisions">
@@ -889,102 +957,102 @@
 			<p class="sec-intro">D-1 to D-20 as recorded on 2026-08-24. Two are reopened by PIVOT and carry no default.</p>
 
 			<article class="card" id="d-1" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-1">89</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-1">100</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-1 — Shell layouts</h3>
 				<p>Three named layouts — <code>.shell</code> 940px, <code>.shell.rail</code> 1180px with 232px left rail at 1040px, <code>.shell.board</code> 1340px with sticky right rail at 1060px.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-2" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-2">90</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-2">101</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-2 — ToC below 1040px</h3>
 				<p>Sticky pill row rendered from the same generated list.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-3" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-3">91</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-3">102</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-3 — Chip vocabulary</h3>
 				<code>integrate</code> / <code>yourcall</code> / <code>defer</code> across markup, chips, card edge and filter buttons. Filter bar is a shell feature.<p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-4" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-4">92</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-4">103</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-4 — Theme control</h3>
 				<p>Three-way System / Light / Dark. System removes the attribute and the stored key.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-5" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-5">93</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-5">104</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-5 — Naming</h3>
 				<p>Contents is <code>.toc</code>; <code>.rail</code> stays reserved for folder-picker rows.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-6" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-6">94</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-6">105</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-6 — Storage</h3>
 				<p>One localStorage JSON document per page keyed by the page id in the meta block; theme one shared key.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-7" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-7">95</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-7">106</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-7 — Republish</h3>
 				<p>Keep every answer; changed card shows an amber strip; removed card's answer held; every regeneration bumps rev.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-8" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-8">96</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-8">107</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-8 — Defaults</h3>
 				<p>Recommended option pre-checked; only touched cards enter the return prompt; Accept all records the defaults.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-9" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-9">97</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-9">108</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-9 — Page data</h3>
 				<p>One <code>#page-meta</code> JSON block holds provenance, id, rev, prompt heading and next steps.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-10" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-10">98</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-10">109</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-10 — Copy controls</h3>
 				<p>Floating pair (Copy prompt, View prompt), bottom right.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-11" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-11">99</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-11">110</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-11 — File reference block</h3>
 				<p>Three links — disk, editor, GitHub blob — plus copy-path. Absolute checkout path acceptable in the page.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-12" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-12">100</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-12">111</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-12 — GitHub pinning</h3>
 				<p>Links pin to the commit the agent read; other branches open via the archive mirror, marked archived copy.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-13" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-13">101</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-13">112</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-13 — Outbound links</h3>
 				<p>Every outbound link opens in a new tab with <code>rel="noopener"</code>.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-14" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-14">102</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-14">113</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-14 — Three templates</h3>
 				<p>Review, options and issue-breakdown share one card anatomy differing by verdict vocabulary; six kinds map onto three.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-15" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-15">103</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-15">114</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-15 — Interview republish</h3>
 				<p>Answered questions rewritten as <code>.answered</code> record cards.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-16" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-16">104</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-16">115</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-16 — Demo page</h3>
 				<p>No fixed shape; fully customisable by the building agent, who must know the available structure, classes and integration points.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-17" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-17">105</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-17">116</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-17 — Panel/modal</h3>
 				<p>Optional block, not part of the shell. PIVOT §5 ships its implementation in the shell while presence stays optional.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-18" data-tag="yourcall">
-				<div class="chiprow"><a class="chip id" href="#d-18">106</a><span class="chip yourcall">Your call</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-18">117</a><span class="chip yourcall">Your call</span><span class="chip">stage 1</span></div>
 				<h3>D-18 — File form</h3>
 				<p>Bare fragment, disk-primary links; Artifact-tool publishing open. <b>Reopened</b> by PIVOT §3/§8.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-19" data-tag="yourcall">
-				<div class="chiprow"><a class="chip id" href="#d-19">107</a><span class="chip yourcall">Your call</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-19">118</a><span class="chip yourcall">Your call</span><span class="chip">stage 1</span></div>
 				<h3>D-19 — Packaging</h3>
 				<p>Ship as a skill. <b>Amended</b> by PIVOT §1: skill kept, versioning and release withdrawn. Landing dir settled in the tech plan.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
 			<article class="card" id="d-20" data-tag="integrate" data-recommended="Agree">
-				<div class="chiprow"><a class="chip id" href="#d-20">108</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
+				<div class="chiprow"><a class="chip id" href="#d-20">119</a><span class="chip integrate">Integrate</span><span class="chip">stage 1</span></div>
 				<h3>D-20 — Corpus</h3>
 				<p>Eight reference files; <code>filebox/review.html</code> excluded.</p><p class="gloss">Source: <code>context/stage-1-decisions.md</code></p>
 			</article>
@@ -993,30 +1061,30 @@
 
 		<section id="open" data-loose="Anything else to settle">
 			<div class="sec-head"><h2>Open questions in the docs</h2><span class="count"></span></div>
-			<p class="sec-intro">Questions the plan and PIVOT leave standing, plus the unresolved lists earlier reviews left behind.</p>
+			<p class="sec-intro">PIVOT §8 and the plan's leftovers. The kill question now carries the safety answer.</p>
 
 			<article class="card" id="q-provenance-root-carries-the-absolute-checkout-path" data-tag="yourcall" data-verdicts="Keep it|Strip at publish|Revise (note)" data-recommended="Keep it">
-				<div class="chiprow"><a class="chip id" href="#q-provenance-root-carries-the-absolute-checkout-path">109</a><span class="chip yourcall">Your call</span><span class="chip">pivot §8</span></div>
+				<div class="chiprow"><a class="chip id" href="#q-provenance-root-carries-the-absolute-checkout-path">120</a><span class="chip yourcall">Your call</span><span class="chip">pivot §8</span></div>
 				<h3>Q: <code>provenance.root</code> carries the absolute checkout path?</h3>
 				<p>Blocks WP-3. It holds the absolute path because that is what makes the Disk and Editor chips resolve; a published page then carries the home-directory name. PIVOT builds against keeping it; the alternative is blanking root at publish time.</p><p class="gloss">Source: <code>plans/PIVOT.md</code> §8; plan-review card <code>root-path-exposure</code></p>
 			</article>
-			<article class="card" id="q-bash-kill-for-the-verification-server" data-tag="yourcall" data-verdicts="Grant kill|User runs server|Defer">
-				<div class="chiprow"><a class="chip id" href="#q-bash-kill-for-the-verification-server">110</a><span class="chip yourcall">Your call</span><span class="chip">plan Q2</span></div>
+			<article class="card" id="q-bash-kill-for-the-verification-server" data-tag="yourcall" data-recommended="Exact-match pkill" data-verdicts="Exact-match pkill|timeout, no grant|Grant kill:* anyway">
+				<div class="chiprow"><a class="chip id" href="#q-bash-kill-for-the-verification-server">121</a><span class="chip yourcall">Your call</span><span class="chip">plan Q2</span></div>
 				<h3>Q: <code>Bash(kill:*)</code> for the verification server</h3>
-				<p>Whether the skill may kill the <code>http.server</code> it starts, or the user starts and stops it.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Unresolved questions</p>
+				<p>Your rev 1 verdict: grant it, the agent must handle the server it starts — with the safety question answered here. <code>Bash(kill:*)</code> is a prefix match, so it lets the agent kill any pid. Narrower: grant the exact string <code>Bash(pkill -f "http.server 8787")</code> (exact-match rule, kills only that server), or start it as <code>timeout 600 python3 -m http.server …</code> so it dies alone and no kill grant exists.</p><p class="gloss">Source: <code>plans/artifact-suite-implementation.md</code> § Unresolved questions</p>
 			</article>
 			<article class="card" id="q-fixtures-inside-the-released-plugin-payload" data-tag="defer" data-answer="none">
-				<div class="chiprow"><a class="chip id" href="#q-fixtures-inside-the-released-plugin-payload">111</a><span class="chip defer">Defer</span><span class="chip">plan Q3</span></div>
+				<div class="chiprow"><a class="chip id" href="#q-fixtures-inside-the-released-plugin-payload">122</a><span class="chip defer">Defer</span><span class="chip">plan Q3</span></div>
 				<h3>Q: fixtures inside the released plugin payload?</h3>
 				<p>Deferred with release packaging; fixtures stay in the repo regardless.</p><p class="gloss">Source: <code>plans/PIVOT.md</code> §8</p>
 			</article>
 			<article class="card" id="q-confirm-the-skill-s-tool-set" data-tag="yourcall" data-verdicts="Confirm|Revise (note)" data-recommended="Confirm">
-				<div class="chiprow"><a class="chip id" href="#q-confirm-the-skill-s-tool-set">112</a><span class="chip yourcall">Your call</span><span class="chip">plan Q5</span></div>
+				<div class="chiprow"><a class="chip id" href="#q-confirm-the-skill-s-tool-set">123</a><span class="chip yourcall">Your call</span><span class="chip">plan Q5</span></div>
 				<h3>Q: confirm the skill's tool set</h3>
 				<p>With <code>splice.py</code> gone: Read with offset/limit plus Edit, and the invariant that the shell and full page copies are never read whole.</p><p class="gloss">Source: <code>plans/PIVOT.md</code> §8</p>
 			</article>
 			<article class="card" id="unresolved-lists-left-in-earlier-reviews" data-tag="yourcall" data-verdicts="Roll in|Stay parked|Triage separately" data-recommended="Triage separately">
-				<div class="chiprow"><a class="chip id" href="#unresolved-lists-left-in-earlier-reviews">113</a><span class="chip yourcall">Your call</span><span class="chip">backlog</span></div>
+				<div class="chiprow"><a class="chip id" href="#unresolved-lists-left-in-earlier-reviews">124</a><span class="chip yourcall">Your call</span><span class="chip">backlog</span></div>
 				<h3>Unresolved lists left in earlier reviews</h3>
 				<p>Investigation § Gaps the lenses missed (16 items); export-import discovery § new capability flag and § watch items; section-ledger § open questions; mock-4-proposals § Deferred and § Your call. None has a recorded verdict. Say whether they roll into the FlightDeck conventions doc or stay parked.</p>
 			</article>
