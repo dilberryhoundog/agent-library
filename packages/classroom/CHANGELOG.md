@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-08-27
+
+### Changed
+
+- The plugin is relocated to `packages/classroom` in the marketplace repository and now owns its skill and agent files in-tree. Install source path changes; nothing user-facing does.
+
 ## [0.5.0] - 2026-08-21
 
 ### Added
