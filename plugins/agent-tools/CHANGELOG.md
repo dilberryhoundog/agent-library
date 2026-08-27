@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-08-27
+
+### Added
+
+- `corpus-sweep` skill (`/agent-tools:corpus-sweep`): carries a framework spec change across a whole document corpus — one isolated agent per document set working from a pre-decided brief, then an independent audit, then a review of what could not be decided in advance. Ships with a `drafthorse` corpus profile.
+
+### Removed
+
+- The `drafthorse` skill and `drafthorse-saddler` agent have moved to the `drafthorse` plugin. agent-tools declares it as a dependency, so it installs automatically; invoke them as `/drafthorse:drafthorse` and `drafthorse:drafthorse-saddler` — the `agent-tools:` names no longer resolve.
+
 ## [0.7.0] - 2026-08-21
 
 ### Added
