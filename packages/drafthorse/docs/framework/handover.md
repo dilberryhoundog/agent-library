@@ -55,7 +55,7 @@ A handover **never names its parent step.** It is an atomic piece of work, with 
 
 ## Steps inside a handover
 
-Step anatomy, conditions, and in-play semantics are unchanged (see [Steps](steps.md)). A handover opens its steps section with the **handover-variant preamble**, not the universal one. The variant points back at the universal rules — a handover only ever loads through a parent that carries them — then states what is true here and nowhere else: child steps of a parent step, control returning to the parent, error handling owned by the parent document, globals holding across the parent step's span. Both preambles are legitimate; a document is read against the one that fits it. [HANDOVER-template.md](../../../extensions/skills/drafthorse/assets/HANDOVER-template.md) carries the canonical variant text and is the creation path for a new handover.
+Step anatomy, conditions, and in-play semantics are unchanged (see [Steps](steps.md)). A handover opens its steps section with the **handover-variant preamble**, not the universal one. The variant points back at the universal rules — a handover only ever loads through a parent that carries them — then states what is true here and nowhere else: child steps of a parent step, control returning to the parent, error handling owned by the parent document, globals holding across the parent step's span. Both preambles are legitimate; a document is read against the one that fits it. [HANDOVER-template.md](../../skills/drafthorse/assets/HANDOVER-template.md) carries the canonical variant text and is the creation path for a new handover.
 
 Two differences follow from the child-step model:
 

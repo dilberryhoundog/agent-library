@@ -1,0 +1,9 @@
+{
+  "name": "drafthorse",
+  "version": "0.8.0",
+  "description": "DraftHorse — framework, builder skill and spec-checker agent for self-routing procedural documents",
+  "author": {
+    "name": "dilberryhoundog",
+    "email": "tech@grahams.coffee"
+  }
+}

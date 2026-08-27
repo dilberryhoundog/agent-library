@@ -16,7 +16,7 @@ discovery:
   stamp_value: DraftHorse
   search_paths:
     - extensions
-    - docs
+    - packages
 
 # How discovered documents group into assignments. One assignment is one agent.
 grouping:
@@ -30,11 +30,11 @@ grouping:
   # Unstamped files that must move in lockstep with a stamped document. Each
   # entry pairs a stamped document with the files that mirror it.
   lockstep:
-    - document: extensions/agents/drafthorse-saddler.md
+    - document: packages/drafthorse/agents/drafthorse-saddler.md
       with:
-        - docs/drafthorse/drafthorse-spec-check.md
+        - packages/drafthorse/docs/drafthorse-spec-check.md
 
-audit_authority: docs/drafthorse/drafthorse-spec-check.md
+audit_authority: packages/drafthorse/docs/drafthorse-spec-check.md
 
 # Tier heuristics for this corpus. The skill proposes a tier per assignment from
 # these and the user approves it with the briefs. See the skill's Tiers reference.
