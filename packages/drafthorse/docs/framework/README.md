@@ -25,7 +25,7 @@ The six layers describe the default DraftHorse document. One variant reuses them
 
 ## After the framework
 
-Two more parts follow once this framework is fine-tuned, each in its own sibling folder under `docs/drafthorse/`:
+Two more parts follow once this framework is fine-tuned, each in its own sibling folder under `docs/`:
 
 - **authoring/** — how to *reach for and compose* these primitives (judgment, not grammar). Built after the framework locks.
 - the **skill** — a DraftHorse skill that builds DraftHorse skills, dogfooding the toolbox. Built last.

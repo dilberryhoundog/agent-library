@@ -1,1 +1,0 @@
-../../../extensions/agents/course-researcher.md
