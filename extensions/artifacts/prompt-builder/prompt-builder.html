@@ -1012,15 +1012,40 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
             "Planning": [
               "Implementation plan",
               "Architecture proposal",
-              "Research brief"
-            ],
-            "Review": [
-              "Review",
-              "Explanation"
+              "Research brief",
+              "Tech plan"
             ],
             "Documents": [
-              "Artifact",
-              "Markdown document"
+              {
+                "key": "Artifact",
+                "value": "Shareable Artifact on claude.ai"
+              },
+              {
+                "key": "Markdown document",
+                "value": "Generic Markdown document"
+              }
+            ],
+            "HTML Pages": [
+              {
+                "key": "Review page",
+                "value": "HTML review page - presentation of findings or evaluation"
+              },
+              {
+                "key": "Plan page",
+                "value": "HTML Plan viewer - supporting page for written plans, explaining key decisions and direction information from the plan"
+              },
+              {
+                "key": "Demo page",
+                "value": "HTML Demo page - custom built visual demonstration of a concept or feature"
+              },
+              {
+                "key": "Option page",
+                "value": "HTML Options chooser - show the user all the information they need to make informed choices."
+              },
+              {
+                "key": "Explainer Page",
+                "value": "HTML Explainer - interactive and/or expressive page to guide a user through a topic or concept"
+              }
             ]
           }
         },
@@ -1587,7 +1612,7 @@ try { var savedTheme = localStorage.getItem("prompt-builder.theme"); if (savedTh
     },
     {
       "name": "Name exported prompts",
-      "text": "Rename the raw prompt exports in `dev/workspace/prompts/prompt-builder` so each one reads like a session name.\n\nThis is mechanical string work — run it on the cheapest model available.\n\nOnly touch files still carrying the browser's export name: `prompt.json`, or `prompt (2).json` and the like. A file that already has a name is finished — leave it exactly as it is.\n\nFor each raw export:\n\n- Read the JSON. The prompt text is at `state.task.text`, or `state.problem.text` when task is empty. Older exports hold the state at the top level instead of under `state`.\n- Build a kebab-case slug from it the way you would name a working session: the subject and what is being done to it, three to six words. Not a summary of the whole prompt.\n- Prefix the file's own last-modified date as `YYYY-MM-DD`.\n- Result: `2026-08-25-artifact-suite-page-templates.json`\n\nWhen several raw exports hold the same prompt saved repeatedly — the task text matches — give them one shared slug and append `-v1`, `-v2` and so on in save order, oldest first. Continue the numbering if files with that slug already exist.\n\nLeave alone and report: any file whose task and problem are both empty, and any name that would collide with an existing file.\n\nList every rename as `old → new` and wait for my go-ahead before renaming anything."
+      "text": "Rename the raw prompt exports in `dev/workspace/prompts/prompt-builder` so each one reads like a session name.\n\nOnly touch files still carrying the browser's export name: `prompt.json`, or `prompt (2).json` and the like. A file that already has a name is finished — leave it exactly as it is.\n\nFor each raw export:\n\n- Read the JSON. The prompt text is at `state.task.text`, or `state.problem.text` when task is empty. Older exports hold the state at the top level instead of under `state`.\n- Build a kebab-case slug from it the way you would name a working session: the subject and what is being done to it, three to six words. Not a summary of the whole prompt.\n- Prefix the file's own last-modified date as `YYYY-MM-DD`.\n- Result: `2026-08-25-artifact-suite-page-templates.json`\n\nWhen several raw exports hold the same prompt saved repeatedly — the task text matches — give them one shared slug and append `-v1`, `-v2` and so on in save order, oldest first. Continue the numbering if files with that slug already exist.\n\nLeave alone and report: any file whose task and problem are both empty, and any name that would collide with an existing file.\n\nList every rename as `old → new` and wait for my go-ahead before renaming anything."
     }
   ]
 }
