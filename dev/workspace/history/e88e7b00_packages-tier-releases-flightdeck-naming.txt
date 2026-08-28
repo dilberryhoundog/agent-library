@@ -1,0 +1,1253 @@
+Session: e88e7b00-f50d-4e8f-8ea8-ebf375b44063
+Date: 2026-08-27 07:01
+Branch: main
+CWD: ~/Projects/agent-library
+
+============================================================
+[SUMMARY]
+>>>
+Explored extracting DraftHorse to its own repo; rejected in favour of a new `packages/` tier in agent-library: self-contained plugins (no symlinks or citations out, extraction-ready via filter-repo). Moved drafthorse (skill, saddler agent, rule stub, framework docs) and classroom into packages/; agent-tools keeps corpus-sweep and depends on drafthorse.
+Released drafthorse 0.8.0 (first tag under drafthorse/v*), agent-tools 0.8.0 (corpus-sweep added, drafthorse removed → dependency), classroom 0.5.1. Marketplace, versioning config, CLAUDE.md and tree config updated; merged to main.
+Decided dev-workspace is renamed FlightDeck: an agentic workspace and orchestration platform shipping workspace/orchestrate/deploy plugins. Vocabulary settled: flight (run + CLI verb), pilot, crew, flight crew pattern, flight plan, flight path, grounded, go-around; page/panel/deck split; DraftHorse becomes a first-class FlightDeck citizen with red/green deterministic finish conditions; corpus-sweep retired for a spec-update crew.
+Built dev/workspace/artifacts/flightdeck-decision-record.html — 38 editable records with JSON export/import and save-into-file (Chromium), on the prompt-builder page pattern. Uncommitted.
+<<<
+------------------------------------------------------------
+
+[USER]    💭: none
+Lets explore extracting Drafthorse into a standalon repo. It is currently a released skill atached through a plugin. We want to move the docs and the skill, it should still be able to be remotely referenced into the agent-tools plugin. 
+The reason for this is this repo is getting a bit squashy, and I want to start creating tests and orchestration runs over some of these packages. and I feel it will get a bit messy. I want to keep this as a grab bag for skills not worth their own repo
+lets explore this, and get beck to me on the risk and blast radius. plus your opinion on the value of this move
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Exploring DraftHorse's footprint across the repo (skill, docs, agent, rules, corpus-sweep profile, marketplace/plugin wiring) before reporting.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cat .claude-plugin/marketplace.json && echo ---- && cat plugins/agent-tools/.claude-plugin/plugin.json && echo ---- && ls -la plugins/agent-tools/skills plugins/agent-tools/agents && echo ---- && grep -rIl -i "drafthorse" --exclude-dir=.git --exclude-dir=history . | sort
+Description: Inspect marketplace, agent-tools plugin, drafthorse references
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+echo "=== cross-refs to docs/drafthorse path ==="; grep -rn "docs/drafthorse\|drafthorse/framework\|framework/" extensions plugins/*/CHANGELOG.md docs/drafthorse --include=*.md --include=*.js --include=*.yml --include=*.json | grep -v "^docs/drafthorse/framework/README" | head -60
+echo; echo "=== how other skills mention drafthorse (frontmatter etc) ==="; grep -rn -i "drafthorse" extensions/skills/classroom/SKILL.md extensions/skills/versioning/SKILL.md extensions/skills/git-box/SKILL.md extensions/skills/git/*/SKILL.md extensions/agents/git-robot.md extensions/agents/doc-reviewer.md extensions/agents/breaking-change-detector.md extensions/agents/course-researcher.md | head -30
+echo; echo "=== saddler refs ==="; grep -n -i "docs/\|framework\|spec-check\|CLAUDE_PLUGIN_ROOT\|path" extensions/agents/drafthorse-saddler.md | head -30
+echo; echo "=== corpus-sweep drafthorse profile refs ==="; cat extensions/skills/corpus-sweep/profiles/drafthorse/profile.yml; grep -n -i "docs/\|framework\|drafthorse" extensions/skills/corpus-sweep/SKILL.md extensions/skills/corpus-sweep/profiles/drafthorse/brief-common.md extensions/skills/corpus-sweep/profiles/drafthorse/audit.js | head -30
+echo; echo "=== skill refs to docs ==="; grep -n -i "docs/\|framework\|spec" extensions/skills/drafthorse/SKILL.md extensions/skills/drafthorse/references/*.md | head -30
+echo; echo "=== rule ==="; cat extensions/rules/DraftHorse.md | head -40
+echo; echo "=== remote source docs ==="; grep -n -i -B2 -A8 '"source"' docs/claude_docs/marketplaces.md | head -80
+echo; echo "=== sizes ==="; du -sh docs/drafthorse extensions/skills/drafthorse extensions/agents/drafthorse-saddler.md extensions/skills/corpus-sweep; git log --oneline -- docs/drafthorse extensions/skills/drafthorse extensions/agents/drafthorse-saddler.md | wc -l; git log --oneline --since=2026-06-01 | wc -l
+echo; echo "=== changelog tail ==="; head -40 plugins/agent-tools/CHANGELOG.md; git tag | grep agent-tools
+Description: Map DraftHorse coupling points and remote-source docs
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+echo "=== plugin dependencies docs ==="; grep -rn -i "dependenc\|submodule" docs/claude_docs/*.md | head -20
+echo; echo "=== framework README ==="; sed -n 1,40p docs/drafthorse/framework/README.md
+echo; echo "=== spec-check head ==="; sed -n 1,15p docs/drafthorse/drafthorse-spec-check.md
+echo; echo "=== commits touching drafthorse AND corpus-sweep/classroom/versioning (coupling) ==="; git log --format=%h --since=2026-06-01 -- docs/drafthorse extensions/skills/drafthorse extensions/agents/drafthorse-saddler.md | while read h; do f=$(git show --name-only --format= $h | grep -c "corpus-sweep\|classroom\|versioning/SKILL\|git-box\|git/agent"); [ "$f" -gt 0 ] && echo "$h $(git log -1 --format=%s $h) [+$f other corpus files]"; done | head -20
+echo; echo "=== versioning skill symlink handling ==="; grep -n -i "readlink\|symlink\|-type l" extensions/skills/versioning/SKILL.md | head
+echo; echo "=== marketplace history for remote entries ==="; git log --oneline -- .claude-plugin/marketplace.json | head; git log -p --format=%h -- .claude-plugin/marketplace.json | grep -n '"repo"\|"github"' | head
+echo; echo "=== drafthorse dir tree ==="; find docs/drafthorse extensions/skills/drafthorse -type f | sort
+Description: Check plugin deps docs, coupling history, versioning symlink logic
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Findings below. No changes made.
+
+## Footprint (what moves)
+
+- `extensions/skills/drafthorse/` (72K, 7 files) — self-contained, no citations into `docs/`
+- `extensions/agents/drafthorse-saddler.md` (40K) — regenerated from spec-check, lockstep with it
+- `docs/drafthorse/` (100K: framework/ ×8 + `drafthorse-spec-check.md`)
+- `extensions/rules/DraftHorse.md` — TODO stub, belongs with framework
+- 38 commits across those paths; 5 archived workspaces in `dev/branches/drafthorse-*` (stay here, history only)
+
+## Mechanism — how "remotely referenced" actually works
+
+Plugins can't borrow a skill from another repo; the unit of remote sourcing is a whole plugin. Realistic options:
+
+1. **New repo = its own plugin `drafthorse`** (recommended). Marketplace entry `{"source":{"source":"github","repo":"dilberryhoundog/drafthorse"}}`. agent-tools keeps corpus-sweep, adds `"dependencies": ["drafthorse"]` in plugin.json → installing agent-tools auto-installs drafthorse (same marketplace, no cross-marketplace allowlist needed; version ranges need CC ≥ 2.1.110).
+2. Git submodule under `extensions/skills/drafthorse` so symlinks keep working — **don't**. Plugin install clones the marketplace repo; submodules won't be initialised → empty skill dir in the cache.
+3. CI copy-sync — two sources of truth. No.
+
+## Blast radius
+
+- **Invocation IDs change**: `agent-tools:drafthorse` → `drafthorse:drafthorse`, `agent-tools:drafthorse-saddler` → `drafthorse:drafthorse-saddler`. Must grep briefs/scripts/prompts (corpus-sweep `audit.js` spawns saddler — verify how it names it). Only affected installs are yours.
+- **corpus-sweep is the real seam.** The corpus (11 stamped docs: classroom, versioning, git skills, 4 agents) stays here, so corpus-sweep + `profiles/drafthorse/` stay here. But `profile.yml` hardcodes `audit_authority: docs/drafthorse/drafthorse-spec-check.md`, `lockstep` on the saddler path, and `search_paths: [extensions, docs]` — all break. Needs an authority-location field (sibling checkout `../drafthorse`, or installed plugin cache path). Framework README's "regenerate saddler from spec-check" loop moves wholesale, so that's fine.
+- **Workflow split**: 4 of the last 6 drafthorse commits touched 10–16 corpus files in the same commit. Post-split every spec change = release drafthorse → sweep corpus here. Two-repo dance, but it matches the model corpus-sweep already assumes ("the framework changed; the corpus did not") and gives the sweep a real version to target.
+- **Versioning**: remove drafthorse paths from agent-tools unit; agent-tools bump is arguably breaking (skill leaves the plugin) — softened by the dependency. Copy drafthorse CHANGELOG entries (0.1.0→0.7.0) into the new repo; new tag scheme (`v0.8.0`, or `drafthorse/v…` if you keep the unit convention). History carries via `git filter-repo --path` ×4 on a clone.
+- **Layout**: with one plugin, the `extensions/` + symlink indirection is unnecessary — plugin.json at repo root, `skills/drafthorse`, `agents/`, `docs/`, `tests/`. Caveat: github-sourced plugins copy the whole repo into the cache, so tests/fixtures ship with installs (bloat only, harmless).
+- **Docs promise fulfilled**: framework README already says skill + authoring guides belong as siblings under `docs/drafthorse/`; the move does what the doc planned.
+- Memory files/CLAUDE.md references to agent-tools:drafthorse — update after.
+
+## Opinion
+
+Worth doing. DraftHorse is the only asset here that is a *product*: spec, checker, templates, sweep profile, 38 commits, 5 dedicated workspaces, 7 releases. Everything else in `extensions/` is a genuine grab-bag item. Evals (`claude plugin eval`), fixtures, and orchestration runs over it would dominate this repo's tree and history. Moderate risk, one-time cost ~half a day, contained to your own installs. The one design decision to make before moving: how corpus-sweep's drafthorse profile locates the authority docs once they live elsewhere. Don't move corpus-sweep — its corpus lives here.
+
+Unresolved:
+- corpus-sweep authority path: sibling checkout, plugin cache, or URL?
+- new repo tag scheme: `v{x}` or keep `drafthorse/v{x}`?
+- carry git history (filter-repo) or fresh start?
+- agent-tools bump: major or minor?
+- want this as a shareable review page?
+
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/plugin unknown
+
+------------------------------------------------------------
+
+[USER]    💭: none
+On the other hand. classroom is not far behind being a product. and I probably will have more coming, like a full html suite called flightdeck. this means I may start an exodus wave with many agent based tooling spread all over. maybe I could extract into a dedicated folder here. maybe assets/ but this will mean agents etc will live in multiple places.
+The original intention was to have this repo for all my agent based assets. this way I could run testing and orchestration runs in a single folder (helps with agent worktrees yeah?)
+The other left field idea could be to integrate some of these into my other standalone product dev-workspace (~/Projects/dev-workspace) but then im "mixing" names and products.
+also the last thing to think of is if any of these eventually take off and I need privacy.
+Ive thrown alot at you here, sorry.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ls ~/Projects/dev-workspace 2>/dev/null; cat ~/Projects/dev-workspace/.claude-plugin/plugin.json 2>/dev/null | head -20; ls ~/Projects/agent-library/plugins/classroom; du -sh ~/Projects/agent-library/plugins/classroom/mcp ~/Projects/agent-library/extensions/skills/classroom
+Description: Peek at dev-workspace repo and classroom size
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+No apology needed — it's the right question to ask before moving one thing. My read:
+
+## The real decision
+
+Not "extract drafthorse?" — it's **what's the promotion path when a grab-bag skill becomes a product?** Decide that rule once; drafthorse, classroom, flightdeck all fall out of it.
+
+## Options
+
+**A. Everything stays here, products get a top-level tier**
+- e.g. `products/drafthorse/`, `products/classroom/` each a self-contained plugin (own plugin.json, skills/, agents/, docs/, tests/), no `extensions/` symlinks; `plugins/` + `extensions/` remain the grab-bag.
+- Pro: one checkout, one worktree root, shared test/orchestration harness, corpus-sweep sees everything, no invocation-ID churn, no cross-repo release dance.
+- Con: history and issues stay mixed; "assets live in two places" — but that's a *tier*, not a mess, if the rule is crisp (product = own folder + own version; grab-bag = extensions+symlinks). Privacy impossible per-product (repo is one visibility).
+
+**B. One repo per product** (what I outlined last turn)
+- Pro: privacy per product, clean history, releases/tags natural, marketplace already supports github sources, product can outgrow CC (flightdeck as HTML suite is a real candidate).
+- Con: orchestration/tests across products = multi-repo; corpus-sweep seams; N repos to keep in sync with the marketplace.
+
+**C. Fold into dev-workspace** — no. dev-workspace is a git/workspace CLI; drafthorse is a doc framework. Different audience, different name, would confuse both READMEs. Only flightdeck *might* belong there if it's literally a dev-workspace UI — otherwise no.
+
+## On your specific worries
+
+- **Worktrees**: agent worktrees are per-repo, so multi-repo means an orchestration run over "all products" needs a wrapper (a meta-repo or a script that opens N worktrees). Not fatal but real friction — favours A.
+- **Privacy**: the only thing that *forces* B. But you don't need it now; extracting later is cheap if the product is already a self-contained folder — `git filter-repo --path products/drafthorse` gives you the repo with full history in minutes. Requirement: no symlinks out of the folder, no citations into the rest of the repo. That's exactly the "installable citations" rule DraftHorse already enforces.
+- **"Repo for all my agent assets"**: still true under A. B breaks it.
+
+## Recommendation
+
+**A now, B on demand.** Add a `products/` tier (or reuse `plugins/` and just stop symlinking for product plugins — fewer concepts). Rule: a product plugin owns its files outright; grab-bag plugins symlink from `extensions/`. Move drafthorse skill+agent+docs+rule into `products/drafthorse/` (or `plugins/drafthorse/`), update marketplace source to that path, agent-tools depends on it. corpus-sweep profile paths change once, stay in-repo. Tests/orchestration live under the product folder. When a product needs privacy or a life of its own, filter-repo it out and flip the marketplace entry to a github source — the layout is already extraction-ready, so that becomes a 1-hour job instead of a redesign.
+
+The one thing I'd do *today* regardless: keep every product folder free of outward symlinks and repo-relative citations. That's the cheap insurance that keeps both doors open.
+
+Unresolved:
+- `products/` tier vs. non-symlinked plugin inside `plugins/`?
+- classroom: promote now (its mcp/ + templates already live under plugins/, only the skill is symlinked) or leave?
+- flightdeck: CC plugin, or standalone HTML app that happens to ship a plugin? (changes whether it belongs here at all)
+
+------------------------------------------------------------
+
+[USER]    💭: none
+any other names for the parent folder? assets/ frameworks/
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Candidates, with the test being "reads correctly next to `plugins/` and `extensions/`":
+
+- `products/` — says "this has users and a version"; slightly commercial-sounding but honest about the tier.
+- `frameworks/` — fits drafthorse, wrong for classroom/flightdeck (they're apps, not frameworks). Too narrow.
+- `assets/` — already means "thing a skill ships" (`skills/x/assets/`). Collides. Avoid.
+- `packages/` — monorepo-standard (npm/pnpm), neutral, implies independent versioning and eventual extractability. Strongest generic fit.
+- `standalone/` — states the rule directly (self-contained, no symlinks out, extraction-ready). Slightly awkward as a noun.
+- `suites/` — good for classroom/flightdeck (multi-part), weak for drafthorse.
+- `projects/` — clashes with `~/Projects` and reads as workspace, not artifact.
+- `toolkits/` / `kits/` — friendly, but vague about the "owns its files" rule.
+- `first-party/` / `core/` — describes provenance, not tier; everything here is first-party.
+
+Pick: `packages/` if you want convention and neutrality; `standalone/` if you want the folder name to *be* the rule. I'd take `packages/`.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+packages/ it is, draft the plan
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+grep -n "saddler\|agentType\|agent-tools" extensions/skills/corpus-sweep/profiles/drafthorse/audit.js extensions/skills/corpus-sweep/profiles/drafthorse/migrate.js extensions/skills/corpus-sweep/SKILL.md | head
+echo ---; grep -n "agent-tools\|drafthorse" docs/*.md README.md 2>/dev/null | head
+echo ---; grep -n -i "path-resolution\|paths:" extensions/skills/versioning/references/config-template.md | head
+echo ---; grep -n "^## \[" plugins/agent-tools/CHANGELOG.md; grep -n -i "corpus-sweep" plugins/agent-tools/CHANGELOG.md | head -3
+echo ---; cat dev/workspace/workspace-config.yml | head -40; git branch --show-current
+Description: Check remaining coupling points and config formats
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+cat plugins/classroom/.claude-plugin/plugin.json; cat plugins/classroom/.mcp.json; grep -rn "CLAUDE_PLUGIN_ROOT\|extensions/\|plugins/classroom" plugins/classroom/scripts plugins/classroom/mcp/*.js plugins/classroom/templates extensions/skills/classroom/SKILL.md 2>/dev/null | head; echo ---; grep -n "classroom\|agent-tools\|drafthorse" README.md .claude/CLAUDE.md docs/create_symlink.md 2>/dev/null | head; echo ---; sed -n 1,30p extensions/skills/versioning/references/config-template.md
+Description: Check classroom plugin internals and versioning config template
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Enough context; writing the plan.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/.claude/plans/packages-it-is-draft-federated-steele.md
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Starting: workspace branch, then moves.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git status --short && dev-workspace new packages-tier 2>&1 | tail -15
+Description: Create packages-tier workspace branch
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: find extensions/skills/artifact-suite -type f | head; du -sh extensions/skills/artifact-suite
+Description: Inspect untracked artifact-suite dir
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Untracked dir is only `__pycache__` leftovers (2 .pyc files) — removing it to unblock.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: rm -rf extensions/skills/artifact-suite && dev-workspace new packages-tier 2>&1 | tail -8 && dev-workspace push 2>&1 | tail -3
+Description: Remove pycache leftovers, create and push workspace branch
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git stash push -u -- extensions/skills/artifact-suite -m "pycache leftovers" >/dev/null && git status --short && dev-workspace new packages-tier 2>&1 | tail -8 && dev-workspace push 2>&1 | tail -3
+Description: Stash untracked pycache, create and push workspace branch
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git stash push -u -m "pycache leftovers" -- extensions/skills/artifact-suite >/dev/null && git status --short && dev-workspace new packages-tier 2>&1 | tail -8 && dev-workspace push 2>&1 | tail -3
+Description: Stash untracked pycache, create and push workspace branch
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Branch up. Step 1+2: the moves.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: set -e
+mkdir -p packages/drafthorse/skills packages/drafthorse/agents packages/drafthorse/rules packages/drafthorse/docs packages/drafthorse/.claude-plugin
+git mv extensions/skills/drafthorse packages/drafthorse/skills/drafthorse
+git mv extensions/agents/drafthorse-saddler.md packages/drafthorse/agents/drafthorse-saddler.md
+git mv extensions/rules/DraftHorse.md packages/drafthorse/rules/DraftHorse.md
+git mv docs/drafthorse/framework packages/drafthorse/docs/framework
+git mv docs/drafthorse/drafthorse-spec-check.md packages/drafthorse/docs/drafthorse-spec-check.md
+rmdir docs/drafthorse 2>/dev/null || true
+git rm -q plugins/agent-tools/skills/drafthorse plugins/agent-tools/agents/drafthorse-saddler.md
+# classroom
+git mv plugins/classroom packages/classroom
+git rm -q packages/classroom/skills/classroom packages/classroom/agents/course-researcher.md
+git mv extensions/skills/classroom packages/classroom/skills/classroom
+git mv extensions/agents/course-researcher.md packages/classroom/agents/course-researcher.md
+echo "--- symlinks in packages:"; find packages -type l
+echo "--- tree:"; find packages -maxdepth 3 -not -path '*/node_modules*' | sort | head -40
+ls plugins docs extensions/agents
+Description: git mv drafthorse and classroom into packages/
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: set -e
+git rm -qf packages/classroom/skills/classroom packages/classroom/agents/course-researcher.md
+git mv extensions/skills/classroom packages/classroom/skills/classroom
+git mv extensions/agents/course-researcher.md packages/classroom/agents/course-researcher.md
+echo "--- symlinks:"; find packages -type l
+echo "--- outward refs in packages:"; grep -rn "extensions/\|docs/drafthorse\|plugins/classroom\|\.\./\.\./\.\." packages --exclude-dir=node_modules --exclude-dir=test || true
+echo "--- live refs elsewhere:"; grep -rn "docs/drafthorse\|extensions/skills/drafthorse\|extensions/skills/classroom\|plugins/classroom\|agent-tools:drafthorse\|extensions/agents/drafthorse-saddler\|extensions/agents/course-researcher" --exclude-dir=.git --exclude-dir=dev --exclude-dir=.playwright-mcp --exclude-dir=.idea --exclude-dir=packages . || true
+echo "--- README root:"; grep -n "classroom\|drafthorse\|plugins/\|extensions/" README.md | head -20
+Description: Finish classroom move and sweep for stale references
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: git status --short | grep -i "classroom\|course-researcher" | head; ls -la packages/classroom/skills packages/classroom/agents; ls extensions/skills extensions/agents
+Description: Check classroom move state
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+The `git rm -f` removed the symlinks and their parent dirs vanished; the sources are intact. Recreating dirs and moving.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: set -e
+mkdir -p packages/classroom/skills packages/classroom/agents
+git mv extensions/skills/classroom packages/classroom/skills/classroom
+git mv extensions/agents/course-researcher.md packages/classroom/agents/course-researcher.md
+find packages -type l; ls packages/classroom/skills/classroom | head -3; ls packages/classroom/agents
+Description: Move classroom skill and agent into the package
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cat plugins/agent-tools/CHANGELOG.md; echo ======; cat extensions/skills/versioning/assets/CHANGELOG-template.md; echo ======; sed -n 20,40p packages/drafthorse/docs/framework/README.md; echo ======; sed -n 1,12p packages/drafthorse/docs/drafthorse-spec-check.md
+Description: Read changelog, template, and docs sections to edit
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cat extensions/skills/versioning/assets/CHANGELOG-template.md
+Description: Read CHANGELOG template
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now writing new package files and fixing in-package refs.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: set -e
+cat > packages/drafthorse/.claude-plugin/plugin.json <<'EOF'
+{
+  "name": "drafthorse",
+  "version": "0.8.0",
+  "description": "DraftHorse — framework, builder skill and spec-checker agent for self-routing procedural documents",
+  "author": {
+    "name": "dilberryhoundog",
+    "email": "tech@grahams.coffee"
+  }
+}
+EOF
+# changelog: header + note + all agent-tools entries (all drafthorse-related)
+{ sed -n 1,8p plugins/agent-tools/CHANGELOG.md
+  echo
+  echo "Versions 0.1.0–0.7.0 shipped inside the \`agent-tools\` plugin; their entries are carried here as DraftHorse's own history."
+  echo
+  sed -n '10,$p' plugins/agent-tools/CHANGELOG.md | sed 's#`/agent-tools:drafthorse`#`/drafthorse`#; s/First release of agent-tools: tools for building agent harness extensions./First release (as part of agent-tools)./'
+} > packages/drafthorse/CHANGELOG.md
+cat > packages/drafthorse/README.md <<'EOF'
+# DraftHorse
+
+A Claude Code plugin: the DraftHorse framework for self-routing procedural documents, the builder skill, and the spec-checker agent.
+
+This directory is a self-contained package. Every file it needs lives inside it; nothing here links or cites outside the directory, so it installs whole and can be lifted into its own repository unchanged.
+
+## Map
+
+- `skills/drafthorse/` — the builder skill (`/drafthorse`): build a new skill or convert an existing document through gated phases.
+- `agents/drafthorse-saddler.md` — the spec-checker agent; regenerated from `docs/drafthorse-spec-check.md`.
+- `docs/framework/` — the normative framework, read from its README.
+- `docs/drafthorse-spec-check.md` — authoring source for the checker; never executed.
+- `rules/DraftHorse.md` — consumer-facing rule set (in progress).
+- `CHANGELOG.md` — release history; tags are `drafthorse/v{version}`.
+EOF
+# in-package path fixes
+sed -i '' 's#each in its own sibling folder under `docs/drafthorse/`#each in its own sibling folder under `docs/`#' packages/drafthorse/docs/framework/README.md
+sed -i '' 's#the framework (docs/drafthorse/framework/)#the framework (docs/framework/)#' packages/drafthorse/docs/drafthorse-spec-check.md
+sed -i '' 's#\[HANDOVER-template.md\](../../../extensions/skills/drafthorse/assets/HANDOVER-template.md)#[HANDOVER-template.md](../../skills/drafthorse/assets/HANDOVER-template.md)#' packages/drafthorse/docs/framework/handover.md
+grep -n "drafthorse_saddler\|usages:" -A1 packages/drafthorse/docs/drafthorse-spec-check.md | head -4
+test -f packages/drafthorse/docs/../skills/drafthorse/assets/HANDOVER-template.md && echo "handover link resolves"
+grep -rn "extensions/\|docs/drafthorse\|plugins/classroom" packages --exclude-dir=node_modules --exclude-dir=test || echo "no outward refs"
+Description: Create drafthorse plugin.json, CHANGELOG, README; fix in-package paths
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: set -e
+cd ~/Projects/agent-library
+sed -i '' 's#  - drafthorse_saddler.md - Keep preamble#  - ../agents/drafthorse-saddler.md - Keep preamble#' packages/drafthorse/docs/drafthorse-spec-check.md
+
+cat > plugins/agent-tools/.claude-plugin/plugin.json <<'EOF'
+{
+  "name": "agent-tools",
+  "version": "0.7.0",
+  "description": "Tools for maintaining agent harness extensions; corpus sweeper for DraftHorse document sets",
+  "author": {
+    "name": "dilberryhoundog",
+    "email": "tech@grahams.coffee"
+  },
+  "dependencies": ["drafthorse"]
+}
+EOF
+
+python3 - <<'EOF'
+import re,pathlib
+p=pathlib.Path('extensions/skills/corpus-sweep/profiles/drafthorse/profile.yml'); s=p.read_text()
+s=s.replace("  search_paths:\n    - extensions\n    - docs\n","  search_paths:\n    - extensions\n    - packages\n")
+s=s.replace("    - document: extensions/agents/drafthorse-saddler.md\n      with:\n        - docs/drafthorse/drafthorse-spec-check.md","    - document: packages/drafthorse/agents/drafthorse-saddler.md\n      with:\n        - packages/drafthorse/docs/drafthorse-spec-check.md")
+s=s.replace("audit_authority: docs/drafthorse/drafthorse-spec-check.md","audit_authority: packages/drafthorse/docs/drafthorse-spec-check.md")
+p.write_text(s)
+
+p=pathlib.Path('.claude-plugin/marketplace.json'); s=p.read_text()
+s=s.replace('"source": "./plugins/classroom"','"source": "./packages/classroom"')
+s=s.replace('''    {
+      "name": "classroom",''','''    {
+      "name": "drafthorse",
+      "source": "./packages/drafthorse",
+      "category": "development"
+    },
+    {
+      "name": "classroom",''')
+p.write_text(s)
+
+p=pathlib.Path('.claude/rules/versioning.md'); s=p.read_text()
+s=s.replace("""plugin directory alone.
+""","""plugin directory alone.
+
+Packages (`packages/<name>`) own their files outright and contain no symlinks; a package
+unit's paths are its directory alone.
+""",1)
+s=s.replace("""### classroom
+
+- paths: plugins/classroom plus resolved symlink targets
+- manifest: plugins/classroom/.claude-plugin/plugin.json (field: version)
+- changelog: plugins/classroom/CHANGELOG.md""","""### classroom
+
+- paths: packages/classroom
+- manifest: packages/classroom/.claude-plugin/plugin.json (field: version)
+- changelog: packages/classroom/CHANGELOG.md""")
+s=s.replace("""### dev-tools
+""","""### drafthorse
+
+- paths: packages/drafthorse
+- manifest: packages/drafthorse/.claude-plugin/plugin.json (field: version)
+- changelog: packages/drafthorse/CHANGELOG.md
+- tag: drafthorse/v{version}
+- github-release: yes
+
+### dev-tools
+""")
+p.write_text(s)
+
+p=pathlib.Path('.claude/CLAUDE.md'); s=p.read_text()
+s=s.replace("""- `plugins/` — versioned, installable packages.""","""- `packages/` — self-contained plugins that have outgrown the grab-bag (currently `drafthorse`, `classroom`). A package owns every file it needs: no symlinks out, no citations outside its directory, so it installs whole and can be lifted into its own repository with `git filter-repo --path packages/<name>`. Tests and orchestration runs for a package live inside it.
+- `plugins/` — versioned, installable packages.""")
+s=s.replace("Only plugins are versioned.","Only plugins and packages are versioned.") if "Only plugins are versioned." in s else s
+s=s.replace("- Each unit gets its own git tag: `agent-tools/v{version}`, `chat-tools/v{version}`, `dev-tools/v{version}`","- Each unit gets its own git tag: `agent-tools/v{version}`, `chat-tools/v{version}`, `classroom/v{version}`, `dev-tools/v{version}`, `drafthorse/v{version}`")
+s=s.replace("- Plugin versions live in `plugins/<name>/.claude-plugin/plugin.json` (field: `version`).","- Plugin versions live in `plugins/<name>/.claude-plugin/plugin.json` or `packages/<name>/.claude-plugin/plugin.json` (field: `version`).")
+s=s.replace("It is also the authoritative source of documentation standards (the agent-agnostic framework).","It is also the authoritative source of documentation standards (the agent-agnostic framework). The DraftHorse framework documentation lives in `packages/drafthorse/docs/`.")
+p.write_text(s)
+
+p=pathlib.Path('.claude/rules/versioning.md'); s=p.read_text()
+s=s.replace("Only plugins are versioned.","Only plugins and packages are versioned.")
+p.write_text(s)
+EOF
+git diff -- .claude .claude-plugin plugins/agent-tools extensions/skills/corpus-sweep | head -150
+Description: Update agent-tools manifest, sweep profile, marketplace, versioning config, CLAUDE.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+echo "--- validate:"; claude plugin validate packages/drafthorse 2>&1 | tail -3; claude plugin validate packages/classroom 2>&1 | tail -3; claude plugin validate plugins/agent-tools 2>&1 | tail -3; claude plugin validate .claude-plugin/marketplace.json 2>&1 | tail -3
+echo "--- stale refs:"; grep -rn "docs/drafthorse\|extensions/skills/drafthorse\|extensions/skills/classroom\|plugins/classroom\|agent-tools:drafthorse\|extensions/agents/drafthorse-saddler\|extensions/agents/course-researcher" --exclude-dir=.git --exclude-dir=dev --exclude-dir=.playwright-mcp --exclude-dir=.idea --exclude=CHANGELOG.md . || echo none
+echo "--- symlinks:"; find packages -type l || true
+echo "--- tree:"; dev-workspace tree 2>&1 | tail -2; grep -n "^packages" -A3 dev/workspace/context/tree.md | head
+echo "--- history carried:"; git log --oneline --follow -- packages/drafthorse/skills/drafthorse/SKILL.md | wc -l
+git status --short | grep -v "^R " 
+Description: Validate plugins, sweep stale refs, regenerate tree
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -n "packages\|tree" dev/workspace/workspace-config.yml | head -20; grep -c "packages" dev/workspace/context/tree.md
+Description: Check tree config covers packages/
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; sed -n 156,190p dev/workspace/workspace-config.yml
+Description: Read tree config block
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+sed -i '' 's#^      - extensions$#      - extensions\n      - packages#' dev/workspace/workspace-config.yml
+dev-workspace tree 2>&1 | tail -1; grep -c "^packages" dev/workspace/context/tree.md
+git add packages plugins/agent-tools plugins/classroom extensions/skills/corpus-sweep/profiles/drafthorse/profile.yml extensions/skills/drafthorse extensions/agents/drafthorse-saddler.md extensions/rules/DraftHorse.md extensions/skills/classroom extensions/agents/course-researcher.md docs/drafthorse .claude-plugin/marketplace.json .claude/CLAUDE.md .claude/rules/versioning.md 2>&1
+git status --short | grep -v "^R  \|^A  \|^D  \|^M  " ; echo "--- staged summary:"; git diff --cached --stat | tail -1
+Description: Add packages/ to tree config, stage the move
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Staging for two commits (drafthorse package; classroom + config), then committing.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+git reset -q
+# commit 1: drafthorse package
+git add packages/drafthorse extensions/skills/drafthorse extensions/agents/drafthorse-saddler.md extensions/rules/DraftHorse.md docs/drafthorse plugins/agent-tools extensions/skills/corpus-sweep/profiles/drafthorse/profile.yml
+git commit -q -F- <<'EOF'
+♻️ refactor(drafthorse): promote to packages/drafthorse as its own plugin
+
+Move the DraftHorse skill, saddler agent, rule stub and framework docs
+into a self-contained package. agent-tools keeps corpus-sweep and
+declares drafthorse as a dependency; the sweep profile's authority
+paths follow the docs.
+
+Claude-Session: https://claude.ai/code/session_01557D2hsnU4AWTd6t994JzW
+EOF
+# commit 2: classroom + marketplace/config
+git add packages/classroom plugins/classroom extensions/skills/classroom extensions/agents/course-researcher.md .claude-plugin/marketplace.json .claude/CLAUDE.md .claude/rules/versioning.md dev/workspace/workspace-config.yml
+git commit -q -F- <<'EOF'
+♻️ refactor(classroom): promote to packages/classroom; register packages tier
+
+Classroom owns its skill and agent in-tree (symlinks replaced by the
+files). Marketplace, versioning config, CLAUDE.md and the tree config
+learn the packages/ tier.
+
+Claude-Session: https://claude.ai/code/session_01557D2hsnU4AWTd6t994JzW
+EOF
+git status --short; git log --oneline -3; echo "--- history follow:"; git log --oneline --follow -- packages/drafthorse/skills/drafthorse/SKILL.md | wc -l; git log --oneline --follow -- packages/classroom/skills/classroom/SKILL.md | wc -l
+Description: Commit drafthorse package, then classroom package and config
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: dev-workspace push 2>&1 | tail -2 && dev-workspace merge --check 2>&1 | tail -25
+Description: Push branch and run merge preflight
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: dev-workspace archive 2>&1 | tail -4 && dev-workspace merge --local 2>&1 | tail -8 && git branch --show-current && dev-workspace push 2>&1 | tail -2
+Description: Archive workspace, merge locally to main, push main
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/.claude/projects/-Users-dylangraham-Projects-agent-library/memory && grep -ln "agent-tools:drafthorse\|plugins/classroom\|docs/drafthorse" *.md; cat > packages-tier-ownership-rule.md <<'EOF'
+---
+name: packages-tier-ownership-rule
+description: packages/ holds self-contained plugins (drafthorse, classroom); no symlinks or citations out, so filter-repo extraction stays a one-hour job
+metadata:
+  type: project
+---
+
+Since 2026-08-27 the repo has a `packages/` tier beside `plugins/`+`extensions/`. `packages/drafthorse` (skill, saddler agent, rule stub, framework docs) and `packages/classroom` own their files outright; agent-tools keeps corpus-sweep and depends on `drafthorse`. Invocation ids moved: `drafthorse:drafthorse`, `drafthorse:drafthorse-saddler`.
+
+**Why:** extraction to separate repos was rejected (breaks single-checkout worktrees and the corpus-sweep loop); the tier keeps repos-on-demand possible via `git filter-repo --path packages/<name>`.
+
+**How to apply:** never add a symlink or a repo-relative citation that points out of a package; promote a grab-bag skill to a package only when it earns tests/orchestration of its own. See [[versioning-skill-workflow]].
+EOF
+echo "- [Packages tier ownership rule](packages-tier-ownership-rule.md) — packages/ plugins own their files; no symlinks/citations out; ids now drafthorse:drafthorse, drafthorse:drafthorse-saddler" >> MEMORY.md
+Description: Save memory of the packages tier rule
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Done and merged to main. Recap:
+
+## What changed (on `main`, pushed; commits `4cfa082`, `68109e8`, merge `9321f0a`)
+
+- `packages/drafthorse/` — skill, `drafthorse-saddler` agent, `DraftHorse.md` rule stub, `docs/framework/` + `drafthorse-spec-check.md`, new `plugin.json` (v0.8.0), `CHANGELOG.md` (agent-tools 0.1.0–0.7.0 entries carried over), `README.md` stating the ownership rule. Three in-package citations repointed.
+- `packages/classroom/` — whole plugin moved; skill + `course-researcher` agent are now real files (symlinks gone).
+- `plugins/agent-tools` — corpus-sweep only; `"dependencies": ["drafthorse"]`; sweep profile authority paths → `packages/drafthorse/...`, `search_paths: extensions, packages`.
+- `marketplace.json` — new `drafthorse` entry; classroom source → `./packages/classroom`.
+- `.claude/rules/versioning.md` — `drafthorse` unit added, classroom paths updated, packages path-resolution note. `CLAUDE.md` documents the tier. Tree config includes `packages/`.
+- `extensions/skills/artifact-suite/` (untracked `__pycache__` only) is in `git stash` "pycache leftovers" — drop it with `git stash drop` when convenient.
+
+## Verified
+
+- `find packages -type l` → none; no outward `extensions/`/`docs/drafthorse` refs in packages.
+- `claude plugin validate` passes for drafthorse, classroom, agent-tools, marketplace.
+- `git log --follow` carries history (17 commits on drafthorse SKILL.md, 22 on classroom).
+- Workspace archived; branch `packages-tier` merged `--local`.
+
+## Left for you (gated skills, need your approvals)
+
+- `/dev-tools:versioning` ×3: `drafthorse` 0.8.0, `classroom` 0.6.0, `agent-tools` minor bump (Removed: drafthorse skill/saddler → dependency).
+- After release: `claude plugin marketplace update`, reinstall `agent-tools` and confirm it pulls `drafthorse`; reinstall `classroom`.
+- Invocation ids now `drafthorse:drafthorse` / `drafthorse:drafthorse-saddler`.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+wow these are great.  `packages/` makes sense, most of these plugins call in a single skill or asset. but these package them all up into a congruent unit so they can be managed as a whole. Im happy with this resolution.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Good. State is clean on `main`; nothing pending from my side except the three releases (`/dev-tools:versioning` for drafthorse, classroom, agent-tools) whenever you want to cut them, and `git stash drop` for the pycache leftovers.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+lets cut the releases /dev-tools:versioning
+
+------------------------------------------------------------
+
+[SKILL TOOL]
+Skill: dev-tools:versioning
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Preflight passes (clean tree, `main`, gh authed). Bare invocation → surveying all five units.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+for u in agent-tools chat-tools dev-tools; do echo "=== $u"; for l in $(find plugins/$u -type l); do echo "$l -> $(readlink $l)"; done; done
+echo "=== tags"; for p in agent-tools chat-tools classroom drafthorse dev-tools; do echo "$p: $(git tag -l "$p/v*" --sort=-version:refname | head -1)"; done
+Description: Resolve unit symlinks and latest tags
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+echo "=== agent-tools"; git ls-files --error-unmatch plugins/agent-tools extensions/skills/corpus-sweep >/dev/null && git log agent-tools/v0.7.0..HEAD --oneline -- plugins/agent-tools extensions/skills/corpus-sweep
+echo "=== chat-tools"; git ls-files --error-unmatch plugins/chat-tools extensions/agents/doc-reviewer.md extensions/skills/markdown extensions/skills/magic-reply >/dev/null && git log chat-tools/v2.1.2..HEAD --oneline -- plugins/chat-tools extensions/agents/doc-reviewer.md extensions/skills/markdown extensions/skills/magic-reply
+echo "=== classroom"; git ls-files --error-unmatch packages/classroom >/dev/null && git log classroom/v0.5.0..HEAD --oneline -- packages/classroom
+echo "=== drafthorse (first release under new tag; prior history under agent-tools)"; git ls-files --error-unmatch packages/drafthorse >/dev/null && git log agent-tools/v0.7.0..HEAD --oneline -- packages/drafthorse
+echo "=== dev-tools"; git ls-files --error-unmatch plugins/dev-tools extensions/agents/breaking-change-detector.md extensions/agents/git-robot.md extensions/skills/git/agent-switch extensions/skills/git/agent-push extensions/skills/git-box extensions/skills/git/agent-commit extensions/skills/versioning >/dev/null && git log dev-tools/v0.10.0..HEAD --oneline -- plugins/dev-tools extensions/agents/breaking-change-detector.md extensions/agents/git-robot.md extensions/skills/git/agent-switch extensions/skills/git/agent-push extensions/skills/git-box extensions/skills/git/agent-commit extensions/skills/versioning
+echo "=== classroom diffstat"; git diff classroom/v0.5.0..HEAD --stat -M -- packages/classroom plugins/classroom extensions/skills/classroom | tail -3
+echo "=== manifests"; grep version packages/drafthorse/.claude-plugin/plugin.json packages/classroom/.claude-plugin/plugin.json plugins/agent-tools/.claude-plugin/plugin.json
+Description: Compute commit ranges for every unit
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Survey: chat-tools and dev-tools have nothing to release. Three units have commits; running the breaking-change scan on agent-tools (a skill left the plugin).
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+While that runs, checking the classroom changelog head and whether agent-tools' changelog ever recorded corpus-sweep.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; sed -n 8,14p packages/classroom/CHANGELOG.md; echo ---; git log -1 --format='%ci %s' agent-tools/v0.7.0; git log -1 --format='%ci %s' 25dac68; grep -c corpus plugins/agent-tools/CHANGELOG.md
+Description: Check classroom changelog and corpus-sweep release status
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Corpus-sweep landed after v0.7.0 — it's unreleased, so agent-tools' bump carries it too. Waiting on the scan before proposing.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+<task-notification>
+<task-id>a8d506fc6ab8e1f48</task-id>
+<tool-use-id>toolu_01YYh3bpWi7htqjF4PPWj63y</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/e88e7b00-f50d-4e8f-8ea8-ebf375b44063/tasks/a8d506fc6ab8e1f48.output</output-file>
+<status>completed</status>
+<summary>Agent "Scan agent-tools for breaking changes" finished</summary>
+<note>A task-notification fires each time this agent stops with no live background children of its own. The user can send it another message and resume it, so the same task-id may notify more than once.</note>
+<result>## Report
+
+**Range:** `agent-tools/v0.7.0..HEAD`
+**Paths:** `plugins/agent-tools`, `extensions/skills/corpus-sweep`
+**Version:** 0.7.0 (pre-1.0)
+
+Both paths resolved against the repo root and produced changes; nothing to escalate as a broken scope.
+
+```
+VERDICT: breaking
+BUMP FLOOR: minor
+CONFIDENCE: confident
+
+SURFACES EXAMINED:
+- plugins/agent-tools/.claude-plugin/plugin.json (manifest: description, dependencies)
+- plugins/agent-tools/skills/drafthorse (symlink, removed)
+- plugins/agent-tools/agents/drafthorse-saddler.md (symlink, removed)
+- plugins/agent-tools/skills/corpus-sweep (symlink, new)
+- extensions/skills/corpus-sweep/SKILL.md (new skill: invocation, allowed-tools, commands)
+- extensions/skills/corpus-sweep/assets/manifest-template.yml, review-template.html (new templates)
+- extensions/skills/corpus-sweep/profiles/drafthorse/* (new profile format: profile.yml, briefs, audit.js, migrate.js)
+- extensions/skills/corpus-sweep/references/workflow-stalls.md (new reference)
+
+FINDINGS:
+1. [breaking] plugins/agent-tools/skills/drafthorse (symlink deleted)
+   Class: Names invoked by a user or another agent — skill namespace/slash-command path.
+   Before: symlinked into agent-tools, invoked as `/agent-tools:drafthorse` (plugin-namespaced per Claude Code's `plugin-name:skill-name` rule).
+   After: symlink removed; the skill no longer resolves under the agent-tools namespace at all.
+   Impact: a user who invoked `/agent-tools:drafthorse` must switch to whatever command the new `drafthorse` plugin exposes. Declaring `drafthorse` as a dependency (see finding 4) auto-installs the functionality, but it does not preserve the old command path — the namespace prefix changes with the plugin.
+
+2. [breaking] plugins/agent-tools/agents/drafthorse-saddler.md (symlink deleted)
+   Class: Names invoked by a user or another agent — agent namespace.
+   Before: symlinked into agent-tools; referenced as an agent-tools-scoped agent.
+   After: symlink removed; agent no longer present under agent-tools.
+   Impact: any Task invocation, hook, or documentation that names `drafthorse-saddler` under the agent-tools plugin must be repointed to wherever the `drafthorse` plugin now exposes it.
+
+3. [additive] extensions/skills/corpus-sweep/** (entirely new files)
+   Class: New contract surfaces — new user-invoked skill (`disable-model-invocation: true`, invoked as `/agent-tools:corpus-sweep`), new templates users author against (`manifest-template.yml`, `review-template.html`), new profile schema (`profiles/drafthorse/profile.yml` + briefs + `audit.js`/`migrate.js`).
+   Before: did not exist.
+   After: new skill and profile format, additive alongside everything else.
+   Impact: none for existing users — nothing prior removed or reshaped.
+
+4. [additive] plugins/agent-tools/.claude-plugin/plugin.json — `dependencies` field added
+   Class: Persisted format — manifest schema field the harness acts on.
+   Before: no `dependencies` field.
+   After: `"dependencies": ["drafthorse"]`.
+   Impact: on next install/enable/auto-update, Claude Code auto-installs and enables the `drafthorse` plugin. No manual install step forced on the user, but this does not restore the old `agent-tools:drafthorse*` names (findings 1–2).
+
+5. [internal] plugins/agent-tools/.claude-plugin/plugin.json — `description` field changed
+   Class: revision-cost (plugin manifest `description` is UI display text only; it is not the skill/agent frontmatter description used for model-invocation matching).
+   Before: "Tools for building agent harness extensions; DraftHorse skill builder"
+   After: "Tools for maintaining agent harness extensions; corpus sweeper for DraftHorse document sets"
+   Impact: tells the user something new about the plugin's scope; forces no change.
+
+UNCERTAIN: none.
+
+MESSAGE DISCREPANCIES:
+- 4cfa082 "♻️ refactor(drafthorse): promote to packages/drafthorse as its own plugin" is typed as a refactor, but it removes the `drafthorse` skill and `drafthorse-saddler` agent from the agent-tools namespace — a breaking change to the invocation surface for existing agent-tools users, not an internal reshuffle. The dependency declaration mitigates the functional loss but not the name change.
+- 25dac68 "feat(corpus-sweep): profile-driven corpus sweep skill" — accurately typed; matches the additive new-skill diff.
+```
+
+Findings 1 and 2 set the verdict and floor; version is pre-1.0, so breaking floors at **minor**, not major.</result>
+<usage><subagent_tokens>39529</subagent_tokens><tool_uses>6</tool_uses><duration_ms>100059</duration_ms></usage>
+</task-notification>
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Scan done. Proposals for the three units with changes (chat-tools, dev-tools: nothing to release):
+
+**agent-tools 0.7.0 → 0.8.0 (minor)**
+- `25dac68 feat(corpus-sweep)` → minor (Added); `4cfa082 refactor(drafthorse)` → scan verdict **breaking** (skill/agent left the namespace) → floor minor (pre-1.0). Scan ran, confident, no uncertain findings; flagged the refactor commit as under-typed.
+- Changelog — Added: `corpus-sweep` skill (profile-driven sweep of a document corpus after a spec change, with independent audit). Removed: `drafthorse` skill and `drafthorse-saddler` agent, now the `drafthorse` plugin, declared as a dependency and auto-installed; invoke as `/drafthorse:drafthorse` and `drafthorse:drafthorse-saddler`.
+
+**drafthorse — first release under `drafthorse/v*`, baseline 0.8.0** (scan skipped: first release)
+- Changelog 0.8.0 — Changed: ships as its own plugin `drafthorse` (previously inside agent-tools ≤0.7.0); framework docs and spec-check relocated into the package; invocation ids `/drafthorse:drafthorse`, `drafthorse:drafthorse-saddler`.
+
+**classroom 0.5.0 → 0.5.1 (patch)** per mapping (`refactor` only; ids unchanged, manifest unchanged, no contract content edits — scan skipped). The plan said 0.6.0; mapping says patch.
+- Changelog — Changed: plugin relocated to `packages/classroom`, owning its skill and agent in-tree; no user-facing change.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Executing drafthorse first. Writing the release notes files for all three now (independent), then running releases sequentially.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/e88e7b00-f50d-4e8f-8ea8-ebf375b44063/scratchpad/versioning-drafthorse-0.8.0.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/e88e7b00-f50d-4e8f-8ea8-ebf375b44063/scratchpad/versioning-agent-tools-0.8.0.md
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: /private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/e88e7b00-f50d-4e8f-8ea8-ebf375b44063/scratchpad/versioning-classroom-0.5.1.md
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/e88e7b00-f50d-4e8f-8ea8-ebf375b44063/scratchpad
+set -e
+# manifest already 0.8.0; insert changelog entry after [Unreleased]
+python3 - "$S/versioning-drafthorse-0.8.0.md" packages/drafthorse/CHANGELOG.md <<'EOF'
+import sys,pathlib
+entry=pathlib.Path(sys.argv[1]).read_text().rstrip()+"\n"
+p=pathlib.Path(sys.argv[2]); s=p.read_text()
+s=s.replace("## [Unreleased]\n\n","## [Unreleased]\n\n"+entry+"\n",1); p.write_text(s)
+EOF
+git add packages/drafthorse/.claude-plugin/plugin.json packages/drafthorse/CHANGELOG.md
+git commit -q -m "chore(release): drafthorse v0.8.0"
+git tag -a drafthorse/v0.8.0 -F "$S/versioning-drafthorse-0.8.0.md"
+git push -q --follow-tags
+gh release create drafthorse/v0.8.0 --title "drafthorse v0.8.0" --notes-file "$S/versioning-drafthorse-0.8.0.md"
+echo "--- verify"; grep version packages/drafthorse/.claude-plugin/plugin.json; sed -n 8,12p packages/drafthorse/CHANGELOG.md; git tag -l drafthorse/v0.8.0; git ls-remote --tags origin refs/tags/drafthorse/v0.8.0; gh release view drafthorse/v0.8.0 --json tagName -q .tagName; git status --porcelain --untracked-files=no
+Description: Release drafthorse v0.8.0: changelog, commit, tag, push, GitHub release, verify
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+drafthorse v0.8.0 verified. Now agent-tools.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/e88e7b00-f50d-4e8f-8ea8-ebf375b44063/scratchpad
+set -e
+sed -i '' 's/"version": "0.7.0"/"version": "0.8.0"/' plugins/agent-tools/.claude-plugin/plugin.json
+python3 - "$S/versioning-agent-tools-0.8.0.md" plugins/agent-tools/CHANGELOG.md <<'EOF'
+import sys,pathlib
+entry=pathlib.Path(sys.argv[1]).read_text().rstrip()+"\n"
+p=pathlib.Path(sys.argv[2]); s=p.read_text()
+s=s.replace("## [Unreleased]\n\n","## [Unreleased]\n\n"+entry+"\n",1); p.write_text(s)
+EOF
+git add plugins/agent-tools/.claude-plugin/plugin.json plugins/agent-tools/CHANGELOG.md
+git commit -q -m "chore(release): agent-tools v0.8.0"
+git tag -a agent-tools/v0.8.0 -F "$S/versioning-agent-tools-0.8.0.md"
+git push -q --follow-tags
+gh release create agent-tools/v0.8.0 --title "agent-tools v0.8.0" --notes-file "$S/versioning-agent-tools-0.8.0.md"
+echo "--- verify"; grep version plugins/agent-tools/.claude-plugin/plugin.json; sed -n 10,10p plugins/agent-tools/CHANGELOG.md; git tag -l agent-tools/v0.8.0; git ls-remote --tags origin refs/tags/agent-tools/v0.8.0 | cut -f2; gh release view agent-tools/v0.8.0 --json tagName -q .tagName; git status --porcelain --untracked-files=no
+Description: Release agent-tools v0.8.0: manifest, changelog, commit, tag, push, GitHub release, verify
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+agent-tools v0.8.0 verified. Now classroom.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library
+S=/private/tmp/claude-501/-Users-dylangraham-Projects-agent-library/e88e7b00-f50d-4e8f-8ea8-ebf375b44063/scratchpad
+set -e
+sed -i '' 's/"version": "0.5.0"/"version": "0.5.1"/' packages/classroom/.claude-plugin/plugin.json
+python3 - "$S/versioning-classroom-0.5.1.md" packages/classroom/CHANGELOG.md <<'EOF'
+import sys,pathlib
+entry=pathlib.Path(sys.argv[1]).read_text().rstrip()+"\n"
+p=pathlib.Path(sys.argv[2]); s=p.read_text()
+s=s.replace("## [Unreleased]\n\n","## [Unreleased]\n\n"+entry+"\n",1); p.write_text(s)
+EOF
+git add packages/classroom/.claude-plugin/plugin.json packages/classroom/CHANGELOG.md
+git commit -q -m "chore(release): classroom v0.5.1"
+git tag -a classroom/v0.5.1 -F "$S/versioning-classroom-0.5.1.md"
+git push -q --follow-tags
+gh release create classroom/v0.5.1 --title "classroom v0.5.1" --notes-file "$S/versioning-classroom-0.5.1.md"
+echo "--- verify"; grep '"version"' packages/classroom/.claude-plugin/plugin.json; sed -n 10,10p packages/classroom/CHANGELOG.md; git tag -l classroom/v0.5.1; git ls-remote --tags origin refs/tags/classroom/v0.5.1 | cut -f2; gh release view classroom/v0.5.1 --json tagName -q .tagName; git status --porcelain --untracked-files=no
+Description: Release classroom v0.5.1: manifest, changelog, commit, tag, push, GitHub release, verify
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+All three released and verified; tree clean.
+
+## Run summary
+
+- **drafthorse v0.8.0** (first release under `drafthorse/v*`) — manifest `packages/drafthorse/.claude-plugin/plugin.json`, changelog entry dated 2026-08-27, tag pushed, GitHub release: https://github.com/dilberryhoundog/agent-library/releases/tag/drafthorse/v0.8.0
+- **agent-tools v0.8.0** (minor; scan verdict breaking → floor minor pre-1.0) — Added corpus-sweep (was unreleased since 0.7.0), Removed drafthorse skill/agent → dependency. https://github.com/dilberryhoundog/agent-library/releases/tag/agent-tools/v0.8.0
+- **classroom v0.5.1** (patch, relocation only) — https://github.com/dilberryhoundog/agent-library/releases/tag/classroom/v0.5.1
+- **chat-tools** (2.1.2), **dev-tools** (0.10.0) — nothing to release.
+
+Next for you: `claude plugin marketplace update DBHD-Plugins`, then update/install `agent-tools` and confirm it pulls `drafthorse` as a dependency; update `classroom`. Old ids `agent-tools:drafthorse*` stop resolving on that update.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok thanks , something huge incoming. 
+`dev-workspace` is stable, and effective. but i never liked the name because it is largely an agent facing product rather than a developer one. without agents it is not needed. 
+It does have git underpinnings wich sais "developer" but the git setup is universally helpful. atleast ive found it to be. It is also claude code fixed. uncompatible with claude.ai wich is an important distinction.
+Also the name is bland and boring, and clashes with `.dev` commonly found for more developer based stuff. it also very contained to myself i don't know of anybody else using it publically.
+
+This converges with my discovery of the name "flightdeck" I really like it and was going to name a html prompt generator and some sub views. But... dev-workspace is probably best defined as advanced custom tooling for agentic work. The initial spark of the idea was a place to store, shape and deliver context across sessions, without bloat and cross contamination.
+
+I think I should rename `dev-workspace` to `FlightDeck` it still keeps all the functionality from before. then I should nest an `orchestration` folder directly under it ad do the same isolation as workspaces 
+
+your thoughts?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Quick check of what `flightdeck` already means in this repo before I weigh in.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; head -30 docs/flightdeck/README.md; echo ---; head -20 docs/flightdeck/terms.md; echo ---; ls ~/Projects/dev-workspace/plugins ~/Projects/dev-workspace/dev 2>/dev/null; grep -rl "dev-workspace" ~/Projects/dev-workspace --include=*.md --include=*.sh --include=*.rb --include=*.json --include=*.yml -l 2>/dev/null | grep -v node_modules | wc -l
+Description: Read existing flightdeck docs and gauge dev-workspace rename surface
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; ls docs; find . -path ./dev -prune -o -iname "*flightdeck*" -print | head; ls dev/branches | head -20; ls ~/Projects/dev-workspace/plugins/dev-workspace; grep -rIl "dev-workspace" ~/Projects/dev-workspace --exclude-dir=node_modules --exclude-dir=.git | wc -l; grep -rIoh "dev-workspace\|dev_workspace\|DEV_WORKSPACE" ~/Projects/dev-workspace --exclude-dir=node_modules --exclude-dir=.git | sort | uniq -c
+Description: Locate flightdeck docs and count dev-workspace name occurrences
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; grep -rIl -i flightdeck dev/branches | head; git branch -a | grep -i "artifact"; git show artifacts:docs/flightdeck/README.md 2>/dev/null | head -25 || git show origin/artifacts:docs/flightdeck/README.md 2>/dev/null | head -25
+Description: Recover flightdeck docs from the artifacts branch
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Thoughts, in order of weight.
+
+## 1. Rename — yes, but resolve the name collision first
+
+FlightDeck already has a defined meaning on the `artifacts` branch: "a single self-contained HTML file an agent builds for a person to operate" with three profiles (instrument, readout, demo). If dev-workspace also becomes FlightDeck you've got exactly the name-mixing you flagged last turn.
+
+The fix is a hierarchy, and I think the metaphor actually fits the system *better* than a single page: a flight deck is where the crew operates from. So:
+
+- **FlightDeck** = the product: context storage, shaping and delivery across sessions (workspaces, archives, orchestration, CLI).
+- **instrument / readout / demo** = the HTML surfaces FlightDeck delivers — already the profile names, so the family loses only the word "flightdeck" as a per-document noun ("build a review readout", "build a review instrument").
+- **workspace**, **orchestration** = the two isolation scopes inside the deck.
+
+Rewrite `terms.md` to that hierarchy before renaming anything; the HTML skill hasn't shipped, so this is the cheapest moment it will ever be.
+
+## 2. Blast radius of the rename
+
+- 1,376 occurrences across 80 files in the dev-workspace repo; CLI binary, plugin name, hook config, skill ids (`dev-workspace:dev-workspace`, `:discover`, `:research`…), sibling plugin `dev-deploy`.
+- **Consumer repos** are the real cost: every project has `dev/workspace`, `dev/branches`, `.claude/rules/dev-workspace_*.md`, `workspace-config.yml`, and CLAUDE.md prose. Recommend the product/CLI renames first and keep the on-disk `dev/` path for now, shipped later via a `flightdeck migrate` command that moves and rewrites — don't do both at once.
+- Short alias: `dw` → `fd` clashes with the `fd` find tool. `deck` is clean and reads well (`deck sync`, `deck merge --check`).
+- Ship a `dev-workspace` shim that prints the new name and forwards, one release, then drop.
+- Nobody else uses it publicly → no external breakage. Rename now.
+
+## 3. `.dev` / "developer" framing
+
+Agree it's misnamed. Worth being honest in the README, though: git *is* the isolation engine, so "agentic context tooling built on git" is the pitch. The claude.ai incompatibility is a separate problem the rename doesn't touch — hooks and CLI are what pin it to CC; the HTML surfaces are the part that could travel.
+
+## 4. `orchestration/` — yes, define its isolation before building
+
+Workspace isolation = a branch + protected paths + archive. A run is different: ephemeral, many-at-once, produces results not commits. Decide up front: is a run a worktree (fits Workflow/agent worktrees), a subfolder under `dev/orchestration/<run>/` with briefs/fixtures/results, or both (worktree for execution, folder for the record)? I'd take both, with `archive` semantics mirroring workspaces so runs are searchable project-wide like `dev/branches/`. It also gives the `packages/` tier its test harness home without a `tests/` folder per package leaking into plugin installs.
+
+## Sequencing
+
+1. Terms hierarchy (FlightDeck / instrument / readout / demo / workspace / orchestration) written down.
+2. Rename repo, plugin, CLI (+ `deck` alias, `dev-workspace` shim). Consumers keep `dev/`.
+3. Orchestration scope designed and added.
+4. `flightdeck migrate` for on-disk paths, when the shim is dropped.
+
+Want me to draft the terms hierarchy doc as the first artifact?
+
+------------------------------------------------------------
+
+[USER]    💭: none
+1. It hadn't settled and didn't feel right anyway.
+2. `flight`, deck and fdeck both "taken" of sorts. keeps 'decks' isolated as a term.
+3. no that **was** the pitch. As time goes on, it is morphing. Ive been HITL with CC since day one and this was my "workspace" for that. now that orchestration is here I need a home for that too. all the stop hooks and check wrappers don't really fit with an agent library of generic skills and agents. I see it more as "advanced agentic workspace and orchestration platform" wich fits 'flightdeck' really well.
+4. orchestration/runs/ is scoped to branches and is a simple setting in workspace.yaml that auto commits with 'flight commit'. the others, templates/ etc merge both ways.
+
+This seems huge for this project. It was initially tooling for interactive sessions. now it is getting a new name and encompassing orchestration tooling also. core features...
+- CLI to enable agentic usage of git based management.
+- streamlined git based management, like syncing, archiving, merging, updating.
+- agentic deploy system to streamline kamal deploying
+- context isolation workspaces for masively increased relevance and a "place for everything claude generates"
+- bespoke tools like, conversation capturing, tree overview of project without searching, reply shaping tool.
+- Archived workspaces for global referencing.
+- repo setup for individual or forked repos.
+Now it will get.
+- visual orchestration decks; specs, plans, results etc.
+- visual spec and 'takeoff prompt' building
+- run versioning and streamlining
+- orchestration infrastructure
+- verification tooling and location per repo
+- helper skills
+
+It lands huh?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+It lands. The through-line is intact: "a place for everything the agent generates, isolated by scope, git as the engine." Orchestration is just a new scope on that spine, and "advanced agentic workspace and orchestration platform" is a sentence someone else could read and understand — dev-workspace never had one.
+
+Where I'd push:
+
+- **Vocabulary is now the product.** FlightDeck (platform), `flight` (CLI), deck (visual HTML page), workspace (branch scope), run (orchestration scope). Each word owns one thing, nothing overlaps — that's good, and it's why `flight` as the verb works: `flight sync`, `flight commit`, `flight run`. Write these five down before anything else; every doc, skill and hook name follows from them.
+- **Modularity is the risk.** The feature list is five products: git core, workspaces, orchestration, decks, deploy. If they stay one plugin, the stop hooks and check wrappers that fit orchestration will load into every HITL session, and kamal deploy sits next to prompt builders. Structure the repo so each is a layer that can be installed alone (core required, the rest optional) — you already proved that shape works with `packages/`. It also answers claude.ai partially: decks and the visual spec/prompt builder are the layers that could run there.
+- **`orchestration/runs/` branch-scoped + auto-commit via `flight commit`, everything else bidirectional** — right split. Only caveat: runs generate bulk (transcripts, fixtures, results); decide early what gets committed vs. gitignored-but-archived, or history balloons.
+- **What stays in agent-library**: generic skills and packages (drafthorse, classroom). FlightDeck should *consume* drafthorse, not host it. The one thing to move out of here is anything that's really a FlightDeck deck — the `artifacts` branch work and the prompt-builder artifact.
+- **Scope discipline**: "run versioning", "verification tooling", "helper skills" are each a workspace's worth. Ship the rename + terms + orchestration scope as v1 of the new name; the visual layer second; everything else as it earns a workspace.
+
+One thing to settle: does a `flight` mean anything as a noun (a session? a run?), or is it purely the CLI verb? If it's a noun too it needs a definition alongside the other four.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+flight is the cli verb.
+
+Modularity is already there. `DBHD-dev-workspace` is a marketplace shipping two plugins; `dev-workspace` and `dev-deploy`. these simply translate into `workspace`, `orchestrate` & `deploy` in `DBHD-FlightDeck`.
+
+awesome quirk with `dw commit` every commit sais "📝 Workspace files updated!" easy to skip. but on record.
+
+Im tossing up moving to `workspace/runs/` so that the "bulk" is conceptually handled like HITL bulk workspace context. that way archives stay as a workspace snapshot now with their runs included. and orchestrate can be pure merged global tools and records.
+
+drafthorse is tempting to integrate as a custom skill generator. fits the "agentic tooling" pattern. I also want to transfer it into a dynamic workflow based tool, so I can reuse the checks and be far more vigorous about converting and generating skills using the drafthorse method. 
+
+I will still have a general 'page-creator' skill the generates custom html static pages in the library as this is the universally compatible skill. But flightdeck panels (haha I found their name) are specialised visual tools. Im considering pinning them to a repo, so you open them per repo and have everything pre populated because the static file is relative to the data it needs to view. Also it can visually show me which project im configuring or looking at.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Reactions, point by point.
+
+**Plugins `workspace` / `orchestrate` / `deploy`** — clean. One check: plugin name becomes the skill namespace, so `workspace:sync`, `orchestrate:run`, `deploy:push` — read them aloud as ids before committing; they read well.
+
+**`workspace/runs/` over `orchestration/runs/`** — take it. Reasons it's the right call: a run is context a branch produced, same as a plan or a review; archives stay one snapshot per workspace with nothing missing; `flight commit` already knows the paths; and `orchestrate` becomes a plugin with no per-branch state — pure tools + global records, which is the cleaner boundary. The only thing to protect: runs are bulkier than HITL context, so give `runs/` its own ignore/prune rule in `workspace.yaml` (keep briefs + results, drop raw transcripts unless flagged) so archives don't carry gigabytes.
+
+**DraftHorse as a FlightDeck workflow** — fits, but keep the *framework* where it is and let FlightDeck consume it. Concretely: `packages/drafthorse` stays the spec, checker source, templates (the authority); `orchestrate` gains a workflow that drives it — convert/generate → saddler audit → fix loop → corpus-sweep, with the Workflow tool's adversarial-verify pattern on the checks. The pieces are already the right shape: `drafthorse-spec-check.md` is a checklist a workflow can fan out per check, and `corpus-sweep` already has the brief/audit/migrate scripts. That gives you rigour without forking the spec into a second home; FlightDeck depends on `drafthorse` like agent-tools does now.
+
+**Panels** — good name, distinct from decks and pages. Three-tier family: page (generic static HTML, universal, lives in the library), deck (FlightDeck visual document — spec, plan, result), panel (specialised tool pinned to a repo). Pinning per repo is the strong idea: a panel at `<repo>/dev/flightdeck/<panel>.html` reading relative data means zero setup, correct data by construction, and the repo identity on screen. Two things to settle: how a panel reads data from `file://` (browsers block fetch; either the agent inlines a data block on regeneration, or panels are served by a tiny local server from the CLI — `flight panel open`), and how a panel gets *updated* when its template changes (regenerate from template + data, never hand-edit the pinned file).
+
+**The `dw commit` quirk** — keep the emoji, change the message to say what it did: `📝 workspace: 3 files (plans, runs)` — still one-glance skippable, but the record is worth something when searching history.
+
+Net: the shape is right. The one decision that shapes the most code is the panel data path (inline vs served) — worth settling before the first panel is built.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+a few pushbacks...
+
+nope drafthorse will be a first class flightdeck citizen. corpus sweep updated the structure not the content, it was a response to an ugly HITL corpus update across many skills. but it can't live on like that. It needs an isolated spec update crew (bingo! another one, a name for the group of agents doing an orchestrated run) that runs in parallel with skills across the corpus. this is needed if drafthorse skills ever start distributing. I am going to significantly transform the process after learning orchestration best practices. individual step finish conditions will become literal red green deterministic. 
+
+three way split. page = any html artifact on CC or claude.ai (trigger word for skill) created on demand. panel = any prebuilt visual in the flightdeck eco-system. deck = customised spec / prompt generator pinned to a repo.
+
+nope dw commit simply grabs a line in workspace-config.yaml purely static. it works brilliantly as "ignore this unless you want to get bombarded with workspace changes" allows constant saving of all the bulk. im even considering a tool to combine a bunch of workspace commits into a single per workspace, before merging.
+
+Ive already got chrome importing and exporting JSON into static html files, but I have to click and select. Claude said this can be done raw if I stick to chrome/arc only, wich is a decent tradeoff.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+All taken.
+
+**DraftHorse in FlightDeck** — fair; if the process itself is being rebuilt around orchestration, the framework belongs with the platform. Then `packages/drafthorse` here becomes a staging home until the move, and agent-tools' dependency follows it to the FlightDeck marketplace (cross-marketplace deps need `allowCrossMarketplaceDependenciesOn` — or agent-tools just drops the dependency once it's gone).
+
+**Red/green finish conditions** is the big one. Today a condition is plain-English state judged by the executing agent; making it a deterministic check changes the spec's core contract, and it's exactly what lets a crew run unattended — a workflow can gate on it instead of trusting a self-report. Worth writing as a spec change first (what a condition may test: file exists, grep matches, script exit code, artifact approved-by-user), then the crew/sweep is built on it. That's also the point where corpus-sweep dies properly: the spec-update crew is a workflow over a corpus, gated by the new conditions.
+
+**Crew** — good word, and it fills the last gap: platform / flight / workspace / run / crew / page / panel / deck. The three-way split reads cleanly now — page is a trigger word for on-demand artefacts, panel is prebuilt ecosystem UI, deck is the repo-pinned spec/prompt generator.
+
+**`dw commit`** — understood, noise-by-design as a filter. The squash-before-merge tool is a one-liner (`git merge --squash` of the workspace commits, or `rebase -i` autosquash driven by the fixed message) and keeps main's history readable without losing the constant-save habit.
+
+**Chrome-only** — decent trade. If not already in use: the File System Access API (`showDirectoryPicker`) lets a panel take the repo directory *once*, persist the handle in IndexedDB, and re-read files on later opens with only a permission click — no per-file selects, and read *and* write both work. Chromium-only, which is the same trade you've already accepted.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok so instead of doing any work on this. you would be a great help if you serialized all MY OWN (important) conventions and decisions ive stated to you. create it as a decision and convention record page (html). allow me to edit any record and then export a full json doc with the changes updated dynamically. Use this page to give yourself a headstart on all the formatting and behind the scenes stuff you need... extensions/artifacts/prompt-builder/prompt-builder.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Reading the prompt-builder page for its structure, styling, and export mechanics first.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; wc -c extensions/artifacts/prompt-builder/prompt-builder.html; grep -n "<style\|</style\|<script\|</script\|function \|const .* = (\|localStorage\|download\|JSON\.\|showSaveFilePicker\|showOpenFilePicker\|--[a-z-]*:" extensions/artifacts/prompt-builder/prompt-builder.html | head -120
+Description: Map prompt-builder.html structure and mechanics
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; F=extensions/artifacts/prompt-builder/prompt-builder.html
+echo "=== head 1-20"; sed -n 1,20p $F
+echo "=== css 75-135"; sed -n 75,135p $F
+echo "=== markup 718-735"; sed -n 718,735p $F
+echo "=== markup 1583-1702"; sed -n 1583,1702p $F
+echo "=== save/export 1846-1990"; sed -n 1846,1990p $F
+Description: Read prompt-builder head, core CSS, body markup, and save/export code
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; F=extensions/artifacts/prompt-builder/prompt-builder.html
+sed -n 136,200p $F; echo "=== buttons"; grep -n "^\tbutton\|\.quiet\|\.ghost\|\.amber\|\.tiny\|data-tip\|\[data-tip\]" $F | head -20; echo "=== export fn"; grep -n "function exportLoadout\|function download\|Blob(\|createObjectURL\|showSaveFilePicker(" $F | head; N=$(grep -n "function download" $F | head -1 | cut -d: -f1); sed -n "${N},$((N+25))p" $F
+Description: Read button styles and export/download helper
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Building the page now — records = only your own stated decisions/conventions from this session, each editable in place, JSON export/import, and the prompt-builder's save-into-self mechanics.
+
+------------------------------------------------------------
+
+[WRITE TOOL]
+File: ~/Projects/agent-library/dev/workspace/artifacts/flightdeck-decision-record.html
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Quick sanity check: JSON block parses and the page loads without errors.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; F=dev/workspace/artifacts/flightdeck-decision-record.html
+python3 - "$F" <<'EOF'
+import sys,re,json
+s=open(sys.argv[1]).read()
+m=re.search(r'<script type="application/json" id="records">(.*?)</script>',s,re.S)
+d=json.loads(m.group(1)); print("records:",len(d["records"]),"areas:",len(d["areas"]))
+ids=[r["id"] for r in d["records"]]; assert len(ids)==len(set(ids)),"dup ids"
+print("areas used but unlisted:",{r["area"] for r in d["records"]}-set(d["areas"]))
+EOF
+node -e "const s=require('fs').readFileSync('$F','utf8');const js=s.split('<script>').pop().split('</script>')[0];new Function(js);console.log('script parses')"
+Description: Validate records JSON and script syntax
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Done — `dev/workspace/artifacts/flightdeck-decision-record.html`.
+
+**What's in it**
+- 28 records, 7 areas: agent-library (7), FlightDeck identity (4), vocabulary (4), structure (5), DraftHorse (3), visual tools (3), working conventions (2).
+- Each record: id, kind (decision/convention/term/question), status (decided/leaning/open/rejected), title, statement, why (only where you gave one), your quote verbatim, date, tags.
+- Only your statements; my suggestions you rejected are recorded as *rejected* with your words, not mine. Two marked *leaning* (runs under `workspace/runs/`, panels pinned to repo) and one *open* (squash workspace commits) — flip them when they settle.
+
+**Mechanics** (borrowed from prompt-builder)
+- Records live in a `<script type="application/json" id="records">` block at the top of the source; page renders from it.
+- Click any text to edit; status/kind are menus; Delete per card; + Record; filter + search.
+- Edits persist in localStorage keyed to the file's content (stale overlays are discarded automatically).
+- **Export JSON** → `decision-record-YYYY-MM-DD.json` (save picker in Chromium, download elsewhere). **Import** replaces the record. **Bind this file → Save into file** splices the block back into the HTML (Chromium only, handle remembered in IndexedDB). **Reset to file** drops browser edits.
+- Light/dark, same palette and fonts as prompt-builder; no network beyond the font link.
+
+Uncommitted — `dw commit` when you want it on record.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+Ok lets marvel at the word `crew` for a second...
+flight crew: fits flightdeck perfectly.
+crew = Individuals all working toward a common goal, has a leader, each has a particular role.
+pilot = the boss, the orchestrator (such a long word to write), the one that flys the thing.
+
+woowsers i might be about to coin a term here. I was asking web claude is the name for the "orchestrator pattern" he said it didn't have an alternative. the other pattern is HITL or "one shotting", this could be using a "flight crew" or "the flight crew pattern". I'll see if it sticks.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+It holds up better than most coined terms, because the mapping does work at every level rather than just the top:
+
+- **crew** — the agents of a run; common goal, a leader, one role each. That last clause is the one that matters: the orchestrator pattern's real content is *role separation with a single point of control*, and "crew" says that without a diagram.
+- **pilot** — the orchestrator. Short, unambiguous, and it names the *role* rather than the mechanism. "Pilot" also carries "the one accountable for the outcome," which "orchestrator" never did.
+- **flight** — a run under a pilot, which is why the CLI verb keeps feeling right even though you've said it's only a verb.
+- **crew pattern** vs **HITL / one-shot** — a clean three-way: human in the loop, single pass, or crew under a pilot.
+
+Where it could strain, so you know before it sticks:
+
+- Aviation has *co-pilot*, *ground crew*, *cabin crew*, *tower*. Tempting, but each one you adopt is a term you have to define. Pilot + crew is enough; resist the rest until a real thing needs a name (verification agents might genuinely be *ground crew*, though — checks before and after the flight).
+- "Pilot" collides with Copilot-brand noise and with "pilot project." Inside FlightDeck it's unambiguous; in the wild you'll say "the pilot agent" for a while.
+- Make the pattern definition tight and citeable in one sentence, or it won't travel: *a pilot decomposes a task, assigns roles to a crew, gates each role's finish on a deterministic check, and owns the merged result.* That last clause is what your red/green decision buys you, and it's what distinguishes the crew pattern from a bag of subagents.
+
+Want it on the record page as a term (pilot / crew / crew pattern)? One record, in your words above.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+oh man im leaning into this. the decks I will style to look like aviation control decks. panels will have red/green indicator lights, switches and dials.
+flight path = the process, where are we on the flight path?
+a 'flight' could easily be a run.
+flight grounded = failed run.
+flight plan = special plan to orchestrate the crew.
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Now the vocabulary is generating itself, which is the sign it's a real metaphor and not a coat of paint. Read-through:
+
+- **flight = a run** — this quietly overturns VO-01 ("flight is the CLI verb, nothing else"), but in the good direction: the CLI verb and the noun are the same word because *the CLI is what flies*. `flight plan`, `flight status`, `flight ground` read as commands *and* as nouns. Keep it; just update the record so the definition says both.
+- **flight plan** — the orchestration plan the pilot files before takeoff: crew, roles, route, checks. This is the artifact your "takeoff prompt" builder produces, so the deck that builds it is literally a flight-plan deck.
+- **flight path** — the process; "where are we on the flight path" is progress. One thing to fix early: path vs plan. Plan = what was filed; path = where the flight actually went. The diff between them is your run report.
+- **grounded** — failed, and also *held before takeoff* (checks failed). Both are useful; worth deciding whether grounded means "never took off" and something else means "failed in flight" (aborted? diverted?). Don't reach for these until a real state needs one.
+- **Red/green lights on panels** — this is the payoff of the deterministic-conditions decision: an indicator light is honest only if the thing behind it is binary. The visual and the spec change are the same decision seen from two sides.
+
+One caution on styling: aviation panels are a strong aesthetic, and the risk is skeuomorphism eating legibility — dials that look great but read worse than a number. Rule of thumb: lights and switches for *state* (binary, few), text and numbers for *values*, and keep the paper/ink base you already have so panels stay documents you can read at a glance.
+
+Terms to add to the record when you say so: flight (noun+verb), flight plan, flight path, grounded, pilot, crew, crew pattern.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+add a terms section with these as seperate entries, the core and the extras. I have more... Flight log, preflight checks. probably too much for now.
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: cd ~/Projects/agent-library; python3 - <<'EOF'
+import re,json,pathlib
+p=pathlib.Path("dev/workspace/artifacts/flightdeck-decision-record.html"); s=p.read_text()
+m=re.search(r'(<script type="application/json" id="records">\n)(.*?)(\n</script>)',s,re.S)
+d=json.loads(m.group(2))
+d["areas"].insert(3,"FlightDeck — terms: core"); d["areas"].insert(4,"FlightDeck — terms: extras")
+# VO-01 superseded
+for r in d["records"]:
+    if r["id"]=="VO-01":
+        r["status"]="rejected"; r["title"]="flight — CLI verb only (superseded)"
+        r["statement"]="Earlier position: `flight` is the CLI verb and carries no noun meaning. Superseded by TC-01: a flight is also a run, and the CLI verb is the same word because the CLI is what flies."
+D="2026-08-27"
+core=[
+ ("TC-01","flight","A run. Also the CLI verb (flight plan, flight status, flight commit) — noun and verb are the same word because the CLI is what flies.","a 'flight' could easily be a run."),
+ ("TC-02","pilot","The boss: the orchestrator, the one that flies the thing. A role, not a mechanism.","pilot = the boss, the orchestrator (such a long word to write), the one that flys the thing."),
+ ("TC-03","crew","Individuals all working toward a common goal; has a leader (the pilot); each has a particular role. The agents of a flight.","crew = Individuals all working toward a common goal, has a leader, each has a particular role."),
+ ("TC-04","the flight crew pattern","The name for the orchestrator pattern: a pilot and a crew, as distinct from HITL and one-shotting.","this could be using a \"flight crew\" or \"the flight crew pattern\". I'll see if it sticks."),
+ ("TC-05","flight plan","A special plan to orchestrate the crew — what is filed before takeoff.","flight plan = special plan to orchestrate the crew."),
+ ("TC-06","flight path","The process; where we are on the flight path is progress.","flight path = the process, where are we on the flight path?"),
+ ("TC-07","grounded","A failed flight.","flight grounded = failed run."),
+]
+extras=[
+ ("TE-01","flight log","Named, not yet defined.","Flight log"),
+ ("TE-02","preflight checks","Named, not yet defined.","preflight checks"),
+ ("TE-03","aviation-styled decks and panels","Decks styled to look like aviation control decks; panels carry red/green indicator lights, switches and dials.","the decks I will style to look like aviation control decks. panels will have red/green indicator lights, switches and dials."),
+]
+for i,t,st,src in core:
+    d["records"].append({"id":i,"area":"FlightDeck — terms: core","kind":"term","status":"decided","title":t,"statement":st,"why":"","source":src,"date":D,"tags":["vocabulary","aviation"]})
+for i,t,st,src in extras:
+    d["records"].append({"id":i,"area":"FlightDeck — terms: extras","kind":"term","status":"open" if i!="TE-03" else "leaning","title":t,"statement":st,"why":"","source":src,"date":D,"tags":["vocabulary","aviation"]})
+out=json.dumps(d,indent=2,ensure_ascii=False).replace("</","<\\/")
+p.write_text(s[:m.start(2)]+out+s[m.end(2):])
+print(len(d["records"]),"records")
+EOF
+grep -c '"id": "T' dev/workspace/artifacts/flightdeck-decision-record.html
+Description: Add core and extras term sections to the record page
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+Added. Record now 38 entries:
+
+- **FlightDeck — terms: core** (7, decided): flight (run + CLI verb), pilot, crew, the flight crew pattern, flight plan, flight path, grounded.
+- **FlightDeck — terms: extras** (3): flight log and preflight checks (named, not yet defined — *open*), aviation-styled decks/panels with red/green lights, switches, dials (*leaning*).
+- VO-01 ("flight is the CLI verb only") flipped to *rejected/superseded* pointing at TC-01, so the history of the change stays on record.
+
+Same file — reload it; browser edits you've made since are kept only if the JSON block hasn't changed, so if you'd already edited in-page, Export first, then Reset to file.
+
+------------------------------------------------------------
+
+[USER]    💭: none
+what is the name for when a plane has to go around again. aborted landing?
+
+------------------------------------------------------------
+
+[ASSISTANT 💬]
+**Go-around** — the standard term. The pilot aborts the approach, climbs, and re-enters the pattern for another attempt. "Missed approach" is the formal ATC/IFR name for the same manoeuvre (the published procedure the pilot flies after going around). "Rejected landing" / "balked landing" are the rarer variants, usually when it happens after touchdown was imminent or wheels already touched.
+
+Maps cleanly to a run: a **go-around** is a retry from a checkpoint — the flight isn't grounded, it just didn't meet the landing criteria (a red light on the finish check) and loops back for another approach. Nice pair with grounded: grounded = never/no longer flying; go-around = still flying, trying again.
+
+------------------------------------------------------------
+
+[USER] [SLASH COMMAND]
+/dev-workspace:conversation-capture unknown
+
+------------------------------------------------------------
+
+[BASH TOOL]
+Command: ruby ~/.claude/plugins/cache/DBHD-dev-workspace/dev-workspace/1.1.0/skills/conversation-capture/scripts/conversation-capture e88e7b00-f50d-4e8f-8ea8-ebf375b44063
+Description: Capture session transcript
+
+------------------------------------------------------------

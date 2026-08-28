@@ -1,0 +1,965 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision Record</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D6B64'/%3E%3Ctext x='16' y='22.5' text-anchor='middle' font-family='Georgia,serif' font-size='19' font-weight='700' fill='%23F4F6F6'%3ED%3C/text%3E%3C/svg%3E">
+
+<!-- Runs before first paint so a remembered theme does not flash the default one. -->
+<script>
+try { var savedTheme = localStorage.getItem("decision-record.theme"); if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme); } catch (e) { /* storage blocked; the system theme applies */ }
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+	:root {
+		--paper:        #F4F6F6;
+		--surface:      #FFFFFF;
+		--surface-sunk: #ECF0EF;
+		--ink:          #14191A;
+		--ink-soft:     #4E5B5C;
+		--ink-faint:    #78878A;
+		--rule:         #D6DEDD;
+		--accent:       #0D6B64;
+		--accent-soft:  #E2EFED;
+		--warn:         #8A5B00;
+		--warn-soft:    #F6EBD6;
+		--stop:         #93332A;
+		--stop-soft:    #F7E5E2;
+		--shadow:       0 1px 2px rgba(20, 25, 26, .05), 0 8px 24px rgba(20, 25, 26, .05);
+		--serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+		--disp:  Bitter, "Source Serif 4", Georgia, serif;
+		--mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--paper: #0E1313; --surface: #161C1C; --surface-sunk: #1D2525; --ink: #E7EDEC; --ink-soft: #A9B6B5; --ink-faint: #7D8B8A;
+			--rule: #293333; --accent: #59C5B9; --accent-soft: #16302E; --warn: #D9A44F; --warn-soft: #2E2617; --stop: #E08277; --stop-soft: #331C19;
+			--shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+		}
+	}
+	:root[data-theme="dark"] {
+		--paper: #0E1313; --surface: #161C1C; --surface-sunk: #1D2525; --ink: #E7EDEC; --ink-soft: #A9B6B5; --ink-faint: #7D8B8A;
+		--rule: #293333; --accent: #59C5B9; --accent-soft: #16302E; --warn: #D9A44F; --warn-soft: #2E2617; --stop: #E08277; --stop-soft: #331C19;
+		--shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.28);
+	}
+
+	* { box-sizing: border-box; }
+	body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+	h1, h2, h3 { font-family: var(--disp); text-wrap: balance; }
+	code, .mono, kbd { font-family: var(--mono); }
+	a { color: var(--accent); }
+	.shell { max-width: 1180px; margin: 0 auto; padding: 0 22px 80px; }
+
+	.masthead { padding: 30px 0 0; }
+	.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+	.eyebrow .spacer { margin-left: auto; }
+	.eyebrow .dirty { color: var(--warn); }
+	h1 { font-size: clamp(26px, 3.6vw, 36px); line-height: 1.1; font-weight: 600; margin: 12px 0 6px; letter-spacing: -.015em; }
+	.standfirst { max-width: 70ch; color: var(--ink-soft); font-size: 17px; margin: 0 0 22px; }
+
+	.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 14px; margin: 0 0 26px; box-shadow: var(--shadow); }
+	.toolbar .spacer { margin-left: auto; }
+	.toolbar .status { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
+	.toolbar select, .toolbar input[type="search"] { font: inherit; font-size: 14px; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 2px; background: var(--surface); color: var(--ink); }
+	.toolbar input[type="search"] { min-width: 220px; }
+
+	button { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; padding: 8px 14px; border-radius: 2px; border: 1px solid var(--accent); background: var(--accent); color: var(--paper); cursor: pointer; }
+	button.ghost { background: transparent; color: var(--accent); }
+	button.quiet { background: transparent; color: var(--ink-faint); border-color: var(--rule); }
+	button.quiet:hover { color: var(--accent); border-color: var(--accent); }
+	button.amber { background: var(--warn); border-color: var(--warn); color: var(--paper); }
+	button.red { background: transparent; border-color: var(--rule); color: var(--stop); }
+	button:hover { filter: brightness(1.08); }
+	button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+	button.tiny { padding: 6px 11px; font-size: 11px; }
+	button:disabled { opacity: .4; cursor: default; filter: none; }
+
+	.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin: 40px 0 14px; }
+	.sec-head:first-child { margin-top: 0; }
+	.sec-head h2 { font-size: 22px; margin: 0; font-weight: 600; letter-spacing: -.01em; }
+	.sec-head .count { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+
+	.card { background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--rule); border-radius: 3px; box-shadow: var(--shadow); padding: 16px 20px 14px; margin: 0 0 14px; }
+	.card[data-status="decided"]  { border-left-color: var(--accent); }
+	.card[data-status="leaning"]  { border-left-color: var(--warn); }
+	.card[data-status="open"]     { border-left-color: var(--ink-faint); }
+	.card[data-status="rejected"] { border-left-color: var(--stop); opacity: .82; }
+	.card-top { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-bottom: 6px; }
+	.card-top .id { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); letter-spacing: .08em; }
+	.card-top .kind { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 2px; }
+	.card-top select { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 3px 6px; border: 1px solid var(--rule); border-radius: 2px; background: var(--surface); color: var(--ink); }
+	.card-top .date { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin-left: auto; }
+	.card h3 { font-size: 19px; margin: 0 0 6px; font-weight: 600; line-height: 1.25; }
+	.card .statement { margin: 0 0 10px; }
+	.card .why { margin: 0 0 10px; color: var(--ink-soft); font-size: 15.5px; }
+	.card .why::before, .card .source::before { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); display: block; margin-bottom: 2px; }
+	.card .why::before { content: "why"; }
+	.card .source::before { content: "in your words"; }
+	.card .source { margin: 0 0 8px; font-size: 15px; font-style: italic; color: var(--ink-soft); border-left: 2px solid var(--rule); padding-left: 12px; }
+	.card .tags { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); margin: 0; }
+	.card .foot { display: flex; gap: 8px; margin-top: 8px; justify-content: flex-end; }
+
+	[contenteditable] { outline: none; border-bottom: 1px dashed transparent; border-radius: 2px; padding: 1px 3px; margin: -1px -3px; }
+	[contenteditable]:hover { border-bottom-color: var(--rule); }
+	[contenteditable]:focus { background: var(--surface-sunk); border-bottom-color: var(--accent); }
+	[contenteditable]:empty::after { content: attr(data-ph); color: var(--ink-faint); }
+
+	dialog.help { max-width: 640px; border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); color: var(--ink); padding: 26px 30px; box-shadow: var(--shadow); font-size: 15.5px; }
+	dialog.help::backdrop { background: rgba(0,0,0,.4); }
+	dialog.help h2 { margin-top: 0; }
+	dialog.help .close { float: right; }
+
+	footer { margin-top: 60px; font-size: 14px; color: var(--ink-faint); border-top: 1px solid var(--rule); padding-top: 16px; }
+	.notice { font-family: var(--mono); font-size: 12.5px; color: var(--warn); min-height: 1.4em; margin: 0 0 12px; }
+	.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- =========================================================================
+     RECORDS
+
+     One object per decision, convention, term or open question, in the
+     speaker's own terms. Fields:
+       id        stable short id, never reused
+       area      grouping heading on the page
+       kind      decision | convention | term | question
+       status    decided | leaning | open | rejected
+       title     one line
+       statement the decision or convention as it stands
+       why       the reason it was made, when one was given
+       source    the speaker's own words, quoted
+       date      YYYY-MM-DD
+       tags      free list
+
+     Edit in place on the page, then Export (a JSON file) or Save (writes this
+     block back into this file — Chromium browsers only).
+     ========================================================================= -->
+<script type="application/json" id="records">
+{
+  "meta": {
+    "name": "FlightDeck & agent-library decision record",
+    "owner": "dilberryhoundog",
+    "started": "2026-08-27",
+    "version": 1
+  },
+  "areas": [
+    "agent-library",
+    "FlightDeck — identity",
+    "FlightDeck — vocabulary",
+    "FlightDeck — terms: core",
+    "FlightDeck — terms: extras",
+    "FlightDeck — structure",
+    "FlightDeck — DraftHorse",
+    "FlightDeck — visual tools",
+    "Working conventions"
+  ],
+  "records": [
+    {
+      "id": "AL-01",
+      "area": "agent-library",
+      "kind": "decision",
+      "status": "decided",
+      "title": "agent-library stays the grab-bag",
+      "statement": "agent-library remains the home for skills and agents not worth their own repo. Nothing generic leaves it.",
+      "why": "The repo was getting squashy and tests/orchestration over the bigger assets would make it messy; the grab-bag role is still wanted.",
+      "source": "I want to keep this as a grab bag for skills not worth their own repo",
+      "date": "2026-08-27",
+      "tags": [
+        "repo-layout"
+      ]
+    },
+    {
+      "id": "AL-02",
+      "area": "agent-library",
+      "kind": "convention",
+      "status": "decided",
+      "title": "packages/ tier for assets that outgrow the grab-bag",
+      "statement": "A package under packages/<name> is a self-contained plugin: it owns every file it needs, with no symlinks out and no citations outside its directory, so it installs whole and can be lifted into its own repo with git filter-repo. plugins/ + extensions/ remain the symlinked grab-bag.",
+      "why": "Most plugins call in a single skill; packages bundle a whole congruent unit so it can be managed, tested and orchestrated as one.",
+      "source": "packages/ makes sense, most of these plugins call in a single skill or asset. but these package them all up into a congruent unit so they can be managed as a whole.",
+      "date": "2026-08-27",
+      "tags": [
+        "repo-layout",
+        "packages"
+      ]
+    },
+    {
+      "id": "AL-03",
+      "area": "agent-library",
+      "kind": "decision",
+      "status": "decided",
+      "title": "Name is packages/",
+      "statement": "The tier is named packages/. assets/ was rejected (collides with skills' assets/ folders); frameworks/ too narrow for classroom and flightdeck; products/ not chosen.",
+      "why": "",
+      "source": "packages/ it is",
+      "date": "2026-08-27",
+      "tags": [
+        "naming"
+      ]
+    },
+    {
+      "id": "AL-04",
+      "area": "agent-library",
+      "kind": "decision",
+      "status": "decided",
+      "title": "drafthorse and classroom promoted together",
+      "statement": "First move into packages/ took both drafthorse and classroom. agent-tools keeps corpus-sweep and declares drafthorse as a dependency. drafthorse continues at 0.8.0 with tag drafthorse/v{x}; the work ran on a dev-workspace branch (packages-tier). Released 2026-08-27: drafthorse 0.8.0, agent-tools 0.8.0, classroom 0.5.1.",
+      "why": "",
+      "source": "drafthorse + classroom · depend on drafthorse · continue at 0.8.0, tag drafthorse/v{x} · yes, dw new packages-tier",
+      "date": "2026-08-27",
+      "tags": [
+        "release",
+        "packages"
+      ]
+    },
+    {
+      "id": "AL-05",
+      "area": "agent-library",
+      "kind": "decision",
+      "status": "rejected",
+      "title": "Separate repo per product — rejected for now",
+      "statement": "Extracting drafthorse (or others) into standalone repos was explored and set aside. The original intent of one repo for all agent-based assets stands: single folder for tests and orchestration, which helps agent worktrees.",
+      "why": "Multi-repo breaks the single-checkout model and splits the corpus-sweep workflow across repos.",
+      "source": "The original intention was to have this repo for all my agent based assets. this way I could run testing and orchestration runs in a single folder (helps with agent worktrees yeah?)",
+      "date": "2026-08-27",
+      "tags": [
+        "repo-layout"
+      ]
+    },
+    {
+      "id": "AL-06",
+      "area": "agent-library",
+      "kind": "decision",
+      "status": "rejected",
+      "title": "Folding assets into dev-workspace — rejected",
+      "statement": "Integrating library assets into the dev-workspace product was rejected because it mixes names and products.",
+      "why": "",
+      "source": "then im \"mixing\" names and products",
+      "date": "2026-08-27",
+      "tags": [
+        "naming"
+      ]
+    },
+    {
+      "id": "AL-07",
+      "area": "agent-library",
+      "kind": "convention",
+      "status": "decided",
+      "title": "Privacy may be needed later; stay extraction-ready",
+      "statement": "If any package takes off it may need privacy. Packages are kept extraction-ready so a private repo is a mechanical move, not a redesign.",
+      "why": "",
+      "source": "if any of these eventually take off and I need privacy",
+      "date": "2026-08-27",
+      "tags": [
+        "privacy",
+        "packages"
+      ]
+    },
+    {
+      "id": "FD-01",
+      "area": "FlightDeck — identity",
+      "kind": "decision",
+      "status": "decided",
+      "title": "dev-workspace is renamed FlightDeck",
+      "statement": "The dev-workspace product becomes FlightDeck, keeping all existing functionality.",
+      "why": "dev-workspace is largely an agent-facing product, not a developer one — without agents it is not needed. The name is bland, clashes with .dev developer tooling, and nobody else uses it publicly. It is also Claude Code-fixed and incompatible with claude.ai, an important distinction.",
+      "source": "I think I should rename `dev-workspace` to `FlightDeck` it still keeps all the functionality from before.",
+      "date": "2026-08-27",
+      "tags": [
+        "naming",
+        "flightdeck"
+      ]
+    },
+    {
+      "id": "FD-02",
+      "area": "FlightDeck — identity",
+      "kind": "decision",
+      "status": "decided",
+      "title": "Definition: advanced agentic workspace and orchestration platform",
+      "statement": "FlightDeck is advanced custom tooling for agentic work — an agentic workspace and orchestration platform. The original spark: a place to store, shape and deliver context across sessions, without bloat and cross contamination.",
+      "why": "The pitch has morphed. It began as the HITL workspace for Claude Code; orchestration now needs a home too, and stop hooks and check wrappers do not fit a generic library of skills and agents.",
+      "source": "I see it more as \"advanced agentic workspace and orchestration platform\" wich fits 'flightdeck' really well.",
+      "date": "2026-08-27",
+      "tags": [
+        "flightdeck",
+        "pitch"
+      ]
+    },
+    {
+      "id": "FD-03",
+      "area": "FlightDeck — identity",
+      "kind": "decision",
+      "status": "decided",
+      "title": "Core features carried over",
+      "statement": "CLI enabling agentic use of git-based management · streamlined git management (sync, archive, merge, update) · agentic deploy system for Kamal · context-isolation workspaces, a place for everything Claude generates · bespoke tools (conversation capture, project tree overview, reply shaping) · archived workspaces for global reference · repo setup for individual or forked repos.",
+      "why": "",
+      "source": "core features... (list as stated)",
+      "date": "2026-08-27",
+      "tags": [
+        "flightdeck",
+        "features"
+      ]
+    },
+    {
+      "id": "FD-04",
+      "area": "FlightDeck — identity",
+      "kind": "decision",
+      "status": "decided",
+      "title": "New features FlightDeck will gain",
+      "statement": "Visual orchestration decks (specs, plans, results) · visual spec and 'takeoff prompt' building · run versioning and streamlining · orchestration infrastructure · verification tooling and location per repo · helper skills.",
+      "why": "",
+      "source": "Now it will get... (list as stated)",
+      "date": "2026-08-27",
+      "tags": [
+        "flightdeck",
+        "features",
+        "orchestration"
+      ]
+    },
+    {
+      "id": "VO-01",
+      "area": "FlightDeck — vocabulary",
+      "kind": "term",
+      "status": "rejected",
+      "title": "flight — CLI verb only (superseded)",
+      "statement": "Earlier position: `flight` is the CLI verb and carries no noun meaning. Superseded by TC-01: a flight is also a run, and the CLI verb is the same word because the CLI is what flies.",
+      "why": "flight, deck and fdeck were each 'taken' in some sense; using flight only as the verb keeps 'deck' isolated as a term.",
+      "source": "flight is the cli verb.",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "cli"
+      ]
+    },
+    {
+      "id": "VO-02",
+      "area": "FlightDeck — vocabulary",
+      "kind": "term",
+      "status": "decided",
+      "title": "page / panel / deck — the three-way split",
+      "statement": "page = any HTML artifact on Claude Code or claude.ai, created on demand; 'page' is the trigger word for the skill. panel = any prebuilt visual in the FlightDeck ecosystem. deck = a customised spec / prompt generator pinned to a repo.",
+      "why": "",
+      "source": "three way split. page = any html artifact on CC or claude.ai (trigger word for skill) created on demand. panel = any prebuilt visual in the flightdeck eco-system. deck = customised spec / prompt generator pinned to a repo.",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "visual"
+      ]
+    },
+    {
+      "id": "VO-03",
+      "area": "FlightDeck — vocabulary",
+      "kind": "term",
+      "status": "decided",
+      "title": "crew — the agents of an orchestrated run",
+      "statement": "A crew is the group of agents doing an orchestrated run.",
+      "why": "",
+      "source": "bingo! another one, a name for the group of agents doing an orchestrated run",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "orchestration"
+      ]
+    },
+    {
+      "id": "VO-04",
+      "area": "FlightDeck — vocabulary",
+      "kind": "term",
+      "status": "decided",
+      "title": "Earlier 'flightdeck = a single HTML file' definition is dropped",
+      "statement": "The artifacts-branch definition of a flightdeck as one self-contained HTML document (instrument / readout / demo) had not settled and is superseded by the page / panel / deck split.",
+      "why": "",
+      "source": "It hadn't settled and didn't feel right anyway.",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "visual"
+      ]
+    },
+    {
+      "id": "ST-01",
+      "area": "FlightDeck — structure",
+      "kind": "decision",
+      "status": "decided",
+      "title": "Marketplace DBHD-FlightDeck ships workspace, orchestrate, deploy",
+      "statement": "DBHD-dev-workspace (plugins dev-workspace, dev-deploy) becomes DBHD-FlightDeck shipping three plugins: workspace, orchestrate, deploy. Modularity already exists; this is a translation.",
+      "why": "",
+      "source": "these simply translate into `workspace`, `orchestrate` & `deploy` in `DBHD-FlightDeck`.",
+      "date": "2026-08-27",
+      "tags": [
+        "flightdeck",
+        "plugins"
+      ]
+    },
+    {
+      "id": "ST-02",
+      "area": "FlightDeck — structure",
+      "kind": "decision",
+      "status": "leaning",
+      "title": "Runs live at workspace/runs/, not orchestration/runs/",
+      "statement": "Orchestration runs sit under the workspace so their bulk is handled like HITL workspace context; archives stay one workspace snapshot with runs included; the orchestrate plugin becomes pure merged global tools and records.",
+      "why": "",
+      "source": "Im tossing up moving to `workspace/runs/` so that the \"bulk\" is conceptually handled like HITL bulk workspace context. that way archives stay as a workspace snapshot now with their runs included. and orchestrate can be pure merged global tools and records.",
+      "date": "2026-08-27",
+      "tags": [
+        "orchestration",
+        "workspace"
+      ]
+    },
+    {
+      "id": "ST-03",
+      "area": "FlightDeck — structure",
+      "kind": "convention",
+      "status": "decided",
+      "title": "runs/ is branch-scoped and auto-committed; other folders merge both ways",
+      "statement": "runs/ is scoped to branches via a simple setting in workspace.yaml and auto-commits with `flight commit`. templates/ and the like merge in both directions.",
+      "why": "",
+      "source": "orchestration/runs/ is scoped to branches and is a simple setting in workspace.yaml that auto commits with 'flight commit'. the others, templates/ etc merge both ways.",
+      "date": "2026-08-27",
+      "tags": [
+        "orchestration",
+        "workspace",
+        "git"
+      ]
+    },
+    {
+      "id": "ST-04",
+      "area": "FlightDeck — structure",
+      "kind": "convention",
+      "status": "decided",
+      "title": "Workspace commit message is a deliberate static filter",
+      "statement": "`dw commit` uses one static line from workspace-config.yaml (\"📝 Workspace files updated!\"). It stays: the sameness is the point — ignore it unless you want to be bombarded with workspace changes — and it allows constant saving of all the bulk.",
+      "why": "",
+      "source": "it works brilliantly as \"ignore this unless you want to get bombarded with workspace changes\" allows constant saving of all the bulk.",
+      "date": "2026-08-27",
+      "tags": [
+        "git",
+        "workspace"
+      ]
+    },
+    {
+      "id": "ST-05",
+      "area": "FlightDeck — structure",
+      "kind": "question",
+      "status": "open",
+      "title": "Squash workspace commits per workspace before merge",
+      "statement": "Considering a tool that combines a workspace's many commits into a single one per workspace before merging.",
+      "why": "",
+      "source": "im even considering a tool to combine a bunch of workspace commits into a single per workspace, before merging.",
+      "date": "2026-08-27",
+      "tags": [
+        "git",
+        "workspace"
+      ]
+    },
+    {
+      "id": "DH-01",
+      "area": "FlightDeck — DraftHorse",
+      "kind": "decision",
+      "status": "decided",
+      "title": "DraftHorse is a first-class FlightDeck citizen",
+      "statement": "DraftHorse moves into FlightDeck as a custom skill generator; FlightDeck does not merely consume it from agent-library. It becomes a dynamic, workflow-based tool that reuses the checks to convert and generate skills far more rigorously.",
+      "why": "Fits the agentic-tooling pattern.",
+      "source": "nope drafthorse will be a first class flightdeck citizen.",
+      "date": "2026-08-27",
+      "tags": [
+        "drafthorse",
+        "orchestration"
+      ]
+    },
+    {
+      "id": "DH-02",
+      "area": "FlightDeck — DraftHorse",
+      "kind": "decision",
+      "status": "decided",
+      "title": "corpus-sweep is retired in favour of a spec-update crew",
+      "statement": "corpus-sweep updated structure, not content, and was a response to an ugly HITL corpus update. It will not live on. Its replacement is an isolated spec-update crew running in parallel across the corpus.",
+      "why": "Needed if DraftHorse skills ever start distributing.",
+      "source": "It needs an isolated spec update crew that runs in parallel with skills across the corpus. this is needed if drafthorse skills ever start distributing.",
+      "date": "2026-08-27",
+      "tags": [
+        "drafthorse",
+        "orchestration",
+        "crew"
+      ]
+    },
+    {
+      "id": "DH-03",
+      "area": "FlightDeck — DraftHorse",
+      "kind": "decision",
+      "status": "decided",
+      "title": "Step finish conditions become red/green deterministic",
+      "statement": "The DraftHorse process is to be significantly transformed after learning orchestration best practices; individual step finish conditions become literal red/green deterministic checks.",
+      "why": "",
+      "source": "individual step finish conditions will become literal red green deterministic.",
+      "date": "2026-08-27",
+      "tags": [
+        "drafthorse",
+        "spec"
+      ]
+    },
+    {
+      "id": "VI-01",
+      "area": "FlightDeck — visual tools",
+      "kind": "decision",
+      "status": "decided",
+      "title": "A general page-creator skill stays in the library",
+      "statement": "A general skill that generates custom static HTML pages remains in agent-library because it is the universally compatible skill (Claude Code and claude.ai).",
+      "why": "",
+      "source": "I will still have a general 'page-creator' skill the generates custom html static pages in the library as this is the universally compatible skill.",
+      "date": "2026-08-27",
+      "tags": [
+        "visual",
+        "page"
+      ]
+    },
+    {
+      "id": "VI-02",
+      "area": "FlightDeck — visual tools",
+      "kind": "decision",
+      "status": "leaning",
+      "title": "Panels are pinned to a repo",
+      "statement": "Panels are specialised visual tools opened per repo, pre-populated because the static file sits relative to the data it views, and visibly showing which project is being configured or looked at.",
+      "why": "",
+      "source": "Im considering pinning them to a repo, so you open them per repo and have everything pre populated because the static file is relative to the data it needs to view. Also it can visually show me which project im configuring or looking at.",
+      "date": "2026-08-27",
+      "tags": [
+        "visual",
+        "panel"
+      ]
+    },
+    {
+      "id": "VI-03",
+      "area": "FlightDeck — visual tools",
+      "kind": "decision",
+      "status": "decided",
+      "title": "Chromium-only (Chrome/Arc) for raw file access is an accepted tradeoff",
+      "statement": "JSON import/export into static HTML already works via click-and-select; doing it raw (no picker per file) means sticking to Chrome/Arc. Accepted.",
+      "why": "",
+      "source": "Claude said this can be done raw if I stick to chrome/arc only, wich is a decent tradeoff.",
+      "date": "2026-08-27",
+      "tags": [
+        "visual",
+        "browser"
+      ]
+    },
+    {
+      "id": "WC-01",
+      "area": "Working conventions",
+      "kind": "convention",
+      "status": "decided",
+      "title": "Exploration requests want a report, not work",
+      "statement": "\"Lets explore\" / \"get back to me on risk and blast radius\" asks for findings and an opinion; changes wait for an explicit go.",
+      "why": "",
+      "source": "lets explore this, and get beck to me on the risk and blast radius. plus your opinion on the value of this move",
+      "date": "2026-08-27",
+      "tags": [
+        "process"
+      ]
+    },
+    {
+      "id": "WC-02",
+      "area": "Working conventions",
+      "kind": "convention",
+      "status": "decided",
+      "title": "Record the user's own conventions, in the user's words",
+      "statement": "A decision/convention record captures what the user stated — not agent suggestions. Each entry keeps the source quote.",
+      "why": "",
+      "source": "serialized all MY OWN (important) conventions and decisions ive stated to you",
+      "date": "2026-08-27",
+      "tags": [
+        "process",
+        "records"
+      ]
+    },
+    {
+      "id": "TC-01",
+      "area": "FlightDeck — terms: core",
+      "kind": "term",
+      "status": "decided",
+      "title": "flight",
+      "statement": "A run. Also the CLI verb (flight plan, flight status, flight commit) — noun and verb are the same word because the CLI is what flies.",
+      "why": "",
+      "source": "a 'flight' could easily be a run.",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "aviation"
+      ]
+    },
+    {
+      "id": "TC-02",
+      "area": "FlightDeck — terms: core",
+      "kind": "term",
+      "status": "decided",
+      "title": "pilot",
+      "statement": "The boss: the orchestrator, the one that flies the thing. A role, not a mechanism.",
+      "why": "",
+      "source": "pilot = the boss, the orchestrator (such a long word to write), the one that flys the thing.",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "aviation"
+      ]
+    },
+    {
+      "id": "TC-03",
+      "area": "FlightDeck — terms: core",
+      "kind": "term",
+      "status": "decided",
+      "title": "crew",
+      "statement": "Individuals all working toward a common goal; has a leader (the pilot); each has a particular role. The agents of a flight.",
+      "why": "",
+      "source": "crew = Individuals all working toward a common goal, has a leader, each has a particular role.",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "aviation"
+      ]
+    },
+    {
+      "id": "TC-04",
+      "area": "FlightDeck — terms: core",
+      "kind": "term",
+      "status": "decided",
+      "title": "the flight crew pattern",
+      "statement": "The name for the orchestrator pattern: a pilot and a crew, as distinct from HITL and one-shotting.",
+      "why": "",
+      "source": "this could be using a \"flight crew\" or \"the flight crew pattern\". I'll see if it sticks.",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "aviation"
+      ]
+    },
+    {
+      "id": "TC-05",
+      "area": "FlightDeck — terms: core",
+      "kind": "term",
+      "status": "decided",
+      "title": "flight plan",
+      "statement": "A special plan to orchestrate the crew — what is filed before takeoff.",
+      "why": "",
+      "source": "flight plan = special plan to orchestrate the crew.",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "aviation"
+      ]
+    },
+    {
+      "id": "TC-06",
+      "area": "FlightDeck — terms: core",
+      "kind": "term",
+      "status": "decided",
+      "title": "flight path",
+      "statement": "The process; where we are on the flight path is progress.",
+      "why": "",
+      "source": "flight path = the process, where are we on the flight path?",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "aviation"
+      ]
+    },
+    {
+      "id": "TC-07",
+      "area": "FlightDeck — terms: core",
+      "kind": "term",
+      "status": "decided",
+      "title": "grounded",
+      "statement": "A failed flight.",
+      "why": "",
+      "source": "flight grounded = failed run.",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "aviation"
+      ]
+    },
+    {
+      "id": "TE-01",
+      "area": "FlightDeck — terms: extras",
+      "kind": "term",
+      "status": "open",
+      "title": "flight log",
+      "statement": "Named, not yet defined.",
+      "why": "",
+      "source": "Flight log",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "aviation"
+      ]
+    },
+    {
+      "id": "TE-02",
+      "area": "FlightDeck — terms: extras",
+      "kind": "term",
+      "status": "open",
+      "title": "preflight checks",
+      "statement": "Named, not yet defined.",
+      "why": "",
+      "source": "preflight checks",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "aviation"
+      ]
+    },
+    {
+      "id": "TE-03",
+      "area": "FlightDeck — terms: extras",
+      "kind": "term",
+      "status": "leaning",
+      "title": "aviation-styled decks and panels",
+      "statement": "Decks styled to look like aviation control decks; panels carry red/green indicator lights, switches and dials.",
+      "why": "",
+      "source": "the decks I will style to look like aviation control decks. panels will have red/green indicator lights, switches and dials.",
+      "date": "2026-08-27",
+      "tags": [
+        "vocabulary",
+        "aviation"
+      ]
+    }
+  ]
+}
+</script>
+
+<div class="shell">
+	<header class="masthead">
+		<div class="eyebrow">
+			<span>Local tool</span><span>·</span><span>v1.0</span><span>·</span>
+			<span id="recName"></span>
+			<span class="dirty" id="dirtyFlag"></span>
+			<span class="spacer"></span>
+			<button class="quiet tiny" id="helpBtn" type="button">Help</button>
+			<button class="quiet tiny" id="themeBtn" type="button">Theme</button>
+		</div>
+		<h1>Decision &amp; Convention Record</h1>
+		<p class="standfirst">Every decision, convention and term as you stated it, grouped by area. Click any text to edit it in place; change a status from its menu. Export writes the whole record as JSON; Save writes it back into this file.</p>
+	</header>
+
+	<div class="toolbar">
+		<input type="search" id="q" placeholder="Filter records…">
+		<select id="statusFilter">
+			<option value="">All statuses</option>
+			<option value="decided">Decided</option>
+			<option value="leaning">Leaning</option>
+			<option value="open">Open</option>
+			<option value="rejected">Rejected</option>
+		</select>
+		<button class="ghost tiny" id="addBtn" type="button">+ Record</button>
+		<span class="spacer"></span>
+		<span class="status" id="caps"></span>
+		<button class="quiet tiny" id="importBtn" type="button">Import JSON</button>
+		<button class="tiny" id="exportBtn" type="button">Export JSON</button>
+		<button class="amber tiny" id="bindBtn" type="button" hidden>Bind this file</button>
+		<button class="amber tiny" id="saveBtn" type="button" hidden>Save into file</button>
+		<button class="quiet tiny" id="resetBtn" type="button">Reset to file</button>
+		<input type="file" id="importFile" accept="application/json,.json" class="hidden">
+	</div>
+	<p class="notice" id="notice"></p>
+
+	<main id="stage"></main>
+
+	<dialog class="help" id="help">
+		<button class="quiet tiny close" id="helpClose" type="button">Close</button>
+		<h2>How this works</h2>
+		<p>The record lives in a JSON block at the top of this file's source. The page renders it; edits are held in this browser (localStorage) until you Export or Save.</p>
+		<h3>Editing</h3>
+		<p>Titles, statements, reasons, quotes, tags and dates are editable in place — click, type, click away. Status is a menu on each card. Delete removes a card; + Record adds a blank one to the area you choose.</p>
+		<h3>Export</h3>
+		<p>Downloads <code>decision-record-YYYY-MM-DD.json</code> carrying the whole record with your edits. Any browser.</p>
+		<h3>Save into file</h3>
+		<p>Chromium only. Bind this file once (a file picker pointing at this very page); after that Save rewrites the JSON block in place. The handle is remembered in this browser.</p>
+		<h3>Import</h3>
+		<p>Replaces the whole record with a JSON file of the same shape.</p>
+	</dialog>
+
+	<footer>A single local file. The record is the JSON block at the top of the source; edit it there or here. Nothing leaves the browser.</footer>
+</div>
+
+<script>
+(function () {
+	var KEY_DATA = "decision-record.data", KEY_BASE = "decision-record.base", KEY_THEME = "decision-record.theme";
+	var FILE = JSON.parse(document.getElementById("records").textContent);
+	var DATA;
+
+	function clone(o) { return JSON.parse(JSON.stringify(o)); }
+	function readStore(k)  { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
+	function writeStore(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+	function dropStore(k)  { try { localStorage.removeItem(k); } catch (e) {} }
+	function fileMark()    { return JSON.stringify(FILE); }
+	function persist()     { writeStore(KEY_DATA, DATA); writeStore(KEY_BASE, fileMark()); paintDirty(); }
+	function unsaved()     { return JSON.stringify(DATA) !== fileMark(); }
+
+	// Overlay only survives if it was made against this same file content.
+	var overlay = readStore(KEY_DATA);
+	DATA = (overlay && readStore(KEY_BASE) === fileMark()) ? overlay : clone(FILE);
+
+	var CAN_PICK = typeof window.showOpenFilePicker === "function";
+	var CAN_SAVE = typeof window.showSaveFilePicker === "function";
+	var HANDLE = null;
+
+	// ---------- IndexedDB for the file handle ----------
+	function idbOpen() {
+		return new Promise(function (res, rej) {
+			var r = indexedDB.open("decision-record", 1);
+			r.onupgradeneeded = function () { r.result.createObjectStore("handles"); };
+			r.onsuccess = function () { res(r.result); };
+			r.onerror = function () { rej(r.error); };
+		});
+	}
+	function idbPut(k, v) { return idbOpen().then(function (db) { return new Promise(function (res, rej) { var tx = db.transaction("handles", "readwrite"); tx.objectStore("handles").put(v, k); tx.oncomplete = function () { db.close(); res(true); }; tx.onerror = function () { db.close(); rej(tx.error); }; }); }).catch(function () { return false; }); }
+	function idbGet(k) { return idbOpen().then(function (db) { return new Promise(function (res) { var q = db.transaction("handles").objectStore("handles").get(k); q.onsuccess = function () { db.close(); res(q.result || null); }; q.onerror = function () { db.close(); res(null); }; }); }).catch(function () { return null; }); }
+	function allowed(h, mode) {
+		if (!h) return Promise.resolve(false);
+		return h.queryPermission({ mode: mode }).then(function (p) { if (p === "granted") return true; return h.requestPermission({ mode: mode }).then(function (q) { return q === "granted"; }); }).catch(function () { return false; });
+	}
+
+	// ---------- save into self ----------
+	var MARK = '<script type="application/json" id="records">', MARK_CLOSE = "<" + "/script>";
+	function blockJson(obj) { return JSON.stringify(obj, null, 2).replace(/<\//g, "<\\/"); }
+	function spliceBlock(src, json) {
+		var a = src.indexOf(MARK); if (a === -1) throw new Error("no records block in that file — wrong file?");
+		var bodyAt = a + MARK.length, b = src.indexOf(MARK_CLOSE, bodyAt); if (b === -1) throw new Error("records block not closed");
+		var next = src.slice(0, bodyAt) + "\n" + json + "\n" + src.slice(b);
+		var c = next.indexOf(MARK) + MARK.length; JSON.parse(next.slice(c, next.indexOf(MARK_CLOSE, c)));
+		return next;
+	}
+	function bindSelf() {
+		return window.showOpenFilePicker({ multiple: false, types: [{ description: "This page", accept: { "text/html": [".html", ".htm"] } }] }).then(function (hs) {
+			return allowed(hs[0], "readwrite").then(function (ok) {
+				if (!ok) throw new Error("write access declined");
+				return hs[0].getFile().then(function (f) { return f.text(); }).then(function (src) {
+					if (src.indexOf(MARK) === -1) throw new Error("that file has no records block");
+					HANDLE = hs[0]; return idbPut("self", hs[0]).then(function () { return hs[0].name; });
+				});
+			});
+		});
+	}
+	function saveSelf() {
+		if (!HANDLE) return Promise.reject(new Error("no file bound"));
+		return allowed(HANDLE, "readwrite").then(function (ok) { if (!ok) throw new Error("write access declined"); return HANDLE.getFile(); })
+			.then(function (f) { return f.text(); })
+			.then(function (src) { var next = spliceBlock(src, blockJson(DATA)); return HANDLE.createWritable().then(function (w) { return w.write(next).then(function () { return w.close(); }); }); })
+			.then(function () { FILE = clone(DATA); persist(); return HANDLE.name; });
+	}
+
+	// ---------- export / import ----------
+	function pad(n) { return (n < 10 ? "0" : "") + n; }
+	function stamp() { var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+	function download(name, text) {
+		var url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+		var a = document.createElement("a"); a.href = url; a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+		setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+	}
+	function exportJson() {
+		var out = clone(DATA); out.meta = out.meta || {}; out.meta.exported = new Date().toISOString();
+		var text = JSON.stringify(out, null, 2), name = "decision-record-" + stamp() + ".json";
+		if (CAN_SAVE) {
+			return window.showSaveFilePicker({ suggestedName: name, types: [{ description: "JSON", accept: { "application/json": [".json"] } }] })
+				.then(function (h) { return h.createWritable().then(function (w) { return w.write(text).then(function () { return w.close(); }); }).then(function () { return h.name; }); })
+				.catch(function (e) { if (e && e.name === "AbortError") return null; download(name, text); return name; });
+		}
+		download(name, text); return Promise.resolve(name);
+	}
+	function validRecord(x) { return x && Array.isArray(x.records) && x.records.every(function (r) { return r && typeof r.id === "string" && typeof r.title === "string"; }); }
+	function importJson(file) {
+		return file.text().then(function (t) { var obj = JSON.parse(t); if (!validRecord(obj)) throw new Error("not a decision record: needs records[] with id and title"); DATA = obj; persist(); render(); return obj.records.length; });
+	}
+
+	// ---------- render ----------
+	var STATUSES = ["decided", "leaning", "open", "rejected"], KINDS = ["decision", "convention", "term", "question"];
+	function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+	function editable(tag, cls, rec, key, ph) {
+		var e = el(tag, cls, rec[key] || ""); e.contentEditable = "plaintext-only"; e.setAttribute("data-ph", ph || "");
+		e.addEventListener("blur", function () { var v = e.textContent.trim(); if (v !== (rec[key] || "")) { rec[key] = v; persist(); } });
+		e.addEventListener("keydown", function (ev) { if (ev.key === "Escape") e.blur(); });
+		return e;
+	}
+	function selectOf(list, cur, onchange) { var s = document.createElement("select"); list.forEach(function (v) { var o = el("option", "", v); o.value = v; if (v === cur) o.selected = true; s.appendChild(o); }); s.addEventListener("change", function () { onchange(s.value); }); return s; }
+	function areas() { var seen = (DATA.areas || []).slice(); DATA.records.forEach(function (r) { if (seen.indexOf(r.area) === -1) seen.push(r.area); }); return seen; }
+	function matches(r) {
+		var q = document.getElementById("q").value.trim().toLowerCase(), st = document.getElementById("statusFilter").value;
+		if (st && r.status !== st) return false;
+		if (!q) return true;
+		return [r.id, r.title, r.statement, r.why, r.source, (r.tags || []).join(" ")].join(" ").toLowerCase().indexOf(q) !== -1;
+	}
+	function card(rec) {
+		var c = el("article", "card"); c.dataset.status = rec.status || "open";
+		var top = el("div", "card-top");
+		top.appendChild(el("span", "id", rec.id));
+		var kindSel = selectOf(KINDS, rec.kind || "decision", function (v) { rec.kind = v; persist(); }); kindSel.className = "kind"; top.appendChild(kindSel);
+		top.appendChild(selectOf(STATUSES, rec.status || "open", function (v) { rec.status = v; c.dataset.status = v; persist(); }));
+		top.appendChild(editable("span", "date", rec, "date", "YYYY-MM-DD"));
+		c.appendChild(top);
+		c.appendChild(editable("h3", "", rec, "title", "Title"));
+		c.appendChild(editable("p", "statement", rec, "statement", "The decision or convention as it stands"));
+		c.appendChild(editable("p", "why", rec, "why", "Reason, if one was given"));
+		c.appendChild(editable("blockquote", "source", rec, "source", "Your own words"));
+		var tags = el("p", "tags", (rec.tags || []).join(", ")); tags.contentEditable = "plaintext-only"; tags.setAttribute("data-ph", "tags, comma separated");
+		tags.addEventListener("blur", function () { rec.tags = tags.textContent.split(",").map(function (s) { return s.trim(); }).filter(Boolean); persist(); });
+		c.appendChild(tags);
+		var foot = el("div", "foot"); var del = el("button", "red tiny", "Delete"); del.type = "button";
+		del.addEventListener("click", function () { if (!confirm("Delete " + rec.id + " — " + rec.title + "?")) return; DATA.records = DATA.records.filter(function (r) { return r !== rec; }); persist(); render(); });
+		foot.appendChild(del); c.appendChild(foot);
+		return c;
+	}
+	function render() {
+		var stage = document.getElementById("stage"); stage.innerHTML = "";
+		var shown = 0;
+		areas().forEach(function (a) {
+			var recs = DATA.records.filter(function (r) { return r.area === a && matches(r); }); if (!recs.length) return;
+			var head = el("div", "sec-head"); head.appendChild(el("h2", "", a)); head.appendChild(el("span", "count", recs.length + " record" + (recs.length === 1 ? "" : "s"))); stage.appendChild(head);
+			recs.forEach(function (r) { stage.appendChild(card(r)); shown++; });
+		});
+		if (!shown) stage.appendChild(el("p", "gloss", "No records match."));
+		document.getElementById("recName").textContent = (DATA.meta && DATA.meta.name) || "decision record";
+		paintDirty();
+	}
+	function paintDirty() { document.getElementById("dirtyFlag").textContent = unsaved() ? "· unsaved edits in this browser" : ""; }
+	function notice(msg, ok) { var n = document.getElementById("notice"); n.textContent = msg || ""; n.style.color = ok ? "var(--accent)" : "var(--warn)"; if (msg) setTimeout(function () { if (n.textContent === msg) n.textContent = ""; }, 5000); }
+
+	function nextId(prefix) { var n = 0; DATA.records.forEach(function (r) { var m = /^([A-Z]+)-(\d+)$/.exec(r.id); if (m && m[1] === prefix) n = Math.max(n, +m[2]); }); return prefix + "-" + pad(n + 1); }
+	function addRecord() {
+		var list = areas(); var a = prompt("Area (existing or new):\n" + list.join("\n"), list[0] || "General"); if (!a) return;
+		var prefix = prompt("Id prefix (letters):", "NEW"); if (!prefix) return;
+		DATA.records.push({ id: nextId(prefix.toUpperCase()), area: a.trim(), kind: "decision", status: "open", title: "", statement: "", why: "", source: "", date: stamp(), tags: [] });
+		if ((DATA.areas || []).indexOf(a.trim()) === -1) (DATA.areas = DATA.areas || []).push(a.trim());
+		persist(); render(); window.scrollTo(0, document.body.scrollHeight);
+	}
+
+	// ---------- wiring ----------
+	document.getElementById("q").addEventListener("input", render);
+	document.getElementById("statusFilter").addEventListener("change", render);
+	document.getElementById("addBtn").addEventListener("click", addRecord);
+	document.getElementById("exportBtn").addEventListener("click", function () { exportJson().then(function (n) { if (n) notice("Exported " + n, true); }).catch(function (e) { notice("Export failed: " + e.message); }); });
+	document.getElementById("importBtn").addEventListener("click", function () { document.getElementById("importFile").click(); });
+	document.getElementById("importFile").addEventListener("change", function (ev) { var f = ev.target.files[0]; if (!f) return; importJson(f).then(function (n) { notice("Imported " + n + " records", true); }).catch(function (e) { notice("Import failed: " + e.message); }); ev.target.value = ""; });
+	document.getElementById("resetBtn").addEventListener("click", function () { if (!unsaved() || confirm("Discard edits held in this browser and reload the record from the file?")) { DATA = clone(FILE); dropStore(KEY_DATA); dropStore(KEY_BASE); render(); notice("Reset to file", true); } });
+	document.getElementById("bindBtn").addEventListener("click", function () { bindSelf().then(function (n) { notice("Bound to " + n, true); paintCaps(); }).catch(function (e) { if (e.name !== "AbortError") notice("Bind failed: " + e.message); }); });
+	document.getElementById("saveBtn").addEventListener("click", function () { saveSelf().then(function (n) { notice("Saved into " + n, true); }).catch(function (e) { notice("Save failed: " + e.message); }); });
+	document.getElementById("helpBtn").addEventListener("click", function () { document.getElementById("help").showModal(); });
+	document.getElementById("helpClose").addEventListener("click", function () { document.getElementById("help").close(); });
+	document.getElementById("themeBtn").addEventListener("click", function () {
+		var root = document.documentElement, dark = root.getAttribute("data-theme") === "dark" || (!root.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+		root.setAttribute("data-theme", dark ? "light" : "dark"); try { localStorage.setItem(KEY_THEME, dark ? "light" : "dark"); } catch (e) {}
+	});
+	function paintCaps() {
+		document.getElementById("caps").textContent = CAN_PICK ? (HANDLE ? "bound: " + HANDLE.name : "save available — bind first") : "export only in this browser";
+		document.getElementById("bindBtn").hidden = !CAN_PICK; document.getElementById("saveBtn").hidden = !(CAN_PICK && HANDLE);
+	}
+	idbGet("self").then(function (h) { HANDLE = h; paintCaps(); });
+	paintCaps(); render();
+})();
+</script>
+</body>
+</html>
