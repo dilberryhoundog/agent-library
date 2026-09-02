@@ -1,0 +1,1097 @@
+<!doctype html>
+<!-- artifact-suite shell v1. Write only between the @markers and the class on .shell; everything else is shared chrome. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- @doc-title --><title>Fixture — review</title><!-- @doc-title:end -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230D6B64'/%3E%3Crect x='4' y='4' width='8' height='2' fill='%23F4F6F6'/%3E%3Crect x='4' y='8' width='8' height='2' fill='%23F4F6F6'/%3E%3Crect x='4' y='12' width='5' height='2' fill='%23F4F6F6'/%3E%3C/svg%3E">
+<script>
+	/* Runs before first paint so a remembered theme does not flash the default. */
+	try {
+		var t = localStorage.getItem("artifact-suite.theme");
+		if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+	} catch (e) { /* storage blocked; the system theme applies */
+	}
+	document.documentElement.dataset.origin = location.protocol === "file:" ? "disk" : "web";
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+	:root {
+		--paper:        #F4F6F6;
+		--surface:      #FFFFFF;
+		--surface-sunk: #ECF0EF;
+		--ink:          #14191A;
+		--ink-soft:     #4E5B5C;
+		--ink-faint:    #78878A;
+		--rule:         #D6DEDD;
+		--accent:       #0D6B64;
+		--accent-soft:  #E2EFED;
+		--warn:         #8A5B00;
+		--warn-soft:    #F6EBD6;
+		--stop:         #93332A;
+		--stop-soft:    #F7E5E2;
+		--shadow:       0 1px 2px rgba(20, 25, 26, .05), 0 8px 24px rgba(20, 25, 26, .05);
+		--add-bg:       #E4F1E9;
+		--add-ink:      #17603E;
+		--del-bg:       #FAE8E5;
+		--del-ink:      #8E332A;
+		--keep-ink:     #4E5B5C;
+		--add-mark:     #17603E;
+		--del-mark:     #8E332A;
+
+		--serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+		--disp:  Bitter, "Source Serif 4", Georgia, serif;
+		--mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--paper:        #0E1313;
+			--surface:      #161C1C;
+			--surface-sunk: #1D2525;
+			--ink:          #E7EDEC;
+			--ink-soft:     #A9B6B5;
+			--ink-faint:    #7D8B8A;
+			--rule:         #293333;
+			--accent:       #59C5B9;
+			--accent-soft:  #16302E;
+			--warn:         #D9A44F;
+			--warn-soft:    #2E2617;
+			--stop:         #E08277;
+			--stop-soft:    #331C19;
+			--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+			--add-bg:       #13291F;
+			--add-ink:      #7FCFA3;
+			--del-bg:       #2C1A18;
+			--del-ink:      #E29288;
+			--keep-ink:     #A9B6B5;
+			--add-mark:     #7FCFA3;
+			--del-mark:     #E29288;
+		}
+	}
+	:root[data-theme="dark"] {
+		--paper:        #0E1313;
+		--surface:      #161C1C;
+		--surface-sunk: #1D2525;
+		--ink:          #E7EDEC;
+		--ink-soft:     #A9B6B5;
+		--ink-faint:    #7D8B8A;
+		--rule:         #293333;
+		--accent:       #59C5B9;
+		--accent-soft:  #16302E;
+		--warn:         #D9A44F;
+		--warn-soft:    #2E2617;
+		--stop:         #E08277;
+		--stop-soft:    #331C19;
+		--shadow:       0 1px 2px rgba(0, 0, 0, .3), 0 10px 28px rgba(0, 0, 0, .28);
+		--add-bg:       #13291F;
+		--add-ink:      #7FCFA3;
+		--del-bg:       #2C1A18;
+		--del-ink:      #E29288;
+		--keep-ink:     #A9B6B5;
+		--add-mark:     #7FCFA3;
+		--del-mark:     #E29288;
+	}
+
+	/* radius: 2px on controls, 3px on cards. No token — indirection over a constant. */
+	/* :has() policy: target is Chrome from file:// (:has() since 105). A :has() rule adds a visual state the native control already expresses and never shares a selector list with a non-:has() selector; the one load-bearing use, .verdicts label:has(input:checked), carries the @supports floor beneath it. */
+	* { box-sizing: border-box; }
+	body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--serif); font-size: 17px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+	h1, h2, h3, h4, h5 { font-family: var(--disp); text-wrap: balance; }
+	code, .mono, kbd { font-family: var(--mono); }
+	code { font-size: .87em; background: var(--surface-sunk); padding: 1px 5px; border-radius: 2px; }
+	a { color: var(--accent); }
+	main { min-width: 0; }
+	section { margin-bottom: 64px; }
+	html { scroll-behavior: smooth; }
+	@media (prefers-reduced-motion: reduce) {
+		html { scroll-behavior: auto; }
+	}
+	@media print {
+		.toc, .filters, .themeset, .floater, #outwrap { display: none; }
+	}
+
+	.shell { display: grid; grid-template-columns: 1fr; max-width: 940px; margin: 0 auto; padding: 0 22px 96px; }
+	.shell.rail { max-width: 1180px; }
+	.shell.board { max-width: 1340px; }
+	.masthead, footer { grid-column: 1 / -1; }
+	.shell:not(.board) > .sidebar { display: none; }
+	@media (min-width: 1040px) {
+		.shell.rail { grid-template-columns: 232px minmax(0, 1fr); gap: 56px; padding-right: 32px; }
+	}
+	@media (min-width: 1060px) {
+		.shell.board { grid-template-columns: minmax(0, 1fr) 440px; gap: 44px; }
+		.shell.board > .sidebar { position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; }
+	}
+
+	.masthead { border-bottom: 1px solid var(--rule); padding: 40px 0 26px; margin-bottom: 34px; }
+	.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+	.eyebrow .spacer { margin-left: auto; }
+	.eyebrow a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--rule); }
+	.eyebrow .pv-branch code { color: var(--accent); }
+	.eyebrow .sep { color: var(--ink-faint); }
+	.eyebrow .sep::before { content: "\00B7"; }
+	h1 { font-size: clamp(26px, 3.6vw, 36px); line-height: 1.1; font-weight: 600; margin: 16px 0 10px; letter-spacing: -.015em; }
+	.standfirst { max-width: 62ch; color: var(--ink-soft); font-size: 18px; margin: 0; }
+	.masthead-meta { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 22px; font-size: 14px; color: var(--ink-soft); }
+	.masthead-meta b { color: var(--ink); font-weight: 600; }
+	.themeset { display: flex; gap: 4px; }
+	.themeset button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+
+	.toc.column { display: none; }
+	.toc.column h4 { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); margin: 22px 0 10px; font-weight: 500; }
+	.toc.column h4 a { font: inherit; letter-spacing: inherit; color: inherit; border: 0; padding: 0; display: inline; }
+	.toc.column ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+	.toc.column a { text-decoration: none; color: var(--ink-soft); font-size: 14.5px; line-height: 1.35; display: block; border-left: 2px solid var(--rule); padding-left: 10px; }
+	.toc.column a:hover, .toc.column a:focus-visible, .toc.column a[aria-current="true"] { color: var(--accent); border-left-color: var(--accent); }
+	.toc.pills { position: sticky; top: 0; z-index: 6; display: flex; gap: 8px; overflow-x: auto; margin: 0 0 26px; padding: 10px 0; background: var(--paper); border-bottom: 1px solid var(--rule); }
+	.toc.pills a { flex: none; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; white-space: nowrap; color: var(--ink-soft); background: var(--surface); border: 1px solid var(--rule); border-radius: 2px; padding: 5px 11px; }
+	.toc.pills a[aria-current="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+	.toc li[hidden], .toc a[hidden] { display: none; }
+	@media (min-width: 1040px) {
+		.shell.rail > .toc.column { display: block; position: sticky; top: 24px; align-self: start; max-height: calc(100vh - 48px); overflow-y: auto; padding-bottom: 20px; }
+		.shell.rail main > .toc.pills { display: none; }
+	}
+	[id] { scroll-margin-top: 72px; }
+	@media (min-width: 1040px) {
+		.shell.rail [id] { scroll-margin-top: 24px; }
+	}
+	article[id]:target, section[id]:target { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 3px; }
+
+	.chiprow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+	.chip { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; background: var(--surface-sunk); color: var(--ink-soft); white-space: nowrap; text-decoration: none; }
+	.chip.id { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); }
+	.chip.integrate { background: var(--accent-soft); color: var(--accent); }
+	.chip.yourcall { background: var(--warn-soft); color: var(--warn); }
+	.chip.defer { background: transparent; border: 1px dashed var(--rule); color: var(--ink-faint); }
+	.chip.dead { background: transparent; border: 1px dashed var(--rule); color: var(--ink-faint); text-decoration: line-through; }
+	.chip.earlier { background: transparent; border: 1px solid var(--rule); color: var(--ink-faint); }
+	.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 26px; }
+	.filters button[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+	.filters .n { margin-left: 6px; font-variant-numeric: tabular-nums; opacity: .75; }
+	.filters[hidden] { display: none; }
+
+	.card { background: var(--surface); border: 1px solid var(--rule); border-left: 3px solid var(--rule); border-radius: 3px; box-shadow: var(--shadow); padding: 22px 24px; margin-bottom: 22px; }
+	.card > *:first-child { margin-top: 0; }
+	.card h3 { font-size: 19.5px; margin: 0 0 8px; font-weight: 600; line-height: 1.3; }
+	.card p, .card ul, .card ol { max-width: 68ch; overflow-wrap: anywhere; }
+	.card ul, .card ol { padding-left: 20px; }
+	.card li { margin-bottom: 6px; }
+	.card p:last-child { margin-bottom: 0; }
+	.card[hidden] { display: none; }
+	.card[data-tag="integrate"] { border-left-color: var(--accent); }
+	.card[data-tag="yourcall"] { border-left-color: var(--warn); }
+	.card[data-tag="defer"] { border-left-color: var(--ink-faint); }
+	.card.dead { border-left-color: var(--ink-faint); background: var(--surface-sunk); }
+	.card.dead h3 { color: var(--ink-soft); }
+	.card.needs-id { border-left-color: var(--warn); }
+	.changed { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--warn); background: var(--warn-soft); border-left: 2px solid var(--warn); padding: 6px 10px; margin: 0 0 12px; display: flex; gap: 10px; align-items: center; }
+	.verdicts label.recommended .rec { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-left: 7px; }
+	.sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 10px; }
+	.sec-head h2 { font-size: 25px; margin: 0; font-weight: 600; letter-spacing: -.01em; }
+	.sec-head .count { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); margin-left: auto; }
+	.sec-intro { color: var(--ink-soft); max-width: 68ch; margin: 14px 0 30px; }
+	.gloss { color: var(--ink-soft); font-size: 14.5px; margin: 0 0 18px; max-width: 62ch; }
+
+	.respond {
+		margin-top:  18px;
+		border-top:  1px dashed var(--rule);
+		padding-top: 14px;
+	}
+	.verdicts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+	.verdicts label {
+		font-family:    var(--mono);
+		font-size:      11px;
+		letter-spacing: .06em;
+		text-transform: uppercase;
+		border:         1px solid var(--rule);
+		border-radius:  2px;
+		padding:        4px 10px;
+		cursor:         pointer;
+		color:          var(--ink-soft);
+		user-select:    none;
+		background:     var(--surface);
+	}
+	.verdicts input { position: absolute; opacity: 0; width: 0; height: 0; }
+	.verdicts label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+	.verdicts label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+	textarea {
+		width:         100%;
+		min-height:    68px;
+		resize:        vertical;
+		background:    var(--surface-sunk);
+		color:         var(--ink);
+		border:        1px solid var(--rule);
+		border-radius: 2px;
+		padding:       10px 12px;
+		font-family:   var(--serif);
+		font-size:     15.5px;
+		line-height:   1.5;
+	}
+	textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+	textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+
+	.loose { border: 1px solid var(--rule); border-radius: 3px; background: var(--surface); padding: 16px 18px; margin-top: 22px; box-shadow: var(--shadow); }
+	.loose .lab { margin-bottom: 9px; }
+	@supports not (selector(:has(*))) { .verdicts input { position: static; opacity: 1; width: auto; height: auto; } }
+
+	blockquote { margin: 14px 0; padding: 4px 0 4px 16px; border-left: 2px solid var(--accent); color: var(--ink-soft); font-style: italic; max-width: 62ch; }
+	blockquote code { font-style: normal; }
+	blockquote cite, .q, .lab { display: block; margin-top: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .09em; text-transform: uppercase; font-style: normal; color: var(--ink-faint); }
+	details { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 14px; margin: 14px 0; }
+	details summary { cursor: pointer; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--ink-soft); }
+	button {
+		font-family:    var(--mono);
+		font-size:      12px;
+		letter-spacing: .07em;
+		text-transform: uppercase;
+		padding:        9px 15px;
+		border-radius:  2px;
+		border:         1px solid var(--accent);
+		background:     var(--accent);
+		color:          var(--paper);
+		cursor:         pointer;
+	}
+	button.ghost { background: transparent; color: var(--accent); }
+	button.quiet { background: transparent; color: var(--ink-faint); border-color: var(--rule); }
+	button.quiet:hover { color: var(--accent); border-color: var(--accent); }
+	button.amber { background: var(--warn); border-color: var(--warn); color: var(--paper); }
+	button.amber.ghost { background: transparent; color: var(--warn); }
+	button:hover { filter: brightness(1.08); }
+	button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+	button.tiny { padding: 6px 11px; font-size: 11px; }
+	button:disabled { opacity: .4; cursor: default; filter: none; }
+
+	.floater { position: fixed; right: 22px; bottom: 22px; z-index: 40; display: flex; gap: 8px; align-items: center; }
+	.floater .status { font-family: var(--mono); font-size: 11.5px; color: var(--ink-soft); background: var(--paper); padding: 2px 6px; border-radius: 2px; }
+	.floater .status.bad { color: var(--stop); }
+	.floater [hidden] { display: none; }
+	#outwrap { position: fixed; right: 22px; bottom: 74px; z-index: 39; width: min(560px, calc(100vw - 44px)); background: var(--surface); border: 1px solid var(--rule); border-left: 2px solid var(--accent); border-radius: 3px; box-shadow: var(--shadow); padding: 10px; }
+	#outwrap[hidden] { display: none; }
+	#out { width: 100%; height: min(52vh, 460px); font-family: var(--mono); font-size: 12.5px; line-height: 1.55; }
+	#foot { font-family: var(--mono); font-size: 12px; color: var(--ink-faint); padding-top: 18px; border-top: 1px solid var(--rule); display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+	#foot .sep { color: var(--ink-faint); }
+	#held-note, #storage-note { flex-basis: 100%; color: var(--warn); }
+	@media (max-width: 620px) {
+		.floater { left: 14px; right: 14px; justify-content: flex-end; }
+		#outwrap { left: 14px; right: 14px; width: auto; }
+	}
+
+	.path--unlinked { text-decoration: underline dotted var(--warn); }
+	/* details.ref and every .ref* rule live in assets/blocks/reference.html, spliced on any page carrying a reference. */
+
+	/* @template-style */
+	
+	.verdict-strip { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 3px; padding: 18px 22px; margin-bottom: 34px; }
+	.verdict-strip h3 { font-size: 18px; margin: 0 0 8px; color: var(--accent); }
+	.verdict-strip p { margin: 0; max-width: 68ch; }
+	.stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 0; }
+	.stat { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 14px; }
+	.stat b { display: block; font-family: var(--disp); font-size: 20px; font-variant-numeric: tabular-nums; }
+	.stat span { font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-faint); }
+	.src { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); background: var(--surface-sunk); border-left: 2px solid var(--rule); padding: 7px 10px; margin: 12px 0; overflow-x: auto; white-space: pre; }
+	.delta { display: grid; gap: 10px; margin: 14px 0; }
+	@media (min-width: 720px) { .delta { grid-template-columns: 1fr 1fr; } }
+	.delta div { border: 1px solid var(--rule); border-radius: 2px; padding: 12px 14px; background: var(--surface-sunk); }
+	.delta h5 { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 8px; font-weight: 500; color: var(--ink-faint); }
+	.delta .now { border-left: 2px solid var(--stop); }
+	.delta .next { border-left: 2px solid var(--accent); }
+	.delta p { margin: 0; font-size: 15px; }
+	.options { display: grid; gap: 10px; }
+	.option { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--rule); border-left: 2px solid var(--rule); border-radius: 2px; padding: 11px 14px; cursor: pointer; }
+	.option:has(input:checked) { border-color: var(--accent); border-left-color: var(--accent); }
+	.option input { margin-top: 6px; accent-color: var(--accent); }
+	.option b { font-family: var(--disp); font-size: 15.5px; display: block; }
+	.option span { color: var(--ink-soft); font-size: 14.5px; }
+	.option .rec { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-left: 8px; }
+	.option.recommended { background: var(--accent-soft); border-left-color: var(--accent); }
+	/* @lifted templates/review.html#style */
+
+	.diff { font-family: var(--mono); font-size: 12.5px; line-height: 1.65; border: 1px solid var(--rule); border-radius: 2px; background: var(--surface-sunk); overflow-x: auto; margin: 4px 0 14px; }
+	.diff-row { display: grid; grid-template-columns: 1.6em minmax(0, 1fr); }
+	.diff-row::before { content: ""; grid-column: 1; grid-row: 1; text-align: center; user-select: none; }
+	.diff-row > .tx { grid-column: 2; grid-row: 1; padding: 3px 12px 3px 4px; white-space: pre-wrap; word-break: break-word; }
+	.diff.numbered .diff-row { grid-template-columns: 3.4em 1.6em minmax(0, 1fr); }
+	.diff.numbered .diff-row::after { content: attr(data-ln); grid-column: 1; grid-row: 1; text-align: right; padding-right: 10px; color: var(--ink-faint); user-select: none; font-variant-numeric: tabular-nums; }
+	.diff.numbered .diff-row::before { grid-column: 2; }
+	.diff.numbered .diff-row > .tx { grid-column: 3; }
+	.diff-row.add::before { content: "+"; color: var(--add-mark); }
+	.diff-row.del::before { content: "\2212"; color: var(--del-mark); }
+	.diff-row.ctx > .tx { color: var(--keep-ink); }
+	.diff-row.add > .tx { background: var(--add-bg); color: var(--add-ink); }
+	.diff-row.del > .tx { background: var(--del-bg); color: var(--del-ink); }
+	.diff-row.gap > .tx { color: var(--ink-faint); opacity: .7; }
+	.diff > button { margin: 4px 10px 10px; }
+	/* @lifted blocks/diff.html#style */
+
+	details.ref { padding: 0; border-left: 2px solid var(--rule); border-radius: 2px; margin: 12px 0; }
+	details.ref summary { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; padding: 9px 14px; background: var(--surface-sunk); }
+	.ref .path { font-family: var(--mono); font-size: 12.5px; color: var(--ink); word-break: break-all; }
+	.ref .lines, .ref .loc { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+	.ref .mirror { margin-left: auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; background: var(--warn-soft); color: var(--warn); padding: 3px 8px; border-radius: 2px; }
+	.ref-links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 14px; }
+	.ref-chip { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border: 1px solid var(--rule); border-radius: 2px; padding: 4px 10px; color: var(--ink-soft); background: var(--surface); text-decoration: none; cursor: pointer; }
+	.refs { display: grid; gap: 8px; margin: 14px 0; }
+	.ref--broken > summary { border-left: 2px solid var(--stop); }
+	.ref--broken .path { color: var(--stop); }
+	:root[data-origin="web"] .ref-disk, :root[data-origin="web"] .ref-editor, .ref--nodisk .ref-disk, .ref--nodisk .ref-editor { display: none; }
+	:root[data-origin="disk"] .ref:not(.ref--nodisk) .ref-disk, :root[data-origin="web"] .ref-gh, .ref--nodisk .ref-gh, .ref-site { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+	/* @lifted blocks/reference.html#style */
+/* @template-style:end */
+</style>
+</head>
+<body>
+<!-- @page-meta -->
+<script type="application/json" id="page-meta">
+{
+  "id": "fixture-review",
+  "kind": "review",
+  "rev": 1,
+  "title": "Fixture — review",
+  "provenance": {
+    "repo": "https://github.com/dilberryhoundog/agent-library",
+    "root": "/Users/dylangraham/Projects/agent-library",
+    "self": "extensions/skills/artifact-suite/tests/fixtures/review-fixture.html",
+    "branch": "fixture",
+    "commit": "0000000000000000000000000000000000000000",
+    "issue": 45,
+    "pr": 12,
+    "date": "2000-01-01",
+    "builtAt": "2000-01-01T00:00:00Z",
+    "editor": "vscode"
+  },
+  "prompt": { "heading": "Response — review fixture" },
+  "next": ["Re-run both verification tiers before committing a shell change."]
+}
+</script>
+<!-- @page-meta:end -->
+<div class="shell rail">
+	<header class="masthead">
+		<div class="eyebrow" id="eyebrow"><span class="spacer"></span>
+			<div class="themeset" role="group" aria-label="Theme">
+				<button class="quiet tiny" type="button" data-theme-set="system" aria-pressed="true">System</button>
+				<button class="quiet tiny" type="button" data-theme-set="light" aria-pressed="false">Light</button>
+				<button class="quiet tiny" type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+			</div>
+		</div>
+		<!-- @masthead -->
+<h1>Fixture — review</h1>
+<p class="standfirst">A frozen review page carrying every block the review template covers: a reference set, a diff, a quote, a withdrawn card and an options card.</p>
+<div class="masthead-meta"><span><b>Cards</b> 5</span><span><b>Sections</b> 2</span><span><b>Blocks</b> ref, diff, quote, options</span></div>
+<!-- @masthead:end -->
+	</header>
+	<nav class="toc column" id="toc-column" aria-label="Contents"></nav>
+	<main>
+		<nav class="toc pills" id="toc-pills" aria-label="Contents"></nav>
+		<div class="filters" id="filters" hidden></div>
+		<!-- @content -->
+<section id="findings">
+	<div class="sec-head"><h2>Findings</h2><span class="count">5</span></div>
+	<p class="sec-intro">One or two lines on what the section covers.</p>
+	<div class="verdict-strip"><h3>Where it landed</h3><p>The outcome the reader should hold while reading the cards.</p></div>
+
+<article class="card" id="reference-block-anatomy" data-tag="integrate" data-recommended="Agree">
+	<div class="chiprow"><a class="chip id" href="#reference-block-anatomy">01</a><span class="chip integrate">Integrate</span><span class="chip">provenance</span></div>
+	<h3>A reference is four attributes and nothing else</h3>
+	<p>The agent writes an empty <code>details.ref</code> carrying its attributes; the engine builds the summary, the chips and every href from <code>#page-meta.provenance</code>. This card carries one plain reference.</p>
+	<details class="ref" data-path="docs/drafthorse/framework/steps.md" data-lines="100-110" data-loc="§ Dispositions"></details>
+	<p>The group below covers the three other routes a reference can take: an archived copy on another branch, a file that lives only on a branch, and a site.</p>
+	<div class="refs">
+		<details class="ref" data-path="dev/workspace/reviews/corpus-sweep-design.html" data-branch="agent-teams" data-lines="50-62" data-loc="SVG kit"></details>
+		<details class="ref" data-path="extensions/rules/STYLE.md" data-branch="main" data-lines="12-18" data-loc="§ Order"></details>
+		<details class="ref" data-url="https://developer.mozilla.org/en-US/docs/Web/CSS/:has" data-loc="MDN"></details>
+	</div>
+</article>
+
+<article class="card" id="diff-gutter-outside-the-text" data-tag="integrate">
+	<div class="chiprow"><a class="chip id" href="#diff-gutter-outside-the-text">02</a><span class="chip integrate">Integrate</span><span class="chip">diff</span></div>
+	<h3>The change marker lives in a CSS gutter</h3>
+	<details class="ref" data-path="extensions/skills/artifact-suite/assets/blocks/diff.html" data-lines="13-27" data-loc="scoped style"></details>
+	<p>No glyph is typed into a line, so copied text is clean and the tint paints only the text cell.</p>
+	<div class="diff numbered" data-copy="adds">
+		<div class="diff-row ctx" data-ln="14"><span class="tx">- **Named recoverable failure** — claim the remainder.</span></div>
+		<div class="diff-row del" data-ln="15"><span class="tx">- **De-hold** — the condition must stop holding.</span></div>
+		<div class="diff-row add" data-ln="15"><span class="tx">- **User approval problem** — claim the remainder.</span></div>
+		<div class="diff-row gap"><span class="tx">…</span></div>
+	</div>
+</article>
+
+<article class="card" id="demo-customisation" data-tag="yourcall">
+	<div class="chiprow"><a class="chip id" href="#demo-customisation">03</a><span class="chip yourcall">Your call</span><span class="chip">demos</span></div>
+	<h3>Demos stay the building agent's own</h3>
+	<blockquote><p>I wanted demos to be fully customisable by the building agent.</p><cite>You · session 2026-08-21</cite></blockquote>
+	<p>The kit therefore ships fragments and rules rather than a page shape.</p>
+</article>
+
+<article class="card" id="skill-name" data-tag="yourcall" data-answer="options" data-recommended="corpus-sweep">
+	<div class="chiprow"><a class="chip id" href="#skill-name">04</a><span class="chip yourcall">Your call</span></div>
+	<h3>What the skill is called</h3>
+	<p>One paragraph of framing before the options.</p>
+	<div class="options">
+		<label class="option recommended"><input type="radio" name="v-skill-name" value="corpus-sweep" checked><div><b>corpus-sweep<span class="rec">recommended</span></b><span>Matches the vocabulary already in use.</span></div></label>
+		<label class="option"><input type="radio" name="v-skill-name" value="corpus-migrate"><div><b>corpus-migrate</b><span>Names the destructive half only.</span></div></label>
+	</div>
+</article>
+
+<article class="card dead" id="relative-root-prefix" data-tag="defer" data-answer="none">
+	<div class="chiprow"><a class="chip id" href="#relative-root-prefix">05</a><span class="chip dead">Withdrawn</span><span class="chip defer">Defer</span></div>
+	<h3>A relative root prefix on every file href</h3>
+	<p>Withdrawn: the absolute checkout path in provenance already answers it.</p>
+</article>
+</section>
+
+<section id="additional-comments" data-loose="Additional comments — anything the cards missed">
+	<div class="sec-head"><h2>Additional comments</h2></div>
+	<p class="sec-intro">Anything the cards did not cover.</p>
+</section>
+<!-- @content:end -->
+	</main>
+	<aside class="sidebar"><!-- @sidebar --><!-- @sidebar:end --></aside>
+	<footer id="foot"></footer>
+</div>
+<div class="floater"><span class="status" id="status" role="status"></span>
+	<button class="ghost tiny" type="button" id="accept-all" hidden>Accept all</button>
+	<button class="ghost" type="button" id="view-prompt">View prompt</button>
+	<button type="button" id="copy-prompt">Copy prompt</button>
+</div>
+<div id="outwrap" hidden><textarea id="out" readonly aria-label="Return prompt as plain text"></textarea></div>
+<script>
+(function () {
+	"use strict";
+
+	/* ---------- Boot ---------- */
+
+	var META, STATE, FILTER = "all", SAVE_TIMER = null, FLASH_TIMER = null;
+	var DEFAULT_VERDICTS = {review: ["Agree", "Revise", "Reject"], issue: ["Accept", "Amend", "Defer"], options: [], interview: [], demo: []};
+	var FILTER_LABEL = {all: "All", integrate: "Integrate", yourcall: "Your call", defer: "Defer", unanswered: "Unanswered"};
+
+	function boot() {
+		readMeta();
+		capabilityGate();
+		loadState();
+		validateCards();
+		cardList().forEach(function (card) { attachRespond(card); restoreCard(card); });
+		$$("[data-loose]").forEach(attachLoose);
+		collectOrphans();
+		renderEyebrow();
+		auditPaths();
+		buildToc();
+		observeSections();
+		buildFilters();
+		document.addEventListener("change", onChange);
+		document.addEventListener("input", onInput);
+		document.addEventListener("click", onClick);
+		byId("copy-prompt").addEventListener("click", copyPrompt);
+		byId("view-prompt").addEventListener("click", viewPrompt);
+		byId("accept-all").addEventListener("click", acceptAll);
+		byId("accept-all").hidden = !document.querySelector("article.card[id][data-recommended]");
+		$$(".themeset [data-theme-set]").forEach(function (b) { b.addEventListener("click", function () { setTheme(b.dataset.themeSet); }); });
+		setTheme(document.documentElement.getAttribute("data-theme") || "system");
+		window.addEventListener("hashchange", revealTarget);
+		checkTitles();
+		revealTarget();
+	}
+	document.addEventListener("DOMContentLoaded", boot);
+
+	function onChange(ev) {
+		var t = ev.target, host = t.closest("[data-card]");
+		if (host && t.type === "radio" && t.name === "v-" + host.dataset.card) recordVerdict(host.dataset.card, t.value);
+	}
+	function onInput(ev) {
+		var t = ev.target;
+		if (t.tagName !== "TEXTAREA") return;
+		if (t.dataset.card) recordComment(t.dataset.card, t.value);
+		else if (t.dataset.section) recordSection(t.dataset.section, t.value);
+	}
+	function onClick(ev) {
+		var t = ev.target, el = t.closest("[data-card],[data-section],[data-filter],[data-held]");
+		if (!el) return;
+		if (el.dataset.filter) applyFilter(el.dataset.filter);
+		else if (el.dataset.held === "show") toggleHeld();
+		else if (el.dataset.held === "discard") discardHeld();
+		else if (el.dataset.act === "clear") clearCard(el.dataset.card);
+		else if (el.dataset.act === "dismiss") dismissChanged(el.dataset.card);
+		else if (t.type === "radio" && t.checked && t.name === "v-" + el.dataset.card) recordVerdict(el.dataset.card, t.value);
+	}
+	function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+	function byId(id) { return document.getElementById(id); }
+	function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
+	function rm(el) { if (el && el.parentNode) el.parentNode.removeChild(el); }
+	function now() { return new Date().toISOString(); }
+
+	/* ---------- Meta and capabilities ---------- */
+
+	var CAN_LS = false, CAN_FS = false, MEM = {};
+
+	function readMeta() {
+		var m = null;
+		try { m = JSON.parse(byId("page-meta").textContent); } catch (e) { m = null; }
+		if (!m || typeof m.id !== "string" || !m.id) {
+			flash("#page-meta is missing or unparseable — answers are not keyed to this page.", true);
+			m = {id: "unknown-page", kind: "review", rev: 1, title: document.title, provenance: {}, prompt: {}, next: []};
+		}
+		m.kind = m.kind || "review";
+		m.rev = m.rev || 1;
+		m.title = m.title || document.title;
+		m.provenance = m.provenance || {};
+		m.prompt = m.prompt || {};
+		m.next = m.next || [];
+		META = m;
+		window.SUITE = {copyText: copyText, flash: flash, meta: META};
+	}
+	function capabilityGate() {
+		CAN_LS = (function () {
+			try {
+				localStorage.setItem("artifact-suite.__probe", "1");
+				localStorage.removeItem("artifact-suite.__probe");
+				return true;
+			} catch (e) {
+				return false;
+			}
+		})();
+		CAN_FS = typeof window.showSaveFilePicker === "function";
+		if (!CAN_FS) $$('[data-needs="fs"]').forEach(rm);
+		if (!CAN_LS) storageNote();
+	}
+	function storageNote() {
+		if (byId("storage-note")) return;
+		var n = document.createElement("span");
+		n.id = "storage-note";
+		n.textContent = "This browser is not saving answers — copy the prompt before you close the page.";
+		byId("foot").appendChild(n);
+	}
+
+	/* ---------- Storage ---------- */
+
+	/* file:// shares one origin across every local page, so every key carries the page id. */
+	function stateKey() { return "artifact-suite.page." + META.id; }
+	/* localStorage can throw (blocked, quota, some file:// setups); every access is wrapped and falls back to MEM. */
+	function readStore(k) { if (k in MEM) return MEM[k]; try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
+	function writeStore(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { MEM[k] = v; return false; } }
+	function dropStore(k) { try { localStorage.removeItem(k); } catch (e) { /* nothing to undo */ } delete MEM[k]; }
+	function loadState() {
+		var s = readStore(stateKey());
+		if (!s || s.schema !== 1) s = {schema: 1, pageId: META.id, rev: META.rev, savedAt: null, cards: {}, sections: {}, orphans: {}};
+		s.cards = s.cards || {};
+		s.sections = s.sections || {};
+		s.orphans = s.orphans || {};
+		STATE = s;
+	}
+	function saveState() {
+		clearTimeout(SAVE_TIMER);
+		STATE.savedAt = now();
+		STATE.rev = META.rev;
+		if (writeStore(stateKey(), STATE) || byId("storage-note")) return;
+		storageNote();
+		flash("Answers are no longer being saved — copy the prompt before you close the page.", true);
+	}
+	function saveSoon() { clearTimeout(SAVE_TIMER); SAVE_TIMER = setTimeout(saveState, 200); }
+
+	/* ---------- Fingerprints ---------- */
+
+	function hashOf(s) {
+		var h = 5381;
+		for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+		return String(h);
+	}
+	function normalise(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
+	function fingerprintOf(card) {
+		var c = card.cloneNode(true);
+		/* everything a block or the engine generates after load is stripped, so the hash is the same before and after the reference and diff scripts run */
+		$$(".respond, .changed, .chip.earlier, .ref-links, .ref > summary, a.ref-link, .demo, .diff > button", c).forEach(rm);
+		return hashOf(normalise(c.textContent) + "|" + (card.dataset.tag || "") + "|" + (card.dataset.verdicts || ""));
+	}
+
+	/* ---------- Respond surfaces ---------- */
+
+	function cardList() { return $$("article.card[id]"); }
+	function cardTitle(card) { var h = card.querySelector("h3"); return h ? normalise(h.textContent) : card.id; }
+	function verdictsFor(card) {
+		if (card.dataset.verdicts == null) return DEFAULT_VERDICTS[META.kind] || [];
+		return card.dataset.verdicts.split("|").map(function (v) { return v.trim(); }).filter(Boolean);
+	}
+	function validateCards() {
+		$$("article.card").forEach(function (card) {
+			if (!card.id) {
+				console.warn("artifact-suite: card without id — no response surface attached");
+				card.classList.add("needs-id");
+			} else if (/^[a-z]?\d+$/i.test(card.id)) {
+				console.warn("artifact-suite: card id \"" + card.id + "\" is ordinal — an id names the subject, never a position");
+			}
+		});
+	}
+	function attachRespond(card) {
+		if (card.querySelector(".respond") || card.dataset.answer === "none") return;
+		var id = esc(card.id), rec = card.dataset.recommended || "", html = "", wrap = document.createElement("div");
+		wrap.className = "respond";
+		if (card.dataset.answer === "options") {
+			var opts = card.querySelector(".options");
+			if (opts) opts.setAttribute("data-card", card.id);
+		} else if (verdictsFor(card).length) {
+			html += '<div class="verdicts" data-card="' + id + '">';
+			verdictsFor(card).forEach(function (v) {
+				var r = v === rec;
+				html += "<label" + (r ? ' class="recommended"' : "") + '><input type="radio" name="v-' + id + '" value="' + esc(v) + '"' + (r ? " checked" : "") + ">" + esc(v) + (r ? '<span class="rec">recommended</span>' : "") + "</label>";
+			});
+			html += "</div>";
+		}
+		html += '<textarea data-card="' + id + '" placeholder="Comment on ' + id + '…"></textarea>';
+		html += '<button type="button" class="quiet tiny clear" data-card="' + id + '" data-act="clear">Clear</button>';
+		wrap.innerHTML = html;
+		card.appendChild(wrap);
+	}
+	function attachLoose(section) {
+		if (!section.id || section.querySelector(".loose")) return;
+		var box = document.createElement("div"), e = STATE.sections[section.id], o = STATE.orphans[section.id];
+		if (!e && o && o.section) {
+			e = STATE.sections[section.id] = o;
+			delete e.section;
+			delete STATE.orphans[section.id];
+			saveState();
+		}
+		box.className = "loose";
+		box.innerHTML = '<span class="lab"></span><textarea data-section="' + esc(section.id) + '"></textarea>';
+		box.firstChild.textContent = section.dataset.loose;
+		if (e && e.comment) box.lastChild.value = e.comment;
+		section.appendChild(box);
+	}
+
+	/* ---------- Restore ---------- */
+
+	function entryFor(cardId) { return STATE.cards[cardId] || null; }
+	function restoreCard(card) {
+		var id = card.id, entry = entryFor(id);
+		if (!entry && STATE.orphans[id] && !STATE.orphans[id].section) {
+			entry = STATE.cards[id] = STATE.orphans[id];
+			delete STATE.orphans[id];
+			saveState();
+		}
+		if (!entry || card.dataset.answer === "none") return;
+		if (typeof entry.verdict === "string") {
+			$$('input[type="radio"]', card).forEach(function (r) { if (r.name === "v-" + id) r.checked = r.value === entry.verdict; });
+		}
+		var ta = card.querySelector("textarea[data-card]");
+		if (ta) ta.value = entry.comment || "";
+		if (entry.fingerprint !== fingerprintOf(card)) { markChanged(card, entry); return; }
+		var chip = document.createElement("span"), row = card.querySelector(".chiprow");
+		chip.className = "chip earlier";
+		chip.textContent = "Answered earlier";
+		if (row) row.appendChild(chip); else card.insertBefore(chip, card.firstChild);
+	}
+	function markChanged(card, entry) {
+		rm(card.querySelector(".changed"));
+		var strip = document.createElement("div");
+		strip.className = "changed";
+		strip.innerHTML = '<span></span><button type="button" class="quiet tiny" data-card="' + esc(card.id) + '" data-act="dismiss">Dismiss</button>';
+		strip.firstChild.textContent = "Changed since you answered (rev " + (entry.rev || 1) + ").";
+		card.insertBefore(strip, card.firstChild);
+	}
+	function dismissChanged(cardId) {
+		var card = byId(cardId), entry = entryFor(cardId);
+		if (!card || !entry) return;
+		rm(card.querySelector(".changed"));
+		entry.fingerprint = fingerprintOf(card);
+		entry.rev = META.rev;
+		saveState();
+	}
+	function collectOrphans() {
+		var moved = false;
+		Object.keys(STATE.cards).forEach(function (id) {
+			if (byId(id)) return;
+			STATE.orphans[id] = STATE.cards[id];
+			STATE.orphans[id].title = STATE.orphans[id].title || id;
+			delete STATE.cards[id];
+			moved = true;
+		});
+		Object.keys(STATE.sections).forEach(function (id) {
+			var s = byId(id);
+			if (s && s.tagName === "SECTION" && s.dataset.loose != null) return;
+			if (normalise(STATE.sections[id].comment)) {
+				STATE.orphans[id] = STATE.sections[id];
+				STATE.orphans[id].section = true;
+				STATE.orphans[id].title = STATE.orphans[id].title || id;
+			}
+			delete STATE.sections[id];
+			moved = true;
+		});
+		if (moved) saveState();
+		rm(byId("held-note"));
+		var ids = Object.keys(STATE.orphans);
+		if (!ids.length) return;
+		var note = document.createElement("span");
+		note.id = "held-note";
+		note.innerHTML = '<span></span> <button type="button" class="quiet tiny" data-held="show">Show</button> <button type="button" class="quiet tiny" data-held="discard">Discard</button> <span hidden></span>';
+		note.firstChild.textContent = ids.length + " answers held for cards no longer on this page.";
+		note.lastChild.textContent = ids.map(function (id) { return id + " — " + STATE.orphans[id].title; }).join("; ");
+		byId("foot").appendChild(note);
+	}
+	function toggleHeld() { var l = byId("held-note").lastChild; l.hidden = !l.hidden; }
+	function discardHeld() {
+		STATE.orphans = {};
+		saveState();
+		collectOrphans();
+		flash("Held answers discarded.");
+	}
+
+	/* ---------- Recording ---------- */
+
+	function entryOrNew(cardId) {
+		var card = byId(cardId);
+		return STATE.cards[cardId] || (STATE.cards[cardId] = {verdict: null, comment: "", fingerprint: fingerprintOf(card), answeredAt: null, touched: false, rev: META.rev, title: cardTitle(card)});
+	}
+	function touch(e) { e.touched = true; e.answeredAt = now(); e.rev = META.rev; saveSoon(); buildFilters(); }
+	function recordVerdict(cardId, value) { var e = entryOrNew(cardId); e.verdict = value; touch(e); }
+	function recordComment(cardId, text) { var e = entryOrNew(cardId); e.comment = text; touch(e); }
+	function recordSection(sectionId, text) {
+		var s = byId(sectionId), h2 = s && s.querySelector(".sec-head h2");
+		var e = STATE.sections[sectionId] || (STATE.sections[sectionId] = {comment: "", touched: false, answeredAt: null, title: normalise(h2 ? h2.textContent : sectionId)});
+		e.comment = text;
+		touch(e);
+	}
+	function clearCard(cardId) {
+		var card = byId(cardId), rec = card.dataset.recommended || "";
+		$$('input[type="radio"]', card).forEach(function (r) { if (r.name === "v-" + cardId) r.checked = r.value === rec; });
+		$$("textarea[data-card]", card).forEach(function (t) { t.value = ""; });
+		$$(".changed, .chip.earlier", card).forEach(rm);
+		delete STATE.cards[cardId];
+		saveState();
+		buildFilters();
+	}
+	function acceptAll() {
+		var n = 0, m = 0;
+		cardList().forEach(function (card) {
+			var e = entryFor(card.id);
+			if (card.dataset.answer === "none" || (e && e.touched)) return;
+			if (!card.dataset.recommended) { m++; return; }
+			$$('input[type="radio"]', card).forEach(function (r) { if (r.name === "v-" + card.id) r.checked = r.value === card.dataset.recommended; });
+			recordVerdict(card.id, card.dataset.recommended);
+			n++;
+		});
+		saveState();
+		flash(n + " cards recorded as agreed; " + m + " without a recommendation skipped.");
+	}
+
+	/* ---------- Provenance ---------- */
+
+	/* references (details.ref, a.ref-link) are expanded by assets/blocks/reference.html, spliced on any page that carries one */
+	var KIND_LABEL = {review: "Review", options: "Options", issue: "Issue breakdown", interview: "Interview", demo: "Demo"};
+
+	function renderEyebrow() {
+		var p = META.provenance, cells = [], row = byId("eyebrow"), spacer = row.querySelector(".spacer"), host = document.createElement("span");
+		function cell(cls, code, path, title) {
+			var inner = "<code>" + esc(code) + "</code>";
+			if (p.repo) inner = '<a href="' + esc(p.repo + path) + '" target="_blank" rel="noopener" title="' + esc(title || code) + '">' + inner + "</a>";
+			cells.push('<span class="' + cls + '">' + inner + "</span>");
+		}
+		cells.push('<span class="pv-kind">' + esc(KIND_LABEL[META.kind] || META.kind) + "</span>");
+		cells.push('<span class="pv-rev">rev ' + esc(META.rev) + "</span>");
+		if (p.issue != null) cell("pv-issue", "#" + p.issue, "/issues/" + p.issue);
+		if (p.pr != null) cell("pv-pr", "PR #" + p.pr, "/pull/" + p.pr);
+		if (p.branch) cell("pv-branch", p.branch, "/tree/" + p.branch);
+		if (p.commit) cell("pv-commit", p.commit.slice(0, 7), "/commit/" + p.commit, p.commit);
+		if (p.date) cells.push('<span class="pv-date">' + esc(p.date) + "</span>");
+		host.innerHTML = cells.join('<span class="sep" aria-hidden="true"></span>');
+		while (host.firstChild) row.insertBefore(host.firstChild, spacer);
+	}
+	function auditPaths() {
+		$$(".path").forEach(function (el) {
+			if (el.closest(".ref, .ref-link")) return;
+			el.classList.add("path--unlinked");
+			console.warn("artifact-suite: .path outside a reference — " + normalise(el.textContent));
+		});
+	}
+
+	/* ---------- Navigation and filters ---------- */
+
+	function buildToc() {
+		var col = "", pills = "";
+		$$("section[id]").forEach(function (sec) {
+			var h2 = sec.querySelector(".sec-head h2"), label = esc(normalise(h2 ? h2.textContent : sec.id)), sid = esc(sec.id);
+			pills += '<a href="#' + sid + '" data-sec="' + sid + '">' + label + "</a>";
+			col += '<h4><a href="#' + sid + '" data-sec="' + sid + '">' + label + "</a></h4><ol>";
+			$$("article.card[id]", sec).forEach(function (c) {
+				var chip = c.querySelector(".chip.id");
+				col += '<li><a href="#' + esc(c.id) + '">' + esc((chip ? normalise(chip.textContent) + " " : "") + cardTitle(c)) + "</a></li>";
+			});
+			col += "</ol>";
+		});
+		byId("toc-column").innerHTML = col;
+		byId("toc-pills").innerHTML = pills;
+	}
+	function observeSections() {
+		if (!("IntersectionObserver" in window)) return;
+		var io = new IntersectionObserver(function (entries) {
+			entries.forEach(function (en) {
+				if (!en.isIntersecting) return;
+				$$(".toc a[aria-current]").forEach(function (a) { a.removeAttribute("aria-current"); });
+				$$('.toc a[data-sec="' + en.target.id + '"]').forEach(function (a) { a.setAttribute("aria-current", "true"); });
+			});
+		}, {rootMargin: "-20% 0px -70% 0px"});
+		$$("section[id]").forEach(function (s) { io.observe(s); });
+	}
+	function buildFilters() {
+		var bar = byId("filters"), cards = cardList(), counts = {all: cards.length, unanswered: 0}, tags = 0;
+		cards.forEach(function (c) {
+			var t = c.dataset.tag, e = entryFor(c.id);
+			if (t) { if (!counts[t]) tags++; counts[t] = (counts[t] || 0) + 1; }
+			if (!e || !e.touched) counts.unanswered++;
+		});
+		if (tags < 2) { bar.hidden = true; return; }
+		/* the buttons are built once and updated in place, so the pressed button keeps focus */
+		if (!bar.firstChild) ["all", "integrate", "yourcall", "defer", "unanswered"].forEach(function (n) {
+			if (!(n in counts)) return;
+			var b = document.createElement("button");
+			b.className = "quiet tiny";
+			b.type = "button";
+			b.dataset.filter = n;
+			b.innerHTML = FILTER_LABEL[n] + '<span class="n"></span>';
+			bar.appendChild(b);
+		});
+		$$("[data-filter]", bar).forEach(function (b) {
+			b.setAttribute("aria-pressed", String(FILTER === b.dataset.filter));
+			b.lastChild.textContent = counts[b.dataset.filter] || 0;
+		});
+		bar.hidden = false;
+	}
+	function applyFilter(name) {
+		FILTER = name;
+		cardList().forEach(function (c) {
+			var e = entryFor(c.id), show = name === "all" || (name === "unanswered" ? !(e && e.touched) : c.dataset.tag === name);
+			c.hidden = !show;
+			$$('.toc a[href="#' + c.id + '"]').forEach(function (a) { var li = a.closest("li"); (li || a).hidden = !show; });
+		});
+		buildFilters();
+	}
+	function revealTarget() {
+		var el = location.hash.length > 1 ? byId(location.hash.slice(1)) : null;
+		if (!el) return;
+		if (el.hidden) el.hidden = false;
+		el.scrollIntoView();
+	}
+
+	/* ---------- Return prompt ---------- */
+
+	function touchedCards() {
+		return cardList().filter(function (c) { var e = entryFor(c.id); return c.dataset.answer !== "none" && !!(e && e.touched); });
+	}
+	function pageFile() { var p = META.provenance; return p.root && p.self ? p.root + "/" + p.self : ""; }
+	function pageHref() { return location.protocol === "file:" ? decodeURIComponent(location.href) : location.href; }
+	function provenanceLine() {
+		var p = META.provenance, parts = [];
+		if (pageFile()) parts.push(pageFile());
+		if (p.branch) parts.push("branch " + p.branch);
+		if (p.issue != null) parts.push(p.repo ? p.repo + "/issues/" + p.issue : "issue #" + p.issue);
+		if (p.pr != null) parts.push(p.repo ? p.repo + "/pull/" + p.pr : "PR #" + p.pr);
+		parts.push("rev " + META.rev);
+		if (p.date) parts.push("built " + p.date);
+		return "Source: " + parts.join(" · ");
+	}
+	function formatNote(text) {
+		var t = String(text || "").replace(/\r\n?/g, "\n").trim();
+		if (!t) return "";
+		var lines = t.split("\n");
+		if (lines.length === 1) return "- Note: " + t;
+		return "- Note:\n" + lines.map(function (l) { return l.trim() ? "  " + l : ""; }).join("\n");
+	}
+	function composePrompt() {
+		var cards = touchedCards(), held = Object.keys(STATE.orphans), rec = 0, un = 0, u = [], out;
+		var secs = $$("section[id][data-loose]").filter(function (s) { var e = STATE.sections[s.id]; return e && e.touched && normalise(e.comment); });
+		if (!cards.length && !secs.length && !held.length) return "";
+		out = ["## " + (META.prompt.heading || META.title), "", provenanceLine()];
+		cardList().forEach(function (c) {
+			var e = entryFor(c.id);
+			if (c.dataset.answer === "none" || (e && e.touched)) return;
+			if (c.dataset.recommended) rec++; else un++;
+		});
+		if (rec) u.push(rec + " left at their recommended default");
+		if (un) u.push(un + " unanswered");
+		if (u.length) out.push("Untouched: " + u.join(", ") + ".");
+		if (held.length) out.push("Held: " + held.length + " answers for cards no longer on this page (" + held.join(", ") + ").");
+		if (cards.length || secs.length) {
+			out.push("", "### Decisions");
+			cards.forEach(function (c) {
+				var e = entryFor(c.id), note = formatNote(e.comment);
+				out.push("", "**" + c.id + " · " + cardTitle(c) + "**");
+				if (e.verdict) out.push("- Verdict: " + e.verdict);
+				if (note) out.push(note);
+				$$(".demo[data-report]", c).forEach(function (d) { if (d.dataset.state) out.push("- " + d.dataset.report + ": " + d.dataset.state); });
+			});
+			secs.forEach(function (s) {
+				var h2 = s.querySelector(".sec-head h2");
+				out.push("", "**" + s.id + " · " + normalise(h2 ? h2.textContent : s.id) + "**", formatNote(STATE.sections[s.id].comment));
+			});
+		}
+		if (META.next.length) {
+			out.push("", "### Next", "");
+			META.next.forEach(function (n) { out.push("- " + n); });
+		}
+		out.push("", "Re-open: " + pageHref());
+		return out.join("\n");
+	}
+
+	/* ---------- Clipboard and status ---------- */
+
+	function copyPrompt() {
+		var text = composePrompt();
+		if (!text) { flash("Nothing answered yet — nothing to copy."); return; }
+		copyText(text, function () { flash("Prompt copied."); });
+	}
+	function viewPrompt() {
+		var w = byId("outwrap");
+		w.hidden = !w.hidden;
+		byId("out").value = w.hidden ? "" : (composePrompt() || "_No responses entered._");
+	}
+	function copyText(text, onDone) {
+		function fallback() {
+			var ta = document.createElement("textarea"), ok = false;
+			ta.value = text;
+			ta.style.position = "fixed";
+			ta.style.left = "-9999px";
+			document.body.appendChild(ta);
+			ta.select();
+			try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+			document.body.removeChild(ta);
+			if (ok) { if (onDone) onDone(); return; }
+			byId("outwrap").hidden = false;
+			byId("out").value = text;
+			byId("out").select();
+			flash("Clipboard blocked — select the text below and copy.", true);
+		}
+		if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { if (onDone) onDone(); }, fallback);
+		else fallback();
+	}
+	function flash(msg, bad) {
+		var s = byId("status");
+		s.textContent = msg;
+		s.classList.toggle("bad", !!bad);
+		clearTimeout(FLASH_TIMER);
+		if (!bad) FLASH_TIMER = setTimeout(function () { s.textContent = ""; }, 2500);
+	}
+	function checkTitles() {
+		var h1 = document.querySelector("h1"), t = normalise(document.title), h = normalise(h1 ? h1.textContent : "");
+		if (t !== META.title || h !== META.title) console.warn("artifact-suite: title mismatch — meta \"" + META.title + "\", title element \"" + t + "\", h1 \"" + h + "\"");
+	}
+
+	/* ---------- Theme ---------- */
+
+	function setTheme(mode) {
+		var root = document.documentElement;
+		if (mode === "light" || mode === "dark") {
+			root.setAttribute("data-theme", mode);
+			try { localStorage.setItem("artifact-suite.theme", mode); } catch (e) { /* storage blocked; the attribute still applies */ }
+		} else {
+			mode = "system";
+			root.removeAttribute("data-theme");
+			try { localStorage.removeItem("artifact-suite.theme"); } catch (e) { /* nothing stored */ }
+		}
+		$$(".themeset [data-theme-set]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.themeSet === mode)); });
+	}
+})();
+</script>
+<!-- @template-script -->
+<script>
+	(function () {
+		"use strict";
+		document.addEventListener("DOMContentLoaded", function () {
+			var each = Array.prototype.forEach;
+			each.call(document.querySelectorAll(".diff[data-copy=\"adds\"]"), function (d) {
+				var lines = [];
+				each.call(d.querySelectorAll(".diff-row.add > .tx"), function (tx) { lines.push(tx.textContent); });
+				if (!lines.length) return;
+				var b = document.createElement("button");
+				b.type = "button";
+				b.className = "quiet tiny";
+				b.textContent = "Copy added lines";
+				b.addEventListener("click", function (ev) {
+					ev.stopPropagation();
+					window.SUITE.copyText(lines.join("\n"), function () { window.SUITE.flash(lines.length + " added lines copied."); });
+				});
+				d.appendChild(b);
+			});
+		});
+	})();
+</script>
+<!-- @lifted blocks/diff.html#script -->
+
+<script>
+	(function () {
+		"use strict";
+		var LINES_RE = /^\d+(?:-\d+)?$/, COMMIT_RE = /^[0-9a-f]{7,40}$/;
+
+		function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+		function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
+		function encPath(p) { return p.split("/").map(encodeURIComponent).join("/"); }
+		function lineAnchor(lines) { return lines ? "#L" + lines.replace("-", "-L") : ""; }
+		function firstLine(lines) { return lines ? lines.split("-")[0] : ""; }
+		function mirrorPath(path, branch) { return path.indexOf("dev/workspace/") === 0 ? "dev/branches/" + branch + "/" + path.slice("dev/workspace/".length) : null; }
+		function outLink(cls, href, title, text) { return '<a class="' + cls + '" href="' + esc(href) + '" target="_blank" rel="noopener" title="' + esc(title) + '">' + esc(text) + "</a>"; }
+
+		function refRoutes(el) {
+			var p = window.SUITE.meta.provenance, d = el.dataset, r = {path: d.path || "", url: d.url || "", lines: LINES_RE.test(d.lines || "") ? d.lines : "", broken: ""};
+			if (!!r.path === !!r.url) r.broken = "a reference carries data-path or data-url, never both and never neither";
+			else if (r.url && r.url.indexOf("https://") !== 0) r.broken = "data-url must be https:";
+			else if (r.path && /^(\.?\/)|(^|\/)\.\.(\/|$)/.test(r.path)) r.broken = "data-path must be repo-relative with no leading / or ./ and no ..";
+			if (r.broken || r.url) return r;
+			r.disk = d.branch ? mirrorPath(r.path, d.branch) : r.path;
+			r.ref = COMMIT_RE.test(d.commit || "") ? d.commit : (d.branch || p.commit || p.branch || "");
+			if (p.root && r.disk) {
+				r.abs = p.root + "/" + r.disk;
+				r.diskHref = "file://" + encPath(r.abs);
+				if (p.editor) r.editorHref = p.editor + "://file" + encPath(r.abs) + (r.lines ? ":" + firstLine(r.lines) : "");
+			}
+			if (p.repo && r.ref) r.ghHref = p.repo + "/blob/" + r.ref + "/" + encPath(r.path) + lineAnchor(r.lines);
+			return r;
+		}
+		function expandRef(el) {
+			var d = el.dataset, r = refRoutes(el), p = window.SUITE.meta.provenance, disk = document.documentElement.dataset.origin === "disk", head = "", links = "", u;
+			if (el.querySelector(".ref-links") || el.classList.contains("ref-link") && el.dataset.expanded) return;
+			if (r.broken) console.warn("artifact-suite: broken reference (" + r.broken + "): " + (r.path || r.url || "(empty)"));
+			if (el.classList.contains("ref-link")) {
+				el.dataset.expanded = "1";
+				if (r.broken) { el.classList.add("ref--broken"); return; }
+				el.href = r.url || (disk && r.diskHref) || r.ghHref || r.diskHref || "#";
+				el.target = "_blank";
+				el.rel = "noopener";
+				el.title = r.url ? r.url : [r.abs, r.ghHref].filter(Boolean).join(" · ");
+				if (!el.textContent.trim()) el.textContent = d.label || r.path || r.url;
+				return;
+			}
+			if (r.broken) {
+				el.classList.add("ref--broken");
+				el.innerHTML = '<summary><span class="path"></span></summary>';
+				el.querySelector(".path").textContent = r.path || r.url || "(empty reference)";
+				return;
+			}
+			if (r.url) {
+				u = document.createElement("a");
+				u.href = r.url;
+				head = '<span class="path">' + esc(u.host + u.pathname) + "</span>";
+				links = outLink("ref-chip ref-site", r.url, r.url, "Open site");
+			} else {
+				/* no disk route — mirror absent or provenance.root missing — makes GitHub the primary chip at either origin */
+				if (!r.diskHref) el.classList.add("ref--nodisk");
+				head = '<span class="path">' + esc(r.path) + "</span>" + (r.lines ? '<span class="lines">L' + esc(r.lines) + "</span>" : "");
+				if (r.diskHref) links += outLink("ref-chip ref-disk", r.diskHref, r.abs, "Open file");
+				if (r.editorHref) links += outLink("ref-chip ref-editor", r.editorHref, p.editor + (r.lines ? " · line " + firstLine(r.lines) : ""), "Editor");
+				if (r.ghHref) links += outLink("ref-chip ref-gh", r.ghHref, "blob/" + (COMMIT_RE.test(r.ref) ? r.ref.slice(0, 7) : r.ref), "GitHub");
+			}
+			if (d.loc) head += '<span class="loc">' + esc(d.loc) + "</span>";
+			if (d.branch && r.disk) head += '<span class="mirror">archived copy</span>';
+			links += '<button type="button" class="ref-chip ref-copy" data-copy="' + esc(r.url || (r.disk || r.path) + (r.lines ? ":" + r.lines : "")) + '">Copy path</button>';
+			el.innerHTML = "<summary>" + head + '</summary><div class="ref-links">' + links + "</div>";
+		}
+		/* registered after the engine's own listener, so SUITE.meta is parsed by the time this runs */
+		document.addEventListener("DOMContentLoaded", function () { $$("details.ref, a.ref-link").forEach(expandRef); });
+		document.addEventListener("click", function (ev) {
+			var b = ev.target.closest(".ref-copy");
+			if (!b || !b.dataset.copy) return;
+			window.SUITE.copyText(b.dataset.copy, function () { window.SUITE.flash("Copied " + b.dataset.copy); });
+		});
+	})();
+</script>
+<!-- @lifted blocks/reference.html#script -->
+<!-- @template-script:end -->
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!-- BLOCK: diff — a change set, one row per line, the marker in a CSS gutter outside the text
+     box, so no glyph is typed into a line and copied text is clean. Rows: ctx unchanged, del
+     removed, add added, gap elision. Numbers are opt-in: `numbered` on the container, data-ln
+     per row. data-copy="adds" asks for a Copy added lines button. A diff is always preceded by
+     a details.ref naming its file.
+
+     Splice each part once per page; a second splice of the same part is refused:
+       python3 $S/splice.py $P template-style  $S/blocks/diff.html style
+       python3 $S/splice.py $P template-script $S/blocks/diff.html script
+     Then copy the @markup shape into a card. -->
+<style>
+	/* @style */
+	.diff { font-family: var(--mono); font-size: 12.5px; line-height: 1.65; border: 1px solid var(--rule); border-radius: 2px; background: var(--surface-sunk); overflow-x: auto; margin: 4px 0 14px; }
+	.diff-row { display: grid; grid-template-columns: 1.6em minmax(0, 1fr); }
+	.diff-row::before { content: ""; grid-column: 1; grid-row: 1; text-align: center; user-select: none; }
+	.diff-row > .tx { grid-column: 2; grid-row: 1; padding: 3px 12px 3px 4px; white-space: pre-wrap; word-break: break-word; }
+	.diff.numbered .diff-row { grid-template-columns: 3.4em 1.6em minmax(0, 1fr); }
+	.diff.numbered .diff-row::after { content: attr(data-ln); grid-column: 1; grid-row: 1; text-align: right; padding-right: 10px; color: var(--ink-faint); user-select: none; font-variant-numeric: tabular-nums; }
+	.diff.numbered .diff-row::before { grid-column: 2; }
+	.diff.numbered .diff-row > .tx { grid-column: 3; }
+	.diff-row.add::before { content: "+"; color: var(--add-mark); }
+	.diff-row.del::before { content: "\2212"; color: var(--del-mark); }
+	.diff-row.ctx > .tx { color: var(--keep-ink); }
+	.diff-row.add > .tx { background: var(--add-bg); color: var(--add-ink); }
+	.diff-row.del > .tx { background: var(--del-bg); color: var(--del-ink); }
+	.diff-row.gap > .tx { color: var(--ink-faint); opacity: .7; }
+	.diff > button { margin: 4px 10px 10px; }
+	/* @style:end */
+</style>
+<!-- @script -->
+<script>
+	(function () {
+		"use strict";
+		document.addEventListener("DOMContentLoaded", function () {
+			var each = Array.prototype.forEach;
+			each.call(document.querySelectorAll(".diff[data-copy=\"adds\"]"), function (d) {
+				var lines = [];
+				each.call(d.querySelectorAll(".diff-row.add > .tx"), function (tx) { lines.push(tx.textContent); });
+				if (!lines.length) return;
+				var b = document.createElement("button");
+				b.type = "button";
+				b.className = "quiet tiny";
+				b.textContent = "Copy added lines";
+				b.addEventListener("click", function (ev) {
+					ev.stopPropagation();
+					window.SUITE.copyText(lines.join("\n"), function () { window.SUITE.flash(lines.length + " added lines copied."); });
+				});
+				d.appendChild(b);
+			});
+		});
+	})();
+</script>
+<!-- @script:end -->
+<!-- @markup -->
+<div class="diff" data-copy="adds">
+	<div class="diff-row ctx"><span class="tx">- **Named recoverable failure** — claim the remainder.</span></div>
+	<div class="diff-row del"><span class="tx">- **De-hold** — the condition must stop holding.</span></div>
+	<div class="diff-row add"><span class="tx">- **User approval problem** — claim the remainder.</span></div>
+	<div class="diff-row gap"><span class="tx">…</span></div>
+</div>
+<!-- @markup:end -->

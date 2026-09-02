@@ -1,0 +1,109 @@
+<!--
+artifact-suite page template: review — serves the review, options and issue-breakdown kinds.
+Layout: .shell.rail for review and issue; for options .shell to eight cards, .shell.rail from nine.
+Splice both parts once each, never reading or retyping either:
+  python3 $S/splice.py $P template-style $S/templates/review.html style
+  python3 $S/splice.py $P content        $S/templates/review.html markup
+Fill @doc-title, @page-meta and @masthead from stdin; write cards with
+  python3 $S/splice.py $P section findings <<'HTML' … HTML
+@markup carries section skeletons only; for other names write @content from stdin in that shape.
+An issue page adds <section id="additional-comments" data-loose="Additional comments">.
+@masthead: <h1>, <p class="standfirst">, then .masthead-meta or, when numbers carry the page,
+<div class="stats"><div class="stat"><b>16</b><span>settled</span></div>…</div>.
+After @markup:end everything is for reading. Card attributes: class, id, data-tag, then data- options.
+-->
+
+<style>
+	/* @style */
+	.verdict-strip { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 3px; padding: 18px 22px; margin-bottom: 34px; }
+	.verdict-strip h3 { font-size: 18px; margin: 0 0 8px; color: var(--accent); }
+	.verdict-strip p { margin: 0; max-width: 68ch; }
+	.stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 0; }
+	.stat { background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 14px; }
+	.stat b { display: block; font-family: var(--disp); font-size: 20px; font-variant-numeric: tabular-nums; }
+	.stat span { font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-faint); }
+	.src { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); background: var(--surface-sunk); border-left: 2px solid var(--rule); padding: 7px 10px; margin: 12px 0; overflow-x: auto; white-space: pre; }
+	.delta { display: grid; gap: 10px; margin: 14px 0; }
+	@media (min-width: 720px) { .delta { grid-template-columns: 1fr 1fr; } }
+	.delta div { border: 1px solid var(--rule); border-radius: 2px; padding: 12px 14px; background: var(--surface-sunk); }
+	.delta h5 { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 8px; font-weight: 500; color: var(--ink-faint); }
+	.delta .now { border-left: 2px solid var(--stop); }
+	.delta .next { border-left: 2px solid var(--accent); }
+	.delta p { margin: 0; font-size: 15px; }
+	.options { display: grid; gap: 10px; }
+	.option { display: flex; gap: 12px; align-items: flex-start; background: var(--surface); border: 1px solid var(--rule); border-left: 2px solid var(--rule); border-radius: 2px; padding: 11px 14px; cursor: pointer; }
+	.option:has(input:checked) { border-color: var(--accent); border-left-color: var(--accent); }
+	.option input { margin-top: 6px; accent-color: var(--accent); }
+	.option b { font-family: var(--disp); font-size: 15.5px; display: block; }
+	.option span { color: var(--ink-soft); font-size: 14.5px; }
+	.option .rec { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-left: 8px; }
+	.option.recommended { background: var(--accent-soft); border-left-color: var(--accent); }
+	/* @style:end */
+</style>
+
+<!--
+#page-meta exemplar, kind "review". Write every </ inside a string as <\/ .
+{
+  "id": "artifact-suite-investigation", "kind": "review", "rev": 1,
+  "title": "Artifact suite — investigation",
+  "provenance": { "repo": "https://github.com/dilberryhoundog/agent-library",
+    "root": "/Users/dylangraham/Projects/agent-library",
+    "self": "dev/workspace/artifacts/artifact-suite-investigation.html",
+    "branch": "artifacts", "commit": "b966a43f1c2d4e5a6b7c8d9e0f1a2b3c4d5e6f70",
+    "issue": null, "pr": null, "date": "2026-08-24",
+    "builtAt": "2026-08-24T03:12:07Z", "editor": "vscode" },
+  "prompt": { "heading": "Response — artifact suite investigation" },
+  "next": ["Apply every accepted card before writing code."]
+}
+Kind "options": "kind": "options"; every card carries data-answer="options", none data-verdicts.
+Kind "issue": "kind": "issue", issue and pr numbers set in provenance, default verdicts Accept|Amend|Defer.
+-->
+
+<!-- @markup -->
+<section id="findings">
+	<div class="sec-head"><h2>Findings</h2><span class="count">8</span></div>
+	<p class="sec-intro">One or two lines on what the section covers.</p>
+	<div class="verdict-strip"><h3>Where it landed</h3><p>The outcome the reader should hold while reading the cards.</p></div>
+</section>
+<!-- @markup:end -->
+
+<!-- Review card; the engine appends .respond and the edge. -->
+<article class="card" id="storage-key-scheme" data-tag="integrate">
+	<div class="chiprow"><a class="chip id" href="#storage-key-scheme">03</a><span class="chip integrate">Integrate</span><span class="chip">storage</span></div>
+	<h3>One JSON document per page</h3>
+	<p>Prose at the shell's 68ch measure; the card writes no max-width.</p>
+</article>
+
+<!-- Evidence card: empty details.ref, .src box, .delta pair. -->
+<article class="card" id="condition-precedence" data-tag="yourcall" data-verdicts="Agree|Revise|Reject" data-recommended="Agree">
+	<div class="chiprow"><a class="chip id" href="#condition-precedence">07</a><span class="chip yourcall">Your call</span></div>
+	<h3>Precedence is decided at the step</h3>
+	<details class="ref" data-path="docs/drafthorse/framework/steps.md" data-lines="136-142" data-loc="§ Dispositions"></details>
+	<div class="src">steps.md 26+ / 54-</div>
+	<div class="delta"><div class="now"><h5>Now</h5><p>What it says today.</p></div><div class="next"><h5>Next</h5><p>What the card proposes.</p></div></div>
+</article>
+
+<!-- Quote card; an exchange is consecutive blockquotes. -->
+<article class="card" id="demo-customisation" data-tag="integrate">
+	<div class="chiprow"><a class="chip id" href="#demo-customisation">11</a><span class="chip integrate">Integrate</span></div>
+	<h3>Demos stay the building agent's own</h3>
+	<blockquote><p>I wanted demos to be fully customisable by the building agent.</p><cite>You · session 2026-08-21</cite></blockquote>
+	<p>What that settles.</p>
+</article>
+
+<!-- Options card; checked, .recommended and data-recommended must agree. -->
+<article class="card" id="skill-name" data-tag="yourcall" data-answer="options" data-recommended="corpus-sweep">
+	<div class="chiprow"><a class="chip id" href="#skill-name">N1</a><span class="chip yourcall">Your call</span></div>
+	<h3>What the skill is called</h3>
+	<div class="options">
+		<label class="option recommended"><input type="radio" name="v-skill-name" value="corpus-sweep" checked><div><b>corpus-sweep<span class="rec">recommended</span></b><span>Matches the vocabulary already in use.</span></div></label>
+		<label class="option"><input type="radio" name="v-skill-name" value="corpus-migrate"><div><b>corpus-migrate</b><span>Names the destructive half.</span></div></label>
+	</div>
+</article>
+
+<!-- Withdrawn card; keeps its id, stops taking answers. -->
+<article class="card dead" id="relative-root-prefix" data-tag="defer" data-answer="none">
+	<div class="chiprow"><a class="chip id" href="#relative-root-prefix">14</a><span class="chip dead">Withdrawn</span></div>
+	<h3>A relative root prefix on every file href</h3>
+	<p>Why it was withdrawn, in a sentence.</p>
+</article>

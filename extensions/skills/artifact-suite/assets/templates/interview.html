@@ -1,0 +1,63 @@
+<!--
+artifact-suite page template: interview — one kind, the interview page, on the bare .shell layout.
+Splice both parts once each, never reading or retyping either:
+  python3 $S/splice.py $P template-style $S/templates/interview.html style
+  python3 $S/splice.py $P content        $S/templates/interview.html markup
+Fill @doc-title, @page-meta and @masthead from stdin; write cards with
+  python3 $S/splice.py $P section open <<'HTML' … HTML
+Answered records go into #answered, which sits above #open. There is no default verdict set for this
+kind: every question carries its own data-verdicts, and data-recommended pre-checks one of them.
+On republish the agent rewrites an answered question as a record card under the same id.
+After @markup:end everything is for reading. Card attributes: class, id, data-tag, then data- options.
+-->
+
+<style>
+	/* @style */
+	.card.answered { border-left-color: var(--accent); }
+	.card.answered h3 { font-size: 16.5px; margin: 0 0 6px; }
+	.q.rec { color: var(--ink); text-transform: none; letter-spacing: 0; font-family: var(--serif); font-size: 15px; }
+	.q.rec b { color: var(--accent); }
+	/* @style:end */
+</style>
+
+<!--
+#page-meta exemplar, kind "interview". Write every </ inside a string as <\/ .
+{
+  "id": "self-update-interview", "kind": "interview", "rev": 2,
+  "title": "Self-update — the open questions",
+  "provenance": { "repo": "https://github.com/dilberryhoundog/agent-library",
+    "root": "/Users/dylangraham/Projects/agent-library",
+    "self": "dev/workspace/artifacts/self-update-interview.html",
+    "branch": "artifacts", "commit": "b966a43f1c2d4e5a6b7c8d9e0f1a2b3c4d5e6f70",
+    "issue": 45, "pr": null, "date": "2026-08-24",
+    "builtAt": "2026-08-24T03:12:07Z", "editor": "vscode" },
+  "prompt": { "heading": "Response — self-update interview" },
+  "next": ["Answer the four open questions; the answered records need no reply."]
+}
+-->
+
+<!-- @markup -->
+<section id="answered">
+	<div class="sec-head"><h2>Answered</h2><span class="count">0</span></div>
+	<p class="sec-intro">What earlier rounds settled, in the agent's words.</p>
+</section>
+<section id="open">
+	<div class="sec-head"><h2>Open questions</h2><span class="count">4</span></div>
+	<p class="sec-intro">One or two lines on what this round needs from the reader.</p>
+</section>
+<!-- @markup:end -->
+
+<!-- Open question; .q.rec carries the recommendation, data-recommended pre-checks it. -->
+<article class="card" id="self-update-recipe" data-tag="yourcall" data-verdicts="You draft it|I'll write it" data-recommended="You draft it">
+	<div class="chiprow"><a class="chip id" href="#self-update-recipe">Q1</a><span class="chip yourcall">Your call</span></div>
+	<h3>What does the self-update recipe actually say?</h3>
+	<p>Framing.</p>
+	<p class="q rec"><b>Recommend:</b> I draft it, you edit it in place.</p>
+</article>
+
+<!-- Answered record; same id as the question it replaces, data-answer="none" stops a second surface. -->
+<article class="card answered" id="self-update-recipe" data-tag="integrate" data-answer="none">
+	<p class="q">Q1 · what the recipe says</p>
+	<h3>You draft it</h3>
+	<p>What the answer settled, in the agent's words.</p>
+</article>
